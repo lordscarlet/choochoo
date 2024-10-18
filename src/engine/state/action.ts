@@ -1,0 +1,11 @@
+
+
+export enum Action {
+  LOCOMOTIVE,
+  FIRST_BUILD,
+  FIRST_MOVE,
+  ENGINEER,
+  TURN_ORDER_PASS,
+  URBANIZATION,
+  PRODUCTION,
+}

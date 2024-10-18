@@ -1,0 +1,51 @@
+
+export class UserError extends Error {
+  constructor(readonly statusCode: number, msg: string) {
+    super(msg);
+  }
+
+  toString(): string {
+    return this.constructor.name + ': ' + this.message;
+  }
+}
+
+export class InvalidInputError extends UserError {
+  constructor(msg: string) {
+    super(400, msg);
+  }
+}
+
+export class PermissionDeniedError extends UserError {
+  constructor(msg: string) {
+    super(403, msg);
+  }
+}
+
+export class NotFoundError extends UserError {
+  constructor(msg: string) {
+    super(404, msg);
+  }
+}
+
+
+interface ErrorData {
+  invalidInput?: true|string;
+  permissionDenied?: true|string;
+  notFound?: true|string;
+}
+
+export type ErrorInput = ErrorData | string;
+
+export function emitError(err: ErrorInput): never {
+  if (typeof err === 'string') {
+    throw new Error(err);
+  } else if (err.invalidInput != null) {
+    throw new InvalidInputError(err.invalidInput === true ? 'invalidInput' : err.invalidInput);
+  } else if (err.permissionDenied != null) {
+    throw new PermissionDeniedError(err.permissionDenied === true ? 'permissionDenied' : err.permissionDenied);
+  } else if (err.notFound != null) {
+    throw new PermissionDeniedError(err.notFound === true ? 'notFound' : err.notFound);
+  } else {
+    throw new Error('unknown');
+  }
+}

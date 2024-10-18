@@ -1,0 +1,94 @@
+
+.hex-grid {
+  background-color: black;
+}
+
+.hex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.hex {
+  display: flex;
+  margin-right: -29px;
+  flex-direction: row;
+  margin-bottom: 1px;
+  position: relative;
+}
+
+.hex.unpassable {
+  --color: grey;
+}
+
+.hex.red {
+  --color: red;
+}
+
+.hex.blue {
+  --color: blue;
+}
+
+.hex.purple {
+  --color: purple;
+}
+
+.hex.yellow {
+  --color: yellow;
+}
+
+.hex.black {
+  --color: black;
+}
+
+.hex.plain {
+  --color: green;
+}
+
+.hex.river {
+  --color: lightblue;
+}
+
+.hex.mountain {
+  --color: brown;
+}
+
+.hex:nth-child(even) {
+  position: relative;
+  top: 53px;
+}
+
+.hex-right {
+  border-left: 30px solid var(--color);
+  border-top: 52px solid transparent;
+  border-bottom: 52px solid transparent;
+}
+
+.hex-body {
+  width: 60px;
+  height: 104px;
+  background-color: var(--color);
+}
+
+.hex-left {
+  border-right: 30px solid var(--color);
+  border-top: 52px solid transparent;
+  border-bottom: 52px solid transparent;
+}
+
+.town {
+  position: absolute;
+  top: 25px;
+  left: 36px;
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  background-color: white;
+}
+
+.hex-name {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  background-color: lightgrey;
+}
