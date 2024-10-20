@@ -23,12 +23,8 @@ export function App() {
       <h1>Steam Age</h1>
       {user && <User user={user.user} setUser={(user) => setUser({user})} />}
       {user && <GameSelector game={game} setGame={setGame}/>}
-      {user?.user && game && <Game user={user.user} gameId={game.id} />}
+      {user?.user && game && <Game user={user.user} gameId={game.id} setUser={(user) => setUser({user})} />}
       {!user && <div>Loading...</div>}
     </div>
   </UserCacheProvider>;
-}
-
-export function Loaded() {
-
 }

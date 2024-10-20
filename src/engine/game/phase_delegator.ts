@@ -1,8 +1,15 @@
 import { assert } from "../../utils/validate";
 import { BuildPhase } from "../build/phase";
 import { injectState } from "../framework/execution_context";
+import { GoodsGrowthPhase } from "../goods_growth/phase";
+import { ExpensesPhase } from "../income_and_expenses/expenses";
+import { IncomePhase } from "../income_and_expenses/income";
+import { IncomeReductionPhase } from "../income_and_expenses/reduction";
+import { MovePhase } from "../move/phase";
+import { SelectActionPhase } from "../select_action/phase";
 import { SharesPhase } from "../shares/phase";
 import { Phase } from "../state/phase";
+import { TurnOrderPhase } from "../turn_order/phase";
 import { PHASE, PhaseModule } from "./phase";
 
 interface PhaseConstructor {
@@ -17,8 +24,15 @@ export class PhaseDelegator {
   private readonly phases = new Map<Phase, PhaseModule>();
 
   constructor() {
-    this.install(BuildPhase);
     this.install(SharesPhase);
+    this.install(BuildPhase);
+    this.install(TurnOrderPhase);
+    this.install(SelectActionPhase);
+    this.install(MovePhase);
+    this.install(IncomePhase);
+    this.install(ExpensesPhase);
+    this.install(IncomeReductionPhase);
+    this.install(GoodsGrowthPhase);
   }
 
   install<T>(ctor: PhaseConstructor): void {
@@ -29,7 +43,6 @@ export class PhaseDelegator {
 
   get(): PhaseModule {
     const currentPhase = this.currentPhase();
-    console.log(`Getting phase processor for [${currentPhase}]`);
     const processor = this.phases.get(this.currentPhase());
     assert(processor != null, `No phase processor found for ${currentPhase}. Available Phases: ${[...this.phases.keys()]}`);
     return processor;

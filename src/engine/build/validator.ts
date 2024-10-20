@@ -76,7 +76,7 @@ export class Validator {
 
     // if it's a town tile, only one of the track needs to be placeable
     if (!this.newTrackExtendsPrevious(buildData.playerColor, space, newTracks)) {
-      return 'cannot place new track';
+      return 'new track must come off a city or extend previous track';
     }
   }
 

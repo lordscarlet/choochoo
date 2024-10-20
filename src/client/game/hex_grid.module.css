@@ -8,7 +8,7 @@
   flex-direction: row;
 }
 
-.hex {
+.hex-container {
   display: flex;
   margin-right: -29px;
   flex-direction: row;
@@ -16,43 +16,50 @@
   position: relative;
 }
 
-.hex.unpassable {
+.hex {
+  display: flex;
+  flex-direction: row;
+  position:relative;
+  width: 120px;
+}
+
+.unpassable {
   --color: grey;
 }
 
-.hex.red {
+.red {
   --color: red;
 }
 
-.hex.blue {
+.blue {
   --color: blue;
 }
 
-.hex.purple {
+.purple {
   --color: purple;
 }
 
-.hex.yellow {
+.yellow {
   --color: yellow;
 }
 
-.hex.black {
+.black {
   --color: black;
 }
 
-.hex.plain {
+.plain {
   --color: green;
 }
 
-.hex.river {
+.river {
   --color: lightblue;
 }
 
-.hex.mountain {
+.mountain {
   --color: brown;
 }
 
-.hex:nth-child(even) {
+.hex-container:nth-child(even) {
   position: relative;
   top: 53px;
 }
@@ -91,4 +98,10 @@
   width: 100%;
   text-align: center;
   background-color: lightgrey;
+}
+
+.tile {
+  position: absolute;
+  width:100%;
+  height:100%;
 }

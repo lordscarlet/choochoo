@@ -12,4 +12,8 @@ export class PlayerHelper {
       updateFn(player!);
     });
   }
+
+  addMoney(num: number): void {
+    return this.update((player) => player.money += num);
+  }
 }

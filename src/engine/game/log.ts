@@ -1,3 +1,4 @@
+import { PlayerColor } from "../state/player";
 import { currentPlayer } from "./state";
 
 export class Log {
@@ -7,8 +8,13 @@ export class Log {
     this.logs.push(entry);
   }
 
+  player(player: PlayerColor, entry: string): void {
+    this.log(player + ' ' + entry);
+
+  }
+
   currentPlayer(entry: string): void {
-    this.log(currentPlayer().color + ' ' + entry);
+    this.player(currentPlayer().color, entry);
   }
 
   dump(): string[] {

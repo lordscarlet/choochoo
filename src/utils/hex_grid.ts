@@ -1,6 +1,7 @@
 import { Coordinates } from "./coordinates";
 import { peek } from "./functions";
 import { freeze, Immutable, ImmutableMap } from "./immutable";
+import { serialize, Serialized, unserialize } from "./serialize";
 import { BaseMap } from "./types";
 
 export abstract class BaseGrid<T, R extends BaseMap<string, T>> {
@@ -33,7 +34,7 @@ export abstract class BaseGrid<T, R extends BaseMap<string, T>> {
         serialized[coordinates.q] = {};
 
       }
-      serialized[coordinates.q][coordinates.r] = value;
+      serialized[coordinates.q][coordinates.r] = serialize(value);
     }
     return serialized;
   }
@@ -72,7 +73,7 @@ export class HexGrid<T> extends BaseGrid<T, Map<string, T>> {
     const grid = new HexGrid<T>();
     for (const [q, row] of Object.entries(serialized)) {
       for (const [r, value] of Object.entries(row)) {
-        grid.set(new Coordinates(Number(q), Number(r)), value);
+        grid.set(new Coordinates(Number(q), Number(r)), unserialize(value));
       }
     }
     return grid;
@@ -90,4 +91,4 @@ export class HexGrid<T> extends BaseGrid<T, Map<string, T>> {
   }
 }
 
-export type HexGridSerialized<T> = {[r: number]: {[q: number]: T}};
+export type HexGridSerialized<T> = {[r: number]: {[q: number]: Serialized<T>}};

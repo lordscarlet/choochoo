@@ -11,6 +11,9 @@ import { MapRegistry } from '../../maps';
 import { Coordinates } from '../../utils/coordinates';
 import { z } from 'zod';
 import { Direction, SimpleTileType } from '../../engine/state/tile';
+import { GameHistoryModel } from '../model/history';
+import { sequelize } from '../sequelize';
+import { Op } from 'sequelize';
 
 export const gameApp = express();
 
@@ -98,28 +101,62 @@ const router = initServer().router(gameContract, {
   },
 
   async performAction({req, params, body}) {
-    const userId = req.session.userId;
-    assert(userId != null, {permissionDenied: true});
+    return await sequelize.transaction(async transaction => {
+      const userId = req.session.userId;
+      assert(userId != null, {permissionDenied: true});
 
-    const game = await GameModel.findByPk(params.gameId);
-    assert(game != null);
-    assert(game.status === GameStatus.ACTIVE, 'cannot perform an action unless the game is live');
-    assert(game.gameData != null);
+      const game = await GameModel.findByPk(params.gameId, {transaction});
+      assert(game != null);
+      assert(game.status === GameStatus.ACTIVE, 'cannot perform an action unless the game is live');
+      assert(game.gameData != null);
+      assert(game.activePlayerId === req.session.userId, {permissionDenied: true});
 
-    const engine = new Engine();
-    console.log('processing action', body.actionName, body.actionData);
-    const {gameData, logs, activePlayerId} =
-        engine.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
+      const engine = new Engine();
+      console.log('processing action', body.actionName, body.actionData);
+      
+      const reversible = true;
+      const gameHistory = GameHistoryModel.build({
+        version: game.version,
+        patch: '',
+        previousGameData: game.gameData,
+        actionName: body.actionName,
+        actionData: JSON.stringify(body.actionData),
+        reversible,
+        gameId: game.id,
+        userId: userId,
+      });
 
-    game.gameData = gameData;
-    game.activePlayerId = activePlayerId;
+      const {gameData, logs, activePlayerId} =
+          engine.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
 
-    const newGame = await game.save();
-    return {status: 200, body: {game: newGame.toApi()}};
+      game.version = game.version + 1;
+      game.gameData = gameData;
+      game.activePlayerId = activePlayerId;
+      game.undoPlayerId = reversible ? userId : undefined;
+      const newGame = await game.save({transaction});
+      await gameHistory.save({transaction});
+
+      return {status: 200, body: {game: newGame.toApi()}};
+    })
   },
 
-  async undoAction() {
-    throw new Error('not implemented');
+  async undoAction({req, params: {gameId}, body: {version}}) {
+    return await sequelize.transaction(async transaction => {
+      const gameHistory = await GameHistoryModel.findOne({where: {gameId, version}, transaction});
+      const game = await GameModel.findByPk(gameId, {transaction});
+      assert(game != null && gameHistory != null);
+      assert(game.version === gameHistory.version + 1, 'can only undo one step');
+      assert(gameHistory.userId === req.session.userId, {permissionDenied: true});
+
+      game.version = version;
+      game.gameData = gameHistory?.previousGameData;
+      game.activePlayerId = gameHistory.userId;
+      const versionBefore = await GameHistoryModel.findOne({where: {gameId, version: version - 1}, transaction});
+      game.undoPlayerId = versionBefore != null && versionBefore.reversible ? versionBefore.userId : undefined;
+      const newGame = await game.save({transaction});
+      await GameHistoryModel.destroy({where: {version: {[Op.gte]: version}}, transaction});
+      return {status: 200, body: {game: newGame.toApi()}};
+    });
   },
 });
 

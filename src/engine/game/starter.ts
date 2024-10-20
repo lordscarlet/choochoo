@@ -5,10 +5,11 @@ import { inject } from "../framework/execution_context";
 import { injectState } from "../framework/execution_context";
 import { Grid } from '../map/grid';
 import { AvailableCity } from '../state/available_city';
+import { CityGroup } from '../state/city_group';
 import { Good } from '../state/good';
 import { LocationType } from '../state/location_type';
 import { PlayerColor, PlayerData } from '../state/player';
-import { AVAILABLE_CITIES, BAG, CURRENT_PLAYER, GRID, PLAYERS, TURN_ORDER } from './state';
+import { AVAILABLE_CITIES, BAG, CURRENT_PLAYER, PLAYERS, TURN_ORDER } from './state';
 
 export class GameStarter {
   private readonly grid = inject(Grid);
@@ -68,7 +69,7 @@ export class GameStarter {
       onRoll: [(3 + index) % 7],
       goods: [],
       upcomingGoods: draw(2, bag),
-      group: index < 4 ? 0 : 1,
+      group: index < 4 ? CityGroup.BLACK : CityGroup.WHITE,
     }));
     this.availableCities.initState(availableCities);
     this.bag.set(bag);

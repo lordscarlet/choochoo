@@ -7,7 +7,7 @@ import { PhaseEngine } from "./phase";
 import { PLAYERS } from "./state";
 import { assert } from "../../utils/validate";
 
-const ROUND = new Key<number>('roundNumber');
+export const ROUND = new Key<number>('roundNumber');
 
 export class RoundEngine {
   private readonly currentRound = injectState(ROUND);
@@ -16,19 +16,20 @@ export class RoundEngine {
 
   startFirstRound(): void {
     // The rounds go from 1 to max rounds
-    this.start(1);
+    this.currentRound.initState(1);
+    this.start();
   }
-
-  start(roundNumber: number) {
-    this.currentRound.initState(roundNumber);
+  
+  start() {
     this.phase.startFirstPhase();
   }
 
   end() {
     const currentRound = this.currentRound();
 
-    if (currentRound < this.maxRounds()) {
+    if (currentRound <= this.maxRounds()) {
       this.currentRound.set(currentRound + 1);
+      this.start();
       return;
     }
     this.game.end();

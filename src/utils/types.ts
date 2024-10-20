@@ -4,6 +4,7 @@ export type ConstructorReturnType<T> = T extends Constructor<infer P> ? P : neve
 export type Primitive = number | string | boolean;
 
 export interface BaseMap<A, B> {
+  has(a: A): boolean;
   get(a: A): B|undefined;
   entries(): Iterable<[A, B]>;
   keys(): Iterable<A>;

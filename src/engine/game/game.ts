@@ -29,6 +29,10 @@ export class GameEngine {
     if (endsTurn) {
       this.turn.end();
     }
+    const autoAction = this.delegator.get().autoAction();
+    if (autoAction != null) {
+      this.processAction(autoAction.action.action, autoAction.data);
+    }
   }
 
   end(): void {

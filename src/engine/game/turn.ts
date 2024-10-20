@@ -21,7 +21,7 @@ export class TurnEngine {
     this.delegator.get().onEndTurn();
     this.currentPlayer.delete();
 
-    const nextPlayer = this.findNextPlayer(player.color);
+    const nextPlayer = this.delegator.get().findNextPlayer(player.color);
     if (nextPlayer != null) {
       console.log(`starting next player ${nextPlayer}`);
       this.start(nextPlayer);
@@ -29,13 +29,5 @@ export class TurnEngine {
     }
     console.log('Ending phase');
     this.phase.end();
-  }
-
-  private findNextPlayer(currentPlayer: PlayerColor): PlayerColor|undefined {
-    const playerOrder = this.delegator.get().getPlayerOrder();
-    const playerIndex = playerOrder.indexOf(currentPlayer);
-    assert(playerIndex >= 0, 'player not found in player order');
-  
-    return playerOrder[playerIndex + 1];
   }
 }

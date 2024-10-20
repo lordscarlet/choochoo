@@ -10,6 +10,13 @@ export enum GameStatus {
   ABANDONED = 'ABANDONED',
 }
 
+export const ActionApi = z.object({
+  actionName: z.string(),
+  actionData: z.unknown(),
+});
+
+export type ActionApi = z.infer<typeof ActionApi>;
+
 export const CreateGameApi = z.object({
   gameKey: z.string(),
   name: z.string(),
@@ -23,6 +30,7 @@ export const GameApi = z.object({
   playerIds: z.array(z.string()),
   status: z.nativeEnum(GameStatus),
   gameData: z.string().optional(),
+  undoPlayerId: z.string().optional(),
 });
 
 export const ListGamesApi = z.object({
@@ -101,10 +109,7 @@ export const gameContract = c.router({
     method: 'POST',
     pathParams: z.object({gameId: z.string()}),
     path: '/:gameId/action',
-    body: z.object({
-      actionName: z.string(),
-      actionData: z.unknown(),
-    }),
+    body: ActionApi,
     responses: {
       200: z.object({game: GameApi}),
     },
@@ -113,8 +118,8 @@ export const gameContract = c.router({
   undoAction: {
     method: 'POST',
     pathParams: z.object({gameId: z.string()}),
-    path: '/:gameId/action',
-    body: z.object({}),
+    path: '/:gameId/undo',
+    body: z.object({version: z.number()}),
     responses: {
       200: z.object({game: GameApi}),
     },

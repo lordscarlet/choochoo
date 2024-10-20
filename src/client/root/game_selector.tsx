@@ -26,12 +26,11 @@ export function GameSelector({game, setGame}: GameSelectorProps) {
   </div>;
 
   async function createGame() {
-    const name = prompt('game name?');
+    const name = 'game - ' + Date.now();
     if (name == null) return;
     gameClient.create({body: {name, gameKey: 'rust-belt'}}).then(({body, status}) => {
       assert(status === 201);
       assert(games != null);
-      console.log('here', [body.game, ...games]);
       setGames([body.game, ...games]);
       setGame(body.game);
     });

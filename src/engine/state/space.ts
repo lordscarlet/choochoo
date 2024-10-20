@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Good } from "./good";
 import { LocationType } from "./location_type";
 import { TileData } from "./tile";
+import { CityGroup } from "./city_group";
 
 
 
@@ -13,7 +14,7 @@ export const CityData = z.object({
   goods: z.array(z.nativeEnum(Good)),
   upcomingGoods: z.array(z.array(z.nativeEnum(Good))),
   onRoll: z.array(z.number()),
-  group: z.number(),
+  group: z.nativeEnum(CityGroup),
 });
 
 export type CityData = z.infer<typeof CityData>;

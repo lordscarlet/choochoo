@@ -1,6 +1,7 @@
 
 import { InjectionContext } from '../engine/framework/inject';
 import { MapSettings } from '../engine/game/map_settings';
+import { CityGroup } from '../engine/state/city_group';
 import { Good } from '../engine/state/good';
 import { LocationType } from '../engine/state/location_type';
 import { CityData, LocationData, SpaceData } from '../engine/state/space';
@@ -21,8 +22,7 @@ const MOUNTAIN: LocationData = {
   type: LocationType.MOUNTAIN,
 };
 
-const BLACK = 1;
-const WHITE = 2;
+const {WHITE, BLACK} = CityGroup;
 
 const map: Array<Array<SpaceData|undefined>> = offset([
   [

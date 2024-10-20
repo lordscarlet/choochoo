@@ -50,6 +50,15 @@ export enum Direction {
   BOTTOM_LEFT,
 }
 
+export const allDirections = [
+  Direction.TOP_LEFT,
+  Direction.TOP,
+  Direction.TOP_RIGHT,
+  Direction.BOTTOM_RIGHT,
+  Direction.BOTTOM,
+  Direction.BOTTOM_LEFT,
+]
+
 export function isDirection(v: unknown): v is Direction {
   return Direction[v as number] != null;
 }

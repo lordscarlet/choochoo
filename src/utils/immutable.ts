@@ -61,6 +61,10 @@ export class ImmutableSet<T> {
 export class ImmutableMap<R,S> implements BaseMap<R, S> {
   constructor(private readonly internal: Map<R, S>) {}
 
+  has(key: R): boolean {
+    return this.internal.has(key);
+  }
+
   get(key: R): S|undefined {
     return this.internal.get(key);
   }

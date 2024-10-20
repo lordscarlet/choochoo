@@ -10,12 +10,17 @@ export class Coordinates {
     return new Coordinates(this.q + offset.q, this.r + offset.r);
   }
 
-  equals(coordinates: Coordinates): boolean {
+  equals(coordinates: unknown): boolean {
+    if (!(coordinates instanceof Coordinates)) return false;
     return this.q === coordinates.q && this.r === coordinates.r;
   }
 
   serialize(): string {
     return `${this.q}|${this.r}`;
+  }
+
+  static from({q, r}: {q: number, r: number}): Coordinates {
+    return new Coordinates(q, r);
   }
 
   static unserialize(serialized: string): Coordinates {

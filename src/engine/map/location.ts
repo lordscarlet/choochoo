@@ -3,7 +3,7 @@ import { inject } from "../framework/execution_context";
 import { LocationType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { LocationData } from "../state/space";
-import { ComplexTileType, Direction, SimpleTileType, TileType, TownTileType } from "../state/tile";
+import { ComplexTileType, Direction, SimpleTileType, TileData, TileType, TownTileType } from "../state/tile";
 import { City } from "./city";
 import { Coordinates } from "../../utils/coordinates";
 import { getOpposite, rotateDirectionClockwise } from "./direction";
@@ -16,7 +16,15 @@ export class Location {
 
   // TODO: add memoization
   getTrack(): Track[] {
-    return calculateTrackInfo(this.data.tile).map((trackInfo) => inject(Track, this.grid, this, trackInfo));
+    return this.getTrackInfo().map((trackInfo) => inject(Track, this.grid, this, trackInfo));
+  }
+
+  getTrackInfo(): TrackInfo[] {
+    return calculateTrackInfo(this.data.tile);
+  }
+
+  hasTile(): boolean {
+    return this.data.tile != null;
   }
 
   getTileType(): TileType|undefined {
@@ -25,6 +33,10 @@ export class Location {
 
   getTileOrientation(): Direction|undefined {
     return this.data.tile?.orientation;
+  }
+
+  getTileData(): TileData|undefined {
+    return this.data.tile;
   }
 
   hasTown(): boolean {
@@ -54,13 +66,20 @@ export class Location {
   getNeighbor(dir: Direction): Location|City|undefined {
     return this.grid.getNeighbor(this.coordinates, dir);
   }
+
+  findRoutesToLocation(coordinates: Coordinates): Array<PlayerColor|undefined> {
+    assert(this.hasTown(), 'cannot call findRoutesToLocation from a non-town hex');
+    return this.getTrack().filter((track) => {
+      const ends = track.getEnds();
+      return ends.some((c) => c != null && c.equals(coordinates));
+    }).map((track) => track.getOwner());
+  }
 }
 
-export interface BaseTileData {
-  tileType: TileType,
-  orientation: Direction;
-  owners?: Array<PlayerColor|undefined>;
-}
+export type MakeOptional<T, Optional extends string> =
+    Pick<T, Exclude<keyof T, Optional>> & Pick<Partial<T>, keyof T>;
+
+export type BaseTileData = MakeOptional<TileData, 'owners'>;
 
 export function calculateTrackInfo(tileData?: BaseTileData): TrackInfo[] {
   if (!tileData) return [];

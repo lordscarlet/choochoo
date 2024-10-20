@@ -10,9 +10,10 @@ import { userClient } from "../services/user";
 interface GameProps {
   gameId: string;
   user: MyUserApi;
+  setUser(user: MyUserApi): void;
 }
 
-export function Game({user, gameId}: GameProps) {
+export function Game({user, gameId, setUser}: GameProps) {
   const [game, setGame] = useState<GameApi|undefined>();
   useEffect(() => {
     gameClient.get({params: {gameId}}).then(({status, body}) => {
@@ -22,23 +23,24 @@ export function Game({user, gameId}: GameProps) {
       setGame(game);
     });
   }, [gameId]);
-  return game ? <LoadedGame user={user} game={game} setGame={setGame} /> : <div>Loading....</div>;
+  return game ? <LoadedGame user={user} game={game} setGame={setGame} setUser={setUser} /> : <div>Loading....</div>;
 }
 
 interface LoadedGameProps {
   game: GameApi;
   user: MyUserApi;
   setGame: (game: GameApi) => void;
+  setUser: (user: MyUserApi) => void;
 }
 
-export function LoadedGame({user, game, setGame}: LoadedGameProps) {
+export function LoadedGame({user, game, setGame, setUser}: LoadedGameProps) {
   switch (game.status) {
     case GameStatus.LOBBY:
-      return <Lobby game={game} user={user} setGame={setGame} />
+      return <Lobby game={game} user={user} setGame={setGame} setUser={setUser} />
     case GameStatus.ACTIVE:
     case GameStatus.ENDED:
     case GameStatus.ABANDONED:
-      return <ActiveGame game={game} user={user} setGame={setGame} />
+      return <ActiveGame game={game} user={user} setUser={setUser} setGame={setGame} />
     default:
       assertNever(game.status);
   }

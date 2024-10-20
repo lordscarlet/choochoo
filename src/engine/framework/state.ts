@@ -1,89 +1,12 @@
-import { assertNever } from "../../utils/validate";
 import { assert } from "../../utils/validate";
 import { Key } from './key';
-import { HexGrid, HexGridSerialized, ImmutableHexGrid } from "../../utils/hex_grid";
+import { HexGridSerialized } from "../../utils/hex_grid";
 import { SpaceData } from "../state/space";
-import { isPrimitive } from "../../utils/functions";
 import { Grid } from "../map/grid";
 import { freeze, Immutable } from "../../utils/immutable";
 import { deepCopy } from "../../utils/deep_copy";
-
-function serialize(value: unknown): unknown {
-  if (isPrimitive(value)) {
-    return value;
-  } else if (value == null) {
-    return null;
-  } else if (value instanceof Set) {
-    return {
-      type: 'set',
-      value: [...value].map(serialize),
-    };
-  } else if (value instanceof Map) {
-    return {
-      type: 'map',
-      value: [...value.entries()].map(([key, value]) => [serialize(key), serialize(value)]),
-    };
-  } else if (Array.isArray(value)) {
-    return value;
-  } else if (value instanceof ImmutableHexGrid) {
-    return {type: 'hexgrid', value: value.serialize()};
-  } else if (typeof value === 'object') {
-    return {
-      type: 'object',
-      value,
-    };
-  } else {
-    throw new Error('failed to serialize: ' + value);
-  }
-}
-
-interface TypedMap {
-  type: 'map';
-  value: Array<[unknown, unknown]>;
-}
-
-interface TypedSet {
-  type: 'set';
-  value: unknown[];
-}
-
-interface TypedObject {
-  type: 'object';
-  value: {};
-}
-
-interface TypedHexGrid {
-  type: 'hexgrid';
-  value: HexGridSerialized<SpaceData>;
-}
-
-type Typed = TypedMap|TypedSet|TypedObject|TypedHexGrid;
-
-function unserialize(value: unknown): unknown {
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return value;
-  } else if (value == null) {
-    return undefined;
-  } else if (Array.isArray(value)) {
-    return value;
-  } else {
-    assert(typeof value === 'object', 'cannot unserialize non-object');
-    const obj = value as Typed;
-    if (obj.type === 'set') {
-      return new Set(obj.value.map(unserialize));
-    } else if (obj.type === 'map') {
-      return new Map(obj.value.map(([key, value]) => {
-        return [unserialize(key), unserialize(value)];
-      }));
-    } else if (obj.type === 'hexgrid') {
-      return HexGrid.parse(obj.value);
-    } else if (obj.type === 'object') {
-      return obj.value;
-    } else {
-      assertNever(obj);
-    }
-  }
-}
+import { Coordinates } from "../../utils/coordinates";
+import { serialize, unserialize } from "../../utils/serialize";
 
 interface StateContainer<T> {
   state: Immutable<T>;
@@ -178,6 +101,7 @@ export class StateStore {
     for (const [key, value] of Object.entries(map)) {
       this.initContainer(key, unserialize(value));
     }
+    console.log('new game state', this.state);
   }
 }
 

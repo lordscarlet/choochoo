@@ -17,10 +17,16 @@ export interface ActionConstructor<T extends {}> {
   readonly action: string;
 }
 
+export interface ActionBundle<T extends {}> {
+  action: ActionConstructor<T>;
+  data: NoInfer<T>;
+}
+
 export class PhaseModule {
   private readonly turnOrder = injectState(TURN_ORDER);
   private readonly turn = inject(TurnEngine);
   private readonly actionRegistry = new Map<string, ActionProcessor<{}>>();
+  private readonly phase = inject(PhaseEngine);
 
   installAction<T extends {}>(action: ActionConstructor<T>) {
     this.actionRegistry.set(action.action, inject(action));
@@ -44,8 +50,10 @@ export class PhaseModule {
 
   configureActions(): void {}
 
-  onStart(): void {
-    this.turn.start(this.getPlayerOrder()[0]);
+  onStart(): void {}
+
+  autoAction(): ActionBundle<{}>|undefined {
+    return undefined;
   }
 
   onEnd(): void {}
@@ -53,6 +61,20 @@ export class PhaseModule {
   onStartTurn(): void {}
 
   onEndTurn(): void {}
+
+  checkSkipTurn(): void {}
+
+  getFirstPlayer(): PlayerColor|undefined {
+    return this.getPlayerOrder()[0];
+  }
+
+  findNextPlayer(currentPlayer: PlayerColor): PlayerColor|undefined {
+    const playerOrder = this.getPlayerOrder();
+    const playerIndex = playerOrder.indexOf(currentPlayer);
+    assert(playerIndex >= 0, 'player not found in player order');
+  
+    return playerOrder[playerIndex + 1];
+  }
 
   getPlayerOrder(): PlayerColor[] {
     return this.turnOrder();
@@ -65,6 +87,7 @@ export class PhaseEngine {
   private readonly phase = injectState(PHASE);
   private readonly delegator = inject(PhaseDelegator);
   private readonly round = inject(RoundEngine);
+  private readonly turn = inject(TurnEngine);
 
   startFirstPhase(): void {
     return this.start(this.phaseOrder()[0]);
@@ -74,6 +97,13 @@ export class PhaseEngine {
     this.phase.initState(phase);
     const phaseProcessor = this.delegator.get();
     phaseProcessor.onStart();
+    console.log(`Starting phase ${phase}.`);
+    const nextPlayer = phaseProcessor.getFirstPlayer();
+    if (nextPlayer == null) {
+      this.end();
+      return;
+    }
+    this.turn.start(nextPlayer);
   }
 
   end(): void {
@@ -83,7 +113,6 @@ export class PhaseEngine {
 
     const nextPhase = this.findNextPhase(currentPhase);
     if (nextPhase != null) {
-      console.log(`Starting next phase ${nextPhase}`);
       this.start(nextPhase);
       return;
     }
@@ -94,14 +123,14 @@ export class PhaseEngine {
   phaseOrder(): Phase[] {
     return [
       Phase.SHARES,
-      // Phase.TURN_ORDER,
-      // Phase.ACTION_SELECTION,
+      Phase.TURN_ORDER,
+      Phase.ACTION_SELECTION,
       Phase.BUILDING,
-      // Phase.MOVING,
-      // Phase.INCOME,
-      // Phase.EXPENSES,
-      // Phase.INCOME_REDUCTION,
-      // Phase.GOODS_GROWTH,
+      Phase.MOVING,
+      Phase.INCOME,
+      Phase.EXPENSES,
+      Phase.INCOME_REDUCTION,
+      Phase.GOODS_GROWTH,
     ];
   }
 

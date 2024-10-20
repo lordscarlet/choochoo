@@ -41,6 +41,9 @@ export class GameModel extends Model<GameModel, GameCreation> {
   @Column(DataTypes.UUIDV4)
   activePlayerId?: string;
 
+  @Column(DataTypes.UUIDV4)
+  undoPlayerId?: string;
+
   @CreatedAt
   createdDate!: Date;
 

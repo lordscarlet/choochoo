@@ -1,5 +1,8 @@
+import { Coordinates } from "../../utils/coordinates";
+import { assert } from "../../utils/validate";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
+import { City } from "./city";
 import { rotateDirectionClockwise } from "./direction";
 import { Grid } from "./grid";
 import { Location } from "./location";
@@ -7,18 +10,8 @@ import { Location } from "./location";
 
 export class Track {
   constructor(private readonly grid: Grid,
-              private readonly location: Location,
+              readonly location: Location,
               private readonly track: TrackInfo) {}
-
-  // prev(): RoutePart|undefined {
-  //   if (this.routeIndex === 0) return undefined;
-  //   return this.route.parts[this.routeIndex - 1];
-  // }
-
-  // next(): RoutePart|undefined {
-  //   if (this.routeIndex === this.route.parts.length - 1) return undefined;
-  //   return this.route.parts[this.routeIndex + 1];
-  // }
 
   getExits(): [Exit, Exit] {
     return this.track.exits;
@@ -32,10 +25,46 @@ export class Track {
     return this.track.exits.includes(exit);
   }
 
-  // neighbors(): [RoutePart|undefined, RoutePart|undefined] {
-  //   return [this.prev(), this.next()];
-  // }
+  getEnds(): [Coordinates|undefined, Coordinates|undefined] {
+    const exits = this.getExits();
+
+    const neighbors = this.getNeighbors();
+    return tupleMap(neighbors, (neighbor) => this.getEnd(neighbor));
+  }
+
+  getEnd(prev: TrackNeighbor): Coordinates|undefined {
+    const next = this.getNext(prev);
+    if (next == null) {
+      return undefined;
+    } else if (next instanceof City) {
+      return next.coordinates;
+    } else if (next === TOWN) {
+      return this.location.coordinates;
+    } else {
+      return next.getEnd(this);
+    }
+  }
+
+  getNext(prevNeighbor: TrackNeighbor): TrackNeighbor {
+    const neighbors = this.getNeighbors();
+    return neighbors[0] === prevNeighbor ? neighbors[1] : neighbors[0];
+  }
+
+  getNeighbors(): [TrackNeighbor, TrackNeighbor] {
+    return tupleMap(this.getExits(), (exit) => {
+      if (exit === TOWN) {
+        return exit;
+      }
+      return this.grid.connection(this, exit);
+    });
+  }
 }
+
+function tupleMap<T, R>(tuple: [T, T], updateFn: (t: T) => R): [R, R] {
+  return tuple.map(updateFn) as [R, R];
+}
+
+export type TrackNeighbor = Track|City|Town|undefined;
 
 export const TOWN = 9;
 

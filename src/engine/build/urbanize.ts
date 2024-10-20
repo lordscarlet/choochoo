@@ -12,10 +12,12 @@ import { Action } from "../state/action";
 import { LocationType } from "../state/location_type";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
+import { assert } from "../../utils/validate";
+import { Location } from "../map/location";
 
 export const UrbanizeData = z.object({
   cityIndex: z.number(),
-  coordinates: z.instanceof(Coordinates),
+  coordinates: z.object({q: z.number(), r: z.number()}),
 });
 
 export type UrbanizeData = z.infer<typeof UrbanizeData>;
@@ -30,10 +32,6 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
   private readonly availableCities = injectState(AVAILABLE_CITIES);
 
   validate(data: UrbanizeData): void {
-
-  }
-
-  process(data: UrbanizeData): boolean {
     const player = currentPlayer();
     if (player.selectedAction !== Action.URBANIZATION) {
       throw new InvalidInputError('You are not authorized to take an urbanize action');
@@ -41,19 +39,24 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
     if (this.buildState().hasUrbanized) {
       throw new InvalidInputError('Can only urbanize once');
     }
+
+    const coordinates = Coordinates.from(data.coordinates);
+    const space = this.grid.lookup(coordinates);
+    assert(space instanceof Location, 'can only urbanize in town locations');
+    assert(space.hasTown(), 'can only urbanize in town locations');
+    const city = this.availableCities()[data.cityIndex];
+    assert(city != null, `Available city doesn't exist at ${data.cityIndex}`);
+  }
+
+  process(data: UrbanizeData): boolean {
+    const coordinates = Coordinates.from(data.coordinates);
     this.buildState.update((state) => state.hasUrbanized = true);
     const city = this.availableCities()[data.cityIndex];
-    if (!city) {
-      throw new InvalidInputError('Invalid city');
-    }
-    this.availableCities().splice(data.cityIndex, 1);
     
-    const location = this.grid.lookup(data.coordinates);
-    if (!location || location instanceof City || !location.hasTown()) {
-      throw new InvalidInputError('Must select a space with a town');
-    }
-
-    this.grid.set(data.coordinates, {
+    const location = this.grid.lookup(coordinates) as Location;
+    
+    this.availableCities.update((cities) => cities.splice(data.cityIndex, 1));
+    this.grid.set(coordinates, {
       type: LocationType.CITY,
       name: location.getTownName()!,
       color: city.color,

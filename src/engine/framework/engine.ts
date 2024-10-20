@@ -44,6 +44,7 @@ export class Engine {
     const endInjectionMode = this.beginInjectionModeAsync(mapKey, gameState);
     try {
       process();
+      console.log('executionContext', JSON.stringify(getExecutionContext().gameState.serialize(), null, 2));
       const player = currentPlayer();
       return {
         activePlayerId: player.playerId,

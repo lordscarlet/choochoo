@@ -11,6 +11,7 @@ import { Location } from "./location";
 import { Route } from "./route";
 import { HexGrid } from "../../utils/hex_grid";
 import { assert } from "../../utils/validate";
+import { Track } from "./track";
 
 export class Grid {
   private readonly grid = injectState(GRID);
@@ -62,6 +63,15 @@ export class Grid {
 
   getNeighbor(coordinates: Coordinates, dir: Direction): City|Location|undefined {
     return this.lookup(coordinates.neighbor(dir));
+  }
+
+  connection(track: Track, dir: Direction): City|Track|undefined {
+    const neighbor = this.getNeighbor(track.location.coordinates, dir);
+    assert(neighbor != null, 'discovered a track leading to an off-board location');
+    if (neighbor instanceof City) {
+      return neighbor;
+    }
+    return neighbor.trackExiting(dir);
   }
 
   getRoutes(): Route[] {

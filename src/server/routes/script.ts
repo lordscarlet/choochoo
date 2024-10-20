@@ -17,6 +17,12 @@ export const buildPromise = context({
     setup(build) {
       build.onEnd(result => {
         console.log(`build ended with ${result.errors.length} errors`);
+        for (const error of result.errors) {
+          console.log('===================');
+          console.log('Text: ', error.text);
+          console.log('Detail: ', error.detail);
+          console.log('location: ', error.location);
+        }
         // HERE: somehow restart the server from here, e.g., by sending a signal that you trap and react to inside the server.
       })
     },

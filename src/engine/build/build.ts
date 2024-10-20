@@ -18,7 +18,7 @@ import { BUILD_STATE } from "./state";
 import { Validator } from "./validator";
 
 export const BuildData = z.object({
-  coordinates: z.instanceof(Coordinates),
+  coordinates: z.object({q: z.number(), r: z.number()}),
   tileType: TileType,
   orientation: z.nativeEnum(Direction),
 });
@@ -38,37 +38,45 @@ export class BuildAction implements ActionProcessor<BuildData> {
   private readonly validator = inject(Validator);
 
   validate(data: BuildData): void {
+    // TODO: verify that the pieces are piece limitted
+    const coordinates = new Coordinates(data.coordinates.q, data.coordinates.r);
+
     const maxTrack = this.helper.getMaxBuilds();
     if (this.helper.buildsRemaining() === 0) {
       throw new InvalidInputError(`You can only build at most ${maxTrack} track`);
     }
 
-    if (currentPlayer().money < this.costCalculator.costOf(data.coordinates, data.tileType)) {
+    if (currentPlayer().money < this.costCalculator.costOf(coordinates, data.tileType)) {
       throw new InvalidInputError('Cannot afford to place track');
     }
 
-    if (this.hasBuiltHere(data.coordinates)) {
+    if (this.hasBuiltHere(coordinates)) {
       throw new InvalidInputError('cannot build in the same location twice in one turn');
     }
-    const invalidBuildReason = this.validator.getInvalidBuildReason(data.coordinates, {...data, playerColor: currentPlayer().color});
+    const invalidBuildReason = this.validator.getInvalidBuildReason(coordinates, {...data, playerColor: currentPlayer().color});
     if (invalidBuildReason != null) {
       throw new InvalidInputError('invalid build: ' + invalidBuildReason);
     }
   }
 
   process(data: BuildData): boolean {
-    this.playerHelper.update((player) => player.money -= this.costCalculator.costOf(data.coordinates, data.tileType));
+    const coordinates = new Coordinates(data.coordinates.q, data.coordinates.r);
+    this.playerHelper.update((player) => player.money -= this.costCalculator.costOf(coordinates, data.tileType));
     const newTile = this.newTile(data);
-    this.grid.update(data.coordinates, (hex) => {
+    this.grid.update(coordinates, (hex) => {
       assert(hex.type !== LocationType.CITY);
       hex.tile = newTile;
+    });
+    this.buildState.update(({previousBuilds}) => {
+      previousBuilds.push(coordinates);
     });
     return this.helper.isAtEndOfTurn();
   }
 
   private newTile(data: BuildData): TileData {
+    const coordinates = new Coordinates(data.coordinates.q, data.coordinates.r);
     const newTileData = calculateTrackInfo(data);
-    const oldTrack = this.grid.lookup(data.coordinates);
+    const oldTrack = this.grid.lookup(coordinates);
     assert(oldTrack instanceof Location);
     const owners = newTileData.map((newTrack) => {
       const previousTrack = oldTrack.getTrack().find((track) =>
@@ -92,7 +100,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     };
   }
 
-  hasBuiltHere(coordinates: Coordinates): boolean {
+  protected hasBuiltHere(coordinates: Coordinates): boolean {
     // you can't build two tiles in the same location in one turn
     for (const previousCoordinates of this.buildState().previousBuilds) {
       if (previousCoordinates.equals(coordinates)) {

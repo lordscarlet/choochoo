@@ -1,95 +1,96 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { GameApi } from "../../api/game";
-import { MyUserApi } from "../../api/user";
+import { ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { ActionApi, GameApi } from "../../api/game";
+import { MyUserApi, UserApi } from "../../api/user";
 import { useUsers } from "../root/user_cache";
 import { Engine } from "../../engine/framework/engine";
 import { Grid } from "../../engine/map/grid";
 import { inject, injectState } from "../../engine/framework/execution_context";
 import { HexGrid } from "./hex_grid";
-import { useInjectedState } from "../utils/execution_context";
-import { CURRENT_PLAYER, currentPlayer, PLAYERS } from "../../engine/game/state";
-import { PlayerColor } from "../../engine/state/player";
-import * as styles from './active_game.module.css';
+import { useInjected, useInjectedState } from "../utils/execution_context";
+import { CURRENT_PLAYER, currentPlayer, PLAYERS, TURN_ORDER } from "../../engine/game/state";
+import { PlayerColor, PlayerData } from "../../engine/state/player";
 import { gameClient } from "../services/game";
-import { assert } from "../../utils/validate";
+import { assert, assertNever } from "../../utils/validate";
 import { SelectAction } from "./select_action";
 import { GameContext, GameData } from "../services/context";
-import { ActionConstructor } from "../../engine/game/phase";
+import { ActionConstructor, PHASE } from "../../engine/game/phase";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ExecutionContextProvider } from "../utils/execution_context";
+import { getPhaseString } from "../../engine/state/phase";
+import { PlayerStats } from "./player_stats";
+import { ROUND, RoundEngine } from "../../engine/game/round";
 
 
 interface LoadedGameProps {
   game: GameApi;
   user: MyUserApi;
   setGame: (game: GameApi) => void;
+  setUser: (user: MyUserApi) => void;
 }
 
-export function ActiveGame({user, game, setGame}: LoadedGameProps) {
-  const gameContext = useMemo(() =>
-    new GameData(user, game, setGame), [user, game]);
+export function ActiveGame({user, game, setGame, setUser}: LoadedGameProps) {
+  const [previousAction, setPreviousAction] = useState<ActionApi|undefined>(undefined);
   return <ExecutionContextProvider gameKey={game.gameKey} gameState={game.gameData!}>
-    <GameContext.Provider value={gameContext}>
+    <GameContextProvider game={game} user={user} setPreviousAction={setPreviousAction} setGame={setGame}>
       <h2>{game.name}</h2>
-      <SelectAction />
-      <PlayerData />
+      <SelectAction setUser={setUser} />
+      <UndoButton />
+      <CurrentPhase />
+      <PlayerStats />
       <TurnOrder/>
       <HexGrid />
       <Goods/>
-    </GameContext.Provider>
+      {previousAction && <PreviousAction previousAction={previousAction} />}
+    </GameContextProvider>
   </ExecutionContextProvider>;
 }
 
-export function PlayerData() {
-  const players = useInjectedState(PLAYERS);
-  const playerUsers = useUsers(players.map((player) => player.playerId));
-  return <table>
-    <thead>
-      <tr>
-        <th></th>
-        <th>Player</th>
-        <th>Money</th>
-        <th>Income</th>
-        <th>Shares</th>
-        <th>Locomotive</th>
-      </tr>
-    </thead>
-    <tbody>
-      {players.map((player, index) =>
-        <tr key={player.playerId}>
-          <td className={[styles.user, toStyle(player.color)].join(' ')}></td>
-          <td>{playerUsers?.[index]?.username}</td>
-          <td>${player.money} ({toNet(player.income - player.shares - player.locomotive)})</td>
-          <td>${player.income}</td>
-          <td>{player.shares}</td>
-          <td>{player.locomotive}</td>
-        </tr>)}
-    </tbody>
-  </table>;
+export function CurrentPhase() {
+  const round = useInjectedState(ROUND);
+  const roundHelper = useInjected(RoundEngine)
+  const phase = useInjectedState(PHASE);
+  return <div>Round: {round}/{roundHelper.maxRounds()}. Phase: {getPhaseString(phase)}.</div>;
 }
 
-function toStyle(playerColor: PlayerColor): string {
-  switch (playerColor) {
-    case PlayerColor.RED:
-      return styles['red'];
-    case PlayerColor.YELLOW:
-      return styles['yellow'];
-    case PlayerColor.GREEN:
-      return styles['green'];
-    case PlayerColor.PURPLE:
-      return styles['purple'];
-    case PlayerColor.BLACK:
-      return styles['black'];
-    case PlayerColor.BLUE:
-      return styles['blue'];
-    case PlayerColor.BROWN:
-      return styles['brown'];
-      
+interface GameContext {
+  game: GameApi;
+  user: MyUserApi;
+  children: ReactNode;
+  setPreviousAction(p: ActionApi|undefined): void;
+  setGame(game: GameApi): void;
+}
+
+export function GameContextProvider({game, user, children, setPreviousAction, setGame}: GameContext) {
+  const users = useUsers(game.playerIds);
+  const gameContext = useMemo(() => {
+    const userCache = new Map((users ?? []).map((user) => [user.id, user]));
+    return new GameData(user, game, userCache, setPreviousAction, setGame);
+  }, [user, game, users?.map((user) => user.id).join('|')]);
+  return <GameContext.Provider value={gameContext}>
+    {children}
+  </GameContext.Provider>;
+}
+
+export function UndoButton() {
+  const ctx = useContext(GameContext)!;
+  const undo = useCallback(() => {
+    gameClient.undoAction({params: {gameId: ctx.game.id}, body: {version: ctx.game.version - 1}}).then(({status, body}) => {
+      assert(status === 200);
+      ctx.setGame(body.game);
+    })
+  }, [ctx.game]);
+  if (ctx.game.undoPlayerId !== ctx.user.id) {
+    return <></>;
   }
+  return <button onClick={undo}>Undo</button>
 }
 
-function toNet(number: number): string {
-  return number >= 0 ? `+$${number}` : `-$${-number}`;
+export function PreviousAction({previousAction}: {previousAction: ActionApi}) {
+  const gameContext = useContext(GameContext);
+  const retry = useCallback(() => {
+    gameContext!.attemptAction(previousAction);
+  }, [previousAction]);
+  return <button onClick={retry}>Retry action {previousAction.actionName}</button>
 }
 
 export function TurnOrder() {
