@@ -5,7 +5,6 @@ import { Primitive } from "./types";
 import { assert, assertNever } from "./validate";
 
 
-
 interface TypedMap<R, S> {
   type: 'map';
   value: Array<[R, S]>;
@@ -32,14 +31,14 @@ interface TypedCoordinates {
 }
 
 export type Serialized<T> =
-    T extends Primitive ? T :
-    T extends undefined ? null :
-    T extends Coordinates ? TypedCoordinates :
-    T extends HexGrid<infer R> ? TypedHexGrid<R> :
-    T extends Set<infer R> ? TypedSet<R> :
-    T extends Map<infer R, infer S> ? TypedMap<R, S> :
-    T extends Object ? TypedObject<T> :
-    never;
+  T extends Primitive ? T :
+  T extends undefined ? null :
+  T extends Coordinates ? TypedCoordinates :
+  T extends HexGrid<infer R> ? TypedHexGrid<R> :
+  T extends Set<infer R> ? TypedSet<R> :
+  T extends Map<infer R, infer S> ? TypedMap<R, S> :
+  T extends Object ? TypedObject<T> :
+  never;
 
 export function unserialize<T>(input: Serialized<T>): T;
 export function unserialize(input: unknown): unknown;
@@ -54,7 +53,7 @@ export function unserialize(input: unknown): unknown {
     assert(typeof input === 'object', 'cannot unserialize non-object');
     assert('type' in input);
     assert('value' in input);
-    const {type, value} = input as TypedCoordinates | TypedHexGrid<unknown> | TypedSet<unknown> | TypedMap<unknown, unknown> | TypedObject<Object>;
+    const { type, value } = input as TypedCoordinates | TypedHexGrid<unknown> | TypedSet<unknown> | TypedMap<unknown, unknown> | TypedObject<Object>;
     if (type === 'set') {
       return new Set(value.map(unserialize));
     } else if (type === 'map') {

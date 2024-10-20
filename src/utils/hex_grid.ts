@@ -1,5 +1,4 @@
 import { Coordinates } from "./coordinates";
-import { peek } from "./functions";
 import { freeze, Immutable, ImmutableMap } from "./immutable";
 import { serialize, Serialized, unserialize } from "./serialize";
 import { BaseMap } from "./types";
@@ -7,7 +6,7 @@ import { BaseMap } from "./types";
 export abstract class BaseGrid<T, R extends BaseMap<string, T>> {
   protected abstract readonly grid: R;
 
-  get(coordinates: Coordinates): T|undefined {
+  get(coordinates: Coordinates): T | undefined {
     return this.grid.get(coordinates.serialize());
   }
 
@@ -79,7 +78,7 @@ export class HexGrid<T> extends BaseGrid<T, Map<string, T>> {
     return grid;
   }
 
-  static fromArray<T>(arr: Array<Array<T|undefined>>): HexGrid<T> {
+  static fromArray<T>(arr: Array<Array<T | undefined>>): HexGrid<T> {
     const grid = new HexGrid<T>();
     for (const [index1, row] of arr.entries()) {
       for (const [index2, value] of row.entries()) {
@@ -91,4 +90,4 @@ export class HexGrid<T> extends BaseGrid<T, Map<string, T>> {
   }
 }
 
-export type HexGridSerialized<T> = {[r: number]: {[q: number]: Serialized<T>}};
+export type HexGridSerialized<T> = { [r: number]: { [q: number]: Serialized<T> } };

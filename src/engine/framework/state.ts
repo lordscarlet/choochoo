@@ -1,11 +1,6 @@
-import { assert } from "../../utils/validate";
 import { Key } from './key';
-import { HexGridSerialized } from "../../utils/hex_grid";
-import { SpaceData } from "../state/space";
-import { Grid } from "../map/grid";
 import { freeze, Immutable } from "../../utils/immutable";
 import { deepCopy } from "../../utils/deep_copy";
-import { Coordinates } from "../../utils/coordinates";
 import { serialize, unserialize } from "../../utils/serialize";
 
 interface StateContainer<T> {
@@ -76,7 +71,7 @@ export class StateStore {
     result.initState = (state: T) => this.init(key, state);
     result.set = (state: T) => this.set(key, state);
     result.listen = (listenFn: (t: Immutable<T>) => void): () => void =>
-        this.listen(key, listenFn);
+      this.listen(key, listenFn);
     result.update = (updateFn: (t: T) => void) => {
       const newResult = deepCopy(this.get(key)) as T;
       updateFn(newResult);
@@ -92,7 +87,7 @@ export class StateStore {
     const serialized = [...this.state.entries()].reduce((obj, [key, val]) => {
       obj[key] = serialize(val.state);
       return obj;
-    }, {} as {[key: string]: unknown});
+    }, {} as { [key: string]: unknown });
     return JSON.stringify(serialized);
   }
 
