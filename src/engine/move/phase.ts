@@ -1,6 +1,6 @@
 import { remove } from "../../utils/functions";
 import { injectState } from "../framework/execution_context";
-import { PhaseModule } from "../game/phase";
+import { PhaseModule } from "../game/phase_module";
 import { PLAYERS } from "../game/state";
 import { Action } from "../state/action";
 import { Phase } from "../state/phase";
@@ -22,7 +22,7 @@ export class MovePhase extends PhaseModule {
 
   onStart(): void {
     super.onStart();
-    this.moveState.initState({moveRound: 0, locomotive: []});
+    this.moveState.initState({ moveRound: 0, locomotive: [] });
   }
 
   onEnd(): void {
@@ -30,7 +30,7 @@ export class MovePhase extends PhaseModule {
     super.onEnd();
   }
 
-  findNextPlayer(currPlayer: PlayerColor): PlayerColor|undefined {
+  findNextPlayer(currPlayer: PlayerColor): PlayerColor | undefined {
     const nextPlayer = super.findNextPlayer(currPlayer);
     if (nextPlayer != null) return nextPlayer;
     if (this.moveState().moveRound === 0) {

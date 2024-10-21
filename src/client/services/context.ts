@@ -1,13 +1,12 @@
 import { createContext } from "react";
 import { ActionApi, GameApi } from "../../api/game";
 import { MyUserApi, UserApi } from "../../api/user";
-import { ActionConstructor } from "../../engine/game/phase";
-import { currentPlayer } from "../../engine/game/state";
+import { inject } from "../../engine/framework/execution_context";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
+import { ActionConstructor } from "../../engine/game/phase_module";
+import { currentPlayer } from "../../engine/game/state";
 import { assert } from "../../utils/validate";
 import { gameClient } from "./game";
-import { useUsers } from "../root/user_cache";
-import { inject } from "../../engine/framework/execution_context";
 
 
 export class GameData {
@@ -18,7 +17,7 @@ export class GameData {
     readonly users: Map<string, UserApi>,
     private readonly setPreviousAction: (previousAction: ActionApi) => void,
     readonly setGame: (game: GameApi) => void
-  ) {}
+  ) { }
 
   isActiveUser(): boolean {
     return currentPlayer()?.playerId === this.user.id;
@@ -35,7 +34,7 @@ export class GameData {
   }
 
   async emit<T extends {}>(action: ActionConstructor<T>, actionData: T): Promise<void> {
-    const data = {actionName: action.action, actionData};
+    const data = { actionName: action.action, actionData };
     try {
       await this.attemptAction(data);
     } catch {
@@ -44,7 +43,7 @@ export class GameData {
   }
 
   attemptAction(body: ActionApi): Promise<void> {
-    return gameClient.performAction({params: {gameId: this.game.id}, body}).then(({status, body}) => {
+    return gameClient.performAction({ params: { gameId: this.game.id }, body }).then(({ status, body }) => {
       assert(status === 200);
       console.log('setting game');
       this.setGame(body.game);
@@ -52,4 +51,4 @@ export class GameData {
   }
 }
 
-export const GameContext = createContext<GameData|undefined>(undefined);
+export const GameContext = createContext<GameData | undefined>(undefined);

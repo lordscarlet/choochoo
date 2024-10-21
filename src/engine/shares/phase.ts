@@ -1,4 +1,4 @@
-import { PhaseModule } from "../game/phase";
+import { PhaseModule } from "../game/phase_module";
 import { Phase } from "../state/phase";
 import { TakeSharesAction } from "./take_shares";
 

@@ -1,6 +1,6 @@
 import { remove } from "../../utils/functions";
 import { injectState } from "../framework/execution_context";
-import { PhaseModule } from "../game/phase";
+import { PhaseModule } from "../game/phase_module";
 import { PLAYERS } from "../game/state";
 import { Action } from "../state/action";
 import { Phase } from "../state/phase";

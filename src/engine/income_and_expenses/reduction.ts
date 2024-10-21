@@ -1,6 +1,6 @@
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
-import { PhaseEngine, PhaseModule } from "../game/phase";
+import { PhaseModule } from "../game/phase_module";
 import { PLAYERS } from "../game/state";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";

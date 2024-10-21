@@ -1,3 +1,4 @@
+import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
 import { LocationType } from "../state/location_type";
@@ -5,7 +6,6 @@ import { PlayerColor } from "../state/player";
 import { LocationData } from "../state/space";
 import { ComplexTileType, Direction, SimpleTileType, TileData, TileType, TownTileType } from "../state/tile";
 import { City } from "./city";
-import { Coordinates } from "../../utils/coordinates";
 import { getOpposite, rotateDirectionClockwise } from "./direction";
 import { Grid } from "./grid";
 import { Exit, rotateExitClockwise, TOWN, Track, TrackInfo } from "./track";
@@ -27,15 +27,15 @@ export class Location {
     return this.data.tile != null;
   }
 
-  getTileType(): TileType|undefined {
+  getTileType(): TileType | undefined {
     return this.data.tile?.tileType;
   }
 
-  getTileOrientation(): Direction|undefined {
+  getTileOrientation(): Direction | undefined {
     return this.data.tile?.orientation;
   }
 
-  getTileData(): TileData|undefined {
+  getTileData(): TileData | undefined {
     return this.data.tile;
   }
 
@@ -43,7 +43,7 @@ export class Location {
     return this.data.townName != null;
   }
 
-  getTownName(): string|undefined {
+  getTownName(): string | undefined {
     return this.data.townName;
   }
 
@@ -59,25 +59,26 @@ export class Location {
     return !neighbor.trackExiting(getOpposite(direction)) != null;
   }
 
-  trackExiting(direction: Direction): Track|undefined {
+  trackExiting(direction: Direction): Track | undefined {
     return this.getTrack().find((track) => track.hasExit(direction));
   }
 
-  getNeighbor(dir: Direction): Location|City|undefined {
+  getNeighbor(dir: Direction): Location | City | undefined {
     return this.grid.getNeighbor(this.coordinates, dir);
   }
 
-  findRoutesToLocation(coordinates: Coordinates): Array<PlayerColor|undefined> {
+  findRoutesToLocation(coordinates: Coordinates): Set<PlayerColor | undefined> {
     assert(this.hasTown(), 'cannot call findRoutesToLocation from a non-town hex');
-    return this.getTrack().filter((track) => {
-      const ends = track.getEnds();
-      return ends.some((c) => c != null && c.equals(coordinates));
-    }).map((track) => track.getOwner());
+    return new Set(
+      this.getTrack().filter((track) => {
+        const ends = track.getEnds();
+        return ends.some((c) => c != null && c.equals(coordinates));
+      }).map((track) => track.getOwner()));
   }
 }
 
 export type MakeOptional<T, Optional extends string> =
-    Pick<T, Exclude<keyof T, Optional>> & Pick<Partial<T>, keyof T>;
+  Pick<T, Exclude<keyof T, Optional>> & Pick<Partial<T>, keyof T>;
 
 export type BaseTileData = MakeOptional<TileData, 'owners'>;
 
@@ -88,108 +89,108 @@ export function calculateTrackInfo(tileData?: BaseTileData): TrackInfo[] {
     trackInfo = trackInfo.map(rotateTrackInfoClockwise);
   }
 
-  return trackInfo.map((trackInfo, index) => ({...trackInfo, owner: tileData.owners?.[index]}));
+  return trackInfo.map((trackInfo, index) => ({ ...trackInfo, owner: tileData.owners?.[index] }));
 }
 
 export function rotateTrackInfoClockwise(trackInfo: TrackInfo): TrackInfo {
-  return {exits: trackInfo.exits.map(rotateExitClockwise) as [Exit, Exit]};
+  return { exits: trackInfo.exits.map(rotateExitClockwise) as [Exit, Exit] };
 }
 
 export function toBaseTile(tile: TileType): TrackInfo[] {
-  const {TOP, BOTTOM, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT} = Direction;
+  const { TOP, BOTTOM, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT } = Direction;
   switch (tile) {
-    case SimpleTileType.STRAIGHT: return [{exits: [TOP, BOTTOM]}];
-    case SimpleTileType.CURVE: return [{exits: [TOP, BOTTOM_LEFT]}];
-    case SimpleTileType.TIGHT: return [{exits: [TOP, TOP_LEFT]}];
+    case SimpleTileType.STRAIGHT: return [{ exits: [TOP, BOTTOM] }];
+    case SimpleTileType.CURVE: return [{ exits: [TOP, BOTTOM_LEFT] }];
+    case SimpleTileType.TIGHT: return [{ exits: [TOP, TOP_LEFT] }];
 
     // TOWNS
-    case TownTileType.LOLLYPOP: return [{exits: [TOWN, TOP]}];
-    case TownTileType.STRAIGHT: return [{exits: [TOWN, TOP]}, {exits: [TOWN, BOTTOM]}];
-    case TownTileType.CURVE: return [{exits: [TOWN, TOP]}, {exits: [TOWN, BOTTOM_LEFT]}];
-    case TownTileType.TIGHT: return [{exits: [TOWN, TOP]}, {exits: [TOWN, TOP_LEFT]}];
+    case TownTileType.LOLLYPOP: return [{ exits: [TOWN, TOP] }];
+    case TownTileType.STRAIGHT: return [{ exits: [TOWN, TOP] }, { exits: [TOWN, BOTTOM] }];
+    case TownTileType.CURVE: return [{ exits: [TOWN, TOP] }, { exits: [TOWN, BOTTOM_LEFT] }];
+    case TownTileType.TIGHT: return [{ exits: [TOWN, TOP] }, { exits: [TOWN, TOP_LEFT] }];
 
     case TownTileType.THREE_WAY:
       return [
-        {exits: [TOWN, TOP]},
-        {exits: [TOWN, BOTTOM_LEFT]},
-        {exits: [TOWN, BOTTOM_RIGHT]}];
+        { exits: [TOWN, TOP] },
+        { exits: [TOWN, BOTTOM_LEFT] },
+        { exits: [TOWN, BOTTOM_RIGHT] }];
     case TownTileType.LEFT_LEANER:
       return [
-        {exits: [TOWN, TOP]},
-        {exits: [TOWN, BOTTOM]},
-        {exits: [TOWN, TOP_LEFT]}];
+        { exits: [TOWN, TOP] },
+        { exits: [TOWN, BOTTOM] },
+        { exits: [TOWN, TOP_LEFT] }];
     case TownTileType.RIGHT_LEANER:
       return [
-        {exits: [TOWN, TOP]},
-        {exits: [TOWN, BOTTOM]},
-        {exits: [TOWN, TOP_RIGHT]}];
+        { exits: [TOWN, TOP] },
+        { exits: [TOWN, BOTTOM] },
+        { exits: [TOWN, TOP_RIGHT] }];
     case TownTileType.TIGHT_THREE:
       return [
-        {exits: [TOWN, TOP]},
-        {exits: [TOWN, TOP_LEFT]},
-        {exits: [TOWN, TOP_RIGHT]}];
+        { exits: [TOWN, TOP] },
+        { exits: [TOWN, TOP_LEFT] },
+        { exits: [TOWN, TOP_RIGHT] }];
 
     case TownTileType.X:
       return [
-        {exits: [TOWN, TOP]},
-        {exits: [TOWN, BOTTOM]},
-        {exits: [TOWN, TOP_RIGHT]},
-        {exits: [TOWN, BOTTOM_LEFT]},
+        { exits: [TOWN, TOP] },
+        { exits: [TOWN, BOTTOM] },
+        { exits: [TOWN, TOP_RIGHT] },
+        { exits: [TOWN, BOTTOM_LEFT] },
       ];
-      
+
     case TownTileType.CHICKEN_FOOT:
       return [
-        {exits: [TOWN, TOP]},
-        {exits: [TOWN, BOTTOM]},
-        {exits: [TOWN, BOTTOM_RIGHT]},
-        {exits: [TOWN, BOTTOM_LEFT]},
+        { exits: [TOWN, TOP] },
+        { exits: [TOWN, BOTTOM] },
+        { exits: [TOWN, BOTTOM_RIGHT] },
+        { exits: [TOWN, BOTTOM_LEFT] },
       ];
-  
+
     case TownTileType.K:
       return [
-        {exits: [TOWN, TOP]},
-        {exits: [TOWN, TOP_RIGHT]},
-        {exits: [TOWN, BOTTOM_RIGHT]},
-        {exits: [TOWN, BOTTOM]},
+        { exits: [TOWN, TOP] },
+        { exits: [TOWN, TOP_RIGHT] },
+        { exits: [TOWN, BOTTOM_RIGHT] },
+        { exits: [TOWN, BOTTOM] },
       ];
 
     // COMPLEX CROSSING
     case ComplexTileType.X:
       return [
-        {exits: [TOP_LEFT, BOTTOM_RIGHT]},
-        {exits: [BOTTOM_LEFT, TOP_RIGHT]},
+        { exits: [TOP_LEFT, BOTTOM_RIGHT] },
+        { exits: [BOTTOM_LEFT, TOP_RIGHT] },
       ];
     case ComplexTileType.BOW_AND_ARROW:
       return [
-        {exits: [BOTTOM_LEFT, BOTTOM_RIGHT]},
-        {exits: [BOTTOM, TOP]},
+        { exits: [BOTTOM_LEFT, BOTTOM_RIGHT] },
+        { exits: [BOTTOM, TOP] },
       ];
     case ComplexTileType.CROSSING_CURVES:
       return [
-        {exits: [TOP_LEFT, BOTTOM]},
-        {exits: [BOTTOM_LEFT, TOP]},
+        { exits: [TOP_LEFT, BOTTOM] },
+        { exits: [BOTTOM_LEFT, TOP] },
       ];
 
     // COMPLEX COEXISTING
     case ComplexTileType.STRAIGHT_TIGHT:
       return [
-        {exits: [TOP, BOTTOM]},
-        {exits: [BOTTOM_LEFT, TOP_LEFT]},
+        { exits: [TOP, BOTTOM] },
+        { exits: [BOTTOM_LEFT, TOP_LEFT] },
       ];
     case ComplexTileType.COEXISTING_CURVES:
       return [
-        {exits: [TOP_LEFT, BOTTOM]},
-        {exits: [TOP, BOTTOM_RIGHT]},
+        { exits: [TOP_LEFT, BOTTOM] },
+        { exits: [TOP, BOTTOM_RIGHT] },
       ];
     case ComplexTileType.CURVE_TIGHT_1:
       return [
-        {exits: [TOP, BOTTOM_RIGHT]},
-        {exits: [TOP_LEFT, BOTTOM_LEFT]},
+        { exits: [TOP, BOTTOM_RIGHT] },
+        { exits: [TOP_LEFT, BOTTOM_LEFT] },
       ];
     case ComplexTileType.CURVE_TIGHT_2:
       return [
-        {exits: [TOP, BOTTOM_RIGHT]},
-        {exits: [BOTTOM_LEFT, BOTTOM]},
+        { exits: [TOP, BOTTOM_RIGHT] },
+        { exits: [BOTTOM_LEFT, BOTTOM] },
       ];
 
     default:

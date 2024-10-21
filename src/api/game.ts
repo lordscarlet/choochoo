@@ -22,6 +22,12 @@ export const CreateGameApi = z.object({
   name: z.string(),
 });
 
+export const LogEntry = z.object({
+  userId: z.string().optional(),
+  message: z.string(),
+  date: z.string(),
+});
+
 export const GameApi = z.object({
   id: z.string(),
   gameKey: z.string(),
@@ -31,6 +37,7 @@ export const GameApi = z.object({
   status: z.nativeEnum(GameStatus),
   gameData: z.string().optional(),
   undoPlayerId: z.string().optional(),
+  logs: z.array(LogEntry).optional(),
 });
 
 export const ListGamesApi = z.object({
@@ -50,10 +57,10 @@ const c = initContract();
 export const gameContract = c.router({
   get: {
     method: 'GET',
-    pathParams: z.object({gameId: z.string()}),
+    pathParams: z.object({ gameId: z.string() }),
     path: '/:gameId',
     responses: {
-      200: z.object({game: GameApi}),
+      200: z.object({ game: GameApi }),
     },
     summary: 'Get a game',
   },
@@ -61,7 +68,7 @@ export const gameContract = c.router({
     method: 'GET',
     path: `/`,
     responses: {
-      200: z.object({games: z.array(GameApi)}),
+      200: z.object({ games: z.array(GameApi) }),
     },
     query: ListGamesApi,
     summary: 'Get a list of games',
@@ -71,57 +78,57 @@ export const gameContract = c.router({
     path: '/',
     body: CreateGameApi,
     responses: {
-      201: z.object({game: GameApi}),
+      201: z.object({ game: GameApi }),
     },
     summary: 'Creates a game',
   },
   join: {
     method: 'POST',
-    pathParams: z.object({gameId: z.string()}),
+    pathParams: z.object({ gameId: z.string() }),
     path: '/:gameId/join',
     body: z.object({}),
     responses: {
-      200: z.object({game: GameApi}),
+      200: z.object({ game: GameApi }),
     },
     summary: 'Joins a game',
   },
   start: {
     method: 'POST',
-    pathParams: z.object({gameId: z.string()}),
+    pathParams: z.object({ gameId: z.string() }),
     path: '/:gameId/start',
     body: z.object({}),
     responses: {
-      200: z.object({game: GameApi}),
+      200: z.object({ game: GameApi }),
     },
     summary: 'Joins a game',
   },
   leave: {
     method: 'POST',
-    pathParams: z.object({gameId: z.string()}),
+    pathParams: z.object({ gameId: z.string() }),
     path: '/:gameId/leave',
     body: z.object({}),
     responses: {
-      200: z.object({game: GameApi}),
+      200: z.object({ game: GameApi }),
     },
     summary: 'Leaves a game',
   },
   performAction: {
     method: 'POST',
-    pathParams: z.object({gameId: z.string()}),
+    pathParams: z.object({ gameId: z.string() }),
     path: '/:gameId/action',
     body: ActionApi,
     responses: {
-      200: z.object({game: GameApi}),
+      200: z.object({ game: GameApi }),
     },
     summary: 'Performs an action on a game',
   },
   undoAction: {
     method: 'POST',
-    pathParams: z.object({gameId: z.string()}),
+    pathParams: z.object({ gameId: z.string() }),
     path: '/:gameId/undo',
-    body: z.object({version: z.number()}),
+    body: z.object({ version: z.number() }),
     responses: {
-      200: z.object({game: GameApi}),
+      200: z.object({ game: GameApi }),
     },
     summary: 'Undoes the previous action on a game',
   },

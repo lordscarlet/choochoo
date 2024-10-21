@@ -2,7 +2,7 @@ import { remove, replaceAll } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
-import { PhaseEngine, PhaseModule } from "../game/phase";
+import { PhaseModule } from "../game/phase_module";
 import { PLAYERS, TURN_ORDER } from "../game/state";
 import { Grid } from "../map/grid";
 import { Location } from "../map/location";
@@ -55,12 +55,12 @@ export class ExpensesPhase extends PhaseModule {
   protected removeOwnershipMarkers(players: Set<PlayerColor>): void {
     const grid = inject(Grid);
     const toUpdate: Location[] = [...grid.all()].filter((space) => space instanceof Location)
-    .filter((location) => {
-      return [...location.getTrack()].some((track) => {
-        const owner = track.getOwner();
-        return owner != null && players.has(owner);
+      .filter((location) => {
+        return [...location.getTrack()].some((track) => {
+          const owner = track.getOwner();
+          return owner != null && players.has(owner);
+        });
       });
-    });
     for (const location of toUpdate) {
       grid.update(location.coordinates, (space) => {
         assert(space.type !== LocationType.CITY);

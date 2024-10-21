@@ -1,16 +1,14 @@
-import { inject } from "../framework/execution_context";
-import { Key } from "../framework/key";
-import { injectState } from "../framework/execution_context";
+import { Coordinates } from "../../utils/coordinates";
+import { assert } from "../../utils/validate";
+import { inject, injectState } from "../framework/execution_context";
 import { GRID } from "../game/state";
 import { LocationType } from "../state/location_type";
 import { SpaceData } from "../state/space";
 import { Direction } from "../state/tile";
 import { City } from "./city";
-import { Coordinates } from "../../utils/coordinates";
+import { getOpposite } from "./direction";
 import { Location } from "./location";
 import { Route } from "./route";
-import { HexGrid } from "../../utils/hex_grid";
-import { assert } from "../../utils/validate";
 import { Track } from "./track";
 
 export class Grid {
@@ -26,7 +24,7 @@ export class Grid {
     });
   }
 
-  private lookupRaw(coords: Coordinates): SpaceData|undefined {
+  private lookupRaw(coords: Coordinates): SpaceData | undefined {
     return this.grid().get(coords);
   }
 
@@ -40,7 +38,7 @@ export class Grid {
     return result;
   }
 
-  lookup(coordinates: Coordinates): City|Location|undefined {
+  lookup(coordinates: Coordinates): City | Location | undefined {
     const space = this.lookupRaw(coordinates);
     if (space == null) return undefined;
     if (space.type === LocationType.CITY) {
@@ -49,7 +47,7 @@ export class Grid {
     return inject(Location, this, coordinates, space);
   }
 
-  all(): Iterable<City|Location> {
+  all(): Iterable<City | Location> {
     return this.findAll(_ => true).map((coords) => this.lookup(coords)!);
   }
 
@@ -61,17 +59,17 @@ export class Grid {
     });
   }
 
-  getNeighbor(coordinates: Coordinates, dir: Direction): City|Location|undefined {
+  getNeighbor(coordinates: Coordinates, dir: Direction): City | Location | undefined {
     return this.lookup(coordinates.neighbor(dir));
   }
 
-  connection(track: Track, dir: Direction): City|Track|undefined {
+  connection(track: Track, dir: Direction): City | Track | undefined {
     const neighbor = this.getNeighbor(track.location.coordinates, dir);
     assert(neighbor != null, 'discovered a track leading to an off-board location');
     if (neighbor instanceof City) {
       return neighbor;
     }
-    return neighbor.trackExiting(dir);
+    return neighbor.trackExiting(getOpposite(dir));
   }
 
   getRoutes(): Route[] {

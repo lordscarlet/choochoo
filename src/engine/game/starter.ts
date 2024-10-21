@@ -1,14 +1,14 @@
 
 import { duplicate, shuffle } from '../../utils/functions';
 import { assert } from '../../utils/validate';
-import { inject } from "../framework/execution_context";
-import { injectState } from "../framework/execution_context";
+import { inject, injectState } from "../framework/execution_context";
 import { Grid } from '../map/grid';
 import { AvailableCity } from '../state/available_city';
 import { CityGroup } from '../state/city_group';
 import { Good } from '../state/good';
 import { LocationType } from '../state/location_type';
 import { PlayerColor, PlayerData } from '../state/player';
+import { OnRoll } from '../state/roll';
 import { AVAILABLE_CITIES, BAG, CURRENT_PLAYER, PLAYERS, TURN_ORDER } from './state';
 
 export class GameStarter {
@@ -66,10 +66,10 @@ export class GameStarter {
       Good.PURPLE,
     ].map((color, index) => ({
       color,
-      onRoll: [(3 + index) % 7],
+      onRoll: [OnRoll.parse(index >= 4 ? index - 3 : index + 3)],
       goods: [],
       upcomingGoods: draw(2, bag),
-      group: index < 4 ? CityGroup.BLACK : CityGroup.WHITE,
+      group: index < 4 ? CityGroup.WHITE : CityGroup.BLACK,
     }));
     this.availableCities.initState(availableCities);
     this.bag.set(bag);

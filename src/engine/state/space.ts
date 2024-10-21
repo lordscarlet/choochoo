@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { CityGroup } from "./city_group";
 import { Good } from "./good";
 import { LocationType } from "./location_type";
+import { OnRoll } from "./roll";
 import { TileData } from "./tile";
-import { CityGroup } from "./city_group";
 
 
 
@@ -13,7 +14,8 @@ export const CityData = z.object({
   color: z.nativeEnum(Good),
   goods: z.array(z.nativeEnum(Good)),
   upcomingGoods: z.array(z.array(z.nativeEnum(Good))),
-  onRoll: z.array(z.number()),
+  urbanized: z.boolean().optional(),
+  onRoll: z.array(OnRoll),
   group: z.nativeEnum(CityGroup),
 });
 

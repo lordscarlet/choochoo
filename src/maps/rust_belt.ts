@@ -4,6 +4,7 @@ import { MapSettings } from '../engine/game/map_settings';
 import { CityGroup } from '../engine/state/city_group';
 import { Good } from '../engine/state/good';
 import { LocationType } from '../engine/state/location_type';
+import { OnRoll } from '../engine/state/roll';
 import { CityData, LocationData, SpaceData } from '../engine/state/space';
 import { duplicate } from '../utils/functions';
 import { HexGrid } from '../utils/hex_grid';
@@ -22,9 +23,9 @@ const MOUNTAIN: LocationData = {
   type: LocationType.MOUNTAIN,
 };
 
-const {WHITE, BLACK} = CityGroup;
+const { WHITE, BLACK } = CityGroup;
 
-const map: Array<Array<SpaceData|undefined>> = offset([
+const map: Array<Array<SpaceData | undefined>> = offset([
   [
     ...duplicate(10, PLAIN),
     city('Kansas City', Good.PURPLE, WHITE, 3),
@@ -160,7 +161,7 @@ const map: Array<Array<SpaceData|undefined>> = offset([
     PLAIN,
     RIVER,
     RIVER,
-    city('Wheeling', Good.YELLOW, WHITE, 4),
+    city('Wheeling', Good.YELLOW, BLACK, 4),
     MOUNTAIN,
     MOUNTAIN,
   ],
@@ -175,10 +176,10 @@ const map: Array<Array<SpaceData|undefined>> = offset([
   ],
 ]);
 
-function offset(grid: Array<Array<SpaceData|undefined>>): Array<Array<SpaceData|undefined>> {
-  const newGrid: Array<Array<SpaceData|undefined>> = [];
+function offset(grid: Array<Array<SpaceData | undefined>>): Array<Array<SpaceData | undefined>> {
+  const newGrid: Array<Array<SpaceData | undefined>> = [];
   for (let i = 0; i < grid.length; i++) {
-    const newColumn: Array<SpaceData|undefined> = [];
+    const newColumn: Array<SpaceData | undefined> = [];
     for (let l = 0; l < grid.length - i - 2; l += 2) {
       newColumn.push(UNPASSABLE);
     }
@@ -187,7 +188,7 @@ function offset(grid: Array<Array<SpaceData|undefined>>): Array<Array<SpaceData|
   return newGrid;
 }
 
-function city(name: string, color: Good, group: number, onRoll: number): CityData {
+function city(name: string, color: Good, group: number, onRoll: OnRoll): CityData {
   return {
     type: LocationType.CITY,
     name,
@@ -211,10 +212,10 @@ export class RustBeltMapSettings implements MapSettings {
   readonly name = 'Rust Belt';
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
-  
+
   getStartingGrid(): HexGrid<SpaceData> {
     return HexGrid.fromArray(map);
   }
 
-  registerOverrides(ctx: InjectionContext): void {}
+  registerOverrides(ctx: InjectionContext): void { }
 }

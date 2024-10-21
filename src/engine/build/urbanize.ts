@@ -1,23 +1,21 @@
 import { z } from "zod";
 import { Coordinates } from "../../utils/coordinates";
 import { InvalidInputError } from "../../utils/error";
-import { inject } from "../framework/execution_context";
-import { injectState } from "../framework/execution_context";
+import { assert } from "../../utils/validate";
+import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { AVAILABLE_CITIES, currentPlayer } from "../game/state";
-import { City } from "../map/city";
 import { Grid } from "../map/grid";
+import { Location } from "../map/location";
 import { Action } from "../state/action";
 import { LocationType } from "../state/location_type";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
-import { assert } from "../../utils/validate";
-import { Location } from "../map/location";
 
 export const UrbanizeData = z.object({
   cityIndex: z.number(),
-  coordinates: z.object({q: z.number(), r: z.number()}),
+  coordinates: z.object({ q: z.number(), r: z.number() }),
 });
 
 export type UrbanizeData = z.infer<typeof UrbanizeData>;
@@ -52,9 +50,9 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
     const coordinates = Coordinates.from(data.coordinates);
     this.buildState.update((state) => state.hasUrbanized = true);
     const city = this.availableCities()[data.cityIndex];
-    
+
     const location = this.grid.lookup(coordinates) as Location;
-    
+
     this.availableCities.update((cities) => cities.splice(data.cityIndex, 1));
     this.grid.set(coordinates, {
       type: LocationType.CITY,
@@ -62,6 +60,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
       color: city.color,
       goods: [],
       upcomingGoods: [city.upcomingGoods],
+      urbanized: true,
       onRoll: city.onRoll,
       group: city.group,
     });

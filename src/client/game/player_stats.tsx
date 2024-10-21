@@ -1,16 +1,15 @@
 import { useMemo } from "react";
+import { UserApi } from "../../api/user";
+import { injectState } from "../../engine/framework/execution_context";
+import { PHASE } from "../../engine/game/phase";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
+import { getSelectedActionString } from "../../engine/state/action";
+import { Phase } from "../../engine/state/phase";
+import { getPlayerColor, PlayerData } from "../../engine/state/player";
+import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { useUsers } from "../root/user_cache";
 import { useInjectedState } from "../utils/execution_context";
-import { PlayerColor, PlayerData } from "../../engine/state/player";
-import { UserApi } from "../../api/user";
 import * as styles from './active_game.module.css';
-import { assertNever } from "../../utils/validate";
-import { PHASE } from "../../engine/game/phase";
-import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
-import { injectState } from "../../engine/framework/execution_context";
-import { Phase } from "../../engine/state/phase";
-import { getSelectedActionString } from "../../engine/state/action";
 
 
 export function PlayerStats() {
@@ -18,12 +17,13 @@ export function PlayerStats() {
   const playerOrder = useInjectedState(TURN_ORDER);
   const currentPlayer = useInjectedState(CURRENT_PLAYER);
   const playerUsers = useUsers(playerData.map((player) => player.playerId));
-  const players = useMemo<Array<{player: PlayerData, user?: UserApi}>>(() => playerOrder.map(color => {
+  const players = useMemo<Array<{ player: PlayerData, user?: UserApi }>>(() => playerOrder.map(color => {
     const player = playerData.find((player) => player.color === color)!;
     const user = playerUsers?.find(user => user.id === player.playerId);
-    return {player, user};
+    return { player, user };
   }), [playerOrder, playerData, playerUsers]);
   const columns: ColumnRenderer[] = useMemo(() => [new BidRenderer()], [1]);
+  // TODO: show players out of the game.
   return <table>
     <thead>
       <tr>
@@ -39,7 +39,7 @@ export function PlayerStats() {
       </tr>
     </thead>
     <tbody>
-      {players.map(({player, user}) =>
+      {players.map(({ player, user }) =>
         <tr key={player.playerId}>
           <td>{player.color === currentPlayer ? '→' : ''}</td>
           <td className={[styles.user, styles[getPlayerColor(player.color)]].join(' ')}></td>
@@ -72,31 +72,7 @@ class BidRenderer {
     const state = injectState(TURN_ORDER_STATE)();
     const turnOrder = state.nextTurnOrder.indexOf(player.color) + 1 + injectState(TURN_ORDER)().length - state.nextTurnOrder.length;
     return state.nextTurnOrder.includes(player.color) ? `Passed: ${turnOrder}` :
-        state.previousBids.has(player.color) ? `$${state.previousBids.get(player.color)}` : 'N/A';
-  }
-}
-
-
-export function getPlayerColor(playerColor?: PlayerColor): 'red'|'yellow'|'green'|'purple'|'black'|'blue'|'brown' {
-  switch (playerColor) {
-    case PlayerColor.RED:
-      return 'red';
-    case PlayerColor.YELLOW:
-      return 'yellow';
-    case PlayerColor.GREEN:
-      return 'green';
-    case PlayerColor.PURPLE:
-      return 'purple';
-    case PlayerColor.BLACK:
-      return 'black';
-    case PlayerColor.BLUE:
-      return 'blue';
-    case PlayerColor.BROWN:
-      return 'brown';
-    case undefined:
-      return 'black';
-    default:
-      assertNever(playerColor);
+      state.previousBids.has(player.color) ? `$${state.previousBids.get(player.color)}` : 'N/A';
   }
 }
 

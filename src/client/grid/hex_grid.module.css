@@ -1,6 +1,6 @@
-
 .hex-grid {
   background-color: black;
+  padding-bottom: 100px;
 }
 
 .hex-row {
@@ -19,9 +19,29 @@
 .hex {
   display: flex;
   flex-direction: row;
-  position:relative;
+  position: relative;
   width: 120px;
 }
+
+.good-block {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 5px;
+  width: 100%;
+}
+
+.good {
+  width: 25px;
+  height: 25px;
+  background-color: var(--color);
+  border: solid 2px grey;
+}
+
+.good:not(:first-child) {
+  margin-left: -10px;
+}
+
 
 .unpassable {
   --color: grey;
@@ -102,6 +122,6 @@
 
 .tile {
   position: absolute;
-  width:100%;
-  height:100%;
+  width: 100%;
+  height: 100%;
 }

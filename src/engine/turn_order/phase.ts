@@ -1,10 +1,10 @@
 import { infiniteLoopCheck } from "../../utils/functions";
 import { inject, injectState } from "../framework/execution_context";
-import { ActionBundle, ActionConstructor, PhaseModule } from "../game/phase";
+import { ActionBundle, PhaseModule } from "../game/phase_module";
 import { currentPlayer, TURN_ORDER } from "../game/state";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
-import { BidAction, BidData } from "./bid";
+import { BidAction } from "./bid";
 import { TurnOrderHelper } from "./helper";
 import { PassAction } from "./pass";
 import { TURN_ORDER_STATE } from "./state";
@@ -31,13 +31,13 @@ export class TurnOrderPhase extends PhaseModule {
     });
   }
 
-  autoAction(): ActionBundle<{}>|undefined {
+  autoAction(): ActionBundle<{}> | undefined {
     if (currentPlayer().money < this.helper.getMinBid()) {
-      return {action: PassAction, data: {}};
+      return { action: PassAction, data: {} };
     }
     if (this.turnOrderState().nextTurnOrder.length === this.currentOrder().length - 1) {
       // This is the last one, pass.
-      return {action: PassAction, data: {}};
+      return { action: PassAction, data: {} };
     }
     return undefined;
   }
@@ -52,7 +52,7 @@ export class TurnOrderPhase extends PhaseModule {
     this.turnOrderState.delete();
   }
 
-  findNextPlayer(currentColor: PlayerColor): PlayerColor|undefined {
+  findNextPlayer(currentColor: PlayerColor): PlayerColor | undefined {
     const ignoring = new Set(this.turnOrderState().nextTurnOrder);
     if (ignoring.size >= super.getPlayerOrder().length) {
       return undefined;

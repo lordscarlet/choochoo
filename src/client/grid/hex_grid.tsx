@@ -1,14 +1,20 @@
-import { useCallback, useContext, useState } from "react";
-import { GameContext } from "../services/context";
-import { useInjected } from "../utils/execution_context";
-import { Grid } from "../../engine/map/grid";
-import { City } from "../../engine/map/city";
-import { Location } from "../../engine/map/location";
-import { peek } from "../../utils/functions";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { BuildAction } from "../../engine/build/build";
+import { PHASE } from "../../engine/game/phase";
+import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
+import { City } from "../../engine/map/city";
+import { Grid } from "../../engine/map/grid";
+import { Location } from "../../engine/map/location";
+import { MoveAction, MoveData } from "../../engine/move/move";
+import { Good } from "../../engine/state/good";
+import { Phase } from "../../engine/state/phase";
+import { peek } from "../../utils/functions";
+import { assert } from "../../utils/validate";
+import { GameContext } from "../services/context";
+import { ignoreInjectedState, useInjected, useInjectedState } from "../utils/execution_context";
+import { BuildingDialog } from "./building_dialog";
 import * as styles from "./hex_grid.module.css";
 import { HexRow } from "./hex_row";
-import { BuildingDialog } from "./building_dialog";
 
 function* calculateRows(locations: Iterable<City | Location>): Iterable<Iterable<City | Location | undefined>> {
   const rows = new Map<number, Array<City | Location>>();
@@ -44,15 +50,88 @@ export function HexGrid() {
   const grid = useInjected(Grid);
   const rows = calculateRows(grid.all());
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
+  const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
+  const phase = useInjectedState(PHASE);
+  const productionState = phase === Phase.GOODS_GROWTH ? useInjectedState(GOODS_GROWTH_STATE) : ignoreInjectedState();
 
   const cellClick = useCallback((space?: Location | City) => {
     if (space instanceof Location && ctx?.isActiveUser() && ctx?.canEmit(BuildAction)) {
       setBuildingSpace(space);
     }
-  }, [ctx]);
+    if (moveActionProgress) {
+      if (space == null) return;
+      const entirePath = [moveActionProgress.startingCity, ...moveActionProgress.path.map(p => p.endingStop)];
+      const selectedIndex = entirePath.findIndex((p) => p.equals(space.coordinates));
+      if (selectedIndex >= 0) {
+        if (selectedIndex === 0) return;
+        // Ignore all but the last two elements
+        if (selectedIndex < entirePath.length - 2) return;
+        if (selectedIndex === entirePath.length - 2) {
+          // Remove the last element of the path.
+          setMoveActionProgress({
+            ...moveActionProgress,
+            path: moveActionProgress.path.slice(0, selectedIndex + 1),
+          });
+          return;
+        }
+        // Otherwise, just update the owner
+        const fromSpace = grid.lookup(entirePath[entirePath.length - 2])!;
+        const eligibleOwners = [...fromSpace.findRoutesToLocation(space.coordinates)];
+        const previousOwner = peek(moveActionProgress.path).owner;
+        const nextOwner = eligibleOwners[(eligibleOwners.indexOf(previousOwner) + 1) % eligibleOwners.length];
+        if (nextOwner === previousOwner) return;
+        setMoveActionProgress({
+          ...moveActionProgress,
+          path: moveActionProgress.path.slice(0, selectedIndex).concat({ owner: nextOwner, endingStop: space.coordinates }),
+        });
+        return;
+      }
+      const fromSpace = grid.lookup(peek(entirePath))!;
+      if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.goodColor() === moveActionProgress.good) return;
+      const eligibleOwners = [...fromSpace.findRoutesToLocation(space.coordinates)];
+      if (eligibleOwners.length === 0) return;
+      setMoveActionProgress({
+        ...moveActionProgress,
+        path: moveActionProgress.path.concat([{ owner: eligibleOwners[0], endingStop: space.coordinates }]),
+      });
+    }
+  }, [ctx, moveActionProgress, grid, productionState]);
 
-  return <div className={styles['hex-grid']}>
-    {[...rows].map((row, index) => <HexRow key={index} row={row} onClick={cellClick} />)}
-    <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
+  const onSelectGood = useCallback((city: City, good: Good) => {
+    if (moveActionProgress != null) return;
+    if (ctx?.isActiveUser() && ctx.canEmit(MoveAction)) {
+      setMoveActionProgress({ path: [], startingCity: city.coordinates, good });
+    }
+  }, [ctx, moveActionProgress, setMoveActionProgress]);
+
+  const canSendGood = useMemo(() => {
+    if (moveActionProgress == null) return false;
+    if (moveActionProgress.path.length === 0) return false;
+    const destination = grid.lookup(peek(moveActionProgress.path).endingStop);
+    if (!(destination instanceof City)) return false;
+    return destination.goodColor() === moveActionProgress.good;
+  }, [grid, moveActionProgress]);
+
+  const sendGood = useCallback(() => {
+    assert(moveActionProgress != null);
+    ctx?.emit(MoveAction, moveActionProgress).then(() => {
+      setMoveActionProgress(undefined);
+    });
+  }, [ctx, moveActionProgress, setMoveActionProgress]);
+
+  const startOver = useCallback(() => {
+    setMoveActionProgress(undefined);
+  }, [setMoveActionProgress]);
+
+  return <div>
+    {moveActionProgress != null && <div>
+      {JSON.stringify(moveActionProgress, null, 2)}
+      {canSendGood && <button onClick={sendGood}>Commit</button>}
+      <button onClick={startOver}>Start over</button>
+    </div>}
+    <div className={styles['hex-grid']}>
+      {[...rows].map((row, index) => <HexRow key={index} onSelectGood={onSelectGood} row={row} onClick={cellClick} />)}
+      <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
+    </div>
   </div>;
 }

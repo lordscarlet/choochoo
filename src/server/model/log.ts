@@ -1,9 +1,18 @@
 import { DataTypes } from "sequelize";
-import { UserModel } from "./user";
 import { BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Model, Table, UpdatedAt } from "sequelize-typescript";
+import { MessageApi } from "../../api/message";
+import { GameModel } from "./game";
+import { UserModel } from "./user";
 
-@Table({underscored: true})
-export class LogModel extends Model<LogModel> {
+interface CreateLog {
+  message: string;
+  userId?: string;
+  gameId?: string;
+  version?: number;
+}
+
+@Table({ underscored: true })
+export class LogModel extends Model<LogModel, CreateLog> {
   @Column({
     allowNull: false,
     primaryKey: true,
@@ -13,7 +22,7 @@ export class LogModel extends Model<LogModel> {
   id!: string;
 
   @Column
-  msg!: string;
+  message!: string;
 
   @ForeignKey(() => UserModel)
   @Column(DataTypes.UUID)
@@ -21,6 +30,16 @@ export class LogModel extends Model<LogModel> {
 
   @BelongsTo(() => UserModel)
   user?: UserModel;
+
+  @ForeignKey(() => GameModel)
+  @Column(DataTypes.UUID)
+  gameId?: string;
+
+  @BelongsTo(() => GameModel)
+  game?: GameModel;
+
+  @Column
+  version?: number;
 
   @CreatedAt
   createdDate!: Date;
@@ -30,4 +49,14 @@ export class LogModel extends Model<LogModel> {
 
   @DeletedAt
   deletedDate!: Date;
+
+  toApi(): MessageApi {
+    return {
+      id: this.id,
+      message: this.message,
+      userId: this.userId,
+      gameId: this.gameId,
+      date: this.createdDate.toString(),
+    };
+  }
 }

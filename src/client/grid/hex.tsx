@@ -1,21 +1,23 @@
-import { RawHex } from "./raw_hex";
-import * as styles from "./hex_grid.module.css";
+import { useMemo } from "react";
 import { City } from "../../engine/map/city";
 import { Location } from "../../engine/map/location";
-import { useMemo } from "react";
+import { Good } from "../../engine/state/good";
 import { TileData } from "../../engine/state/tile";
+import { GoodsBlock } from "./good";
+import * as styles from "./hex_grid.module.css";
+import { RawHex } from "./raw_hex";
 
 
 interface HexProps {
   space?: City | Location;
   onClick(): void;
+  onSelectGood(space: City, good: Good): void
 }
 
-export function Hex({ space, onClick }: HexProps) {
+export function Hex({ space, onSelectGood, onClick }: HexProps) {
   return <RawHex className={styles['hex-container']} space={space} tile={useMemo(() => removeContext(space), [space])} onClick={onClick}>
     {space instanceof City && <HexName name={space.cityName()} />}
-    {space instanceof Location && space.hasTown() && <Town />}
-    {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} />}
+    {space instanceof City && <GoodsBlock onClick={(good) => onSelectGood(space, good)} goods={space.getGoods()} />}
   </RawHex>;
 
   function removeContext(space?: Location | City): TileData | undefined {

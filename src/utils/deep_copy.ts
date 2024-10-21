@@ -28,9 +28,3 @@ export function deepCopy<T>(t: unknown): unknown {
     }, {} as any);
   }
 }
-
-console.log('asserting deep copy');
-assert(deepCopy(new Coordinates(1, 2)) instanceof Coordinates);
-
-// console.log('asserting');
-assert((deepCopy({values: [new Coordinates(1, 2)]}) as any).values[0] instanceof Coordinates);

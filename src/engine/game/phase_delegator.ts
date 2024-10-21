@@ -10,10 +10,11 @@ import { SelectActionPhase } from "../select_action/phase";
 import { SharesPhase } from "../shares/phase";
 import { Phase } from "../state/phase";
 import { TurnOrderPhase } from "../turn_order/phase";
-import { PHASE, PhaseModule } from "./phase";
+import { PHASE } from "./phase";
+import { PhaseModule } from "./phase_module";
 
 interface PhaseConstructor {
-  new (): PhaseModule;
+  new(): PhaseModule;
 
   readonly phase: Phase;
 }

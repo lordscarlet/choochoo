@@ -1,5 +1,5 @@
 import { Coordinates } from "../../utils/coordinates";
-import { assert } from "../../utils/validate";
+import { assertNever } from "../../utils/validate";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
 import { City } from "./city";
@@ -10,14 +10,14 @@ import { Location } from "./location";
 
 export class Track {
   constructor(private readonly grid: Grid,
-              readonly location: Location,
-              private readonly track: TrackInfo) {}
+    readonly location: Location,
+    private readonly track: TrackInfo) { }
 
   getExits(): [Exit, Exit] {
     return this.track.exits;
   }
 
-  getOwner(): PlayerColor|undefined {
+  getOwner(): PlayerColor | undefined {
     return this.track.owner;
   }
 
@@ -25,14 +25,14 @@ export class Track {
     return this.track.exits.includes(exit);
   }
 
-  getEnds(): [Coordinates|undefined, Coordinates|undefined] {
+  getEnds(): [Coordinates | undefined, Coordinates | undefined] {
     const exits = this.getExits();
 
     const neighbors = this.getNeighbors();
     return tupleMap(neighbors, (neighbor) => this.getEnd(neighbor));
   }
 
-  getEnd(prev: TrackNeighbor): Coordinates|undefined {
+  getEnd(prev: TrackNeighbor): Coordinates | undefined {
     const next = this.getNext(prev);
     if (next == null) {
       return undefined;
@@ -47,7 +47,7 @@ export class Track {
 
   getNext(prevNeighbor: TrackNeighbor): TrackNeighbor {
     const neighbors = this.getNeighbors();
-    return neighbors[0] === prevNeighbor ? neighbors[1] : neighbors[0];
+    return trackNeighborEquals(neighbors[0], prevNeighbor) ? neighbors[1] : neighbors[0];
   }
 
   getNeighbors(): [TrackNeighbor, TrackNeighbor] {
@@ -58,13 +58,32 @@ export class Track {
       return this.grid.connection(this, exit);
     });
   }
+
+  equals(other: Track): boolean {
+    return this.location.coordinates.equals(other.location.coordinates) &&
+      this.getExits().every((e) => other.getExits().includes(e));
+  }
+}
+
+function trackNeighborEquals(tn1: TrackNeighbor, tn2: TrackNeighbor): boolean {
+  if (tn1 === TOWN) {
+    return tn2 === TOWN;
+  } else if (tn1 === undefined) {
+    return tn2 === undefined;
+  } else if (tn1 instanceof City) {
+    return tn2 instanceof City && tn2.coordinates.equals(tn1.coordinates);
+  } else if (tn1 instanceof Track) {
+    return tn2 instanceof Track && tn2.equals(tn1);
+  } else {
+    assertNever(tn1);
+  }
 }
 
 function tupleMap<T, R>(tuple: [T, T], updateFn: (t: T) => R): [R, R] {
   return tuple.map(updateFn) as [R, R];
 }
 
-export type TrackNeighbor = Track|City|Town|undefined;
+export type TrackNeighbor = Track | City | Town | undefined;
 
 export const TOWN = 9;
 

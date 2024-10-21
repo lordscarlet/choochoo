@@ -1,16 +1,16 @@
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
-import { ExecutionContext, injectState, setExecutionContextGetter } from "../../engine/framework/execution_context";
+import { createContext, ReactNode, useContext, useEffect, useMemo } from "react";
+import { ExecutionContext, setExecutionContextGetter } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
+import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
+import { PlayerData } from "../../engine/state/player";
 import { Immutable } from "../../utils/immutable";
 import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
-import { PlayerData } from "../../engine/state/player";
-import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
 
-export const ExecutionContextContext = createContext<ExecutionContext|undefined>(undefined);
+export const ExecutionContextContext = createContext<ExecutionContext | undefined>(undefined);
 
 export function useExecutionContext(): ExecutionContext {
-  const ctx = useContext(ExecutionContextContext);  
+  const ctx = useContext(ExecutionContextContext);
   assert(ctx != null);
   return ctx;
 }
@@ -26,7 +26,7 @@ export function useInjected<T extends Constructor<any>>(factory: T, ...args: NoI
   return ctx.injectionContext.get(factory, args);
 }
 
-export function ExecutionContextProvider({gameState, gameKey, children}: ExecutionContextProps) {
+export function ExecutionContextProvider({ gameState, gameKey, children }: ExecutionContextProps) {
   const ctx = useMemo(() => new ExecutionContext(gameKey, gameState), [gameKey, gameState]);
   setExecutionContextGetter(() => ctx);
   useEffect(() => {
@@ -35,6 +35,12 @@ export function ExecutionContextProvider({gameState, gameKey, children}: Executi
   return <ExecutionContextContext.Provider value={ctx}>
     {children}
   </ExecutionContextContext.Provider>;
+}
+
+export function ignoreInjectedState(): undefined {
+  // We have to pull in the context to preserve the callback order.
+  useExecutionContext();
+  return undefined;
 }
 
 export function useInjectedState<T>(key: Key<T>): Immutable<T> {

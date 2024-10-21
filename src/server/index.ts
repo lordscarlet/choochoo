@@ -1,13 +1,13 @@
-import express, {Request, Response} from 'express';
 import cookieParser from 'cookie-parser';
-import {readFile} from 'fs';
-import { jsApp } from './routes/script';
-import { homeApp } from './routes/home';
-import { gameApp } from './routes/game';
-import { userApp } from './routes/user';
-import { redisSession } from './redis';
-import { waitForSequelize } from './sequelize';
+import express, { Request, Response } from 'express';
 import { UserError } from '../utils/error';
+import { redisSession } from './redis';
+import { gameApp } from './routes/game';
+import { homeApp } from './routes/home';
+import { messageApp } from './routes/message';
+import { jsApp } from './routes/script';
+import { userApp } from './routes/user';
+import { waitForSequelize } from './sequelize';
 
 
 const app = express();
@@ -21,6 +21,7 @@ app.use(waitForSequelize());
 app.use('/dist', jsApp);
 app.use('/api/games', gameApp);
 app.use('/api/users', userApp);
+app.use('/api/messages', messageApp);
 app.use(homeApp);
 
 app.use((err: unknown, req: Request, res: Response, next: (t: unknown) => void) => {
@@ -34,7 +35,7 @@ app.use((err: unknown, req: Request, res: Response, next: (t: unknown) => void) 
     res.status(500)
   }
   console.error(err);
-  res.json({success: false});
+  res.json({ success: false });
 });
 
 /// Start

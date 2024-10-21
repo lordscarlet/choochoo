@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Exit, TOWN, TrackInfo } from "../../engine/map/track";
-import { getPlayerColor } from "../game/player_stats";
+import { getPlayerColor } from "../../engine/state/player";
 import { Direction } from "../../engine/state/tile";
 import { assertNever } from "../../utils/validate";
 import * as styles from "./hex_grid.module.css";

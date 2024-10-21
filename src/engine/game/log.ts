@@ -1,4 +1,4 @@
-import { PlayerColor } from "../state/player";
+import { getPlayerColor, PlayerColor } from "../state/player";
 import { currentPlayer } from "./state";
 
 export class Log {
@@ -9,7 +9,7 @@ export class Log {
   }
 
   player(player: PlayerColor, entry: string): void {
-    this.log(player + ' ' + entry);
+    this.log(getPlayerColor(player) + ' ' + entry);
 
   }
 

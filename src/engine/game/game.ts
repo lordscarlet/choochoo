@@ -1,14 +1,10 @@
 import { HexGrid } from "../../utils/hex_grid";
-import { assert } from "../../utils/validate";
-import { inject } from "../framework/execution_context";
-import { injectState } from "../framework/execution_context";
-import { Grid } from "../map/grid";
-import { PlayerColor } from "../state/player";
+import { inject, injectState } from "../framework/execution_context";
 import { SpaceData } from "../state/space";
 import { PhaseDelegator } from "./phase_delegator";
 import { RoundEngine } from "./round";
 import { GameStarter } from "./starter";
-import { currentPlayer, GRID } from "./state";
+import { GRID } from "./state";
 import { TurnEngine } from "./turn";
 
 export class GameEngine {

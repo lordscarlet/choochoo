@@ -1,9 +1,8 @@
 import { iterate, random, rollDice } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
-import { PhaseEngine, PhaseModule } from "../game/phase";
+import { PhaseModule } from "../game/phase_module";
 import { BAG, PLAYERS } from "../game/state";
-import { TurnEngine } from "../game/turn";
 import { Grid } from "../map/grid";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
@@ -11,6 +10,7 @@ import { Good } from "../state/good";
 import { LocationType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
+import { ProductionAction } from "./production";
 import { GOODS_GROWTH_STATE } from "./state";
 
 export class GoodsGrowthPhase extends PhaseModule {
@@ -19,7 +19,11 @@ export class GoodsGrowthPhase extends PhaseModule {
   private readonly players = injectState(PLAYERS);
   private readonly bag = injectState(BAG);
   private readonly turnState = injectState(GOODS_GROWTH_STATE);
-  
+
+  configureActions(): void {
+    this.installAction(ProductionAction);
+  }
+
   onStartTurn(): void {
     super.onStartTurn();
     const goods: Good[] = [];
@@ -30,7 +34,7 @@ export class GoodsGrowthPhase extends PhaseModule {
         goods.push(...bag.splice(index, 1));
       });
     });
-    this.turnState.initState({goods});
+    this.turnState.initState({ goods });
   }
 
   onEndTurn(): void {
@@ -39,9 +43,10 @@ export class GoodsGrowthPhase extends PhaseModule {
   }
 
   getPlayerOrder(): PlayerColor[] {
+    // TODO: verify that this counts all players, not just those still in the game.
     return this.players()
-        .filter((player) => player.selectedAction === Action.PRODUCTION)
-        .map((p) => p.color);
+      .filter((player) => player.selectedAction === Action.PRODUCTION)
+      .map((p) => p.color);
   }
 
   onEnd(): void {

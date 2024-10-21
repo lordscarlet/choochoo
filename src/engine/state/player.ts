@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { assertNever } from "../../utils/validate";
 import { Action } from "./action";
 
 
@@ -24,3 +25,26 @@ export const PlayerData = z.object({
 });
 
 export type PlayerData = z.infer<typeof PlayerData>;
+
+export function getPlayerColor(playerColor?: PlayerColor): 'red' | 'yellow' | 'green' | 'purple' | 'black' | 'blue' | 'brown' {
+  switch (playerColor) {
+    case PlayerColor.RED:
+      return 'red';
+    case PlayerColor.YELLOW:
+      return 'yellow';
+    case PlayerColor.GREEN:
+      return 'green';
+    case PlayerColor.PURPLE:
+      return 'purple';
+    case PlayerColor.BLACK:
+      return 'black';
+    case PlayerColor.BLUE:
+      return 'blue';
+    case PlayerColor.BROWN:
+      return 'brown';
+    case undefined:
+      return 'black';
+    default:
+      assertNever(playerColor);
+  }
+}
