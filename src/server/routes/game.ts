@@ -12,6 +12,7 @@ import { GameHistoryModel } from '../model/history';
 import { LogModel } from '../model/log';
 import { sequelize } from '../sequelize';
 import '../session';
+import { emitToRoom } from '../socket';
 
 export const gameApp = express();
 
@@ -133,11 +134,16 @@ const router = initServer().router(gameContract, {
       game.undoPlayerId = reversible ? userId : undefined;
       const newGame = await game.save({ transaction });
       await gameHistory.save({ transaction });
-      await LogModel.bulkCreate(logs.map((message) => ({
+      const newLogs = await LogModel.bulkCreate(logs.map((message, index) => ({
         gameId: game.id,
         message,
         version: game.version,
+        index,
       })), { transaction });
+
+      transaction.afterCommit(() => {
+        emitToRoom(game.id, newLogs);
+      });
 
       return { status: 200, body: { game: newGame.toApi() } };
     })

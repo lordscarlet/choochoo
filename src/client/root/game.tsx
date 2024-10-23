@@ -4,7 +4,7 @@ import { MyUserApi } from "../../api/user";
 import { assert, assertNever } from "../../utils/validate";
 import { ActiveGame } from "../game/active_game";
 import { gameClient } from "../services/game";
-import { useUsers } from "./user_cache";
+import { useUsers } from "../services/user";
 
 interface GameProps {
   gameId: string;

@@ -1,15 +1,15 @@
-import { inject } from "../framework/execution_context";
+import { assert } from "../../utils/validate";
+import { inject, injectState } from "../framework/execution_context";
 import { Key } from "../framework/key";
-import { injectState } from "../framework/execution_context";
-import { Phase } from "../state/phase";
 import { GameEngine } from "./game";
+import { Log } from "./log";
 import { PhaseEngine } from "./phase";
 import { PLAYERS } from "./state";
-import { assert } from "../../utils/validate";
 
 export const ROUND = new Key<number>('roundNumber');
 
 export class RoundEngine {
+  private readonly log = inject(Log);
   private readonly currentRound = injectState(ROUND);
   private readonly phase = inject(PhaseEngine);
   private readonly game = inject(GameEngine);
@@ -19,13 +19,15 @@ export class RoundEngine {
     this.currentRound.initState(1);
     this.start();
   }
-  
+
   start() {
+    this.log.log(`Start round #${this.currentRound()}`);
     this.phase.startFirstPhase();
   }
 
   end() {
     const currentRound = this.currentRound();
+    this.log.log(`End round #${currentRound}`);
 
     if (currentRound <= this.maxRounds()) {
       this.currentRound.set(currentRound + 1);

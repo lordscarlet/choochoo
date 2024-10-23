@@ -15,6 +15,12 @@ export class InvalidInputError extends UserError {
   }
 }
 
+export class UnauthorizedError extends UserError {
+  constructor(msg: string) {
+    super(401, msg);
+  }
+}
+
 export class PermissionDeniedError extends UserError {
   constructor(msg: string) {
     super(403, msg);
@@ -29,9 +35,10 @@ export class NotFoundError extends UserError {
 
 
 interface ErrorData {
-  invalidInput?: true|string;
-  permissionDenied?: true|string;
-  notFound?: true|string;
+  invalidInput?: true | string;
+  permissionDenied?: true | string;
+  notFound?: true | string;
+  unauthorized?: true | string;
 }
 
 export type ErrorInput = ErrorData | string;
@@ -44,7 +51,9 @@ export function emitError(err: ErrorInput): never {
   } else if (err.permissionDenied != null) {
     throw new PermissionDeniedError(err.permissionDenied === true ? 'permissionDenied' : err.permissionDenied);
   } else if (err.notFound != null) {
-    throw new PermissionDeniedError(err.notFound === true ? 'notFound' : err.notFound);
+    throw new NotFoundError(err.notFound === true ? 'notFound' : err.notFound);
+  } else if (err.unauthorized != null) {
+    throw new NotFoundError(err.unauthorized === true ? 'unauthorized' : err.unauthorized);
   } else {
     throw new Error('unknown');
   }

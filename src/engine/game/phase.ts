@@ -1,7 +1,8 @@
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Key } from "../framework/key";
-import { Phase } from "../state/phase";
+import { getPhaseString, Phase } from "../state/phase";
+import { Log } from "./log";
 import { PhaseDelegator } from "./phase_delegator";
 import { RoundEngine } from "./round";
 import { TurnEngine } from "./turn";
@@ -9,6 +10,7 @@ import { TurnEngine } from "./turn";
 export const PHASE = new Key<Phase>('currentPhase');
 
 export class PhaseEngine {
+  private readonly log = inject(Log);
   private readonly phase = injectState(PHASE);
   private readonly delegator = inject(PhaseDelegator);
   private readonly round = inject(RoundEngine);
@@ -20,9 +22,9 @@ export class PhaseEngine {
 
   start(phase: Phase): void {
     this.phase.initState(phase);
+    this.log.log(`Starting ${getPhaseString(phase)} phase`);
     const phaseProcessor = this.delegator.get();
     phaseProcessor.onStart();
-    console.log(`Starting phase ${phase}.`);
     const nextPlayer = phaseProcessor.getFirstPlayer();
     if (nextPlayer == null) {
       this.end();
@@ -35,6 +37,7 @@ export class PhaseEngine {
     const currentPhase = this.phase();
     this.delegator.get().onEnd();
     this.phase.delete();
+    this.log.log(`Ending ${getPhaseString(currentPhase)} phase`);
 
     const nextPhase = this.findNextPhase(currentPhase);
     if (nextPhase != null) {

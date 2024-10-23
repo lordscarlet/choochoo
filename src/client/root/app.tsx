@@ -1,30 +1,34 @@
-import { useEffect, useState } from "react";
-import { User } from "./user";
-import { GameSelector } from "./game_selector";
-import { Game } from "./game";
-import { MyUserApi } from "../../api/user";
-import { GameApi } from "../../api/game";
-import { userClient } from "../services/user";
-import { assert } from "../../utils/validate";
-import { UserCacheProvider } from "./user_cache";
+import { Button } from "@mui/material";
+import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { NotificationsProvider } from "@toolpad/core";
+import { ReactNode, Suspense, useMemo } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { tsr } from '../services/client';
 
-export function App() {
-  const [user, setUser] = useState<{user?: MyUserApi}|undefined>();
-  const [game, setGame] = useState<GameApi|undefined>(undefined);
+export function App({ children }: { children: ReactNode }) {
+  const queryClient = useMemo(() => new QueryClient(), [1]);
+  const { reset } = useQueryErrorResetBoundary();
 
-  useEffect(() => {
-    userClient.getMe().then(({body, status}) => {
-      assert(status === 200);
-      setUser({user: body.user});
-    });
-  }, [1]);
-  return <UserCacheProvider>
-    <div>
-      <h1>Steam Age</h1>
-      {user && <User user={user.user} setUser={(user) => setUser({user})} />}
-      {user && <GameSelector game={game} setGame={setGame}/>}
-      {user?.user && game && <Game user={user.user} gameId={game.id} setUser={(user) => setUser({user})} />}
-      {!user && <div>Loading...</div>}
-    </div>
-  </UserCacheProvider>;
+  return <Suspense fallback={<Loading />}>
+    <NotificationsProvider>
+      <ErrorBoundary onReset={reset} fallbackRender={({ resetErrorBoundary }) => <ResetError resetErrorBoundary={resetErrorBoundary} />}>
+        <QueryClientProvider client={queryClient}>
+          <tsr.ReactQueryProvider>
+            {children}
+          </tsr.ReactQueryProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </NotificationsProvider>
+  </Suspense>;
+}
+
+function Loading() {
+  return <div>Loading...</div>;
+}
+
+function ResetError({ resetErrorBoundary }: { resetErrorBoundary(): void }) {
+  return <div>
+    There was an error!
+    <Button onClick={resetErrorBoundary}>Try again</Button>
+  </div>;
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { MessageApi } from "../../api/message";
 import { assert } from "../../utils/validate";
 import { messageClient } from "../services/message";
+import * as styles from "./game_log.module.css";
+
 
 interface GameLogProps {
   gameId?: string;
@@ -18,7 +20,7 @@ export function GameLog({ gameId }: GameLogProps) {
     };
     messageClient.list({ query: { gameId } }).then(({ status, body }) => {
       assert(status === 200);
-      setLogsInternal(body.messages);
+      setLogsInternal(body.messages.reverse());
     });
     return () => {
       setLogsInternal = () => { };
@@ -27,7 +29,7 @@ export function GameLog({ gameId }: GameLogProps) {
 
   const logs = logsGameId === gameId ? logsState : [];
 
-  return <div>
+  return <div className={styles['log-container']}>
     {logs?.map((log) =>
       <p key={log.id}>[{log.date}] {log.userId ?? 'System'}: {log.message}</p>
     )}

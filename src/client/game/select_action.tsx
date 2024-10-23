@@ -20,10 +20,9 @@ import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
 import { PassAction } from "../../engine/turn_order/pass";
 import { iterate } from "../../utils/functions";
-import { assert } from "../../utils/validate";
-import { useUsers } from "../root/user_cache";
 import { GameContext } from "../services/context";
-import { userClient } from "../services/user";
+import { useLogin } from "../services/me";
+import { useUsers } from "../services/user";
 import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/execution_context";
 
 
@@ -80,7 +79,7 @@ export function SelectAction({ setUser }: SelectActionProps) {
     }
   }
   if (!context.isActiveUser()) {
-    actions.push(<SwitchToActive key="switch" setUser={setUser} />);
+    actions.push(<SwitchToActive key="switch" />);
   }
   return <div>{actions}</div>;
 }
@@ -145,23 +144,20 @@ export function Bid() {
   }
 }
 
-export function SwitchToActive({ setUser }: { setUser(user?: MyUserApi): void }) {
+export function SwitchToActive() {
   const currentPlayerColor = useInjectedState(CURRENT_PLAYER);
   const players = useInjectedState(PLAYERS);
   const playerUsers = useUsers(players.map(({ playerId }) => playerId));
+  const { login, isPending } = useLogin();
   const switchToActiveUser = useCallback(() => {
     const currentPlayer = players?.find(({ color }) => color === currentPlayerColor);
     const currentUser = playerUsers?.find(({ id }) => id === currentPlayer?.playerId);
     const userCreds = users.find(({ username }) => currentUser?.username === username);
     if (userCreds != null) {
-      userClient.login({ body: { usernameOrEmail: userCreds.username, password: userCreds.password } })
-        .then(({ status, body }) => {
-          assert(status === 200);
-          setUser(body.user);
-        })
+      login({ usernameOrEmail: userCreds.username, password: userCreds.password });
     }
   }, [currentPlayerColor, players, playerUsers]);
-  return <button onClick={switchToActiveUser}>Switch to active user</button>;
+  return <button onClick={switchToActiveUser} disabled={isPending}>Switch to active user</button>;
 }
 
 export function GenericMessage({ msg }: { msg: string }) {

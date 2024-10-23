@@ -1,8 +1,8 @@
 
 import RedisStore from "connect-redis";
-import {createClient} from "redis";
-import session from 'express-session';
 import express from 'express';
+import session from 'express-session';
+import { createClient } from "redis";
 
 const redisClient = createClient();
 redisClient.connect().catch(console.error);
@@ -14,9 +14,11 @@ export const redisStore = new RedisStore({
 
 export const redisSession = express();
 
-redisSession.use(session({
+export const sessionParser = session({
   store: redisStore,
   resave: false,
   saveUninitialized: false,
   secret: "keyboard cat",
-}));
+});
+
+redisSession.use(sessionParser);

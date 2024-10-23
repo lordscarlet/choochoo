@@ -11,6 +11,7 @@ import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";
 import { LocationType } from "../state/location_type";
 import { OnRoll } from "../state/roll";
+import { GoodsHelper } from "./helper";
 import { GOODS_GROWTH_STATE } from "./state";
 
 
@@ -29,6 +30,7 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
 
   private readonly grid = inject(Grid);
   private readonly log = inject(Log);
+  private readonly helper = inject(GoodsHelper);
   private readonly playerHelper = inject(PlayerHelper);
   private readonly turnState = injectState(GOODS_GROWTH_STATE);
 
@@ -61,6 +63,11 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
     this.turnState.update((state) => {
       state.goods.splice(state.goods.indexOf(data.good), 1);
     });
+
+    if (!this.helper.hasCityOpenings()) {
+      inject(Log).currentPlayer('has to forfeit remaining production due to no openings');
+      return true;
+    }
 
     return this.turnState().goods.length === 0;
   }

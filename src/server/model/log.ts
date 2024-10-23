@@ -9,6 +9,7 @@ interface CreateLog {
   userId?: string;
   gameId?: string;
   version?: number;
+  index?: number;
 }
 
 @Table({ underscored: true })
@@ -37,6 +38,9 @@ export class LogModel extends Model<LogModel, CreateLog> {
 
   @BelongsTo(() => GameModel)
   game?: GameModel;
+
+  @Column(DataTypes.SMALLINT)
+  index?: number;
 
   @Column
   version?: number;

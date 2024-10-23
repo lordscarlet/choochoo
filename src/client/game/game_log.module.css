@@ -1,0 +1,6 @@
+.log-container {
+  height: 200px;
+  background-color: lightgrey;
+  overflow-y: auto;
+  padding: 8px;
+}

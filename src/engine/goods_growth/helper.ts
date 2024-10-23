@@ -1,0 +1,23 @@
+import { inject } from "../framework/execution_context";
+import { City } from "../map/city";
+import { Grid } from "../map/grid";
+
+export class GoodsHelper {
+  private readonly grid = inject(Grid);
+  getTotalUpcomingGoodsSlots(urbanized: boolean) {
+    return urbanized ? 2 : 3;
+  }
+
+  isAtCapacity(city: City): boolean {
+    return city.getUpcomingGoods().every(g => g.length >= this.getTotalUpcomingGoodsSlots(city.isUrbanized()));
+  }
+
+  hasCityOpenings(): boolean {
+    for (const city of this.grid.findAllCities()) {
+      if (!this.isAtCapacity(city)) {
+        return true;
+      }
+    }
+    return false;
+  }
+}

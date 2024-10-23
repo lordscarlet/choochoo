@@ -20,7 +20,7 @@ const router = initServer().router(messageContract, {
     if (query.before != null) {
       where.createdAt = { [Op.lt]: query.before };
     }
-    const messages = await LogModel.findAll({ where, order: [['createdDate', 'DESC']] });
+    const messages = await LogModel.findAll({ where, order: [['createdDate', 'DESC'], ['index', 'DESC']] });
     return { status: 200, body: { messages: messages.map(m => m.toApi()) } };
   },
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Coordinates } from "../../utils/coordinates";
+import { CoordinatesZod } from "../../utils/coordinates";
 import { InvalidInputError } from "../../utils/error";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
@@ -15,7 +15,7 @@ import { BUILD_STATE } from "./state";
 
 export const UrbanizeData = z.object({
   cityIndex: z.number(),
-  coordinates: z.object({ q: z.number(), r: z.number() }),
+  coordinates: CoordinatesZod,
 });
 
 export type UrbanizeData = z.infer<typeof UrbanizeData>;
@@ -38,8 +38,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
       throw new InvalidInputError('Can only urbanize once');
     }
 
-    const coordinates = Coordinates.from(data.coordinates);
-    const space = this.grid.lookup(coordinates);
+    const space = this.grid.lookup(data.coordinates);
     assert(space instanceof Location, 'can only urbanize in town locations');
     assert(space.hasTown(), 'can only urbanize in town locations');
     const city = this.availableCities()[data.cityIndex];
@@ -47,14 +46,13 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
   }
 
   process(data: UrbanizeData): boolean {
-    const coordinates = Coordinates.from(data.coordinates);
     this.buildState.update((state) => state.hasUrbanized = true);
     const city = this.availableCities()[data.cityIndex];
 
-    const location = this.grid.lookup(coordinates) as Location;
+    const location = this.grid.lookup(data.coordinates) as Location;
 
     this.availableCities.update((cities) => cities.splice(data.cityIndex, 1));
-    this.grid.set(coordinates, {
+    this.grid.set(data.coordinates, {
       type: LocationType.CITY,
       name: location.getTownName()!,
       color: city.color,

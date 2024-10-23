@@ -30,7 +30,7 @@ const c = initContract();
 export const messageContract = c.router({
   list: {
     method: 'GET',
-    path: `/`,
+    path: `/messages/`,
     responses: {
       200: z.object({ messages: z.array(MessageApi) }),
     },
@@ -39,10 +39,10 @@ export const messageContract = c.router({
   },
   sendChat: {
     method: 'POST',
-    path: `/send`,
+    path: `/messages/send`,
     responses: {
       200: z.object({ message: MessageApi })
     },
     body: SubmitMessageApi,
-  }
+  },
 });

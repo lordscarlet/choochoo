@@ -1,3 +1,4 @@
+import { OnRoll } from "../engine/state/roll";
 import { Primitive } from "./types";
 import { assert } from "./validate";
 
@@ -40,11 +41,11 @@ export function shuffle<T>(array: T[]): T[] {
   return results;
 }
 
-export function rollDie(): number {
-  return random(6);
+export function rollDie(): OnRoll {
+  return OnRoll.parse(random(6) + 1);
 }
 
-export function rollDice(numDice: number): number[] {
+export function rollDice(numDice: number): OnRoll[] {
   return iterate(numDice, rollDie);
 }
 

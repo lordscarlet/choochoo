@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { initContract } from '@ts-rest/core';
+import { z } from 'zod';
 
 export const CreateUserApi = z.object({
   email: z.string(),
@@ -38,48 +38,49 @@ export const userContract = c.router({
   create: {
     body: CreateUserApi,
     responses: {
-      200: z.object({user: MyUserApi}),
+      200: z.object({ user: MyUserApi }),
     },
     method: 'POST',
-    path: '/',
+    path: '/users/',
   },
   login: {
     body: LoginUserApi,
     responses: {
-      200: z.object({user: MyUserApi}),
+      200: z.object({ user: MyUserApi }),
+      401: z.object({}),
     },
     method: 'POST',
-    path: '/login',
+    path: '/users/login',
   },
   logout: {
     body: z.object({}),
     responses: {
-      200: z.object({success: z.boolean()}),
+      200: z.object({ success: z.boolean() }),
     },
     method: 'POST',
-    path: '/logout',
+    path: '/users/logout',
   },
   getMe: {
     responses: {
-      200: z.object({user: MyUserApi.optional()}),
+      200: z.object({ user: MyUserApi.optional() }),
     },
     method: 'GET',
-    path: '/me',
+    path: '/users/me',
   },
   get: {
-    pathParams: z.object({userId: z.string()}),
+    pathParams: z.object({ userId: z.string() }),
     responses: {
-      200: z.object({user: UserApi}),
+      200: z.object({ user: UserApi }),
     },
     method: 'GET',
-    path: '/:userId',
+    path: '/users/:userId',
   },
   list: {
     responses: {
-      200: z.object({users: z.array(UserApi)}),
+      200: z.object({ users: z.array(UserApi) }),
     },
     query: ListQueryApi,
     method: 'GET',
-    path: '/',
+    path: '/users/',
   }
 });

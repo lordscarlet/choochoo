@@ -58,7 +58,7 @@ export const gameContract = c.router({
   get: {
     method: 'GET',
     pathParams: z.object({ gameId: z.string() }),
-    path: '/:gameId',
+    path: '/games/:gameId',
     responses: {
       200: z.object({ game: GameApi }),
     },
@@ -66,7 +66,7 @@ export const gameContract = c.router({
   },
   list: {
     method: 'GET',
-    path: `/`,
+    path: `/games`,
     responses: {
       200: z.object({ games: z.array(GameApi) }),
     },
@@ -75,7 +75,7 @@ export const gameContract = c.router({
   },
   create: {
     method: 'POST',
-    path: '/',
+    path: '/games/',
     body: CreateGameApi,
     responses: {
       201: z.object({ game: GameApi }),
@@ -85,7 +85,7 @@ export const gameContract = c.router({
   join: {
     method: 'POST',
     pathParams: z.object({ gameId: z.string() }),
-    path: '/:gameId/join',
+    path: '/games/:gameId/join',
     body: z.object({}),
     responses: {
       200: z.object({ game: GameApi }),
@@ -95,7 +95,7 @@ export const gameContract = c.router({
   start: {
     method: 'POST',
     pathParams: z.object({ gameId: z.string() }),
-    path: '/:gameId/start',
+    path: '/games/:gameId/start',
     body: z.object({}),
     responses: {
       200: z.object({ game: GameApi }),
@@ -105,7 +105,7 @@ export const gameContract = c.router({
   leave: {
     method: 'POST',
     pathParams: z.object({ gameId: z.string() }),
-    path: '/:gameId/leave',
+    path: '/games/:gameId/leave',
     body: z.object({}),
     responses: {
       200: z.object({ game: GameApi }),
@@ -115,7 +115,7 @@ export const gameContract = c.router({
   performAction: {
     method: 'POST',
     pathParams: z.object({ gameId: z.string() }),
-    path: '/:gameId/action',
+    path: '/games/:gameId/action',
     body: ActionApi,
     responses: {
       200: z.object({ game: GameApi }),
@@ -125,7 +125,7 @@ export const gameContract = c.router({
   undoAction: {
     method: 'POST',
     pathParams: z.object({ gameId: z.string() }),
-    path: '/:gameId/undo',
+    path: '/games/:gameId/undo',
     body: z.object({ version: z.number() }),
     responses: {
       200: z.object({ game: GameApi }),

@@ -29,7 +29,6 @@ export class TurnOrderHelper {
         state.turnOrderPassUsed = true;
       });
     } else {
-      log.currentPlayer('passes');
       const previousState = this.turnOrderState();
       const previousBid = previousState.previousBids.get(currentPlayer().color) ?? 0;
       const numPlayers = injectState(PLAYERS).length;

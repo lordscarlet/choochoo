@@ -58,10 +58,10 @@ export class TurnOrderPhase extends PhaseModule {
       return undefined;
     }
     const infiniteLoop = infiniteLoopCheck(10);
-    let nextPlayer: PlayerColor;
+    let nextPlayer = currentColor;
     do {
       infiniteLoop();
-      nextPlayer = super.findNextPlayer(currentColor) ?? super.getPlayerOrder()[0];
+      nextPlayer = super.findNextPlayer(nextPlayer) ?? super.getPlayerOrder()[0];
     } while (ignoring.has(nextPlayer));
     return nextPlayer;
   }
