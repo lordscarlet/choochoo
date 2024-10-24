@@ -1,5 +1,5 @@
 import { initClient } from "@ts-rest/core";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { GameApi, gameContract } from "../../api/game";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
@@ -7,6 +7,7 @@ import { ActionConstructor } from "../../engine/game/phase_module";
 import { useInjected } from "../utils/execution_context";
 import { tsr } from "./client";
 import { useMe } from "./me";
+import { socket, useJoinRoom } from "./socket";
 import { useUsers } from "./user";
 
 export const gameClient = initClient(gameContract, {
@@ -26,6 +27,16 @@ export function useGameList(): GameApi[] {
 export function useGame(): GameApi {
   const gameId = useParams().gameId!;
   const { data } = tsr.games.get.useSuspenseQuery({ queryKey: getQueryKey(gameId), queryData: { params: { gameId } } });
+
+  useJoinRoom();
+  const setGame = useSetGame();
+
+  useEffect(() => {
+    socket.on('gameUpdate', setGame);
+    return () => {
+      socket.off('gameUpdate', setGame);
+    };
+  }, []);
 
   return data.body.game;
 }

@@ -4,7 +4,7 @@ import { MessageApi } from "./message";
 export const HOME_ROOM = 'homeroom';
 
 export interface ServerToClientEvents {
-  gameUpdate(gameData: GameApi): void;
+  gameUpdate(game: GameApi): void;
   logsUpdate(logs: MessageApi[]): void;
 }
 

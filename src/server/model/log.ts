@@ -59,6 +59,7 @@ export class LogModel extends Model<LogModel, CreateLog> {
       id: this.id,
       message: this.message,
       userId: this.userId,
+      index: this.index,
       gameId: this.gameId,
       date: this.createdDate.toString(),
     };

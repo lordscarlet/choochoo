@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import { GameApi } from "../api/game";
 import { ClientToServerEvents, ServerToClientEvents } from "../api/socket";
 import { LogModel } from "./model/log";
 
@@ -10,11 +11,15 @@ function roomName(gameId?: string) {
   return gameId == undefined ? HOME_ROOM : 'gameId-' + gameId;
 }
 
-export function emitToRoom(gameId: string | undefined, logs: LogModel[]): void {
-  io.to(roomName(gameId)).emit('logsUpdate', logs.map((l) => l.toApi()));
+export function emitToRoom(logs: LogModel[], game?: GameApi): void {
+  io.to(roomName(game?.id)).emit('logsUpdate', logs.map((l) => l.toApi()));
+  if (game != null) {
+    io.to(roomName(game?.id)).emit('gameUpdate', game);
+  }
 }
 
 io.on('connection', (socket) => {
+  console.log('receivedsocket connection');
   const rooms = new Map<string, number>();
 
   function joinRoom(gameId?: string) {
@@ -39,8 +44,8 @@ io.on('connection', (socket) => {
     }
   }
 
-  io.on('joinHomeRoom', joinRoom);
-  io.on('leaveHomeRoom', leaveRoom);
-  io.on('joinGameRoom', joinRoom);
-  io.on('leaveGameRoom', leaveRoom);
+  socket.on('joinHomeRoom', joinRoom);
+  socket.on('leaveHomeRoom', leaveRoom);
+  socket.on('joinGameRoom', joinRoom);
+  socket.on('leaveGameRoom', leaveRoom);
 });

@@ -142,7 +142,7 @@ const router = initServer().router(gameContract, {
       })), { transaction });
 
       transaction.afterCommit(() => {
-        emitToRoom(game.id, newLogs);
+        emitToRoom(newLogs, newGame);
       });
 
       return { status: 200, body: { game: newGame.toApi() } };

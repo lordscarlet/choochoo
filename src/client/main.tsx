@@ -5,4 +5,4 @@ import { Router } from './root/routes';
 
 const root = createRoot(document.getElementById('root')!);
 
-root.render(<StrictMode><App><Router /></App></StrictMode>);
+root.render(<StrictMode><App /></StrictMode>);

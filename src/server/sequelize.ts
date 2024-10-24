@@ -1,15 +1,16 @@
 import { Request, Response } from 'express';
 import { Sequelize } from 'sequelize-typescript';
 import { GameModel } from './model/game';
-import { UserModel } from './model/user';
-import { LogModel } from './model/log';
 import { GameHistoryModel } from './model/history';
+import { LogModel } from './model/log';
+import { UserModel } from './model/user';
 
 export const sequelize = new Sequelize({
   dialect: 'postgres',
   database: 'aos',
   host: 'localhost',
   port: 5432,
+  logging: false,
   ssl: true,
 });
 

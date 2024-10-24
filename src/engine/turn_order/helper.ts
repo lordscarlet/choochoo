@@ -9,7 +9,6 @@ export class TurnOrderHelper {
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
 
   getMinBid(): number {
-    console.log('other bids', this.turnOrderState().previousBids.values());
     return Math.max(0, ...this.turnOrderState().previousBids.values()) + 1;
   }
 
@@ -22,7 +21,7 @@ export class TurnOrderHelper {
     const curr = currentPlayer();
 
     const useTurnOrderPass = currentPlayer().selectedAction === Action.TURN_ORDER_PASS &&
-        !this.turnOrderState().turnOrderPassUsed;
+      !this.turnOrderState().turnOrderPassUsed;
     if (useTurnOrderPass) {
       log.currentPlayer('uses their turn order pass');
       this.turnOrderState.update((state) => {
@@ -34,7 +33,7 @@ export class TurnOrderHelper {
       const numPlayers = injectState(PLAYERS).length;
       const playerOrder = numPlayers - previousState.nextTurnOrder.length;
       const costMultiplier = playerOrder === numPlayers ? 0 :
-          playerOrder <= 2 ? 1 : 0.5;
+        playerOrder <= 2 ? 1 : 0.5;
       const cost = Math.ceil(previousBid * costMultiplier);
 
       this.turnOrderState.update((state) => {

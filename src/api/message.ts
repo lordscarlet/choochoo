@@ -13,6 +13,7 @@ export const MessageApi = z.object({
   id: z.string(),
   message: z.string(),
   userId: z.string().optional(),
+  index: z.number(),
   gameId: z.string().optional(),
   date: z.string().optional(),
 });

@@ -1,11 +1,12 @@
 import { Button } from "@mui/material";
 import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { NotificationsProvider } from "@toolpad/core";
-import { ReactNode, Suspense, useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { tsr } from '../services/client';
+import { Router } from "./routes";
 
-export function App({ children }: { children: ReactNode }) {
+export function App() {
   const queryClient = useMemo(() => new QueryClient(), [1]);
   const { reset } = useQueryErrorResetBoundary();
 
@@ -14,7 +15,7 @@ export function App({ children }: { children: ReactNode }) {
       <ErrorBoundary onReset={reset} fallbackRender={({ resetErrorBoundary }) => <ResetError resetErrorBoundary={resetErrorBoundary} />}>
         <QueryClientProvider client={queryClient}>
           <tsr.ReactQueryProvider>
-            {children}
+            <Router />
           </tsr.ReactQueryProvider>
         </QueryClientProvider>
       </ErrorBoundary>
