@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
 import { loginRoute } from "../user/login";
 import { Layout } from "./layout";
@@ -34,4 +35,3 @@ export function Router() {
 
 export const RegisterPage = () => <div>Register page</div>;
 export const CreateGamePage = () => <div>Create Game page</div>;
-export const GamePage = () => <div>Game page</div>;

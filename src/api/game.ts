@@ -36,6 +36,7 @@ export const GameApi = z.object({
   playerIds: z.array(z.string()),
   status: z.nativeEnum(GameStatus),
   gameData: z.string().optional(),
+  activePlayerId: z.string().optional(),
   undoPlayerId: z.string().optional(),
   logs: z.array(LogEntry).optional(),
 });

@@ -1,7 +1,7 @@
-import { Key } from './key';
-import { freeze, Immutable } from "../../utils/immutable";
 import { deepCopy } from "../../utils/deep_copy";
+import { freeze, Immutable } from "../../utils/immutable";
 import { serialize, unserialize } from "../../utils/serialize";
+import { Key } from './key';
 
 interface StateContainer<T> {
   state: Immutable<T>;
@@ -39,6 +39,10 @@ export class StateStore {
     this.getContainer(key).state = freeze(state);
   }
 
+  isInitialized<T>(key: Key<T>): boolean {
+    return this.state.has(key.name);
+  }
+
   get<T>(key: Key<T>): Immutable<T> {
     this.monitoring?.add(key.name);
     return this.getContainer(key).state;
@@ -70,6 +74,7 @@ export class StateStore {
     const result = () => this.get(key);
     result.initState = (state: T) => this.init(key, state);
     result.set = (state: T) => this.set(key, state);
+    result.isInitialized = () => this.isInitialized(key);
     result.listen = (listenFn: (t: Immutable<T>) => void): () => void =>
       this.listen(key, listenFn);
     result.update = (updateFn: (t: T) => void) => {
@@ -104,6 +109,7 @@ export interface InjectedState<Data> {
   (): Immutable<Data>;
 
   initState(state: Data): void;
+  isInitialized(): boolean;
   set(state: Data): void;
   update(updateFn: (state: Data) => void): void;
   listen(listenFn: (value: Immutable<Data>) => void): () => void;

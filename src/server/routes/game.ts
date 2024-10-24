@@ -21,7 +21,7 @@ const s = initServer();
 const router = initServer().router(gameContract, {
   async list({ query }) {
     const games = await GameModel.findAll({
-      attributes: ['id', 'gameKey', 'name'],
+      attributes: ['id', 'gameKey', 'name', 'playerIds'],
       where: query,
       limit: 20,
       order: ['id'],
@@ -153,7 +153,8 @@ const router = initServer().router(gameContract, {
     return await sequelize.transaction(async transaction => {
       const gameHistory = await GameHistoryModel.findOne({ where: { gameId, version }, transaction });
       const game = await GameModel.findByPk(gameId, { transaction });
-      assert(game != null && gameHistory != null);
+      assert(game != null);
+      assert(gameHistory != null);
       assert(game.version === gameHistory.version + 1, 'can only undo one step');
       assert(gameHistory.userId === req.session.userId, { permissionDenied: true });
 

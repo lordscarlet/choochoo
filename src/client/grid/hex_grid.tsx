@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { PHASE } from "../../engine/game/phase";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
@@ -10,7 +10,7 @@ import { Good } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
-import { GameContext } from "../services/context";
+import { useAction } from "../services/game";
 import { ignoreInjectedState, useInjected, useInjectedState } from "../utils/execution_context";
 import { BuildingDialog } from "./building_dialog";
 import * as styles from "./hex_grid.module.css";
@@ -46,7 +46,8 @@ function* calculateRows(locations: Iterable<City | Location>): Iterable<Iterable
 }
 
 export function HexGrid() {
-  const ctx = useContext(GameContext);
+  const { canEmit: canEmitBuild } = useAction(BuildAction);
+  const { canEmit: canEmitMove, emit: emitMove } = useAction(MoveAction);
   const grid = useInjected(Grid);
   const rows = calculateRows(grid.all());
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
@@ -55,7 +56,7 @@ export function HexGrid() {
   const productionState = phase === Phase.GOODS_GROWTH ? useInjectedState(GOODS_GROWTH_STATE) : ignoreInjectedState();
 
   const cellClick = useCallback((space?: Location | City) => {
-    if (space instanceof Location && ctx?.isActiveUser() && ctx?.canEmit(BuildAction)) {
+    if (space instanceof Location && canEmitBuild) {
       setBuildingSpace(space);
     }
     if (moveActionProgress) {
@@ -95,14 +96,14 @@ export function HexGrid() {
         path: moveActionProgress.path.concat([{ owner: eligibleOwners[0], endingStop: space.coordinates }]),
       });
     }
-  }, [ctx, moveActionProgress, grid, productionState]);
+  }, [canEmitBuild, moveActionProgress, grid, productionState]);
 
   const onSelectGood = useCallback((city: City, good: Good) => {
     if (moveActionProgress != null) return;
-    if (ctx?.isActiveUser() && ctx.canEmit(MoveAction)) {
+    if (canEmitMove) {
       setMoveActionProgress({ path: [], startingCity: city.coordinates, good });
     }
-  }, [ctx, moveActionProgress, setMoveActionProgress]);
+  }, [canEmitMove, moveActionProgress, setMoveActionProgress]);
 
   const canSendGood = useMemo(() => {
     if (moveActionProgress == null) return false;
@@ -114,10 +115,10 @@ export function HexGrid() {
 
   const sendGood = useCallback(() => {
     assert(moveActionProgress != null);
-    ctx?.emit(MoveAction, moveActionProgress).then(() => {
-      setMoveActionProgress(undefined);
-    });
-  }, [ctx, moveActionProgress, setMoveActionProgress]);
+    emitMove(moveActionProgress);
+    // TODO: maintain progress somewhere else.
+    // setMoveActionProgress(undefined);
+  }, [emitMove, moveActionProgress, setMoveActionProgress]);
 
   const startOver = useCallback(() => {
     setMoveActionProgress(undefined);

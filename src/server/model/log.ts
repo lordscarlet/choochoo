@@ -9,7 +9,7 @@ interface CreateLog {
   userId?: string;
   gameId?: string;
   version?: number;
-  index?: number;
+  index: number;
 }
 
 @Table({ underscored: true })
@@ -40,7 +40,7 @@ export class LogModel extends Model<LogModel, CreateLog> {
   game?: GameModel;
 
   @Column(DataTypes.SMALLINT)
-  index?: number;
+  index!: number;
 
   @Column
   version?: number;
@@ -52,7 +52,7 @@ export class LogModel extends Model<LogModel, CreateLog> {
   updatedDate!: Date;
 
   @DeletedAt
-  deletedDate!: Date;
+  deletedDate?: Date;
 
   toApi(): MessageApi {
     return {

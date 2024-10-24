@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
+import { Column, CreatedAt, DeletedAt, Model, Table, UpdatedAt } from 'sequelize-typescript';
 import { GameApi, GameStatus } from '../../api/game';
-import { Table, Column, Model, CreatedAt, UpdatedAt, DeletedAt } from 'sequelize-typescript';
 
 interface GameCreation {
   version: number;
@@ -10,7 +10,7 @@ interface GameCreation {
   playerIds: string[];
 }
 
-@Table({underscored: true})
+@Table({ underscored: true })
 export class GameModel extends Model<GameModel, GameCreation> {
   @Column({
     allowNull: false,
@@ -19,10 +19,10 @@ export class GameModel extends Model<GameModel, GameCreation> {
     defaultValue: DataTypes.UUIDV4,
   })
   id!: string;
-  
+
   @Column
   version!: number;
-  
+
   @Column
   gameKey!: string;
 
@@ -51,7 +51,7 @@ export class GameModel extends Model<GameModel, GameCreation> {
   updatedDate!: Date;
 
   @DeletedAt
-  deletedDate!: Date;
+  deletedDate?: Date;
 
   toApi(): GameApi {
     return this.dataValues;

@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
+import { BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Index, Model, Table, UpdatedAt } from "sequelize-typescript";
 import { GameModel } from "./game";
 import { UserModel } from "./user";
-import { BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Index, Model, Table, UpdatedAt } from "sequelize-typescript";
 
 export interface GameHistoryCreate {
   version: number;
@@ -14,7 +14,7 @@ export interface GameHistoryCreate {
   userId: string;
 }
 
-@Table({underscored: true})
+@Table({ underscored: true })
 export class GameHistoryModel extends Model<GameHistoryModel, GameHistoryCreate> {
   @Column({
     allowNull: false,
@@ -65,5 +65,5 @@ export class GameHistoryModel extends Model<GameHistoryModel, GameHistoryCreate>
   updatedDate!: Date;
 
   @DeletedAt
-  deletedDate!: Date;
+  deletedDate?: Date;
 }

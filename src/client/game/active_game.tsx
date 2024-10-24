@@ -1,6 +1,5 @@
-import { ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ActionApi, GameApi } from "../../api/game";
-import { MyUserApi } from "../../api/user";
 import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
@@ -16,9 +15,7 @@ import { iterate } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GoodBlock } from "../grid/good";
 import { HexGrid } from "../grid/hex_grid";
-import { GameContext, GameData } from "../services/context";
-import { gameClient } from "../services/game";
-import { useUsers } from "../services/user";
+import { useAction, useGame, useUndoAction } from "../services/game";
 import { ExecutionContextProvider, ignoreInjectedState, useInjected, useInjectedState } from "../utils/execution_context";
 import { GameLog } from "./game_log";
 import { PlayerStats } from "./player_stats";
@@ -27,26 +24,30 @@ import { SelectAction } from "./select_action";
 
 interface LoadedGameProps {
   game: GameApi;
-  user: MyUserApi;
   setGame: (game: GameApi) => void;
-  setUser: (user: MyUserApi) => void;
 }
 
-export function ActiveGame({ user, game, setGame, setUser }: LoadedGameProps) {
-  const [previousAction, setPreviousAction] = useState<ActionApi | undefined>(undefined);
+export function ActiveGame() {
+  const game = useGame();
   return <ExecutionContextProvider gameKey={game.gameKey} gameState={game.gameData!}>
-    <GameContextProvider game={game} user={user} setPreviousAction={setPreviousAction} setGame={setGame}>
-      <h2>{game.name}</h2>
-      <GameLog gameId={game.id} />
-      <SelectAction setUser={setUser} />
-      <UndoButton />
-      <CurrentPhase />
-      <PlayerStats />
-      <HexGrid />
-      <Goods />
-      {previousAction && <PreviousAction previousAction={previousAction} />}
-    </GameContextProvider>
+    <InternalActiveGame />
   </ExecutionContextProvider>;
+}
+
+function InternalActiveGame() {
+  const [previousAction, setPreviousAction] = useState<ActionApi | undefined>(undefined);
+  const game = useGame();
+  return <div>
+    <h2>{game.name}</h2>
+    <GameLog gameId={game.id} />
+    <SelectAction />
+    <UndoButton />
+    <CurrentPhase />
+    <PlayerStats />
+    <HexGrid />
+    <Goods />
+    {previousAction && <PreviousAction previousAction={previousAction} />}
+  </div>;
 }
 
 export function CurrentPhase() {
@@ -65,49 +66,22 @@ export function MovingMetadata() {
   return <p>Move round #{state.moveRound + 1}</p>;
 }
 
-interface GameContext {
-  game: GameApi;
-  user: MyUserApi;
-  children: ReactNode;
-  setPreviousAction(p: ActionApi | undefined): void;
-  setGame(game: GameApi): void;
-}
-
-export function GameContextProvider({ game, user, children, setPreviousAction, setGame }: GameContext) {
-  const users = useUsers(game.playerIds);
-  const gameContext = useMemo(() => {
-    const userCache = new Map((users ?? []).map((user) => [user.id, user]));
-    return new GameData(user, game, userCache, setPreviousAction, setGame);
-  }, [user, game, users?.map((user) => user.id).join('|')]);
-  return <GameContext.Provider value={gameContext}>
-    {children}
-  </GameContext.Provider>;
-}
-
 export function UndoButton() {
-  const ctx = useContext(GameContext)!;
-  const undo = useCallback(() => {
-    gameClient.undoAction({ params: { gameId: ctx.game.id }, body: { version: ctx.game.version - 1 } }).then(({ status, body }) => {
-      assert(status === 200);
-      ctx.setGame(body.game);
-    })
-  }, [ctx.game]);
-  if (ctx.game.undoPlayerId !== ctx.user.id) {
+  const { undo, canUndo } = useUndoAction();
+  if (!canUndo) {
     return <></>;
   }
-  return <button onClick={undo}>Undo</button>
+  return <button onClick={undo}>Undo</button>;
 }
 
 export function PreviousAction({ previousAction }: { previousAction: ActionApi }) {
-  const gameContext = useContext(GameContext);
   const retry = useCallback(() => {
-    gameContext!.attemptAction(previousAction);
+    // gameContext!.attemptAction(previousAction);
   }, [previousAction]);
   return <button onClick={retry}>Retry action {previousAction.actionName}</button>
 }
 
 export function Goods() {
-  const ctx = useContext(GameContext);
   const grid = useInjected(Grid);
   const availableCities = useInjectedState(AVAILABLE_CITIES);
   const cities = useMemo(() => {
@@ -124,6 +98,7 @@ export function Goods() {
     return { regularCities, urbanizedCities };
   }, [grid, availableCities]);
 
+  const { emit, canEmit } = useAction(ProductionAction);
   const phase = useInjectedState(PHASE);
   const productionState = phase === Phase.GOODS_GROWTH ? useInjectedState(GOODS_GROWTH_STATE) : ignoreInjectedState();
 
@@ -133,10 +108,10 @@ export function Goods() {
   }, [productionState]);
 
   const onClick = useCallback((urbanized: boolean, cityGroup: CityGroup, onRoll: OnRoll) => {
-    if (!ctx?.isActiveUser() || !ctx.canEmit(ProductionAction)) return;
+    if (!canEmit) return;
     assert(good != null);
-    ctx.emit(ProductionAction, { urbanized, onRoll, cityGroup, good })
-  }, [ctx, good]);
+    emit({ urbanized, onRoll, cityGroup, good });
+  }, [canEmit, emit, good]);
   return <table>
     <thead>
       <tr>

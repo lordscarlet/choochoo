@@ -1,11 +1,11 @@
-import {DataTypes} from 'sequelize';
-import {hash, compare} from 'bcrypt';
+import { compare, hash } from 'bcrypt';
+import { DataTypes } from 'sequelize';
 import { Column, CreatedAt, DeletedAt, Index, Model, Table, UpdatedAt } from 'sequelize-typescript';
 import { CreateUserApi, MyUserApi, UserApi } from '../../api/user';
 
 const saltRounds = 10;
 
-@Table({underscored: true})
+@Table({ underscored: true })
 export class UserModel extends Model<UserModel, CreateUserApi> {
   @Column({
     allowNull: false,
@@ -15,11 +15,11 @@ export class UserModel extends Model<UserModel, CreateUserApi> {
   })
   id!: string;
 
-  @Index({unique: true})
+  @Index({ unique: true })
   @Column
   username!: string;
-  
-  @Index({unique: true})
+
+  @Index({ unique: true })
   @Column
   email!: string;
 
@@ -33,7 +33,7 @@ export class UserModel extends Model<UserModel, CreateUserApi> {
   updatedDate!: Date;
 
   @DeletedAt
-  deletedDate!: Date;
+  deletedDate?: Date;
 
   // Helper methods
 
@@ -60,14 +60,14 @@ export class UserModel extends Model<UserModel, CreateUserApi> {
     return hash(password, saltRounds);
   }
 
-  static async findByUsernameOrEmail(usernameOrEmail: string): Promise<UserModel|null> {
+  static async findByUsernameOrEmail(usernameOrEmail: string): Promise<UserModel | null> {
     if (usernameOrEmail.indexOf('@') != -1) {
-      return UserModel.findOne({where: {email: usernameOrEmail}});
+      return UserModel.findOne({ where: { email: usernameOrEmail } });
     }
-    return UserModel.findOne({where: {username: usernameOrEmail}});
+    return UserModel.findOne({ where: { username: usernameOrEmail } });
   }
 
-  static async login(usernameOrEmail: string, password: string): Promise<UserModel|null> {
+  static async login(usernameOrEmail: string, password: string): Promise<UserModel | null> {
     const user = await this.findByUsernameOrEmail(usernameOrEmail);
     if (user == null) {
       return null;

@@ -17,15 +17,31 @@ const router = initServer().router(messageContract, {
     if (query.gameId != null) {
       where.gameId = query.gameId;
     }
-    if (query.before != null) {
-      where.createdAt = { [Op.lt]: query.before };
+    if (query.pageCursor != null) {
+      where.createdAt = {
+        // TODO: find a way to insert to avoid this wonkiness
+        [Op.or]: [
+          { [Op.lt]: query.pageCursor.beforeDate },
+          {
+            [Op.and]: [
+              { [Op.eq]: query.pageCursor.beforeDate },
+              { [Op.lt]: query.pageCursor.beforeIndex },
+            ],
+          },
+        ],
+      };
     }
-    const messages = await LogModel.findAll({ where, order: [['createdDate', 'DESC'], ['index', 'DESC']] });
-    return { status: 200, body: { messages: messages.map(m => m.toApi()) } };
+    const modelMessages = await LogModel.findAll({ where, order: [['createdDate', 'DESC'], ['index', 'DESC']] });
+    const messages = modelMessages.reverse().map(m => m.toApi());
+    const nextPageCursor = {
+      beforeDate: modelMessages[0].createdDate.toString(),
+      beforeIndex: modelMessages[0].index,
+    };
+    return { status: 200, body: { messages, nextPageCursor } };
   },
 
   async sendChat({ body: { message, gameId }, req }) {
-    const log = await LogModel.create({ message, gameId, userId: req.session.userId });
+    const log = await LogModel.create({ message, gameId, index: 0, userId: req.session.userId });
     return { status: 200, body: { message: log.toApi() } };
   },
 });

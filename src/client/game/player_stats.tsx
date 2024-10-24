@@ -7,7 +7,7 @@ import { getSelectedActionString } from "../../engine/state/action";
 import { Phase } from "../../engine/state/phase";
 import { getPlayerColor, PlayerData } from "../../engine/state/player";
 import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
-import { useUsers } from "../root/user_cache";
+import { useUsers } from "../services/user";
 import { useInjectedState } from "../utils/execution_context";
 import * as styles from './active_game.module.css';
 

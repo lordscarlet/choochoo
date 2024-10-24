@@ -30,8 +30,11 @@ export function ExecutionContextProvider({ gameState, gameKey, children }: Execu
   const ctx = useMemo(() => new ExecutionContext(gameKey, gameState), [gameKey, gameState]);
   setExecutionContextGetter(() => ctx);
   useEffect(() => {
-    return setExecutionContextGetter;
-  }, [1]);
+    setExecutionContextGetter(() => ctx);
+    return () => {
+      setExecutionContextGetter();
+    };
+  }, [ctx]);
   return <ExecutionContextContext.Provider value={ctx}>
     {children}
   </ExecutionContextContext.Provider>;
@@ -43,6 +46,12 @@ export function ignoreInjectedState(): undefined {
   return undefined;
 }
 
+export function useOptionalInjectedState<T>(key: Key<T>): Immutable<T> | undefined {
+  const ctx = useExecutionContext();
+  const injectedState = ctx.gameState.injectState(key);
+  return injectedState.isInitialized() ? injectedState() : undefined;
+}
+
 export function useInjectedState<T>(key: Key<T>): Immutable<T> {
   const ctx = useExecutionContext();
   const injectedState = ctx.gameState.injectState(key);
@@ -52,5 +61,5 @@ export function useInjectedState<T>(key: Key<T>): Immutable<T> {
 export function useCurrentPlayer(): PlayerData {
   const playerColor = useInjectedState(CURRENT_PLAYER);
   const players = useInjectedState(PLAYERS);
-  return players.find((player) => player.color === playerColor)!;
+  return players!.find((player) => player.color === playerColor)!;
 }

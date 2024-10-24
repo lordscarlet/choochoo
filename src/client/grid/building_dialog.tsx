@@ -3,7 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
-import { useCallback, useContext, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer, useState } from "react";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
@@ -13,7 +13,7 @@ import { Location } from "../../engine/map/location";
 import { Action } from "../../engine/state/action";
 import { ComplexTileType, Direction, SimpleTileType, TownTileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
-import { GameContext } from "../services/context";
+import { useAction } from '../services/game';
 import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/execution_context";
 import { RawHex } from "./raw_hex";
 
@@ -24,7 +24,8 @@ interface BuildingProps {
 }
 
 export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
-  const context = useContext(GameContext);
+  const { emit: emitBuild } = useAction(BuildAction);
+  const { emit: emitUrbanize } = useAction(UrbanizeAction);
   const action = useInjected(BuildAction);
   const curr = useCurrentPlayer();
   const availableCities = useInjectedState(AVAILABLE_CITIES);
@@ -37,12 +38,12 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
     [direction, showReasons, action, coordinates?.q, coordinates?.r]);
   const onSelect = useCallback((build: BuildData) => {
     cancelBuild();
-    context?.emit(BuildAction, build);
-  }, [cancelBuild, context]);
+    emitBuild(build);
+  }, [cancelBuild, emitBuild]);
   const selectAvailableCity = useCallback((cityIndex: number) => {
     cancelBuild();
-    context?.emit(UrbanizeAction, { cityIndex, coordinates: space!.coordinates });
-  }, [space, context]);
+    emitUrbanize({ cityIndex, coordinates: space!.coordinates });
+  }, [space, emitUrbanize]);
   return <>
     <Dialog
       open={coordinates != null}

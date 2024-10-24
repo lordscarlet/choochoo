@@ -1,51 +1,60 @@
 
 
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { GameApi } from '../../api/game';
-import { MessageApi } from '../../api/message';
+import { MessageApi, PageCursor } from '../../api/message';
 import { ClientToServerEvents, ServerToClientEvents } from '../../api/socket';
-import { assert } from '../../utils/validate';
-import { messageClient } from './message';
+import { tsr } from './client';
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io();
 
 const RESET = 'RESET';
 
-export function useGameState(gameId?: string): GameApi {
-  const [game, setGame] = useState<GameApi | undefined>();
+// export function useGameState(gameId?: string): GameApi {
+//   const [game, setGame] = useState<GameApi | undefined>();
 
-}
+// }
 
 export function useMessages(gameId?: string): MessageApi[] {
-  const [messages, appendMessages] = useReducer((prev: MessageApi[], curr: MessageApi[] | typeof RESET) => {
-    if (curr === RESET) return [];
-    return prev.concat(curr.filter((c) => !prev.some(p => p.id === c.id)));
-  }, []);
+  useJoinRoom(gameId);
+
+  const queryClient = tsr.useQueryClient();
+  const queryKey = ['messages', gameId];
+  const { data, isLoading, isError, fetchNextPage, hasNextPage } = tsr.messages.list.useSuspenseInfiniteQuery({
+    queryKey,
+    queryData: ({ pageParam }) => ({
+      query: { gameId, pageCursor: pageParam },
+    }),
+    initialPageParam: (undefined as (PageCursor | undefined)),
+    getNextPageParam: ({ status, body }): PageCursor | undefined => {
+      if (status !== 200) return undefined;
+      return body.nextPageCursor;
+    },
+  });
 
   useEffect(() => {
-    const controller = new AbortController();
-    messageClient.list({ query: { gameId }, fetchOptions: { signal: controller.signal } }).then(({ status, body }) => {
-      assert(status === 200);
-      appendMessages(body.messages);
-    });
-    return () => {
-      controller.abort();
-      appendMessages(RESET);
-    };
-  }, [gameId]);
-
-  useJoinRoom();
-
-  useEffect(() => {
-    const listener = (logs: MessageApi[]) => {
-      appendMessages(logs.filter(log => log.gameId === gameId));
+    const listener = (messages: MessageApi[]) => {
+      queryClient.messages.list.setQueryData(queryKey, (r) => {
+        if (r == null || r.status !== 200) {
+          return { headers: new Headers(), status: 200, body: { messages } };
+        }
+        const newMessages = r.body.messages.concat(messages).filter(({ id }, index, arr) => {
+          return !arr.slice(0, index).some((other) => other.id === id);
+        });
+        return {
+          ...r,
+          status: 200,
+          messages: newMessages,
+        };
+      });
     };
     socket.on('logsUpdate', listener);
     return () => {
       socket.off('logsUpdate', listener);
     };
   }, [gameId]);
+
+  const messages = data.pages.flatMap((page) => page.body.messages);
 
   return messages;
 }

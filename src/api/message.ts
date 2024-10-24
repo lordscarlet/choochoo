@@ -19,9 +19,16 @@ export const MessageApi = z.object({
 
 export type MessageApi = z.infer<typeof MessageApi>;
 
+export const PageCursor = z.object({
+  beforeDate: z.string(),
+  beforeIndex: z.number(),
+});
+
+export type PageCursor = z.infer<typeof PageCursor>;
+
 export const ListMessageApi = z.object({
   gameId: z.string().optional(),
-  before: z.string().optional(),
+  pageCursor: PageCursor.optional(),
 });
 
 
@@ -32,7 +39,7 @@ export const messageContract = c.router({
     method: 'GET',
     path: `/messages/`,
     responses: {
-      200: z.object({ messages: z.array(MessageApi) }),
+      200: z.object({ messages: z.array(MessageApi), nextPageCursor: PageCursor.optional() }),
     },
     query: ListMessageApi,
     summary: 'Get a list of messages',
