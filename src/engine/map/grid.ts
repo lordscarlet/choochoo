@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
-import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { GRID } from "../game/state";
@@ -81,17 +80,12 @@ export class Grid {
       if (!(space instanceof Location)) continue;
       for (const track of space.getTrack()) {
         if (track.getOwner() !== color) continue;
-        for (const neighbor of track.getNeighbors()) {
-          if (!(neighbor instanceof City) && neighbor !== TOWN) continue;
-
-          const route = track.getRoute();
-          if (route[0] != null && peek(route)) break;
-          danglers.push({
-            coordinates: space.coordinates,
-            immovableExit: neighbor === TOWN ? track.getExits().find(e => e !== TOWN)! : space.coordinates.getDirection(neighbor.coordinates),
-            length: route.length - 2,
-          });
-        }
+        if (!track.dangles()) continue;
+        danglers.push({
+          coordinates: space.coordinates,
+          immovableExit: track.immovableExits().filter(e => e !== TOWN)[0],
+          length: track.getRoute().length,
+        });
       }
     }
     return danglers;

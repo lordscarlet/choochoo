@@ -1,6 +1,7 @@
 import { inject, injectState } from "../framework/execution_context";
 import { Grid } from "../map/grid";
 import { Location } from "../map/location";
+import { Track } from "../map/track";
 import { PlayerColor, PlayerData } from "../state/player";
 import { CURRENT_PLAYER, PLAYERS } from "./state";
 
@@ -28,14 +29,19 @@ export class PlayerHelper {
   }
 
   countTrack(color: PlayerColor): number {
+    const countedTrack = new Set<Track>();
     let numTrack = 0;
     for (const space of this.grid.all()) {
       if (!(space instanceof Location)) continue;
       for (const track of space.getTrack()) {
         if (track.getOwner() !== color) continue;
-        const dangles = track.getEnds().some(end => end == null);
+        const route = track.getRoute();
+        for (const t of route) {
+          countedTrack.add(t);
+        }
+        const dangles = route.some(t => t.dangles());
         if (dangles) continue;
-        numTrack++;
+        numTrack += route.length;
       }
     }
     return numTrack;

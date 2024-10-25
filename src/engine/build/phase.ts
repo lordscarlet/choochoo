@@ -7,7 +7,7 @@ import { PhaseModule } from "../game/phase_module";
 import { currentPlayer, PLAYERS } from "../game/state";
 import { Grid } from "../map/grid";
 import { Location } from "../map/location";
-import { Track } from "../map/track";
+import { TOWN } from "../map/track";
 import { Action } from "../state/action";
 import { LocationType } from "../state/location_type";
 import { Phase } from "../state/phase";
@@ -51,7 +51,7 @@ export class BuildPhase extends PhaseModule {
       const space = this.grid.lookup(removing.coordinates);
       assert(space instanceof Location);
       const track = space.trackExiting(removing.immovableExit);
-      return track!.getRoute().filter(r => r instanceof Track);
+      return track!.getRoute();
     });
 
     for (const track of toRemoveAll) {

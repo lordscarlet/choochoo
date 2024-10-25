@@ -5,7 +5,7 @@ import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
 import { Grid } from "../map/grid";
 import { calculateTrackInfo, Location } from "../map/location";
-import { TOWN, Track, TrackInfo } from "../map/track";
+import { Exit, TOWN, Track, TrackInfo } from "../map/track";
 import { PlayerColor } from "../state/player";
 import { Direction, isDirection, TileType, TownTileType } from "../state/tile";
 import { BuilderHelper } from "./helper";
@@ -87,19 +87,28 @@ export class Validator {
   }
 
   private createsCircularLoop(coordinates: Coordinates, newTileData: TrackInfo[]): boolean {
-    for (const track of newTileData) {
-      for (const exit of track.exits) {
-        if (exit === TOWN) {
-          throw new Error('gah I havent figured this out yet');
-        }
-        const neighbor = this.grid.connection(coordinates, exit);
-        if (neighbor instanceof City) {
-          throw new Error('gah I havent figured this out yet');
+    return newTileData.some((track) => {
+      const [firstExit, secondExit] = track.exits;
+      return this.getEnd(coordinates, firstExit).equals(this.getEnd(coordinates, secondExit));
+    });
+  }
 
-        }
-        const end = neighbor?.getEnds(track);
-      }
+  private getEnd(coordinates: Coordinates, exit: Exit): Coordinates {
+    if (exit === TOWN) {
+      return coordinates;
     }
+    const neighbor = this.grid.connection(coordinates, exit);
+    if (neighbor == null) {
+      return coordinates.neighbor(exit);
+    }
+    if (neighbor instanceof City) {
+      return neighbor.coordinates;
+    }
+    const [coordinates2, toExit] = neighbor.getEnd(getOpposite(exit));
+    if (toExit === TOWN) {
+      return coordinates;
+    }
+    return coordinates2.neighbor(toExit);
   }
 
   private partitionTracks(space: Location, tracks: TrackInfo[]): Partitioned {

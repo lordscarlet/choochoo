@@ -77,10 +77,7 @@ export class Location {
   findRoutesToLocation(coordinates: Coordinates): Set<PlayerColor | undefined> {
     assert(this.hasTown(), 'cannot call findRoutesToLocation from a non-town hex');
     return new Set(
-      this.getTrack().filter((track) => {
-        const ends = track.getEnds();
-        return ends.some((c) => c != null && c.equals(coordinates));
-      }).map((track) => track.getOwner()));
+      this.getTrack().filter((track) => track.endsWith(coordinates)).map((track) => track.getOwner()));
   }
 }
 

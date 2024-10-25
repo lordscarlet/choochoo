@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { Coordinates } from "../../utils/coordinates";
-import { assertNever } from "../../utils/validate";
+import { peek } from "../../utils/functions";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
 import { City } from "./city";
-import { rotateDirectionClockwise } from "./direction";
+import { getOpposite, rotateDirectionClockwise } from "./direction";
 import { Grid } from "./grid";
 import { Location } from "./location";
 
@@ -15,67 +15,90 @@ export class Track {
     readonly location: Location,
     private readonly track: TrackInfo) { }
 
+  /** Returns the exits for the track */
   getExits(): [Exit, Exit] {
     return this.track.exits;
   }
 
+  /** Returns the owner of the track */
   getOwner(): PlayerColor | undefined {
     return this.track.owner;
   }
 
+  /** Returns whether this track exits this direction */
   hasExit(exit: Exit): boolean {
     return this.track.exits.includes(exit);
   }
 
-  getRoute(): TrackNeighbor[] {
-    const neighbors = this.getNeighbors();
-    const [routeOne, routeTwo] = tupleMap(neighbors, neighbor => this.getRouteOneWay(neighbor));
-    return routeOne.reverse().concat(routeTwo);
+  /** Returns whether this track dangles. Not whether some track on the same route dangles. */
+  dangles(): boolean {
+    return this.immovableExits().length !== 2;
   }
 
-  getRouteOneWay(prev: TrackNeighbor): TrackNeighbor[] {
-    const next = this.getNext(prev);
-    if (next == null) {
-      return [next];
-    } else if (next instanceof City) {
-      return [next];
-    } else if (next === TOWN) {
-      return [next];
+  /** Returns a list of exits that cannot be redirected. */
+  immovableExits(): Exit[] {
+    if (this.hasExit(TOWN)) return this.getExits();
+    return this.getExits().filter((exit) => exit !== TOWN && this.getNeighbor(exit) !== undefined);
+  }
+
+  /** Returns every track on the path. */
+  getRoute(): Track[] {
+    const [routeOne, routeTwo] = tupleMap(this.getExits(), exit => this.getRouteOneWay(exit));
+    return routeOne.reverse().concat([this, ...routeTwo]);
+  }
+
+  /** Returns the route going one direction, not including this. */
+  private getRouteOneWay(fromExit: Exit): Track[] {
+    const toExit = this.getOtherExit(fromExit);
+    if (toExit === TOWN) {
+      return [];
+    }
+
+    const neighbor = this.getNeighbor(toExit);
+    if (neighbor == undefined || neighbor instanceof City) {
+      return [];
     } else {
-      return [next, ...next.getRouteOneWay(this)];
+      return [neighbor, ...neighbor.getRouteOneWay(getOpposite(toExit))];
     }
   }
 
-  getEnds(): [Coordinates | undefined, Coordinates | undefined] {
-    const neighbors = this.getNeighbors();
-    return tupleMap(neighbors, (neighbor) => this.getEnd(neighbor));
-  }
+  /** Returns the coordinates of the last piece of track, and which direction it exits. */
+  getEnd(fromExit: Exit): [Coordinates, Exit] {
+    const toExit = this.getOtherExit(fromExit);
+    if (toExit === TOWN) {
+      return [this.location.coordinates, toExit];
+    }
 
-  getEnd(prev: TrackNeighbor): Coordinates | undefined {
-    const next = this.getNext(prev);
-    if (next == null) {
-      return undefined;
-    } else if (next instanceof City) {
-      return next.coordinates;
-    } else if (next === TOWN) {
-      return this.location.coordinates;
+    const neighbor = this.getNeighbor(toExit);
+    if (neighbor == undefined || neighbor instanceof City) {
+      return [this.location.coordinates, toExit];
     } else {
-      return next.getEnd(this);
+      return neighbor.getEnd(getOpposite(toExit));
     }
   }
 
-  getNext(prevNeighbor: TrackNeighbor): TrackNeighbor {
-    const neighbors = this.getNeighbors();
-    return trackNeighborEquals(neighbors[0], prevNeighbor) ? neighbors[1] : neighbors[0];
+  /** Returns whether the given coordinates are at the end of the given track */
+  endsWith(coordinates: Coordinates): boolean {
+    const route = this.getRoute();
+    return route[0].exitsTo(coordinates) && peek(route).exitsTo(coordinates);
   }
 
-  getNeighbors(): [TrackNeighbor, TrackNeighbor] {
-    return tupleMap(this.getExits(), (exit) => {
-      if (exit === TOWN) {
-        return exit;
+  /** Returns whether this exits to the given coordinates. */
+  exitsTo(coordinates: Coordinates): boolean {
+    return this.getExits().some((e) => {
+      if (e === TOWN) {
+        return this.location.coordinates.equals(coordinates);
       }
-      return this.grid.connection(this, exit);
+      return this.location.coordinates.neighbor(e).equals(coordinates);
     });
+  }
+
+  private getOtherExit(exit: Exit): Exit {
+    return this.getExits().find(e => e !== exit)!;
+  }
+
+  private getNeighbor(exit: Direction): Track | City | undefined {
+    return this.grid.connection(this, exit);
   }
 
   equals(other: Track): boolean {
@@ -84,25 +107,11 @@ export class Track {
   }
 }
 
-function trackNeighborEquals(tn1: TrackNeighbor, tn2: TrackNeighbor): boolean {
-  if (tn1 === TOWN) {
-    return tn2 === TOWN;
-  } else if (tn1 === undefined) {
-    return tn2 === undefined;
-  } else if (tn1 instanceof City) {
-    return tn2 instanceof City && tn2.coordinates.equals(tn1.coordinates);
-  } else if (tn1 instanceof Track) {
-    return tn2 instanceof Track && tn2.equals(tn1);
-  } else {
-    assertNever(tn1);
-  }
-}
-
 function tupleMap<T, R>(tuple: [T, T], updateFn: (t: T) => R): [R, R] {
   return tuple.map(updateFn) as [R, R];
 }
 
-export type TrackNeighbor = Track | City | Town | undefined;
+export type RoutePart = Track | City | Town;
 
 export const TOWN = 9;
 

@@ -31,10 +31,7 @@ export class City {
       return neighbor.trackExiting(getOpposite(direction));
     })
       .filter(track => track != null)
-      .filter((track) => {
-        const end = track.getEnd(this);
-        return end != null && coordinates.equals(end);
-      })
+      .filter((track) => track.exitsTo(coordinates))
       .map((track) => track.getOwner()));
   }
 
