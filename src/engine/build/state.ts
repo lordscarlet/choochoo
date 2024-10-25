@@ -1,10 +1,12 @@
 import { z } from "zod";
-import { Coordinates } from "../../utils/coordinates";
+import { CoordinatesZod } from "../../utils/coordinates";
 import { Key } from "../framework/key";
+import { DanglerInfo } from "../map/grid";
 
 export const BuildStateDefinition = z.object({
-  previousBuilds: z.array(z.instanceof(Coordinates)),
+  previousBuilds: z.array(CoordinatesZod),
   hasUrbanized: z.boolean(),
+  danglers: z.array(DanglerInfo),
 });
 
 export type BuildState = z.infer<typeof BuildStateDefinition>;

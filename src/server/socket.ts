@@ -19,7 +19,6 @@ export function emitToRoom(logs: LogModel[], game?: GameApi): void {
 }
 
 io.on('connection', (socket) => {
-  console.log('receivedsocket connection');
   const rooms = new Map<string, number>();
 
   function joinRoom(gameId?: string) {

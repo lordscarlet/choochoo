@@ -116,8 +116,8 @@ export function HexGrid() {
   const sendGood = useCallback(() => {
     assert(moveActionProgress != null);
     emitMove(moveActionProgress);
-    // TODO: maintain progress somewhere else.
-    // setMoveActionProgress(undefined);
+    // TODO: only clear progress when the action gets emitted.
+    setMoveActionProgress(undefined);
   }, [emitMove, moveActionProgress, setMoveActionProgress]);
 
   const startOver = useCallback(() => {

@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
-import { ActionApi, GameApi } from "../../api/game";
+import { useCallback, useMemo } from "react";
+import { GameApi } from "../../api/game";
 import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
@@ -35,7 +35,6 @@ export function ActiveGame() {
 }
 
 function InternalActiveGame() {
-  const [previousAction, setPreviousAction] = useState<ActionApi | undefined>(undefined);
   const game = useGame();
   return <div>
     <h2>{game.name}</h2>
@@ -46,7 +45,6 @@ function InternalActiveGame() {
     <PlayerStats />
     <HexGrid />
     <Goods />
-    {previousAction && <PreviousAction previousAction={previousAction} />}
   </div>;
 }
 
@@ -72,13 +70,6 @@ export function UndoButton() {
     return <></>;
   }
   return <button onClick={undo}>Undo</button>;
-}
-
-export function PreviousAction({ previousAction }: { previousAction: ActionApi }) {
-  const retry = useCallback(() => {
-    // gameContext!.attemptAction(previousAction);
-  }, [previousAction]);
-  return <button onClick={retry}>Retry action {previousAction.actionName}</button>
 }
 
 export function Goods() {

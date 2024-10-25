@@ -1,36 +1,6 @@
-import { peek } from "../../utils/functions";
+import { NestedMap } from "../../utils/nested_map";
 import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
-import { Key } from './key';
-
-class NestedMap {
-  private readonly map = new Map<unknown, unknown>();
-  
-  get<T>(args: unknown[], factory: () => T): T {
-    const leafParent = this.digToLeafParent(args);
-    const leafArg = peek(args);
-    if (leafParent.has(leafArg)) {
-      return leafParent.get(leafArg) as T;
-    }
-    const newValue = factory();
-    leafParent.set(leafArg, newValue);
-    return newValue;
-  }
-
-  private digToLeafParent(args: unknown[]): Map<unknown, unknown> {
-    if (args.length === 1) return this.map;
-    
-    assert(args.length > 0, 'called NestedMap with not enough args');
-    const [next, ...rest] = args;
-    if (!this.map.has(next)) {
-      this.map.set(next, new NestedMap());
-    }
-    const nextMap = this.map.get(next);
-
-    assert(nextMap instanceof NestedMap, 'called NestedMap with too many args');
-    return nextMap.digToLeafParent(rest);
-  }
-}
 
 export class InjectionContext {
   private readonly overrides = new Map<Constructor<unknown>, unknown>();
@@ -69,32 +39,32 @@ interface ProxyObject<T> {
 
 function buildProxy<T extends Constructor<any>>(constructorFn: T): ProxyObject<ConstructorReturnType<T>> {
   //we don't care about the target, but compiler does not allow a null one, so let's pass an "empty object" {}
-  let initialized: Initialized<T>|undefined;
+  let initialized: Initialized<T> | undefined;
   const proxy = new Proxy({}, {
-      get: function(_, property: string, __){
-        assert(initialized != null, 'called an uninitialized value');
-          
-          let item = (initialized.value as any)[property];
-          if (typeof(item) === "function"){
-              return function(...args: any){
-                  assert(initialized != null, 'called an uninitialized value');
-                  return item.call(initialized.value, ...args);
-              };
-          } else {
-              return item;
-          }
-      },
+    get: function (_, property: string, __) {
+      assert(initialized != null, 'called an uninitialized value');
 
-      set: function(_, property: string|symbol, value: any, __): boolean {
-        assert(initialized != null, 'called an uninitialized value');
-        (initialized.value as any)[property] = value;
-        return true;
-      },
-          
+      let item = (initialized.value as any)[property];
+      if (typeof (item) === "function") {
+        return function (...args: any) {
+          assert(initialized != null, 'called an uninitialized value');
+          return item.call(initialized.value, ...args);
+        };
+      } else {
+        return item;
+      }
+    },
+
+    set: function (_, property: string | symbol, value: any, __): boolean {
+      assert(initialized != null, 'called an uninitialized value');
+      (initialized.value as any)[property] = value;
+      return true;
+    },
+
   });
 
   return {
     proxy: proxy as ConstructorReturnType<T>,
-    setInternalObject: (value: T) => initialized = {value},
+    setInternalObject: (value: T) => initialized = { value },
   };
 }

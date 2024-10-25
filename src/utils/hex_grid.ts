@@ -72,7 +72,7 @@ export class HexGrid<T> extends BaseGrid<T, Map<string, T>> {
     const grid = new HexGrid<T>();
     for (const [q, row] of Object.entries(serialized)) {
       for (const [r, value] of Object.entries(row)) {
-        grid.set(new Coordinates(Number(q), Number(r)), unserialize(value));
+        grid.set(Coordinates.from({ q: Number(q), r: Number(r) }), unserialize(value));
       }
     }
     return grid;
@@ -80,10 +80,10 @@ export class HexGrid<T> extends BaseGrid<T, Map<string, T>> {
 
   static fromArray<T>(arr: Array<Array<T | undefined>>): HexGrid<T> {
     const grid = new HexGrid<T>();
-    for (const [index1, row] of arr.entries()) {
-      for (const [index2, value] of row.entries()) {
+    for (const [q, row] of arr.entries()) {
+      for (const [r, value] of row.entries()) {
         if (value == null) continue;
-        grid.set(new Coordinates(index1, index2), value);
+        grid.set(Coordinates.from({ q, r }), value);
       }
     }
     return grid;

@@ -2,13 +2,14 @@ import { useMemo } from "react";
 import { UserApi } from "../../api/user";
 import { injectState } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
+import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
 import { getSelectedActionString } from "../../engine/state/action";
 import { Phase } from "../../engine/state/phase";
 import { getPlayerColor, PlayerData } from "../../engine/state/player";
 import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { useUsers } from "../services/user";
-import { useInjectedState } from "../utils/execution_context";
+import { useInjected, useInjectedState } from "../utils/execution_context";
 import * as styles from './active_game.module.css';
 
 
@@ -16,14 +17,15 @@ export function PlayerStats() {
   const playerData = useInjectedState(PLAYERS);
   const playerOrder = useInjectedState(TURN_ORDER);
   const currentPlayer = useInjectedState(CURRENT_PLAYER);
+  const helper = useInjected(PlayerHelper);
   const playerUsers = useUsers(playerData.map((player) => player.playerId));
-  const players = useMemo<Array<{ player: PlayerData, user?: UserApi }>>(() => playerOrder.map(color => {
+  const outOfGamePlayers = playerData.filter((p) => p.outOfGame).map((p) => p.color);
+  const players = useMemo<Array<{ player: PlayerData, user?: UserApi }>>(() => playerOrder.concat(outOfGamePlayers).map(color => {
     const player = playerData.find((player) => player.color === color)!;
     const user = playerUsers?.find(user => user.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
   const columns: ColumnRenderer[] = useMemo(() => [new BidRenderer()], [1]);
-  // TODO: show players out of the game.
   return <table>
     <thead>
       <tr>
@@ -36,6 +38,7 @@ export function PlayerStats() {
         <th>Shares</th>
         <th>Locomotive</th>
         {columns.filter(c => c.isEnabled()).map((c) => <th key={c.title}>{c.title}</th>)}
+        <th>Score</th>
       </tr>
     </thead>
     <tbody>
@@ -50,6 +53,7 @@ export function PlayerStats() {
           <td>{player.shares}</td>
           <td>{player.locomotive}</td>
           {columns.filter(c => c.isEnabled()).map((c) => <td key={c.title}>{c.calculator(player)}</td>)}
+          <td>{helper.getScore(player)}</td>
         </tr>)}
     </tbody>
   </table>;

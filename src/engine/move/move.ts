@@ -69,8 +69,9 @@ export class MoveAction implements ActionProcessor<MoveData> {
         throw new InvalidInputError(`Cannot pass through a ${location.goodColor()} city with a ${action.good} good`);
       }
     }
-    // TODO: Cannot visit the same stop twice
-    const allCoordinates = [action.startingCity].concat([...action.path.values()].map(v => v.endingStop)).map(({ q, r }) => new Coordinates(q, r));
+
+    // Cannot visit the same stop twice
+    const allCoordinates = [action.startingCity].concat([...action.path.values()].map(v => v.endingStop)).map(Coordinates.from);
     for (const [index, coordinate] of allCoordinates.entries()) {
       for (const otherCoordinate of allCoordinates.slice(index + 1)) {
         assert(!coordinate.equals(otherCoordinate), 'cannot stop at the same city twice');

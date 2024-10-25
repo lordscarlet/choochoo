@@ -12,7 +12,7 @@ export type Immutable<T> =
   T extends Map<infer R, infer P> ? ImmutableMap<Immutable<R>, Immutable<P>> :
   T extends HexGrid<infer P> ? ImmutableHexGrid<Immutable<P>> :
   T extends Array<infer P> ? ReadonlyArray<Immutable<P>> :
-  T extends Object ? {readonly [P in keyof T]: Immutable<T[P]>} :
+  T extends Object ? { readonly [P in keyof T]: Immutable<T[P]> } :
   never;
 
 export type Mutable<T> = T extends Immutable<infer P> ? P : T;
@@ -43,7 +43,7 @@ export function freeze(value: unknown): unknown {
 }
 
 export class ImmutableSet<T> {
-  constructor(private readonly internal: Set<T>) {}
+  constructor(private readonly internal: Set<T>) { }
 
   has(value: T): boolean {
     return this.internal.has(value);
@@ -58,14 +58,16 @@ export class ImmutableSet<T> {
   }
 }
 
-export class ImmutableMap<R,S> implements BaseMap<R, S> {
-  constructor(private readonly internal: Map<R, S>) {}
+export class ImmutableMap<R, S> implements BaseMap<R, S> {
+  readonly size = this.internal.size;
+
+  constructor(private readonly internal: Map<R, S>) { }
 
   has(key: R): boolean {
     return this.internal.has(key);
   }
 
-  get(key: R): S|undefined {
+  get(key: R): S | undefined {
     return this.internal.get(key);
   }
 

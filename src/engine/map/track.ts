@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { Coordinates } from "../../utils/coordinates";
 import { assertNever } from "../../utils/validate";
 import { PlayerColor } from "../state/player";
@@ -9,7 +10,8 @@ import { Location } from "./location";
 
 
 export class Track {
-  constructor(private readonly grid: Grid,
+  constructor(
+    private readonly grid: Grid,
     readonly location: Location,
     private readonly track: TrackInfo) { }
 
@@ -25,9 +27,26 @@ export class Track {
     return this.track.exits.includes(exit);
   }
 
-  getEnds(): [Coordinates | undefined, Coordinates | undefined] {
-    const exits = this.getExits();
+  getRoute(): TrackNeighbor[] {
+    const neighbors = this.getNeighbors();
+    const [routeOne, routeTwo] = tupleMap(neighbors, neighbor => this.getRouteOneWay(neighbor));
+    return routeOne.reverse().concat(routeTwo);
+  }
 
+  getRouteOneWay(prev: TrackNeighbor): TrackNeighbor[] {
+    const next = this.getNext(prev);
+    if (next == null) {
+      return [next];
+    } else if (next instanceof City) {
+      return [next];
+    } else if (next === TOWN) {
+      return [next];
+    } else {
+      return [next, ...next.getRouteOneWay(this)];
+    }
+  }
+
+  getEnds(): [Coordinates | undefined, Coordinates | undefined] {
     const neighbors = this.getNeighbors();
     return tupleMap(neighbors, (neighbor) => this.getEnd(neighbor));
   }
@@ -89,6 +108,7 @@ export const TOWN = 9;
 
 export type Town = typeof TOWN;
 export type Exit = Direction | Town;
+export const ExitZod = z.union([z.nativeEnum(Direction), z.literal(TOWN)]);
 
 export interface TrackInfo {
   exits: [Exit, Exit];

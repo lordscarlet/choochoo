@@ -19,7 +19,7 @@ export function deepCopy<T>(t: unknown): unknown {
   } else if (t instanceof BaseGrid) {
     return t.copy();
   } else if (t instanceof Coordinates) {
-    return new Coordinates(t.q, t.r);
+    return t;
   } else {
     assert(typeof t === 'object');
     return Object.keys(t as Object).reduce((result, prop: string) => {

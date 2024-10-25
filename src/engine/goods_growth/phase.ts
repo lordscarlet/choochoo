@@ -12,6 +12,7 @@ import { LocationType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { GoodsHelper } from "./helper";
+import { PassAction } from "./pass";
 import { ProductionAction } from "./production";
 import { GOODS_GROWTH_STATE } from "./state";
 
@@ -27,6 +28,7 @@ export class GoodsGrowthPhase extends PhaseModule {
 
   configureActions(): void {
     this.installAction(ProductionAction);
+    this.installAction(PassAction);
   }
 
   onStartTurn(): void {
@@ -63,7 +65,6 @@ export class GoodsGrowthPhase extends PhaseModule {
 
   onEnd(): void {
     const grid = inject(Grid);
-    // TODO: verify that this counts all players, not just those still in the game.
     const rolls = new Map<CityGroup, number[]>([
       [CityGroup.WHITE, rollDice(this.players().length).sort()],
       [CityGroup.BLACK, rollDice(this.players().length).sort()],

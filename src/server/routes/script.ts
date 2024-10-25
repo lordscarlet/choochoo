@@ -1,8 +1,7 @@
 
-import {dependencies} from '../../../package.json';
-import {build, context} from 'esbuild';
-import express, {Request, Response} from 'express';
-import {join} from 'path';
+import { context } from 'esbuild';
+import express, { Request, Response } from 'express';
+import { join } from 'path';
 
 export const buildPromise = context({
   entryPoints: ["src/client/main.tsx"],
@@ -37,7 +36,7 @@ jsApp.use((req: Request, res: Response, next: (err?: any) => void) => {
   return buildPromise.then(() => {
     console.log('done building');
     next();
-  }).catch(next); 
+  }).catch(next);
 });
 
 jsApp.use(express.static(join(__dirname, '../../../dist')));

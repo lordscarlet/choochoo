@@ -188,7 +188,7 @@ function offset(grid: Array<Array<SpaceData | undefined>>): Array<Array<SpaceDat
   return newGrid;
 }
 
-function city(name: string, color: Good, group: number, onRoll: OnRoll): CityData {
+function city(name: string, color: Good, group: CityGroup, onRoll: OnRoll): CityData {
   return {
     type: LocationType.CITY,
     name,

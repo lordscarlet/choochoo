@@ -9,6 +9,7 @@ import { AVAILABLE_CITIES, currentPlayer } from "../game/state";
 import { Grid } from "../map/grid";
 import { Location } from "../map/location";
 import { Action } from "../state/action";
+import { CityGroup } from "../state/city_group";
 import { LocationType } from "../state/location_type";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
@@ -63,12 +64,14 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
       group: city.group,
     });
 
-    inject(Log).currentPlayer(`places city ${toLetter(city.onRoll[0])} in ${data.coordinates.toString()}`);
+    inject(Log).currentPlayer(`places city ${toLetter(city.group, city.onRoll[0])} in ${data.coordinates.toString()}`);
     return this.helper.isAtEndOfTurn();
   }
 }
 
-function toLetter(v: number): string {
-  // TODO: implement
-  return 'A';
+function toLetter(group: CityGroup, onRoll: number): string {
+  if (group === CityGroup.WHITE) {
+    return String.fromCharCode('A'.charCodeAt(0) + onRoll - 2);
+  }
+  return String.fromCharCode('E'.charCodeAt(0) + onRoll);
 }

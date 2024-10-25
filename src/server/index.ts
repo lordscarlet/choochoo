@@ -45,5 +45,5 @@ io.attach(server);
 
 /// Start
 server.listen(3000, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`AoS listening on port ${port}`);
 });

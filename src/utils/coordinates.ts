@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { Direction } from "../engine/state/tile";
-import { assertNever } from "./validate";
+import { assert, assertNever } from "./validate";
 
 
 export class Coordinates {
-  constructor(readonly q: number, readonly r: number) { }
+  private static readonly staticMap = new Map<string, Coordinates>();
+  private constructor(readonly q: number, readonly r: number) { }
 
   neighbor(dir: Direction): Coordinates {
     const offset = toOffset(dir);
@@ -19,13 +20,23 @@ export class Coordinates {
     return `${this.q}|${this.r}`;
   }
 
+  getDirection(to: Coordinates): Direction {
+    return fromOffset({ q: to.q - this.q, r: to.r - this.r });
+  }
+
   static from({ q, r }: { q: number, r: number }): Coordinates {
-    return new Coordinates(q, r);
+    const key = `${q}|${r}`;
+    if (this.staticMap.has(key)) {
+      return this.staticMap.get(key)!;
+    }
+    const newCoordinates = new Coordinates(q, r);
+    this.staticMap.set(key, newCoordinates);
+    return newCoordinates;
   }
 
   static unserialize(serialized: string): Coordinates {
-    const [first, second] = serialized.split('|').map((num) => Number(num));
-    return new Coordinates(first, second);
+    const [q, r] = serialized.split('|').map((num) => Number(num));
+    return Coordinates.from({ q, r });
   }
 
   toString(): string {
@@ -42,6 +53,24 @@ export const CoordinatesZod = z.object({ q: z.number(), r: z.number() }).transfo
 interface Offset {
   q: number;
   r: number;
+}
+
+function fromOffset(offset: Offset): Direction {
+  if (offset.q === -1 && offset.r === 0) {
+    return Direction.TOP_LEFT;
+  } else if (offset.q === 0 && offset.r === -1) {
+    return Direction.TOP;
+  } else if (offset.q === 1 && offset.r === -1) {
+    return Direction.TOP_RIGHT;
+  } else if (offset.q === -1 && offset.r === 1) {
+    return Direction.BOTTOM_LEFT;
+  } else if (offset.q === 0 && offset.r === 1) {
+    return Direction.BOTTOM;
+  } else if (offset.q === 1 && offset.r === 0) {
+    return Direction.BOTTOM_RIGHT;
+  } else {
+    assert(false, 'cannot calculate direction of offset ' + JSON.stringify(offset));
+  }
 }
 
 function toOffset(dir: Direction): Offset {

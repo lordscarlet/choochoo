@@ -1,15 +1,13 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
-import { currentPlayer } from "../game/state";
 import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
 import { Grid } from "../map/grid";
 import { calculateTrackInfo, Location } from "../map/location";
 import { TOWN, Track, TrackInfo } from "../map/track";
 import { PlayerColor } from "../state/player";
-import { LocationData } from "../state/space";
-import { Direction, isDirection, TileData, TileType, TownTileType } from "../state/tile";
+import { Direction, isDirection, TileType, TownTileType } from "../state/tile";
 import { BuilderHelper } from "./helper";
 
 
@@ -25,10 +23,10 @@ export class Validator {
   private readonly helper = inject(BuilderHelper);
   private readonly grid = inject(Grid);
 
-  getInvalidBuildReason(coordinates: Coordinates, buildData: BuildInfo): InvalidBuildReason|undefined {
+  getInvalidBuildReason(coordinates: Coordinates, buildData: BuildInfo): InvalidBuildReason | undefined {
     const space = this.grid.lookup(coordinates);
     if (space == null) {
-      return 'cannot build on an empty space';
+      return 'cannot build on impassable terrain';
     }
     if (space instanceof City) {
       return 'cannot build on a city';
@@ -44,7 +42,11 @@ export class Validator {
 
     const newTileData = calculateTrackInfo(buildData);
 
-    const {preserved, rerouted, newTracks} = this.partitionTracks(space, newTileData);
+    const { preserved, rerouted, newTracks } = this.partitionTracks(space, newTileData);
+
+    if (isTownTile && rerouted.length > 0) {
+      return 'cannot reroute track on a town tile';
+    }
 
     for (const reroutedTrack of rerouted) {
       const oldTrack = this.oldTrack(space, reroutedTrack)!;
@@ -78,6 +80,26 @@ export class Validator {
     if (!this.newTrackExtendsPrevious(buildData.playerColor, space, newTracks)) {
       return 'new track must come off a city or extend previous track';
     }
+
+    if (this.createsCircularLoop(coordinates, newTileData)) {
+      return 'cannot create a loop back to the same location';
+    }
+  }
+
+  private createsCircularLoop(coordinates: Coordinates, newTileData: TrackInfo[]): boolean {
+    for (const track of newTileData) {
+      for (const exit of track.exits) {
+        if (exit === TOWN) {
+          throw new Error('gah I havent figured this out yet');
+        }
+        const neighbor = this.grid.connection(coordinates, exit);
+        if (neighbor instanceof City) {
+          throw new Error('gah I havent figured this out yet');
+
+        }
+        const end = neighbor?.getEnds(track);
+      }
+    }
   }
 
   private partitionTracks(space: Location, tracks: TrackInfo[]): Partitioned {
@@ -98,10 +120,10 @@ export class Validator {
       }
       preserved.push(trackInfo);
     }
-    return {preserved, newTracks, rerouted};
+    return { preserved, newTracks, rerouted };
   }
 
-  private oldTrack(space: Location, newTrack: TrackInfo): Track|undefined {
+  private oldTrack(space: Location, newTrack: TrackInfo): Track | undefined {
     const oldTrackList = space.getTrack().filter((track) => {
       return newTrack.exits.some((exit) => exit !== TOWN && track.hasExit(exit));
     });

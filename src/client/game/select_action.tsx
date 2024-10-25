@@ -4,6 +4,7 @@ import { BuildAction } from "../../engine/build/build";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
+import { PassAction as ProductionPassAction } from "../../engine/goods_growth/pass";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { LocoAction } from "../../engine/move/loco";
 import { MoveAction } from "../../engine/move/move";
@@ -17,12 +18,15 @@ import { getGoodColor } from "../../engine/state/good";
 import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
 import { PassAction } from "../../engine/turn_order/pass";
+import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { iterate } from "../../utils/functions";
 import { useAction } from "../services/game";
 import { useLogin } from "../services/me";
 import { useUsers } from "../services/user";
 import { useCurrentPlayer, useInjected, useInjectedState, useOptionalInjectedState } from "../utils/execution_context";
+PassAction
 
+ProductionPassAction
 
 export function SelectAction() {
   return <div>
@@ -38,6 +42,7 @@ export function SelectAction() {
 
 export function PlaceGood() {
   const { canEmit, canEmitUsername } = useAction(MoveAction);
+  const { emit: emitPass } = useAction(ProductionPassAction);
   const state = useOptionalInjectedState(GOODS_GROWTH_STATE);
   if (canEmitUsername == null) {
     return <></>;
@@ -47,10 +52,12 @@ export function PlaceGood() {
     return <GenericMessage>{canEmitUsername} must perform their production.</GenericMessage>;
   }
 
-  return <>
+  // TODO: choose a different order to place.
+  return <div>
     <p>{canEmit ? 'You' : canEmitUsername} drew {state!.goods.map(getGoodColor).join(', ')}</p>
     <p>Select where to place {getGoodColor(state!.goods[0])}</p>
-  </>;
+    <button onClick={emitPass}>Pass</button>
+  </div>;
 }
 
 export function MoveGoods() {
@@ -94,6 +101,7 @@ export function SpecialActionSelector() {
 
 export function Bid() {
   const { emit: emitBid, canEmit, canEmitUsername } = useAction(BidAction);
+  const { emit: emitTurnOrderPass } = useAction(TurnOrderPassAction);
   const { emit: emitPass } = useAction(PassAction);
   const helper = useInjected(TurnOrderHelper);
 
@@ -104,12 +112,14 @@ export function Bid() {
   if (!canEmit) {
     return <GenericMessage>{canEmitUsername} must bid.</GenericMessage>;
   }
+
   const minBid = helper.getMinBid();
   const maxBid = helper.getMaxBid();
   const bids = iterate(maxBid - minBid + 1, (i) => i + minBid);
   return <div>
     You must bid.
     <button onClick={emitPass}>Pass</button>
+    {helper.canUseTurnOrderPass() && <button onClick={emitTurnOrderPass}>Use Turn Order Pass</button>}
     {bids.map(bid => <button key={bid} onClick={() => emitBid({ bid })}>{bid}</button>)}
   </div>;
 }
