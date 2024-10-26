@@ -49,7 +49,7 @@ export function HexGrid() {
   const { canEmit: canEmitBuild } = useAction(BuildAction);
   const { canEmit: canEmitMove, emit: emitMove } = useAction(MoveAction);
   const grid = useInjected(Grid);
-  const rows = calculateRows(grid.all());
+  const rows = useMemo(() => [...calculateRows(grid.all())], [grid]);
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
   const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
   const phase = useInjectedState(PHASE);

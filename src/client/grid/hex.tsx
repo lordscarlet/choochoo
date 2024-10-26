@@ -16,7 +16,6 @@ interface HexProps {
 
 export function Hex({ space, onSelectGood, onClick }: HexProps) {
   return <RawHex className={styles['hex-container']} space={space} tile={useMemo(() => removeContext(space), [space])} onClick={onClick}>
-    {space instanceof City && <HexName name={space.cityName()} />}
     {space instanceof City && <GoodsBlock onClick={(good) => onSelectGood(space, good)} goods={space.getGoods()} />}
   </RawHex>;
 

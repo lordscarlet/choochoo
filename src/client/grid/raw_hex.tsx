@@ -55,12 +55,13 @@ export function style(space: City | Location | undefined): string {
 }
 
 export function RawHex({ space, asCity, className, tile, children, onClick }: RawHexProps) {
-  return <div className={[className, styles['hex'], asCity != null ? goodStyle(asCity) : style(space)].join(' ')} onClick={onClick}>
+  return <div data-coordinates={space?.coordinates.serialize()} className={[className, styles['hex'], asCity != null ? goodStyle(asCity) : style(space)].join(' ')} onClick={onClick}>
     <div className={styles['hex-left']}></div>
     <div className={styles['hex-body']}></div>
     <div className={styles['hex-right']}></div>
     {tile && <Track track={calculateTrackInfo(tile)} />}
     {space instanceof Location && space.hasTown() && <Town />}
+    {space instanceof City && <HexName name={space.cityName()} />}
     {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} />}
     {children}
   </div>;
