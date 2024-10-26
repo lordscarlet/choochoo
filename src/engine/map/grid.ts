@@ -74,7 +74,7 @@ export class Grid {
     return neighbor.trackExiting(getOpposite(dir));
   }
 
-  getDanglers(color: PlayerColor): DanglerInfo[] {
+  getDanglers(color?: PlayerColor): DanglerInfo[] {
     const danglers: DanglerInfo[] = [];
     for (const space of this.all()) {
       if (!(space instanceof Location)) continue;

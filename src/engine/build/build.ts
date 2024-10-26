@@ -9,8 +9,9 @@ import { PlayerHelper } from "../game/player";
 import { currentPlayer } from "../game/state";
 import { Grid } from "../map/grid";
 import { calculateTrackInfo, Location } from "../map/location";
-import { TOWN } from "../map/track";
+import { TOWN, Track } from "../map/track";
 import { LocationType } from "../state/location_type";
+import { PlayerColor } from "../state/player";
 import { Direction, getTileTypeString, TileData, TileType } from "../state/tile";
 import { BuildCostCalculator } from "./cost";
 import { BuilderHelper } from "./helper";
@@ -68,6 +69,25 @@ export class BuildAction implements ActionProcessor<BuildData> {
       assert(hex.type !== LocationType.CITY);
       hex.tile = newTile;
     });
+    const location = this.grid.lookup(coordinates);
+    assert(location instanceof Location);
+
+    const toUpdate: Array<[Track, PlayerColor | undefined]> = [];
+    for (const originatingTrack of location.getTrack()) {
+      for (const track of originatingTrack.getRoute()) {
+        if (track.getOwner() !== originatingTrack.getOwner()) {
+          toUpdate.push([track, originatingTrack.getOwner()]);
+        }
+      }
+    }
+
+    for (const [track, color] of toUpdate) {
+      this.grid.update(track.location.coordinates, (hex) => {
+        assert(hex.type !== LocationType.CITY);
+        hex.tile!.owners[track.ownerIndex] = color;
+      });
+    }
+
     this.buildState.update(({ previousBuilds }) => {
       previousBuilds.push(coordinates);
     });

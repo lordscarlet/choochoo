@@ -5,9 +5,10 @@ import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
 import { Grid } from "../map/grid";
 import { calculateTrackInfo, Location } from "../map/location";
+import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";
 import { PlayerColor } from "../state/player";
-import { Direction, isDirection, TileType, TownTileType } from "../state/tile";
+import { Direction, isDirection, TileType } from "../state/tile";
 import { BuilderHelper } from "./helper";
 
 
@@ -32,9 +33,13 @@ export class Validator {
       return 'cannot build on a city';
     }
 
-    const isTownTile = buildData.tileType in TownTileType;
-    if (space.hasTown() !== isTownTile) {
-      if (isTownTile) {
+    if (this.helper.tileAvailableInManifest(buildData.tileType)) {
+      return 'no tile to place there';
+    }
+
+    const thisIsTownTile = isTownTile(buildData.tileType);
+    if (space.hasTown() !== thisIsTownTile) {
+      if (thisIsTownTile) {
         return 'cannot place town track on a non-town tile';
       }
       return 'cannot place regular track on a town tile';
@@ -44,7 +49,7 @@ export class Validator {
 
     const { preserved, rerouted, newTracks } = this.partitionTracks(space, newTileData);
 
-    if (isTownTile && rerouted.length > 0) {
+    if (thisIsTownTile && rerouted.length > 0) {
       return 'cannot reroute track on a town tile';
     }
 

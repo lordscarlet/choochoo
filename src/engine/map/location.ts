@@ -18,7 +18,7 @@ export class Location {
   // TODO: add memoization
   @memoize
   getTrack(): Track[] {
-    return this.getTrackInfo().map((trackInfo) => inject(Track, this.grid, this, trackInfo));
+    return this.getTrackInfo().map((trackInfo, index) => inject(Track, this.grid, index, this, trackInfo));
   }
 
   @memoize

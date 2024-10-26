@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { users } from "../../api/fake_data";
-import { BuildAction } from "../../engine/build/build";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
@@ -20,7 +19,7 @@ import { TurnOrderHelper } from "../../engine/turn_order/helper";
 import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { iterate } from "../../utils/functions";
-import { useAction } from "../services/game";
+import { useAction, useEmptyAction } from "../services/game";
 import { useLogin } from "../services/me";
 import { useUsers } from "../services/user";
 import { useCurrentPlayer, useInjected, useInjectedState, useOptionalInjectedState } from "../utils/execution_context";
@@ -42,7 +41,7 @@ export function SelectAction() {
 
 export function PlaceGood() {
   const { canEmit, canEmitUsername } = useAction(MoveAction);
-  const { emit: emitPass } = useAction(ProductionPassAction);
+  const { emit: emitPass } = useEmptyAction(ProductionPassAction);
   const state = useOptionalInjectedState(GOODS_GROWTH_STATE);
   if (canEmitUsername == null) {
     return <></>;
@@ -61,8 +60,8 @@ export function PlaceGood() {
 }
 
 export function MoveGoods() {
-  const { emit: emitLoco, canEmit, canEmitUsername } = useAction(LocoAction);
-  const { emit: emitPass } = useAction(MovePassAction);
+  const { emit: emitLoco, canEmit, canEmitUsername } = useEmptyAction(LocoAction);
+  const { emit: emitPass } = useEmptyAction(MovePassAction);
   const player = useCurrentPlayer();
   const state = useOptionalInjectedState(MOVE_STATE);
 
@@ -101,8 +100,8 @@ export function SpecialActionSelector() {
 
 export function Bid() {
   const { emit: emitBid, canEmit, canEmitUsername } = useAction(BidAction);
-  const { emit: emitTurnOrderPass } = useAction(TurnOrderPassAction);
-  const { emit: emitPass } = useAction(PassAction);
+  const { emit: emitTurnOrderPass } = useEmptyAction(TurnOrderPassAction);
+  const { emit: emitPass } = useEmptyAction(PassAction);
   const helper = useInjected(TurnOrderHelper);
 
   if (canEmitUsername == null) {
@@ -164,8 +163,7 @@ export function TakeShares() {
 }
 
 export function Build() {
-  const { canEmit, canEmitUsername } = useAction(BuildAction);
-  const { emit: emitPass } = useAction(DoneAction);
+  const { emit: emitPass, canEmit, canEmitUsername } = useEmptyAction(DoneAction);
   const helper = useInjected(BuilderHelper);
 
   if (canEmitUsername == null) {

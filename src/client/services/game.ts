@@ -1,3 +1,4 @@
+import { useNotifications } from "@toolpad/core";
 import { initClient } from "@ts-rest/core";
 import { useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -113,21 +114,40 @@ interface ActionHandler<T> {
   canEmitUsername?: string;
 }
 
+export function useEmptyAction(action: ActionConstructor<Record<string, never>>): ActionHandler<unknown> {
+  const { emit: oldEmit, canEmit, canEmitUsername } = useAction(action);
+  const emit = useCallback(() => {
+    oldEmit({});
+  }, [oldEmit]);
+  return { emit, canEmit, canEmitUsername };
+}
+
 export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHandler<T> {
   const me = useMe();
   const game = useGame();
   const setGame = useSetGame();
   const phaseDelegator = useInjected(PhaseDelegator);
+  const notifications = useNotifications();
   const { mutate } = tsr.games.performAction.useMutation();
   const users = useUsers(game.activePlayerId != null ? [game.activePlayerId] : []);
 
   const actionName = action.action;
 
-  const emit = useCallback((actionData: T) => mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
-    onSuccess: (data) => {
-      setGame(data.body.game);
-    },
-  }), [game.id, actionName]);
+  const emit = useCallback((actionData: T) => {
+    if ('view' in actionData && actionData['view'] instanceof Window) {
+      notifications.show('Error performing action');
+      throw new Error('Cannot use event as actionData. You likely want to use useEmptyAction');
+    }
+    mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
+      onSuccess: (data) => {
+        setGame(data.body.game);
+      },
+      onError(error) {
+        console.error(error);
+        notifications.show('Error performing action');
+      },
+    });
+  }, [game.id, actionName]);
 
   const actionCanBeEmitted = phaseDelegator.get().canEmit(action);;
 

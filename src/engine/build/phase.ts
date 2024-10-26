@@ -7,7 +7,6 @@ import { PhaseModule } from "../game/phase_module";
 import { currentPlayer, PLAYERS } from "../game/state";
 import { Grid } from "../map/grid";
 import { Location } from "../map/location";
-import { TOWN } from "../map/track";
 import { Action } from "../state/action";
 import { LocationType } from "../state/location_type";
 import { Phase } from "../state/phase";
@@ -35,7 +34,7 @@ export class BuildPhase extends PhaseModule {
     this.turnState.initState({
       previousBuilds: [],
       hasUrbanized: false,
-      danglers: this.grid.getDanglers(currentPlayer().color),
+      danglers: this.grid.getDanglers(currentPlayer().color).concat(this.grid.getDanglers(undefined)),
     });
   }
 

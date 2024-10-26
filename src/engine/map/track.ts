@@ -12,6 +12,7 @@ import { Location } from "./location";
 export class Track {
   constructor(
     private readonly grid: Grid,
+    readonly ownerIndex: number,
     readonly location: Location,
     private readonly track: TrackInfo) { }
 
