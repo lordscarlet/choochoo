@@ -4,10 +4,11 @@ import { MapSettings } from '../engine/game/map_settings';
 import { CityGroup } from '../engine/state/city_group';
 import { Good } from '../engine/state/good';
 import { LocationType } from '../engine/state/location_type';
-import { OnRoll } from '../engine/state/roll';
-import { CityData, LocationData, SpaceData } from '../engine/state/space';
+import { SpaceSettingData } from '../engine/state/map_settings';
+import { LocationData } from '../engine/state/space';
 import { duplicate } from '../utils/functions';
 import { HexGrid } from '../utils/hex_grid';
+import { city } from './factory';
 
 const PLAIN: LocationData = {
   type: LocationType.PLAIN,
@@ -25,7 +26,7 @@ const MOUNTAIN: LocationData = {
 
 const { WHITE, BLACK } = CityGroup;
 
-const map: Array<Array<SpaceData | undefined>> = offset([
+const map: Array<Array<SpaceSettingData | undefined>> = offset([
   [
     ...duplicate(10, PLAIN),
     city('Kansas City', Good.PURPLE, WHITE, 3),
@@ -161,7 +162,7 @@ const map: Array<Array<SpaceData | undefined>> = offset([
     PLAIN,
     RIVER,
     RIVER,
-    city('Wheeling', Good.YELLOW, BLACK, 4),
+    city('Wheeling', Good.YELLOW, BLACK, 4, 3),
     MOUNTAIN,
     MOUNTAIN,
   ],
@@ -171,33 +172,21 @@ const map: Array<Array<SpaceData | undefined>> = offset([
     town('Buffalo'),
     PLAIN,
     MOUNTAIN,
-    city('Pittsburgh', Good.RED, BLACK, 5),
+    city('Pittsburgh', Good.RED, BLACK, 5, 3),
     ...duplicate(4, MOUNTAIN),
   ],
 ]);
 
-function offset(grid: Array<Array<SpaceData | undefined>>): Array<Array<SpaceData | undefined>> {
-  const newGrid: Array<Array<SpaceData | undefined>> = [];
+function offset(grid: Array<Array<SpaceSettingData | undefined>>): Array<Array<SpaceSettingData | undefined>> {
+  const newGrid: Array<Array<SpaceSettingData | undefined>> = [];
   for (let i = 0; i < grid.length; i++) {
-    const newColumn: Array<SpaceData | undefined> = [];
+    const newColumn: Array<SpaceSettingData | undefined> = [];
     for (let l = 0; l < grid.length - i - 2; l += 2) {
       newColumn.push(UNPASSABLE);
     }
     newGrid.push([...newColumn, ...grid[i]]);
   }
   return newGrid;
-}
-
-function city(name: string, color: Good, group: CityGroup, onRoll: OnRoll): CityData {
-  return {
-    type: LocationType.CITY,
-    name,
-    color,
-    goods: [],
-    upcomingGoods: [[]],
-    onRoll: [onRoll],
-    group,
-  };
 }
 
 function town(townName: string): LocationData {
@@ -213,7 +202,7 @@ export class RustBeltMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
 
-  getStartingGrid(): HexGrid<SpaceData> {
+  getStartingGrid(): HexGrid<SpaceSettingData> {
     return HexGrid.fromArray(map);
   }
 

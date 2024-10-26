@@ -34,12 +34,10 @@ export class BuildAction implements ActionProcessor<BuildData> {
   private readonly grid = inject(Grid);
   private readonly helper = inject(BuilderHelper);
   private readonly costCalculator = inject(BuildCostCalculator);
-  private readonly buildHelper = inject(BuilderHelper);
   private readonly playerHelper = inject(PlayerHelper);
   private readonly validator = inject(Validator);
 
   validate(data: BuildData): void {
-    // TODO: verify that the pieces are piece limitted
     const coordinates: Coordinates = data.coordinates;
 
     const maxTrack = this.helper.getMaxBuilds();

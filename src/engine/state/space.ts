@@ -6,8 +6,6 @@ import { OnRoll } from "./roll";
 import { TileData } from "./tile";
 
 
-
-
 export const CityData = z.object({
   type: z.literal(LocationType.CITY),
   name: z.string(),
