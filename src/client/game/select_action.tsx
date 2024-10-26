@@ -4,9 +4,9 @@ import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
 import { PassAction as ProductionPassAction } from "../../engine/goods_growth/pass";
+import { ProductionAction } from "../../engine/goods_growth/production";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { LocoAction } from "../../engine/move/loco";
-import { MoveAction } from "../../engine/move/move";
 import { MovePassAction } from "../../engine/move/pass";
 import { MOVE_STATE } from "../../engine/move/state";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
@@ -40,7 +40,7 @@ export function SelectAction() {
 }
 
 export function PlaceGood() {
-  const { canEmit, canEmitUsername } = useAction(MoveAction);
+  const { canEmit, canEmitUsername } = useAction(ProductionAction);
   const { emit: emitPass } = useEmptyAction(ProductionPassAction);
   const state = useOptionalInjectedState(GOODS_GROWTH_STATE);
   if (canEmitUsername == null) {

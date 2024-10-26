@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { City } from "../../engine/map/city";
 import { BaseTileData, calculateTrackInfo, Location } from "../../engine/map/location";
+import { isTownTile } from "../../engine/map/tile";
 import { Good } from "../../engine/state/good";
 import { LocationType } from "../../engine/state/location_type";
 import { assertNever } from "../../utils/validate";
@@ -60,7 +61,7 @@ export function RawHex({ space, asCity, className, tile, children, onClick }: Ra
     <div className={styles['hex-body']}></div>
     <div className={styles['hex-right']}></div>
     {tile && <Track track={calculateTrackInfo(tile)} />}
-    {space instanceof Location && space.hasTown() && <Town />}
+    {space instanceof Location && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <Town />}
     {space instanceof City && <HexName name={space.cityName()} />}
     {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} />}
     {children}

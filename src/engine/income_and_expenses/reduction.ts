@@ -13,7 +13,7 @@ export class IncomeReductionPhase extends PhaseModule {
     injectState(PLAYERS).update((players) => {
       for (const player of players) {
         if (player.outOfGame) continue;
-        const lostIncome = Math.max(10, Math.floor((player.income / 10)) * 2);
+        const lostIncome = Math.min(10, Math.floor((player.income / 10)) * 2);
         player.income -= lostIncome;
         log.player(player.color, `loses ${lostIncome} income`);
       }

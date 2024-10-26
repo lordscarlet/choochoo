@@ -76,6 +76,10 @@ export class Validator {
       }
     }
 
+    if (rerouted.length + newTracks.length === 0) {
+      return 'must build or reroute track';
+    }
+
     // Look to see if any track was removed
     if (preserved.length + rerouted.length !== space.getTrack().length) {
       return 'must preserve previous track';

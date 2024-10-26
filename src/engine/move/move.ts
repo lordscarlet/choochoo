@@ -5,12 +5,12 @@ import { partition, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
-import { PlayerHelper } from "../game/player";
+import { Log } from "../game/log";
 import { currentPlayer, PLAYERS } from "../game/state";
 import { City } from "../map/city";
 import { Grid } from "../map/grid";
 import { Location } from "../map/location";
-import { Good } from "../state/good";
+import { getGoodColor, Good } from "../state/good";
 import { LocationType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 
@@ -33,8 +33,8 @@ export type MoveData = z.infer<typeof MoveData>;
 
 export class MoveAction implements ActionProcessor<MoveData> {
   static readonly action = 'move';
-  private readonly playerHelper = inject(PlayerHelper);
   private readonly grid = inject(Grid);
+  private readonly log = inject(Log);
 
   readonly assertInput = MoveData.parse;
   validate(action: MoveData): void {
@@ -105,10 +105,15 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
     const partitioned = partition(action.path, (step) => step.owner);
 
+    this.log.currentPlayer(`moves a ${getGoodColor(action.good)} good from the city at ${action.startingCity} to the city at ${peek(action.path).endingStop}`)
+
     injectState(PLAYERS).update((players) => {
       for (const player of players) {
         assert(!player.outOfGame, 'unexpected out of game player still owns track');
-        player.income += partitioned.get(player.color)?.length ?? 0;
+        if (!partitioned.has(player.color)) continue;
+        const incomeBonus = partitioned.get(player.color)?.length ?? 0;
+        this.log.player(player.color, `earns ${incomeBonus} income`);
+        player.income += incomeBonus;
       }
     });
     return true;

@@ -81,7 +81,7 @@ export class Track {
   /** Returns whether the given coordinates are at the end of the given track */
   endsWith(coordinates: Coordinates): boolean {
     const route = this.getRoute();
-    return route[0].exitsTo(coordinates) && peek(route).exitsTo(coordinates);
+    return route[0].exitsTo(coordinates) || peek(route).exitsTo(coordinates);
   }
 
   /** Returns whether this exits to the given coordinates. */
