@@ -7,6 +7,7 @@ import { PlayerColor } from "../state/player";
 import { TURN_ORDER_STATE } from "./state";
 
 export class TurnOrderHelper {
+  private readonly turnOrder = injectState(TURN_ORDER);
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
 
   getMinBid(): number {
@@ -25,8 +26,17 @@ export class TurnOrderHelper {
   }
 
   canUseTurnOrderPass(): boolean {
-    return currentPlayer().selectedAction === Action.TURN_ORDER_PASS &&
+    const hasTurnOrderPass = currentPlayer().selectedAction === Action.TURN_ORDER_PASS &&
       !this.turnOrderState().turnOrderPassUsed;
+    const wouldBeTheirTurnAgainAnyways = this.remainingBiddersOrder().length === 2;
+    const canTurnOrderPass = hasTurnOrderPass && !wouldBeTheirTurnAgainAnyways;
+
+    return canTurnOrderPass;
+  }
+
+  remainingBiddersOrder(): PlayerColor[] {
+    const ignoring = new Set(this.turnOrderState().nextTurnOrder);
+    return this.turnOrder().filter((p) => !ignoring.has(p));
   }
 
   pass(): void {

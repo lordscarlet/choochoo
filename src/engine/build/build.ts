@@ -80,10 +80,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     }
 
     for (const [track, color] of toUpdate) {
-      this.grid.update(track.location.coordinates, (hex) => {
-        assert(hex.type !== LocationType.CITY);
-        hex.tile!.owners[track.ownerIndex] = color;
-      });
+      this.grid.setTrackOwner(track, color);
     }
 
     this.buildState.update(({ previousBuilds }) => {

@@ -8,7 +8,7 @@ import { TURN_ORDER_STATE } from "./state";
 
 
 export class TurnOrderPassAction implements ActionProcessor<{}> {
-  static readonly action = 'pass';
+  static readonly action = 'turnOrderPass';
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly helper = inject(TurnOrderHelper);
   private readonly log = inject(Log);

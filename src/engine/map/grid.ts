@@ -19,6 +19,13 @@ export class Grid {
     this.grid.update((grid) => grid.update(coordinates, updateFn));
   }
 
+  setTrackOwner(track: Track, owner?: PlayerColor): void {
+    this.update(track.location.coordinates, (hex) => {
+      assert(hex.type !== LocationType.CITY);
+      hex.tile!.owners[track.ownerIndex] = owner;
+    });
+  }
+
   set(coordinates: Coordinates, space: SpaceData): void {
     this.grid.update((grid) => {
       grid.set(coordinates, space);
@@ -67,7 +74,8 @@ export class Grid {
   connection(track: Track | Coordinates, dir: Direction): City | Track | undefined {
     const coordinates = track instanceof Track ? track.location.coordinates : track;
     const neighbor = this.getNeighbor(coordinates, dir);
-    assert(neighbor != null, 'discovered a track leading to an off-board location');
+    if (neighbor == null) return undefined;
+
     if (neighbor instanceof City) {
       return neighbor;
     }

@@ -21,6 +21,7 @@ export class PhaseModule {
   private readonly actionRegistry = new Map<string, ActionProcessor<{}>>();
 
   installAction<T extends {}>(action: ActionConstructor<T>) {
+    assert(!this.actionRegistry.has(action.action), 'cannot install duplicate actions: ' + action.action);
     this.actionRegistry.set(action.action, inject(action));
   }
 

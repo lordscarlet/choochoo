@@ -4,7 +4,7 @@ import { ActionProcessor } from "../game/action";
 
 
 export class PassAction implements ActionProcessor<{}> {
-  static readonly action = 'production';
+  static readonly action = 'pass';
   readonly assertInput = z.object({}).parse;
 
   validate(_: {}) { }

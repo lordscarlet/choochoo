@@ -163,7 +163,6 @@ export interface UndoAction {
 }
 
 export function useUndoAction(): UndoAction {
-  const tsrQueryClient = tsr.useQueryClient();
   const game = useGame();
   const me = useMe();
   const setGame = useSetGame();
@@ -173,7 +172,7 @@ export function useUndoAction(): UndoAction {
     onSuccess: (data) => {
       setGame(data.body.game);
     },
-  }), [game.id]);
+  }), [game.id, game.version]);
 
   const canUndo = game.undoPlayerId === me?.id;
 

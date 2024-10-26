@@ -26,11 +26,11 @@ export class Coordinates {
 
   static from({ q, r }: { q: number, r: number }): Coordinates {
     const key = `${q}|${r}`;
-    if (this.staticMap.has(key)) {
-      return this.staticMap.get(key)!;
+    if (Coordinates.staticMap.has(key)) {
+      return Coordinates.staticMap.get(key)!;
     }
     const newCoordinates = new Coordinates(q, r);
-    this.staticMap.set(key, newCoordinates);
+    Coordinates.staticMap.set(key, newCoordinates);
     return newCoordinates;
   }
 

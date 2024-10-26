@@ -20,7 +20,7 @@ import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { iterate } from "../../utils/functions";
 import { useAction, useEmptyAction } from "../services/game";
-import { useLogin } from "../services/me";
+import { useLogin, useMe } from "../services/me";
 import { useUsers } from "../services/user";
 import { useCurrentPlayer, useInjected, useInjectedState, useOptionalInjectedState } from "../utils/execution_context";
 PassAction
@@ -124,18 +124,20 @@ export function Bid() {
 }
 
 export function SwitchToActive() {
+  const me = useMe();
   const currentPlayerColor = useInjectedState(CURRENT_PLAYER);
   const players = useInjectedState(PLAYERS);
   const playerUsers = useUsers(players.map(({ playerId }) => playerId));
   const { login, isPending } = useLogin();
+  const currentPlayer = players.find((player) => player.color === currentPlayerColor);
   const switchToActiveUser = useCallback(() => {
-    const currentPlayer = players?.find(({ color }) => color === currentPlayerColor);
     const currentUser = playerUsers?.find(({ id }) => id === currentPlayer?.playerId);
     const userCreds = users.find(({ username }) => currentUser?.username === username);
     if (userCreds != null) {
       login({ usernameOrEmail: userCreds.username, password: userCreds.password });
     }
-  }, [currentPlayerColor, players, playerUsers]);
+  }, [currentPlayer, players, playerUsers]);
+  if (currentPlayer == null || me?.id === currentPlayer?.playerId) return <></>
   return <button onClick={switchToActiveUser} disabled={isPending}>Switch to active user</button>;
 }
 

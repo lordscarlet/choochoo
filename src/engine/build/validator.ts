@@ -33,7 +33,7 @@ export class Validator {
       return 'cannot build on a city';
     }
 
-    if (this.helper.tileAvailableInManifest(buildData.tileType)) {
+    if (!this.helper.tileAvailableInManifest(buildData.tileType)) {
       return 'no tile to place there';
     }
 

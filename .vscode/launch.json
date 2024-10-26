@@ -11,7 +11,7 @@
       "name": "Launch Program",
       "skipFiles": [
         "<node_internals>/**",
-        "src/client/**",
+        "src/client/**/**",
       ],
       "program": "${workspaceFolder}/src/server/index.ts",
       "outFiles": [
@@ -19,8 +19,8 @@
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": [
-          "${workspaceFolder}/**",
-          "!**/node_modules/**"
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
       ]
     }
   ]

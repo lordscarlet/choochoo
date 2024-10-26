@@ -6,11 +6,14 @@ import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { AVAILABLE_CITIES, currentPlayer } from "../game/state";
+import { City } from "../map/city";
 import { Grid } from "../map/grid";
 import { Location } from "../map/location";
+import { Track } from "../map/track";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
 import { LocationType } from "../state/location_type";
+import { allDirections } from "../state/tile";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
 
@@ -29,6 +32,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
   private readonly grid = inject(Grid);
   private readonly buildState = injectState(BUILD_STATE);
   private readonly availableCities = injectState(AVAILABLE_CITIES);
+  private readonly log = inject(Log);
 
   validate(data: UrbanizeData): void {
     const player = currentPlayer();
@@ -64,7 +68,20 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
       group: city.group,
     });
 
-    inject(Log).currentPlayer(`places city ${toLetter(city.group, city.onRoll[0])} in ${data.coordinates.toString()}`);
+    // Take ownership of connecting unowned track.
+    const toUpdate: Track[] = [];
+    for (const direction of allDirections) {
+      const connection = this.grid.connection(data.coordinates, direction);
+      if (connection == null || connection instanceof City || connection.getOwner() != null) continue;
+
+      toUpdate.push(...connection.getRoute());
+    }
+
+    for (const track of toUpdate) {
+      this.grid.setTrackOwner(track, currentPlayer().color);
+    }
+
+    this.log.currentPlayer(`places city ${toLetter(city.group, city.onRoll[0])} in ${data.coordinates.toString()}`);
     return this.helper.isAtEndOfTurn();
   }
 }

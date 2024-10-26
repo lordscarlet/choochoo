@@ -45,12 +45,22 @@ export class BuilderHelper {
   }
 
   private calculateManifest(newTile?: TileType): Map<TileType, number> {
-    // TODO: set manifest
     const manifest = new Map<TileType, number>([
-      [SimpleTileType.STRAIGHT, 100],
-      [SimpleTileType.CURVE, 100],
-      [SimpleTileType.TIGHT, 8],
-      [TownTileType.LOLLYPOP, 8],
+      [SimpleTileType.STRAIGHT, 48],
+      [SimpleTileType.CURVE, 55],
+      [SimpleTileType.TIGHT, 7],
+      [TownTileType.LOLLYPOP, 3],
+      [TownTileType.TIGHT_THREE, 2],
+      [TownTileType.LEFT_LEANER, 2],
+      [TownTileType.RIGHT_LEANER, 2],
+      [TownTileType.THREE_WAY, 2],
+      [ComplexTileType.X, 4],
+      [ComplexTileType.BOW_AND_ARROW, 4],
+      [ComplexTileType.CROSSING_CURVES, 3],
+      [ComplexTileType.STRAIGHT_TIGHT, 1],
+      [ComplexTileType.COEXISTING_CURVES, 1],
+      [ComplexTileType.CURVE_TIGHT_1, 1],
+      [ComplexTileType.CURVE_TIGHT_2, 1],
     ]);
 
     const townTiles = new Map<TownTileType, number>();
@@ -63,6 +73,7 @@ export class BuilderHelper {
     if (newTile != null) {
       tiles.push(newTile);
     }
+
     for (const tile of tiles) {
       if (isTownTile(tile)) {
         townTiles.set(tile, (townTiles.get(tile) ?? 0) + 1);

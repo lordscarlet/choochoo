@@ -1,4 +1,6 @@
+
 import { infiniteLoopCheck } from "../../utils/functions";
+import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
@@ -35,7 +37,8 @@ export class TurnOrderPhase extends PhaseModule {
   }
 
   autoAction(): ActionBundle<{}> | undefined {
-    if (currentPlayer().money < this.helper.getMinBid()) {
+    const canAffordBid = currentPlayer().money >= this.helper.getMinBid();
+    if (!canAffordBid && !this.helper.canUseTurnOrderPass()) {
       return { action: PassAction, data: {} };
     }
     return undefined;
@@ -44,33 +47,35 @@ export class TurnOrderPhase extends PhaseModule {
   onEnd(): void {
     super.onEnd();
     const state = this.turnOrderState();
+    const remainingBidders = this.helper.remainingBiddersOrder();
+    assert(remainingBidders.length === 1, 'expected exactly one bidder');
+    this.log.player(remainingBidders[0], 'takes first place');
     this.currentOrder.update((turnOrder) => {
       turnOrder.splice(0, turnOrder.length);
-      turnOrder.push(...state.nextTurnOrder);
+      turnOrder.push(remainingBidders[0], ...state.nextTurnOrder);
     });
     this.turnOrderState.delete();
   }
 
   findNextPlayer(currentColor: PlayerColor): PlayerColor | undefined {
-    const ignoring = new Set(this.turnOrderState().nextTurnOrder);
-    if (ignoring.size >= super.getPlayerOrder().length - 1) {
+    const remainingBiddersOrder = this.helper.remainingBiddersOrder();
+
+    if (remainingBiddersOrder.length === 1) {
       return undefined;
     }
 
     const maxBidPlayer = this.helper.getMaxBidPlayer();
-    if (maxBidPlayer != null) {
-      ignoring.add(maxBidPlayer);
-    }
 
     const infiniteLoop = infiniteLoopCheck(10);
     let nextPlayer = currentColor;
     do {
       infiniteLoop();
-      nextPlayer = super.findNextPlayer(nextPlayer) ?? super.getPlayerOrder()[0];
+      const previousIndex = remainingBiddersOrder.indexOf(nextPlayer);
+      nextPlayer = remainingBiddersOrder[previousIndex === remainingBiddersOrder.length - 1 ? 0 : previousIndex + 1];
       if (nextPlayer === maxBidPlayer) {
         this.log.player(nextPlayer, 'does not have to bid against themselves');
       }
-    } while (ignoring.has(nextPlayer));
+    } while (nextPlayer === maxBidPlayer);
     return nextPlayer;
   }
 }
