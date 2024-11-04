@@ -15,7 +15,7 @@ socket.on('connect', () => {
 
 const RESET = 'RESET';
 
-export function useMessages(gameId?: string): MessageApi[] | undefined {
+export function useMessages(gameId?: number): MessageApi[] | undefined {
   useJoinRoom(gameId);
 
   const queryClient = tsr.useQueryClient();
@@ -58,7 +58,7 @@ export function useMessages(gameId?: string): MessageApi[] | undefined {
   return messages;
 }
 
-export function useJoinRoom(gameId?: string) {
+export function useJoinRoom(gameId?: number) {
   useEffect(() => {
     if (gameId == null) {
       socket.emit('joinHomeRoom');

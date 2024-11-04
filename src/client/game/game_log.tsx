@@ -3,7 +3,7 @@ import * as styles from "./game_log.module.css";
 
 
 interface GameLogProps {
-  gameId?: string;
+  gameId?: number;
 }
 
 export function GameLog({ gameId }: GameLogProps) {
