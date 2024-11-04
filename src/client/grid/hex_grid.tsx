@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { PHASE } from "../../engine/game/phase";
-import { injectGrid } from "../../engine/game/state";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { City } from "../../engine/map/city";
 import { GridHelper } from "../../engine/map/grid_helper";
@@ -12,7 +11,7 @@ import { Phase } from "../../engine/state/phase";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { useAction } from "../services/game";
-import { ignoreInjectedState, useInjected, useInjectedState } from "../utils/execution_context";
+import { ignoreInjectedState, useGrid, useInjected, useInjectedState } from "../utils/execution_context";
 import { BuildingDialog } from "./building_dialog";
 import * as styles from "./hex_grid.module.css";
 import { HexRow } from "./hex_row";
@@ -49,9 +48,10 @@ function* calculateRows(locations: Iterable<City | Location>): Iterable<Iterable
 export function HexGrid() {
   const { canEmit: canEmitBuild } = useAction(BuildAction);
   const { canEmit: canEmitMove, emit: emitMove } = useAction(MoveAction);
-  const grid = injectGrid();
+  const grid = useGrid();
   const gridHelper = useInjected(GridHelper);
-  const rows = useMemo(() => [...calculateRows(gridHelper.all())], [gridHelper]);
+  const rows = useMemo(() => [...calculateRows(grid.values())], [grid]);
+  console.log('rendering grid', grid, rows);
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
   const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
   const phase = useInjectedState(PHASE);
@@ -79,7 +79,7 @@ export function HexGrid() {
         }
         // Otherwise, just update the owner
         const fromSpace = gridHelper.lookup(entirePath[entirePath.length - 2])!;
-        const eligibleOwners = [...grid().findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
+        const eligibleOwners = [...grid.findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
         const previousOwner = peek(moveActionProgress.path).owner;
         const nextOwner = eligibleOwners[(eligibleOwners.indexOf(previousOwner) + 1) % eligibleOwners.length];
         if (nextOwner === previousOwner) return;
@@ -91,7 +91,7 @@ export function HexGrid() {
       }
       const fromSpace = gridHelper.lookup(peek(entirePath))!;
       if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.goodColor() === moveActionProgress.good) return;
-      const eligibleOwners = [...grid().findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
+      const eligibleOwners = [...grid.findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
       if (eligibleOwners.length === 0) return;
       setMoveActionProgress({
         ...moveActionProgress,

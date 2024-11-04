@@ -1,7 +1,11 @@
+import { Map as ImmutableMap } from 'immutable';
 import { z } from "zod";
 import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
+import { deepEquals } from '../../utils/deep_equals';
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
+import { GridData } from "../state/grid";
+import { LocationType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { allDirections, Direction } from "../state/tile";
 import { City } from "./city";
@@ -12,9 +16,7 @@ import { Exit, TOWN, Track, tupleMap } from "./track";
 export type Space = City | Location;
 
 export class Grid {
-  private readonly grid = new Map<Coordinates, Space>();
-  constructor(builder: (grid: Grid, internalMap: Map<Coordinates, Space>) => void) {
-    builder(this, this.grid);
+  private constructor(private readonly grid: ImmutableMap<Coordinates, Space>) {
   }
 
   get(coordinates: Coordinates): Space | undefined {
@@ -25,15 +27,15 @@ export class Grid {
     return this.grid.has(coordinates);
   }
 
-  *keys(): Iterable<Coordinates> {
+  keys(): Iterable<Coordinates> {
     return this.grid.keys();
   }
 
-  *values(): Iterable<Space> {
+  values(): Iterable<Space> {
     return this.grid.values();
   }
 
-  *entries(): Iterable<[Coordinates, Space]> {
+  entries(): Iterable<[Coordinates, Space]> {
     return this.grid.entries();
   }
 
@@ -147,6 +149,26 @@ export class Grid {
       .filter(track => track != null)
       .filter((track) => this.endsWith(track, coordinates))
       .map((track) => track.getOwner()));
+  }
+
+  merge(gridData: GridData): Grid {
+    let map = this.grid;
+    for (const [coordinates, spaceData] of gridData) {
+      if (this.has(coordinates) && deepEquals(this.get(coordinates)!.data, spaceData)) {
+        continue;
+      }
+      if (spaceData.type === LocationType.CITY) {
+        map = map.set(coordinates, new City(coordinates, spaceData));
+      } else {
+        map = map.set(coordinates, new Location(coordinates, spaceData));
+      }
+    }
+    if (map === this.grid) return this;
+    return new Grid(map);
+  }
+
+  static fromData(gridData: GridData): Grid {
+    return new Grid(ImmutableMap()).merge(gridData);
   }
 }
 

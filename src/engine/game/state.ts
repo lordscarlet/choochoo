@@ -24,20 +24,9 @@ export function injectCurrentPlayer(): () => PlayerData {
 
 export function injectGrid(): () => Grid {
   return composeState([injectState(GRID)], (previousGrid: Grid | undefined, gridData: GridData): Grid => {
-    return new Grid((grid, map) => {
-      for (const [coordinates, spaceData] of gridData) {
-        if (previousGrid != null && previousGrid?.get(coordinates)?.data === gridData.get(coordinates)) {
-          if (!previousGrid.has(coordinates)) {
-            continue;
-          }
-          map.set(coordinates, previousGrid.get(coordinates)!);
-        }
-        if (spaceData.type === LocationType.CITY) {
-          map.set(coordinates, new City(coordinates, spaceData));
-        } else {
-          map.set(coordinates, new Location(coordinates, spaceData));
-        }
-      }
-    });
+    if (previousGrid) {
+      return previousGrid.merge(gridData);
+    }
+    return Grid.fromData(gridData);
   });
 }

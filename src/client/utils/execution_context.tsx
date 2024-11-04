@@ -1,8 +1,10 @@
-import { createContext, ReactNode, useContext, useEffect, useMemo } from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useRef } from "react";
 import { ExecutionContext, setExecutionContextGetter } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
-import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
+import { CURRENT_PLAYER, GRID, PLAYERS } from "../../engine/game/state";
+import { Grid } from "../../engine/map/grid";
 import { PlayerData } from "../../engine/state/player";
+import { grid } from "../../maps/factory";
 import { Immutable } from "../../utils/immutable";
 import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
@@ -62,4 +64,15 @@ export function useCurrentPlayer(): PlayerData {
   const playerColor = useInjectedState(CURRENT_PLAYER);
   const players = useInjectedState(PLAYERS);
   return players.find((player) => player.color === playerColor)!;
+}
+
+export function useGrid(): Grid {
+  const gridData = useInjectedState(GRID);
+  const previousGrid = useRef<Grid | undefined>(undefined);
+  return useMemo(() => {
+    if (previousGrid.current != null) {
+      return previousGrid.current.merge(gridData);
+    }
+    return Grid.fromData(gridData);
+  }, [grid]);
 }
