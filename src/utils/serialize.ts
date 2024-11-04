@@ -1,6 +1,6 @@
+import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import { Coordinates } from "./coordinates";
 import { isPrimitive } from "./functions";
-import { HexGrid, HexGridSerialized, ImmutableHexGrid } from "./hex_grid";
 import { Primitive } from "./types";
 import { assert, assertNever } from "./validate";
 
@@ -20,11 +20,6 @@ interface TypedObject<T extends Object> {
   value: T;
 }
 
-interface TypedHexGrid<T> {
-  type: 'hexgrid';
-  value: HexGridSerialized<Serialized<T>>;
-}
-
 interface TypedCoordinates {
   type: 'coords';
   value: string;
@@ -34,7 +29,6 @@ export type Serialized<T> =
   T extends Primitive ? T :
   T extends undefined ? null :
   T extends Coordinates ? TypedCoordinates :
-  T extends HexGrid<infer R> ? TypedHexGrid<R> :
   T extends Set<infer R> ? TypedSet<R> :
   T extends Map<infer R, infer S> ? TypedMap<R, S> :
   T extends Object ? TypedObject<T> :
@@ -53,15 +47,13 @@ export function unserialize(input: unknown): unknown {
     assert(typeof input === 'object', 'cannot unserialize non-object');
     assert('type' in input);
     assert('value' in input);
-    const { type, value } = input as TypedCoordinates | TypedHexGrid<unknown> | TypedSet<unknown> | TypedMap<unknown, unknown> | TypedObject<Object>;
+    const { type, value } = input as TypedCoordinates | TypedSet<unknown> | TypedMap<unknown, unknown> | TypedObject<Object>;
     if (type === 'set') {
-      return new Set(value.map(unserialize));
+      return ImmutableSet(value.map(unserialize));
     } else if (type === 'map') {
-      return new Map(value.map(([key, value]) => {
+      return ImmutableMap(value.map(([key, value]) => {
         return [unserialize(key), unserialize(value)];
       }));
-    } else if (type === 'hexgrid') {
-      return HexGrid.parse(value);
     } else if (type === 'coords') {
       return Coordinates.unserialize(value);
     } else if (type === 'object') {
@@ -80,12 +72,12 @@ export function serialize(value: unknown): unknown {
     return value;
   } else if (value === undefined) {
     return null;
-  } else if (value instanceof Set) {
+  } else if (value instanceof Set || ImmutableSet.isSet(value)) {
     return {
       type: 'set',
       value: [...value].map(serialize),
     };
-  } else if (value instanceof Map) {
+  } else if (value instanceof Map || ImmutableMap.isMap(value)) {
     return {
       type: 'map',
       value: [...value.entries()].map(([key, value]) => [serialize(key), serialize(value)]),
@@ -94,8 +86,6 @@ export function serialize(value: unknown): unknown {
     return value.map(serialize);
   } else if (value instanceof Coordinates) {
     return { type: 'coords', value: value.serialize() };
-  } else if (value instanceof ImmutableHexGrid) {
-    return { type: 'hexgrid', value: value.serialize() };
   } else if (typeof value === 'object') {
     assert(value.constructor === Object, `attempted to serialize ${value.constructor}: ${value}`);
     return {

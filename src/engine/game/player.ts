@@ -1,15 +1,15 @@
 import { inject, injectState } from "../framework/execution_context";
-import { Grid } from "../map/grid";
+import { GridHelper } from "../map/grid";
 import { Location } from "../map/location";
-import { PlayerColor, PlayerData } from "../state/player";
+import { MutablePlayerData, PlayerColor, PlayerData } from "../state/player";
 import { CURRENT_PLAYER, PLAYERS } from "./state";
 
 export class PlayerHelper {
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
   private readonly players = injectState(PLAYERS);
-  private readonly grid = inject(Grid);
+  private readonly grid = inject(GridHelper);
 
-  update(updateFn: (data: PlayerData) => void): void {
+  update(updateFn: (data: MutablePlayerData) => void): void {
     this.players.update((players) => {
       const player = players.find((player) => player.color === this.currentPlayer());
       updateFn(player!);

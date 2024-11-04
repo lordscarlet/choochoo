@@ -1,19 +1,15 @@
 import { compare, hash } from 'bcrypt';
-import { DataTypes } from 'sequelize';
-import { Column, CreatedAt, DeletedAt, Index, Model, Table, UpdatedAt } from 'sequelize-typescript';
+import { AutoIncrement, Column, CreatedAt, DeletedAt, Index, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript';
 import { CreateUserApi, MyUserApi, UserApi } from '../../api/user';
 
 const saltRounds = 10;
 
-@Table({ underscored: true })
+@Table({ modelName: 'User' })
 export class UserModel extends Model<UserModel, CreateUserApi> {
-  @Column({
-    allowNull: false,
-    primaryKey: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-  })
-  id!: string;
+  @AutoIncrement
+  @PrimaryKey
+  @Column
+  id!: number;
 
   @Index({ unique: true })
   @Column

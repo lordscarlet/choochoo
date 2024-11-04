@@ -11,8 +11,8 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   joinHomeRoom(): void;
   leaveHomeRoom(): void;
-  joinGameRoom(gameId: string): void;
-  leaveGameRoom(gameId: string): void;
+  joinGameRoom(gameId: number): void;
+  leaveGameRoom(gameId: number): void;
   emitAction(actionName: string, actionData: {}): void;
   submitMessage(message: string): void;
 }

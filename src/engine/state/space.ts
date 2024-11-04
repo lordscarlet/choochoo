@@ -1,12 +1,13 @@
 import { z } from "zod";
+import { Immutable } from "../../utils/immutable";
 import { CityGroup } from "./city_group";
 import { Good } from "./good";
 import { LocationType } from "./location_type";
 import { OnRoll } from "./roll";
-import { TileData } from "./tile";
+import { MutableTileData } from "./tile";
 
 
-export const CityData = z.object({
+export const MutableCityData = z.object({
   type: z.literal(LocationType.CITY),
   name: z.string(),
   color: z.nativeEnum(Good),
@@ -17,15 +18,18 @@ export const CityData = z.object({
   group: z.nativeEnum(CityGroup),
 });
 
-export type CityData = z.infer<typeof CityData>;
+export type MutableCityData = z.infer<typeof MutableCityData>;
+export type CityData = Immutable<MutableCityData>;
 
-export const LocationData = z.object({
+export const MutableLocationData = z.object({
   type: z.union([z.literal(LocationType.PLAIN), z.literal(LocationType.RIVER), z.literal(LocationType.MOUNTAIN)]),
   townName: z.string().optional(),
-  tile: TileData.optional(),
+  tile: MutableTileData.optional(),
 });
 
-export type LocationData = z.infer<typeof LocationData>;
+export type MutableLocationData = z.infer<typeof MutableLocationData>;
+export type LocationData = Immutable<MutableLocationData>;
 
-export const SpaceData = z.discriminatedUnion('type', [CityData, LocationData]);
-export type SpaceData = z.infer<typeof SpaceData>;
+export const MutableSpaceData = z.discriminatedUnion('type', [MutableCityData, MutableLocationData]);
+export type MutableSpaceData = z.infer<typeof MutableSpaceData>;
+export type SpaceData = Immutable<MutableSpaceData>;

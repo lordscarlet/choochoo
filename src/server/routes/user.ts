@@ -11,6 +11,9 @@ export const userApp = express();
 const router = initServer().router(userContract, {
 
   async getMe({ req }) {
+    if (typeof req.session.userId === 'string') {
+      delete req.session.userId;
+    }
     if (req.session.userId == null) {
       return { status: 200, body: { user: undefined } };
     }

@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { BuildData } from "../../engine/build/build";
 import { MoveData } from "../../engine/move/move";
-import { freeze, Immutable } from "../../utils/immutable";
+import { freeze, Immutable } from "../../utils/freeze";
 
 interface InProgressAction {
   inProgress: boolean;

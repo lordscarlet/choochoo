@@ -1,29 +1,20 @@
 import { Coordinates } from "../../utils/coordinates";
-import { memoize } from "../../utils/memoize";
-import { assert, assertNever } from "../../utils/validate";
-import { inject } from "../framework/execution_context";
+import { assertNever } from "../../utils/validate";
 import { LocationType } from "../state/location_type";
-import { PlayerColor } from "../state/player";
 import { LocationData } from "../state/space";
 import { ComplexTileType, Direction, SimpleTileType, TileData, TileType, TownTileType } from "../state/tile";
-import { City } from "./city";
-import { getOpposite, rotateDirectionClockwise } from "./direction";
-import { Grid } from "./grid";
+import { rotateDirectionClockwise } from "./direction";
 import { Exit, rotateExitClockwise, TOWN, Track, TrackInfo } from "./track";
 
 export class Location {
-  constructor(private readonly grid: Grid, readonly coordinates: Coordinates, private readonly data: LocationData) {
+  private readonly track: Track[];
+
+  constructor(readonly coordinates: Coordinates, readonly data: LocationData) {
+    this.track = calculateTrackInfo(this.data.tile).map((trackInfo, index) => new Track(index, this.coordinates, trackInfo));
   }
 
-  // TODO: add memoization
-  @memoize
   getTrack(): Track[] {
-    return this.getTrackInfo().map((trackInfo, index) => inject(Track, this.grid, index, this, trackInfo));
-  }
-
-  @memoize
-  getTrackInfo(): TrackInfo[] {
-    return calculateTrackInfo(this.data.tile);
+    return this.track;
   }
 
   hasTile(): boolean {
@@ -54,30 +45,8 @@ export class Location {
     return this.data.type;
   }
 
-  @memoize
-  isDangling(direction: Direction): boolean {
-    if (this.trackExiting(direction) == null) return false;
-    const neighbor = this.getNeighbor(direction);
-    assert(neighbor != null, 'found track dangling to a non-tile');
-    if (neighbor instanceof City) return false;
-    return !neighbor.trackExiting(getOpposite(direction)) != null;
-  }
-
-  @memoize
   trackExiting(direction: Direction): Track | undefined {
     return this.getTrack().find((track) => track.hasExit(direction));
-  }
-
-  @memoize
-  getNeighbor(dir: Direction): Location | City | undefined {
-    return this.grid.getNeighbor(this.coordinates, dir);
-  }
-
-  @memoize
-  findRoutesToLocation(coordinates: Coordinates): Set<PlayerColor | undefined> {
-    assert(this.hasTown(), 'cannot call findRoutesToLocation from a non-town hex');
-    return new Set(
-      this.getTrack().filter((track) => track.endsWith(coordinates)).map((track) => track.getOwner()));
   }
 }
 

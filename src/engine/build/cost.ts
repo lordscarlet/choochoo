@@ -1,7 +1,7 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
-import { Grid } from "../map/grid";
+import { GridHelper } from "../map/grid";
 import { Location, toBaseTile } from "../map/location";
 import { crosses, isComplexTile, isSimpleTile, isTownTile } from "../map/tile";
 import { LocationType } from "../state/location_type";
@@ -9,7 +9,7 @@ import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../stat
 
 
 export class BuildCostCalculator {
-  private readonly grid = inject(Grid);
+  private readonly grid = inject(GridHelper);
 
   costOf(coordinates: Coordinates, newTileType: TileType): number {
     const location = this.grid.lookup(coordinates);

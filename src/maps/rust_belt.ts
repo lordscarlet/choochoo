@@ -4,11 +4,9 @@ import { MapSettings } from '../engine/game/map_settings';
 import { CityGroup } from '../engine/state/city_group';
 import { Good } from '../engine/state/good';
 import { LocationType } from '../engine/state/location_type';
-import { SpaceSettingData } from '../engine/state/map_settings';
 import { LocationData } from '../engine/state/space';
 import { duplicate } from '../utils/functions';
-import { HexGrid } from '../utils/hex_grid';
-import { city } from './factory';
+import { city, grid } from './factory';
 
 const PLAIN: LocationData = {
   type: LocationType.PLAIN,
@@ -26,7 +24,7 @@ const MOUNTAIN: LocationData = {
 
 const { WHITE, BLACK } = CityGroup;
 
-const map: Array<Array<SpaceSettingData | undefined>> = offset([
+const map = grid([
   [
     ...duplicate(10, PLAIN),
     city('Kansas City', Good.PURPLE, WHITE, 3),
@@ -177,18 +175,6 @@ const map: Array<Array<SpaceSettingData | undefined>> = offset([
   ],
 ]);
 
-function offset(grid: Array<Array<SpaceSettingData | undefined>>): Array<Array<SpaceSettingData | undefined>> {
-  const newGrid: Array<Array<SpaceSettingData | undefined>> = [];
-  for (let i = 0; i < grid.length; i++) {
-    const newColumn: Array<SpaceSettingData | undefined> = [];
-    for (let l = 0; l < grid.length - i - 2; l += 2) {
-      newColumn.push(UNPASSABLE);
-    }
-    newGrid.push([...newColumn, ...grid[i]]);
-  }
-  return newGrid;
-}
-
 function town(townName: string): LocationData {
   return {
     ...PLAIN,
@@ -201,10 +187,7 @@ export class RustBeltMapSettings implements MapSettings {
   readonly name = 'Rust Belt';
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
-
-  getStartingGrid(): HexGrid<SpaceSettingData> {
-    return HexGrid.fromArray(map);
-  }
+  readonly startingGrid = map;
 
   registerOverrides(ctx: InjectionContext): void { }
 }

@@ -16,8 +16,8 @@ export const gameClient = initClient(gameContract, {
   baseHeaders: { 'Content-Type': 'application/json' },
 });
 
-function getQueryKey(gameId: string): string[] {
-  return ['games', gameId];
+function getQueryKey(gameId: number | string): string[] {
+  return ['games', `${gameId}`];
 }
 
 export function useGameList(): GameApi[] {
@@ -26,7 +26,7 @@ export function useGameList(): GameApi[] {
 }
 
 export function useGame(): GameApi {
-  const gameId = useParams().gameId!;
+  const gameId = parseInt(useParams().gameId!);
   const { data } = tsr.games.get.useSuspenseQuery({ queryKey: getQueryKey(gameId), queryData: { params: { gameId } } });
 
   useJoinRoom();

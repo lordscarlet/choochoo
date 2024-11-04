@@ -1,9 +1,9 @@
 import { inject } from "../framework/execution_context";
 import { City } from "../map/city";
-import { Grid } from "../map/grid";
+import { GridHelper } from "../map/grid";
 
 export class GoodsHelper {
-  private readonly grid = inject(Grid);
+  private readonly grid = inject(GridHelper);
   getTotalUpcomingGoodsSlots(urbanized: boolean) {
     return urbanized ? 2 : 3;
   }

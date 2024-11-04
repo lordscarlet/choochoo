@@ -31,7 +31,8 @@ const router = initServer().router(gameContract, {
 
   async get({ params }) {
     const game = await GameModel.findByPk(params.gameId);
-    assert(game != null);
+    console.log('getting', params, game);
+    assert(game != null, { notFound: true });
     return { status: 200, body: { game: game.toApi() } };
   },
 
@@ -43,7 +44,7 @@ const router = initServer().router(gameContract, {
       gameKey: body.gameKey,
       name: body.name,
       status: GameStatus.LOBBY,
-      playerIds: ['5d1602cf-d95a-4b0e-a287-6088508e1676', '6df353bf-d067-44fa-920e-e382f9800a42', 'a50b1e58-c956-49f3-b07c-7b1463459083'],
+      playerIds: [4, 5, 6],
     });
     return { status: 201, body: { game: game.toApi() } };
   },
@@ -122,7 +123,7 @@ const router = initServer().router(gameContract, {
         actionData: JSON.stringify(body.actionData),
         reversible,
         gameId: game.id,
-        userId: userId,
+        userId,
       });
 
       const { gameData, logs, activePlayerId } =

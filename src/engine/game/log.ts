@@ -1,7 +1,8 @@
 import { getPlayerColor, PlayerColor } from "../state/player";
-import { currentPlayer } from "./state";
+import { injectCurrentPlayer } from "./state";
 
 export class Log {
+  private readonly currPlayerData = injectCurrentPlayer();
   private readonly logs: string[] = [];
 
   log(entry: string): void {
@@ -14,7 +15,7 @@ export class Log {
   }
 
   currentPlayer(entry: string): void {
-    this.player(currentPlayer().color, entry);
+    this.player(this.currPlayerData().color, entry);
   }
 
   dump(): string[] {

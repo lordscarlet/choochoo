@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Index, Model, Table, UpdatedAt } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Index, Model, PrimaryKey, Table, UpdatedAt } from "sequelize-typescript";
 import { GameModel } from "./game";
 import { UserModel } from "./user";
 
@@ -10,21 +10,20 @@ export interface GameHistoryCreate {
   actionName: string;
   actionData: string;
   reversible: boolean;
-  gameId: string;
-  userId: string;
+  gameId: number;
+  userId: number;
 }
 
-@Table({ underscored: true })
-export class GameHistoryModel extends Model<GameHistoryModel, GameHistoryCreate> {
-  @Column({
-    allowNull: false,
-    primaryKey: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-  })
-  id!: string;
+const gameVersionIndex = 'game-version';
 
-  @Index('game-version')
+@Table({ modelName: 'GameHistory' })
+export class GameHistoryModel extends Model<GameHistoryModel, GameHistoryCreate> {
+  @AutoIncrement
+  @PrimaryKey
+  @Column
+  id!: number;
+
+  @Index(gameVersionIndex)
   @Column
   version!: number;
 
@@ -43,17 +42,15 @@ export class GameHistoryModel extends Model<GameHistoryModel, GameHistoryCreate>
   @Column
   reversible!: boolean;
 
-  @Index('game-version')
+  @Index(gameVersionIndex)
   @ForeignKey(() => GameModel)
-  @Column(DataTypes.UUID)
-  gameId!: string;
+  gameId!: number;
 
   @BelongsTo(() => GameModel)
   game!: GameModel;
 
   @ForeignKey(() => UserModel)
-  @Column(DataTypes.UUID)
-  userId!: string;
+  userId!: number;
 
   @BelongsTo(() => UserModel)
   user!: UserModel;

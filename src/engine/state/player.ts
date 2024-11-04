@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Immutable } from "../../utils/immutable";
 import { assertNever } from "../../utils/validate";
 import { Action } from "./action";
 
@@ -13,8 +14,8 @@ export enum PlayerColor {
   BROWN,
 }
 
-export const PlayerData = z.object({
-  playerId: z.string(),
+export const MutablePlayerData = z.object({
+  playerId: z.number(),
   color: z.nativeEnum(PlayerColor),
   income: z.number(),
   shares: z.number(),
@@ -24,7 +25,8 @@ export const PlayerData = z.object({
   outOfGame: z.boolean().optional(),
 });
 
-export type PlayerData = z.infer<typeof PlayerData>;
+export type MutablePlayerData = z.infer<typeof MutablePlayerData>;
+export type PlayerData = Immutable<MutablePlayerData>;
 
 export function getPlayerColor(playerColor?: PlayerColor): 'red' | 'yellow' | 'green' | 'purple' | 'black' | 'blue' | 'brown' {
   switch (playerColor) {

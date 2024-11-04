@@ -61,5 +61,5 @@ export function useInjectedState<T>(key: Key<T>): Immutable<T> {
 export function useCurrentPlayer(): PlayerData {
   const playerColor = useInjectedState(CURRENT_PLAYER);
   const players = useInjectedState(PLAYERS);
-  return players!.find((player) => player.color === playerColor)!;
+  return players.find((player) => player.color === playerColor)!;
 }

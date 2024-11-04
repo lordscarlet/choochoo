@@ -1,14 +1,16 @@
 import { z } from "zod";
 import { CoordinatesZod } from "../../utils/coordinates";
+import { Immutable } from "../../utils/immutable";
 import { Key } from "../framework/key";
 import { DanglerInfo } from "../map/grid";
 
-export const BuildStateDefinition = z.object({
+export const MutableBuildState = z.object({
   previousBuilds: z.array(CoordinatesZod),
   hasUrbanized: z.boolean(),
   danglers: z.array(DanglerInfo),
 });
 
-export type BuildState = z.infer<typeof BuildStateDefinition>;
+export type MutableBuildState = z.infer<typeof MutableBuildState>;
+export type BuildState = Immutable<MutableBuildState>;
 
-export const BUILD_STATE = new Key<BuildState>('BuildState');
+export const BUILD_STATE = new Key<MutableBuildState>('BuildState');

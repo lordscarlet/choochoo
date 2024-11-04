@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { PHASE } from "../../engine/game/phase";
+import { injectGrid } from "../../engine/game/state";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { City } from "../../engine/map/city";
-import { Grid } from "../../engine/map/grid";
+import { GridHelper } from "../../engine/map/grid";
 import { Location } from "../../engine/map/location";
 import { MoveAction, MoveData } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";
@@ -48,8 +49,9 @@ function* calculateRows(locations: Iterable<City | Location>): Iterable<Iterable
 export function HexGrid() {
   const { canEmit: canEmitBuild } = useAction(BuildAction);
   const { canEmit: canEmitMove, emit: emitMove } = useAction(MoveAction);
-  const grid = useInjected(Grid);
-  const rows = useMemo(() => [...calculateRows(grid.all())], [grid]);
+  const grid = injectGrid();
+  const gridHelper = useInjected(GridHelper);
+  const rows = useMemo(() => [...calculateRows(gridHelper.all())], [gridHelper]);
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
   const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
   const phase = useInjectedState(PHASE);
@@ -76,8 +78,8 @@ export function HexGrid() {
           return;
         }
         // Otherwise, just update the owner
-        const fromSpace = grid.lookup(entirePath[entirePath.length - 2])!;
-        const eligibleOwners = [...fromSpace.findRoutesToLocation(space.coordinates)];
+        const fromSpace = gridHelper.lookup(entirePath[entirePath.length - 2])!;
+        const eligibleOwners = [...grid().findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
         const previousOwner = peek(moveActionProgress.path).owner;
         const nextOwner = eligibleOwners[(eligibleOwners.indexOf(previousOwner) + 1) % eligibleOwners.length];
         if (nextOwner === previousOwner) return;
@@ -87,16 +89,16 @@ export function HexGrid() {
         });
         return;
       }
-      const fromSpace = grid.lookup(peek(entirePath))!;
+      const fromSpace = gridHelper.lookup(peek(entirePath))!;
       if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.goodColor() === moveActionProgress.good) return;
-      const eligibleOwners = [...fromSpace.findRoutesToLocation(space.coordinates)];
+      const eligibleOwners = [...grid().findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
       if (eligibleOwners.length === 0) return;
       setMoveActionProgress({
         ...moveActionProgress,
         path: moveActionProgress.path.concat([{ owner: eligibleOwners[0], endingStop: space.coordinates }]),
       });
     }
-  }, [canEmitBuild, moveActionProgress, grid, productionState]);
+  }, [canEmitBuild, moveActionProgress, grid, gridHelper, productionState]);
 
   const onSelectGood = useCallback((city: City, good: Good) => {
     if (moveActionProgress != null) return;
@@ -108,10 +110,10 @@ export function HexGrid() {
   const canSendGood = useMemo(() => {
     if (moveActionProgress == null) return false;
     if (moveActionProgress.path.length === 0) return false;
-    const destination = grid.lookup(peek(moveActionProgress.path).endingStop);
+    const destination = gridHelper.lookup(peek(moveActionProgress.path).endingStop);
     if (!(destination instanceof City)) return false;
     return destination.goodColor() === moveActionProgress.good;
-  }, [grid, moveActionProgress]);
+  }, [gridHelper, moveActionProgress]);
 
   const sendGood = useCallback(() => {
     assert(moveActionProgress != null);
@@ -130,7 +132,7 @@ export function HexGrid() {
       {canSendGood && <button onClick={sendGood}>Commit</button>}
       <button onClick={startOver}>Start over</button>
     </div>}
-    <div className={styles['hex-grid']}>
+    <div className={styles['hex-gridHelper']}>
       {[...rows].map((row, index) => <HexRow key={index} onSelectGood={onSelectGood} row={row} onClick={cellClick} />)}
       <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
     </div>

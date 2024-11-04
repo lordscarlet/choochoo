@@ -1,10 +1,10 @@
+import { Map as ImmutableMap, Set as ImmutableSet } from "immutable";
 import { Coordinates } from "./coordinates";
 import { isPrimitive } from "./functions";
-import { BaseGrid } from "./hex_grid";
-import { ImmutableMap, ImmutableSet, Mutable } from "./immutable";
+import { Immutable } from "./immutable";
 import { assert } from "./validate";
 
-export function deepCopy<T>(t: T): Mutable<T>;
+export function deepCopy<T>(t: Immutable<T>): T;
 export function deepCopy<T>(t: unknown): unknown {
   if (isPrimitive(t)) {
     return t;
@@ -12,12 +12,10 @@ export function deepCopy<T>(t: unknown): unknown {
     return t;
   } else if (Array.isArray(t)) {
     return t.map(deepCopy);
-  } else if (t instanceof ImmutableSet || t instanceof Set) {
+  } else if (ImmutableSet.isSet(t) || t instanceof Set) {
     return new Set([...t].map(deepCopy));
-  } else if (t instanceof ImmutableMap || t instanceof Map) {
+  } else if (ImmutableMap.isMap(t) || t instanceof Map) {
     return new Map([...t].map(([k, v]) => [deepCopy(k), deepCopy(v)]));
-  } else if (t instanceof BaseGrid) {
-    return t.copy();
   } else if (t instanceof Coordinates) {
     return t;
   } else {

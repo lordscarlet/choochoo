@@ -13,18 +13,18 @@ export const LoginUserApi = z.object({
 });
 
 export const UserApi = z.object({
-  id: z.string(),
+  id: z.number(),
   username: z.string(),
 });
 
 export const MyUserApi = z.object({
-  id: z.string(),
+  id: z.number(),
   email: z.string(),
   username: z.string(),
 });
 
 export const ListQueryApi = z.object({
-  id: z.array(z.string()),
+  id: z.array(z.number()),
 });
 
 export type CreateUserApi = z.infer<typeof CreateUserApi>;
@@ -68,7 +68,7 @@ export const userContract = c.router({
     path: '/users/me',
   },
   get: {
-    pathParams: z.object({ userId: z.string() }),
+    pathParams: z.object({ userId: z.coerce.number() }),
     responses: {
       200: z.object({ user: UserApi }),
     },

@@ -1,10 +1,9 @@
 import { z } from "zod";
+import { assert } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
-import { currentPlayer } from "../game/state";
-import { assert } from "../../utils/validate";
 import { ShareHelper } from "./share_helper";
 
 
@@ -26,10 +25,10 @@ export class TakeSharesAction implements ActionProcessor<TakeSharesData> {
     const helper = inject(ShareHelper);
     assert(
       data.numShares <= helper.getSharesTheyCanTake(),
-      {invalidInput: `cannot take more than ${helper.getMaxShares()} shares`})
+      { invalidInput: `cannot take more than ${helper.getMaxShares()} shares` })
   }
 
-  process({numShares}: TakeSharesData): boolean {
+  process({ numShares }: TakeSharesData): boolean {
     this.playerHelper.update((player) => {
       player.shares += numShares;
       player.money += 5 * numShares;

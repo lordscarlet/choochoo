@@ -5,7 +5,7 @@ import { ROUND, RoundEngine } from "../../engine/game/round";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
-import { Grid } from "../../engine/map/grid";
+import { GridHelper } from "../../engine/map/grid";
 import { MOVE_STATE } from "../../engine/move/state";
 import { CityGroup } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
@@ -73,7 +73,7 @@ export function UndoButton() {
 }
 
 export function Goods() {
-  const grid = useInjected(Grid);
+  const grid = useInjected(GridHelper);
   const availableCities = useInjectedState(AVAILABLE_CITIES);
   const cities = useMemo(() => {
     const cities = grid.findAllCities();

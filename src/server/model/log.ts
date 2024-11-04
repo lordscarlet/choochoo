@@ -1,40 +1,35 @@
 import { DataTypes } from "sequelize";
-import { BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Model, Table, UpdatedAt } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from "sequelize-typescript";
 import { MessageApi } from "../../api/message";
 import { GameModel } from "./game";
 import { UserModel } from "./user";
 
 interface CreateLog {
   message: string;
-  userId?: string;
-  gameId?: string;
+  userId?: number;
+  gameId?: number;
   version?: number;
   index: number;
 }
 
-@Table({ underscored: true })
+@Table({ modelName: 'Log' })
 export class LogModel extends Model<LogModel, CreateLog> {
-  @Column({
-    allowNull: false,
-    primaryKey: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-  })
-  id!: string;
+  @AutoIncrement
+  @PrimaryKey
+  @Column
+  id!: number;
 
   @Column
   message!: string;
 
   @ForeignKey(() => UserModel)
-  @Column(DataTypes.UUID)
-  userId?: string;
+  userId?: number;
 
   @BelongsTo(() => UserModel)
   user?: UserModel;
 
   @ForeignKey(() => GameModel)
-  @Column(DataTypes.UUID)
-  gameId?: string;
+  gameId?: number;
 
   @BelongsTo(() => GameModel)
   game?: GameModel;

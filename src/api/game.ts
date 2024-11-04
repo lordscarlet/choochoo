@@ -23,21 +23,21 @@ export const CreateGameApi = z.object({
 });
 
 export const LogEntry = z.object({
-  userId: z.string().optional(),
+  userId: z.number().optional(),
   message: z.string(),
   date: z.string(),
 });
 
 export const GameApi = z.object({
-  id: z.string(),
+  id: z.number(),
   gameKey: z.string(),
   version: z.number(),
   name: z.string(),
-  playerIds: z.array(z.string()),
+  playerIds: z.array(z.number()),
   status: z.nativeEnum(GameStatus),
   gameData: z.string().optional(),
-  activePlayerId: z.string().optional(),
-  undoPlayerId: z.string().optional(),
+  activePlayerId: z.number().optional(),
+  undoPlayerId: z.number().optional(),
   logs: z.array(LogEntry).optional(),
 });
 
@@ -58,7 +58,7 @@ const c = initContract();
 export const gameContract = c.router({
   get: {
     method: 'GET',
-    pathParams: z.object({ gameId: z.string() }),
+    pathParams: z.object({ gameId: z.coerce.number() }),
     path: '/games/:gameId',
     responses: {
       200: z.object({ game: GameApi }),
@@ -85,7 +85,7 @@ export const gameContract = c.router({
   },
   join: {
     method: 'POST',
-    pathParams: z.object({ gameId: z.string() }),
+    pathParams: z.object({ gameId: z.coerce.number() }),
     path: '/games/:gameId/join',
     body: z.object({}),
     responses: {
@@ -95,7 +95,7 @@ export const gameContract = c.router({
   },
   start: {
     method: 'POST',
-    pathParams: z.object({ gameId: z.string() }),
+    pathParams: z.object({ gameId: z.coerce.number() }),
     path: '/games/:gameId/start',
     body: z.object({}),
     responses: {
@@ -105,7 +105,7 @@ export const gameContract = c.router({
   },
   leave: {
     method: 'POST',
-    pathParams: z.object({ gameId: z.string() }),
+    pathParams: z.object({ gameId: z.coerce.number() }),
     path: '/games/:gameId/leave',
     body: z.object({}),
     responses: {
@@ -115,7 +115,7 @@ export const gameContract = c.router({
   },
   performAction: {
     method: 'POST',
-    pathParams: z.object({ gameId: z.string() }),
+    pathParams: z.object({ gameId: z.coerce.number() }),
     path: '/games/:gameId/action',
     body: ActionApi,
     responses: {
@@ -125,7 +125,7 @@ export const gameContract = c.router({
   },
   undoAction: {
     method: 'POST',
-    pathParams: z.object({ gameId: z.string() }),
+    pathParams: z.object({ gameId: z.coerce.number() }),
     path: '/games/:gameId/undo',
     body: z.object({ version: z.number() }),
     responses: {

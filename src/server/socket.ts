@@ -7,7 +7,7 @@ export const io = new Server<ClientToServerEvents, ServerToClientEvents>();
 
 const HOME_ROOM = 'HOME_ROOM';
 
-function roomName(gameId?: string) {
+function roomName(gameId?: number) {
   return gameId == undefined ? HOME_ROOM : 'gameId-' + gameId;
 }
 
@@ -21,7 +21,7 @@ export function emitToRoom(logs: LogModel[], game?: GameApi): void {
 io.on('connection', (socket) => {
   const rooms = new Map<string, number>();
 
-  function joinRoom(gameId?: string) {
+  function joinRoom(gameId?: number) {
     const name = roomName(gameId);
     if (!rooms.has(name)) {
       rooms.set(name, 1);
@@ -31,7 +31,7 @@ io.on('connection', (socket) => {
     }
   }
 
-  function leaveRoom(gameId?: string) {
+  function leaveRoom(gameId?: number) {
     const name = roomName(gameId);
     if (!rooms.has(name)) {
       return;

@@ -6,8 +6,8 @@ import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
-import { currentPlayer } from "../game/state";
-import { Grid } from "../map/grid";
+import { injectCurrentPlayer, injectGrid } from "../game/state";
+import { GridHelper } from "../map/grid";
 import { calculateTrackInfo, Location } from "../map/location";
 import { TOWN, Track } from "../map/track";
 import { LocationType } from "../state/location_type";
@@ -31,7 +31,9 @@ export class BuildAction implements ActionProcessor<BuildData> {
   readonly assertInput = BuildData.parse;
 
   private readonly buildState = injectState(BUILD_STATE);
-  private readonly grid = inject(Grid);
+  private readonly currentPlayer = injectCurrentPlayer();
+  private readonly grid = injectGrid();
+  private readonly gridHelper = inject(GridHelper);
   private readonly helper = inject(BuilderHelper);
   private readonly costCalculator = inject(BuildCostCalculator);
   private readonly playerHelper = inject(PlayerHelper);
@@ -45,14 +47,14 @@ export class BuildAction implements ActionProcessor<BuildData> {
       throw new InvalidInputError(`You can only build at most ${maxTrack} track`);
     }
 
-    if (currentPlayer().money < this.costCalculator.costOf(coordinates, data.tileType)) {
+    if (this.currentPlayer().money < this.costCalculator.costOf(coordinates, data.tileType)) {
       throw new InvalidInputError('Cannot afford to place track');
     }
 
     if (this.hasBuiltHere(coordinates)) {
       throw new InvalidInputError('cannot build in the same location twice in one turn');
     }
-    const invalidBuildReason = this.validator.getInvalidBuildReason(coordinates, { ...data, playerColor: currentPlayer().color });
+    const invalidBuildReason = this.validator.getInvalidBuildReason(coordinates, { ...data, playerColor: this.currentPlayer().color });
     if (invalidBuildReason != null) {
       throw new InvalidInputError('invalid build: ' + invalidBuildReason);
     }
@@ -63,16 +65,16 @@ export class BuildAction implements ActionProcessor<BuildData> {
     this.playerHelper.update((player) => player.money -= this.costCalculator.costOf(coordinates, data.tileType));
     const newTile = this.newTile(data);
     inject(Log).currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${data.coordinates}`);
-    this.grid.update(coordinates, (hex) => {
+    this.gridHelper.update(coordinates, (hex) => {
       assert(hex.type !== LocationType.CITY);
       hex.tile = newTile;
     });
-    const location = this.grid.lookup(coordinates);
+    const location = this.gridHelper.lookup(coordinates);
     assert(location instanceof Location);
 
     const toUpdate: Array<[Track, PlayerColor | undefined]> = [];
     for (const originatingTrack of location.getTrack()) {
-      for (const track of originatingTrack.getRoute()) {
+      for (const track of this.grid().getRoute(originatingTrack)) {
         if (track.getOwner() !== originatingTrack.getOwner()) {
           toUpdate.push([track, originatingTrack.getOwner()]);
         }
@@ -80,7 +82,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     }
 
     for (const [track, color] of toUpdate) {
-      this.grid.setTrackOwner(track, color);
+      this.gridHelper.setTrackOwner(track, color);
     }
 
     this.buildState.update(({ previousBuilds }) => {
@@ -91,7 +93,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
 
   private newTile(data: BuildData): TileData {
     const newTileData = calculateTrackInfo(data);
-    const oldTrack = this.grid.lookup(data.coordinates);
+    const oldTrack = this.gridHelper.lookup(data.coordinates);
     assert(oldTrack instanceof Location);
     const owners = newTileData.map((newTrack) => {
       const previousTrack = oldTrack.getTrack().find((track) =>
@@ -105,7 +107,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
         }
       }
 
-      return currentPlayer().color;
+      return this.currentPlayer().color;
     });
 
     return {

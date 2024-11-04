@@ -6,9 +6,9 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
-import { currentPlayer, PLAYERS } from "../game/state";
+import { injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
 import { City } from "../map/city";
-import { Grid } from "../map/grid";
+import { GridHelper } from "../map/grid";
 import { Location } from "../map/location";
 import { getGoodColor, Good } from "../state/good";
 import { LocationType } from "../state/location_type";
@@ -33,12 +33,14 @@ export type MoveData = z.infer<typeof MoveData>;
 
 export class MoveAction implements ActionProcessor<MoveData> {
   static readonly action = 'move';
-  private readonly grid = inject(Grid);
+  private readonly currentPlayer = injectCurrentPlayer();
+  private readonly gridHelper = inject(GridHelper);
+  private readonly grid = injectGrid();
   private readonly log = inject(Log);
 
   readonly assertInput = MoveData.parse;
   validate(action: MoveData): void {
-    const curr = currentPlayer();
+    const curr = this.currentPlayer();
     if (action.path.length > curr.locomotive) {
       throw new InvalidInputError(`Can only move ${curr.locomotive} steps`);
     }
@@ -46,11 +48,11 @@ export class MoveAction implements ActionProcessor<MoveData> {
       throw new InvalidInputError('must move over at least one route');
     }
 
-    const startingCity = this.grid.lookup(action.startingCity);
+    const startingCity = this.gridHelper.lookup(action.startingCity);
     assert(startingCity instanceof City);
     assert(startingCity.getGoods().includes(action.good), `${action.good} good not found at the indicated location`);
 
-    const endingLocation = this.grid.lookup(peek(action.path).endingStop);
+    const endingLocation = this.gridHelper.lookup(peek(action.path).endingStop);
 
     if (!(endingLocation instanceof City)) {
       throw new InvalidInputError(`${action.good} good cannot be delivered to non city`);
@@ -61,7 +63,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
     // Validate that the route passes through cities and towns
     for (const step of action.path.slice(0, action.path.length - 1)) {
-      const location = this.grid.lookup(step.endingStop);
+      const location = this.gridHelper.lookup(step.endingStop);
       if (!(location instanceof City) && !(location instanceof Location && location.hasTown())) {
         throw new InvalidInputError('Invalid path, must pass through cities and towns');
       }
@@ -83,7 +85,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
     let fromCity: City | Location = startingCity;
     for (const step of action.path) {
       const toCoordinates = step.endingStop;
-      const eligibleOwners = fromCity.findRoutesToLocation(toCoordinates);
+      const eligibleOwners = this.grid().findRoutesToLocation(fromCity.coordinates, toCoordinates);
       if (eligibleOwners.size === 0) {
         throw new InvalidInputError(`no route found from ${fromCity.coordinates} to ${toCoordinates}`);
       }
@@ -92,13 +94,13 @@ export class MoveAction implements ActionProcessor<MoveData> {
         throw new InvalidInputError(`no route found from ${fromCity.coordinates} to ${toCoordinates} owned by ${step.owner}`);
       }
 
-      fromCity = this.grid.lookup(toCoordinates)!;
+      fromCity = this.gridHelper.lookup(toCoordinates)!;
     }
   }
 
   process(action: MoveData): boolean {
     const coordinates = Coordinates.from(action.startingCity);
-    this.grid.update(coordinates, (city) => {
+    this.gridHelper.update(coordinates, (city) => {
       assert(city.type === LocationType.CITY);
       city.goods.splice(city.goods.indexOf(action.good), 1);
     });

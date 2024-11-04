@@ -6,7 +6,7 @@ import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
 import { City } from "../map/city";
-import { Grid } from "../map/grid";
+import { GridHelper } from "../map/grid";
 import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";
 import { LocationType } from "../state/location_type";
@@ -28,14 +28,14 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
   static readonly action = 'production';
   readonly assertInput = ProductionData.parse;
 
-  private readonly grid = inject(Grid);
+  private readonly grid = inject(GridHelper);
   private readonly log = inject(Log);
   private readonly helper = inject(GoodsHelper);
   private readonly playerHelper = inject(PlayerHelper);
   private readonly turnState = injectState(GOODS_GROWTH_STATE);
 
   private findCity(data: ProductionData): City | undefined {
-    return this.grid.findAllCities().find((city) =>
+    return [...this.grid.findAllCities()].find((city) =>
       city.onRoll().includes(data.onRoll) &&
       city.isUrbanized() === data.urbanized &&
       city.group() === data.cityGroup);

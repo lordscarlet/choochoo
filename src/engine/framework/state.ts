@@ -1,4 +1,6 @@
+import { Map as ImmutableMap } from 'immutable';
 import { deepCopy } from "../../utils/deep_copy";
+import { deepEquals } from "../../utils/deep_equals";
 import { freeze, Immutable } from "../../utils/immutable";
 import { serialize, unserialize } from "../../utils/serialize";
 import { Key } from './key';
@@ -9,7 +11,7 @@ interface StateContainer<T> {
 }
 
 export class StateStore {
-  private readonly state = new Map<string, StateContainer<unknown>>();
+  private state = new Map<string, StateContainer<unknown>>();
   private monitoring?: Set<string>;
 
   init<T>(key: Key<T>, state: T): void {
@@ -32,7 +34,7 @@ export class StateStore {
       state: freeze(state),
       listeners: new Set(),
     };
-    this.state.set(key, container as StateContainer<unknown>);
+    this.state.set(key, container as unknown as StateContainer<unknown>);
   }
 
   set<T>(key: Key<T>, state: T): void {
@@ -44,7 +46,6 @@ export class StateStore {
   }
 
   get<T>(key: Key<T>): Immutable<T> {
-    this.monitoring?.add(key.name);
     return this.getContainer(key).state;
   }
 
@@ -52,7 +53,7 @@ export class StateStore {
     if (!this.state.has(key.name)) {
       throw new Error(`state ${key.name} not found`);
     }
-    return this.state.get(key.name) as StateContainer<T>;
+    return this.state.get(key.name) as unknown as StateContainer<T>;
   }
 
   listen<T>(key: Key<T>, listenerFn: (v: Immutable<T>) => void): () => void {
@@ -71,19 +72,22 @@ export class StateStore {
   }
 
   injectState<T>(key: Key<T>): InjectedState<T> {
+    this.monitoring?.add(key.name);
     const result = () => this.get(key);
-    result.initState = (state: T) => this.init(key, state);
-    result.set = (state: T) => this.set(key, state);
-    result.isInitialized = () => this.isInitialized(key);
-    result.listen = (listenFn: (t: Immutable<T>) => void): () => void =>
-      this.listen(key, listenFn);
-    result.update = (updateFn: (t: T) => void) => {
-      const newResult = deepCopy(this.get(key)) as T;
-      updateFn(newResult);
-      result.set(newResult);
+    const ops: InjectedOps<T> = {
+      initState: (state: T) => this.init(key, state),
+      set: (state: T) => this.set(key, state),
+      isInitialized: () => this.isInitialized(key),
+      listen: (listenFn: (t: Immutable<T>) => void): () => void =>
+        this.listen(key, listenFn),
+      update: (updateFn: (t: T) => void) => {
+        const newValue = deepCopy(this.get(key));
+        updateFn(newValue);
+        this.set(key, newValue);
+      },
+      delete: () => this.delete(key),
     };
-    result.delete = () => this.delete(key);
-    return result;
+    return Object.assign(result, ops);
   }
 
   serialize(): string {
@@ -96,18 +100,54 @@ export class StateStore {
     return JSON.stringify(serialized);
   }
 
-  merge(serializedState: string): void {
+  merge(serializedState: string): ValueChange[] {
     const map = JSON.parse(serializedState) as Map<string, unknown>;
+    const changes: ValueChange[] = [];
     for (const [key, value] of Object.entries(map)) {
-      this.initContainer(key, unserialize(value));
+      const newValue = unserialize(value);
+      const oldValue = this.state.get(key)?.state;
+      if (oldValue == null || deepEquals(newValue, oldValue)) {
+        continue;
+      }
+      if (ImmutableMap.isMap(key)) {
+        const [newNewValue, mapKeys] = mergeMap(newValue, oldValue as (typeof newValue));
+        if (newNewValue !== oldValue) {
+          this.state.delete(key);
+          this.initContainer(key, newNewValue);
+          changes.push({ key, mapKeys })
+        }
+      } else {
+        this.state.delete(key);
+        this.initContainer(key, newValue);
+        changes.push({ key })
+      }
     }
-    console.log('new game state', this.state);
+    return changes;
   }
 }
 
-export interface InjectedState<Data> {
-  (): Immutable<Data>;
+export interface ValueChange {
+  key: string;
+  mapKeys?: unknown[];
+}
 
+function mergeMap<R, S>(newMap: ImmutableMap<R, S>, oldMap: ImmutableMap<R, S>): [ImmutableMap<R, S>, R[]] {
+  const differentKeys: R[] = [];
+  let updatedMap = oldMap;
+  for (const [key, value] of newMap) {
+    if (!deepEquals(value, updatedMap.get(key)!)) {
+      updatedMap = updatedMap.set(key, value);
+      differentKeys.push(key);
+    }
+  }
+  return [updatedMap, differentKeys];
+}
+
+export type MappableArray<Tuple extends [...any[]]> = {
+  [Index in keyof Tuple]: Mappable<Tuple[Index]>;
+} & { length: Tuple['length'] };
+
+interface InjectedOps<Data> {
   initState(state: Data): void;
   isInitialized(): boolean;
   set(state: Data): void;
@@ -116,3 +156,7 @@ export interface InjectedState<Data> {
   delete(): void;
 }
 
+export type InjectedState<Data> =
+  (() => Immutable<Data>) & InjectedOps<Data>;
+
+export type Mappable<Data> = () => Immutable<Data>;

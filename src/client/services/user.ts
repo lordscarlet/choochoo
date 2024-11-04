@@ -1,7 +1,7 @@
 import { UserApi } from "../../api/user";
 import { tsr } from "./client";
 
-export function useUsers(userIds: string[]): UserApi[] {
+export function useUsers(userIds: number[]): UserApi[] {
   const { data } = tsr.users.get.useSuspenseQueries({
     queries: userIds.map((userId) => ({
       queryKey: ['users', userId],

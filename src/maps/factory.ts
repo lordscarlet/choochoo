@@ -1,8 +1,10 @@
+import { Map as ImmutableMap } from 'immutable';
 import { CityGroup } from "../engine/state/city_group";
 import { Good } from "../engine/state/good";
 import { LocationType } from "../engine/state/location_type";
-import { CitySettingData } from "../engine/state/map_settings";
+import { CitySettingData, InitialMapGrid, SpaceSettingData } from "../engine/state/map_settings";
 import { OnRoll } from "../engine/state/roll";
+import { Coordinates } from "../utils/coordinates";
 
 
 export function city(name: string, color: Good, group: CityGroup, onRoll: OnRoll, startingNumCubes = 2): CitySettingData {
@@ -14,4 +16,30 @@ export function city(name: string, color: Good, group: CityGroup, onRoll: OnRoll
     onRoll: [onRoll],
     group,
   };
+}
+
+export function grid(array: Array<Array<SpaceSettingData | undefined>>): InitialMapGrid {
+  const newArray = offset(array);
+
+  return ImmutableMap<Coordinates, SpaceSettingData>().withMutations((grid) => {
+    for (const [q, row] of newArray.entries()) {
+      for (const [r, value] of row.entries()) {
+        if (value == null) continue;
+        grid.set(Coordinates.from({ q, r }), value);
+      }
+    }
+  });
+}
+
+
+function offset(grid: Array<Array<SpaceSettingData | undefined>>): Array<Array<SpaceSettingData | undefined>> {
+  const newGrid: Array<Array<SpaceSettingData | undefined>> = [];
+  for (let i = 0; i < grid.length; i++) {
+    const newColumn: Array<SpaceSettingData | undefined> = [];
+    for (let l = 0; l < grid.length - i - 2; l += 2) {
+      newColumn.push(undefined);
+    }
+    newGrid.push([...newColumn, ...grid[i]]);
+  }
+  return newGrid;
 }

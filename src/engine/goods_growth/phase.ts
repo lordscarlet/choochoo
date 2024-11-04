@@ -4,7 +4,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
 import { BAG, PLAYERS } from "../game/state";
-import { Grid } from "../map/grid";
+import { GridHelper } from "../map/grid";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";
@@ -20,7 +20,7 @@ export class GoodsGrowthPhase extends PhaseModule {
   static readonly phase = Phase.GOODS_GROWTH;
 
   private readonly log = inject(Log);
-  private readonly grid = inject(Grid);
+  private readonly grid = inject(GridHelper);
   private readonly players = injectState(PLAYERS);
   private readonly bag = injectState(BAG);
   private readonly turnState = injectState(GOODS_GROWTH_STATE);
@@ -64,19 +64,18 @@ export class GoodsGrowthPhase extends PhaseModule {
   }
 
   onEnd(): void {
-    const grid = inject(Grid);
     const rolls = new Map<CityGroup, number[]>([
       [CityGroup.WHITE, rollDice(this.players().length).sort()],
       [CityGroup.BLACK, rollDice(this.players().length).sort()],
     ]);
     this.log.log(`White rolled ${rolls.get(CityGroup.WHITE)!.join(', ')}`);
     this.log.log(`Black rolled ${rolls.get(CityGroup.BLACK)!.join(', ')}`);
-    const cities = grid.findAllCities();
+    const cities = this.grid.findAllCities();
     for (const city of cities) {
       for (const [index, onRoll] of city.onRoll().entries()) {
         const numRolled = rolls.get(city.group())!.filter((r) => r === onRoll).length;
         if (numRolled === 0) continue;
-        grid.update(city.coordinates, (location) => {
+        this.grid.update(city.coordinates, (location) => {
           assert(location.type === LocationType.CITY);
           const newGoods = location.upcomingGoods[index].splice(-numRolled, numRolled);
           location.goods.push(...newGoods);

@@ -1,6 +1,6 @@
-import { HexGrid } from "../../utils/hex_grid";
+
 import { inject, injectState } from "../framework/execution_context";
-import { SpaceSettingData } from "../state/map_settings";
+import { InitialMapGrid } from "../state/map_settings";
 import { PhaseDelegator } from "./phase_delegator";
 import { RoundEngine } from "./round";
 import { GameStarter } from "./starter";
@@ -14,7 +14,7 @@ export class GameEngine {
   private readonly round = inject(RoundEngine);
   private readonly turn = inject(TurnEngine);
 
-  start(playerIds: string[], startingMap: HexGrid<SpaceSettingData>) {
+  start(playerIds: number[], startingMap: InitialMapGrid) {
     this.starter.startGame(playerIds, startingMap);
     this.round.startFirstRound();
   }

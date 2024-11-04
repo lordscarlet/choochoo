@@ -1,15 +1,14 @@
-import { assert } from "../../utils/validate";
-import { inject } from "../framework/execution_context";
-import { injectState } from "../framework/execution_context";
+import { inject, injectState } from "../framework/execution_context";
 import { PlayerColor } from "../state/player";
 import { PhaseEngine } from "./phase";
 import { PhaseDelegator } from "./phase_delegator";
-import { CURRENT_PLAYER, currentPlayer } from "./state";
+import { CURRENT_PLAYER, injectCurrentPlayer } from "./state";
 
 export class TurnEngine {
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
   private readonly delegator = inject(PhaseDelegator);
   private readonly phase = inject(PhaseEngine);
+  private readonly currentPlayerData = injectCurrentPlayer();
 
   start(currentPlayer: PlayerColor): void {
     this.currentPlayer.initState(currentPlayer);
@@ -17,7 +16,7 @@ export class TurnEngine {
   }
 
   end(): void {
-    const player = currentPlayer();
+    const player = this.currentPlayerData();
     this.delegator.get().onEndTurn();
     this.currentPlayer.delete();
 

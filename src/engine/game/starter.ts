@@ -1,13 +1,14 @@
 
+import { Map as ImmutableMap } from 'immutable';
 import { duplicate, shuffle } from '../../utils/functions';
-import { HexGrid } from '../../utils/hex_grid';
 import { assert } from '../../utils/validate';
-import { injectState } from "../framework/execution_context";
+import { inject, injectState } from "../framework/execution_context";
+import { GridHelper } from '../map/grid';
 import { AvailableCity } from '../state/available_city';
 import { CityGroup } from '../state/city_group';
 import { Good } from '../state/good';
 import { LocationType } from '../state/location_type';
-import { SpaceSettingData } from '../state/map_settings';
+import { InitialMapGrid, SpaceSettingData } from '../state/map_settings';
 import { PlayerColor, PlayerData } from '../state/player';
 import { OnRoll } from '../state/roll';
 import { SpaceData } from '../state/space';
@@ -19,8 +20,9 @@ export class GameStarter {
   private readonly players = injectState(PLAYERS);
   private readonly bag = injectState(BAG);
   private readonly availableCities = injectState(AVAILABLE_CITIES);
+  private readonly gridHelper = inject(GridHelper);
 
-  startGame(playerIds: string[], startingMap: HexGrid<SpaceSettingData>) {
+  startGame(playerIds: number[], startingMap: InitialMapGrid) {
     this.initializeStartingCubes();
     this.drawCubesForCities(startingMap);
     this.initializePlayers(playerIds);
@@ -37,25 +39,25 @@ export class GameStarter {
     ]));
   }
 
-  drawCubesForCities(startingMap: HexGrid<SpaceSettingData>) {
+  drawCubesForCities(startingMap: InitialMapGrid) {
     const bag = [...this.bag()];
-    const newGrid = new HexGrid<SpaceData>();
+    this.grid.initState(ImmutableMap());
     for (const [coordinates, location] of startingMap.entries()) {
-      if (location.type === LocationType.CITY) {
-        newGrid.set(coordinates, {
-          ...location,
-          goods: draw(location.startingNumCubes, bag),
-          upcomingGoods: location.onRoll.map((_) => draw(3, bag)),
-        });
-      } else {
-        newGrid.set(coordinates, location);
-      }
+      this.gridHelper.set(coordinates, this.drawCubesFor(bag, location));
     }
-    this.grid.initState(newGrid);
     this.bag.set(bag);
   }
 
-  initializePlayers(playerIds: string[]) {
+  private drawCubesFor(bag: Good[], location: SpaceSettingData): SpaceData {
+    if (location.type !== LocationType.CITY) return location;
+    return {
+      ...location,
+      goods: draw(location.startingNumCubes, bag),
+      upcomingGoods: location.onRoll.map((_) => draw(3, bag)),
+    };
+  }
+
+  initializePlayers(playerIds: number[]) {
     const players = playerIds.map(buildPlayer);
 
     this.players.initState(players);
@@ -97,7 +99,7 @@ const colors = [
   PlayerColor.BLACK,
 ];
 
-function buildPlayer(playerId: string, index: number): PlayerData {
+function buildPlayer(playerId: number, index: number): PlayerData {
   return {
     playerId,
     color: colors[index],

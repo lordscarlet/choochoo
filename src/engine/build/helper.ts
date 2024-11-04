@@ -1,8 +1,8 @@
 
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
-import { currentPlayer } from "../game/state";
-import { Grid } from "../map/grid";
+import { injectCurrentPlayer } from "../game/state";
+import { GridHelper } from "../map/grid";
 import { Location } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Action } from "../state/action";
@@ -11,20 +11,21 @@ import { BUILD_STATE } from "./state";
 
 
 export class BuilderHelper {
+  private readonly currentPlayer = injectCurrentPlayer();
   private readonly buildState = injectState(BUILD_STATE);
-  private readonly grid = inject(Grid);
+  private readonly grid = inject(GridHelper);
 
   isAtEndOfTurn(): boolean {
     return this.buildsRemaining() === 0 && !this.canUrbanize();
   }
 
   canUrbanize(): boolean {
-    return currentPlayer().selectedAction === Action.URBANIZATION &&
+    return this.currentPlayer().selectedAction === Action.URBANIZATION &&
       !this.buildState().hasUrbanized;
   }
 
   getMaxBuilds(): number {
-    return currentPlayer().selectedAction === Action.ENGINEER ? 4 : 3;
+    return this.currentPlayer().selectedAction === Action.ENGINEER ? 4 : 3;
   }
 
   buildsRemaining(): number {

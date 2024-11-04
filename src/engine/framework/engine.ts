@@ -1,17 +1,15 @@
 import { MapRegistry } from "../../maps";
 import { GameEngine } from "../game/game";
 import { Log } from "../game/log";
-import { currentPlayer } from "../game/state";
+import { injectCurrentPlayer } from "../game/state";
 import { ExecutionContext, getExecutionContext, inject, setExecutionContextGetter } from "./execution_context";
-import { InjectionContext } from "./inject";
-import { StateStore } from "./state";
 
 interface MapConfig {
   mapKey: string;
 }
 
 interface GameState {
-  activePlayerId: string;
+  activePlayerId: number;
   gameData: string;
   logs: string[];
 }
@@ -19,10 +17,10 @@ interface GameState {
 export class Engine {
   private readonly registry = new MapRegistry();
 
-  start(playerIds: string[], mapConfig: MapConfig): GameState {
+  start(playerIds: number[], mapConfig: MapConfig): GameState {
     return this.executeInExecutionContext(mapConfig.mapKey, undefined, () => {
       const gameEngine = inject(GameEngine);
-      gameEngine.start(playerIds, this.registry.get(mapConfig.mapKey).getStartingGrid());
+      gameEngine.start(playerIds, this.registry.get(mapConfig.mapKey).startingGrid);
     });
   }
 
@@ -33,18 +31,17 @@ export class Engine {
     });
   }
 
-  private beginInjectionModeAsync(mapKey: string, gameState: string|undefined): () => void {
-    const mapMode = this.registry.get(mapKey);
+  private beginInjectionModeAsync(mapKey: string, gameState: string | undefined): () => void {
     const executionContext = new ExecutionContext(mapKey, gameState);
     setExecutionContextGetter(() => executionContext);
     return setExecutionContextGetter;
   }
 
-  private executeInExecutionContext(mapKey: string, gameState: string|undefined, process: () => void): GameState {
+  private executeInExecutionContext(mapKey: string, gameState: string | undefined, process: () => void): GameState {
     const endInjectionMode = this.beginInjectionModeAsync(mapKey, gameState);
     try {
+      const currentPlayer = injectCurrentPlayer();
       process();
-      console.log('executionContext', JSON.stringify(getExecutionContext().gameState.serialize(), null, 2));
       const player = currentPlayer();
       return {
         activePlayerId: player.playerId,

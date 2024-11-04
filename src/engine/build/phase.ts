@@ -1,11 +1,12 @@
 
+import { Record } from "immutable";
 import { remove } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
-import { currentPlayer, PLAYERS } from "../game/state";
-import { Grid } from "../map/grid";
+import { injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
+import { GridHelper } from "../map/grid";
 import { Location } from "../map/location";
 import { Action } from "../state/action";
 import { LocationType } from "../state/location_type";
@@ -20,7 +21,9 @@ export class BuildPhase extends PhaseModule {
   static readonly phase = Phase.BUILDING;
 
   private readonly turnState = injectState(BUILD_STATE);
-  private readonly grid = inject(Grid);
+  private readonly gridHelper = inject(GridHelper);
+  private readonly currentPlayer = injectCurrentPlayer();
+  private readonly grid = injectGrid();
   private readonly log = inject(Log);
 
   configureActions() {
@@ -31,31 +34,32 @@ export class BuildPhase extends PhaseModule {
 
   onStartTurn(): void {
     super.onStartTurn();
-    this.turnState.initState({
+    this.turnState.initState(Record({
       previousBuilds: [],
       hasUrbanized: false,
-      danglers: this.grid.getDanglers(currentPlayer().color).concat(this.grid.getDanglers(undefined)),
-    });
+      danglers: this.grid().getDanglers(this.currentPlayer().color).concat(this.grid().getDanglers(undefined)),
+    })());
   }
 
   onEndTurn(): void {
     const { danglers } = this.turnState();
-    const newDanglers = this.grid.getDanglers(currentPlayer().color);
+    const grid = this.grid();
+    const newDanglers = grid.getDanglers(this.currentPlayer().color);
     const toRemoveIndividual = danglers.filter((dangler) => {
       const newDangler = newDanglers.find((d) => d.coordinates.equals(dangler.coordinates) && d.immovableExit === dangler.immovableExit);
       return newDangler && newDangler.length > dangler.length;
     });
 
     const toRemoveAll = toRemoveIndividual.flatMap((removing) => {
-      const space = this.grid.lookup(removing.coordinates);
+      const space = grid.get(removing.coordinates);
       assert(space instanceof Location);
       const track = space.trackExiting(removing.immovableExit);
-      return track!.getRoute();
+      return grid.getRoute(track!);
     });
 
     for (const track of toRemoveAll) {
-      const index = track.location.getTrack().indexOf(track);
-      this.grid.update(track.location.coordinates, (spaceData) => {
+      const index = track.ownerIndex;
+      this.gridHelper.update(track.coordinates, (spaceData) => {
         assert(spaceData.type !== LocationType.CITY);
         assert(spaceData.tile != null);
         spaceData.tile.owners[index] = undefined;

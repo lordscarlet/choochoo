@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { Column, CreatedAt, DeletedAt, Model, Table, UpdatedAt } from 'sequelize-typescript';
+import { AutoIncrement, Column, CreatedAt, DeletedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript';
 import { GameApi, GameStatus } from '../../api/game';
 
 interface GameCreation {
@@ -7,18 +7,15 @@ interface GameCreation {
   gameKey: string;
   name: string;
   status: GameStatus;
-  playerIds: string[];
+  playerIds: number[];
 }
 
-@Table({ underscored: true })
+@Table({ modelName: 'Game' })
 export class GameModel extends Model<GameModel, GameCreation> {
-  @Column({
-    allowNull: false,
-    primaryKey: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-  })
-  id!: string;
+  @AutoIncrement
+  @PrimaryKey
+  @Column
+  id!: number;
 
   @Column
   version!: number;
@@ -35,14 +32,12 @@ export class GameModel extends Model<GameModel, GameCreation> {
   @Column
   status!: GameStatus;
 
-  @Column(DataTypes.ARRAY(DataTypes.UUIDV4))
-  playerIds!: string[];
+  @Column(DataTypes.ARRAY(DataTypes.INTEGER))
+  playerIds!: number[];
 
-  @Column(DataTypes.UUIDV4)
-  activePlayerId?: string;
+  activePlayerId?: number;
 
-  @Column(DataTypes.UUIDV4)
-  undoPlayerId?: string;
+  undoPlayerId?: number;
 
   @CreatedAt
   createdDate!: Date;

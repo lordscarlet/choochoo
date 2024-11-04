@@ -8,7 +8,7 @@ import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
 import { rotateDirectionClockwise } from "../../engine/map/direction";
-import { Grid } from "../../engine/map/grid";
+import { GridHelper } from '../../engine/map/grid';
 import { Location } from "../../engine/map/location";
 import { Action } from "../../engine/state/action";
 import { ComplexTileType, Direction, SimpleTileType, TownTileType } from "../../engine/state/tile";
@@ -29,7 +29,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
   const action = useInjected(BuildAction);
   const curr = useCurrentPlayer();
   const availableCities = useInjectedState(AVAILABLE_CITIES);
-  const grid = useInjected(Grid);
+  const grid = useInjected(GridHelper);
   const [showReasons, setShowReasons] = useState(false);
   const [direction, rotate] = useReducer((prev: Direction, _: {}) => rotateDirectionClockwise(prev), Direction.TOP);
   const space = coordinates && (grid.lookup(coordinates) as Location);

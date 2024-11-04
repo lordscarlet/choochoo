@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Immutable } from "../../utils/immutable";
 import { assertNever } from "../../utils/validate";
 import { PlayerColor } from "./player";
 
@@ -72,13 +73,14 @@ export const TileType = z.union([
 
 export type TileType = z.infer<typeof TileType>;
 
-export const TileData = z.object({
+export const MutableTileData = z.object({
   tileType: TileType,
   orientation: z.nativeEnum(Direction),
   owners: z.array(z.nativeEnum(PlayerColor).optional()),
 });
 
-export type TileData = z.infer<typeof TileData>;
+export type MutableTileData = z.infer<typeof MutableTileData>;
+export type TileData = Immutable<MutableTileData>;
 
 export function getTileTypeString(tileType: TileType): string {
   switch (tileType) {

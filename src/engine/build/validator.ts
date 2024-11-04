@@ -1,14 +1,15 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
+import { injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
-import { Grid } from "../map/grid";
+import { GridHelper } from "../map/grid";
 import { calculateTrackInfo, Location } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";
 import { PlayerColor } from "../state/player";
-import { Direction, isDirection, TileType } from "../state/tile";
+import { Direction, TileType } from "../state/tile";
 import { BuilderHelper } from "./helper";
 
 
@@ -22,10 +23,12 @@ export type InvalidBuildReason = string;
 
 export class Validator {
   private readonly helper = inject(BuilderHelper);
-  private readonly grid = inject(Grid);
+  private readonly gridHelper = inject(GridHelper);
+  private readonly grid = injectGrid();
 
   getInvalidBuildReason(coordinates: Coordinates, buildData: BuildInfo): InvalidBuildReason | undefined {
-    const space = this.grid.lookup(coordinates);
+    const grid = this.grid();
+    const space = this.gridHelper.lookup(coordinates);
     if (space == null) {
       return 'cannot build on impassable terrain';
     }
@@ -60,9 +63,7 @@ export class Validator {
         return 'cannot reroute another players track';
       }
 
-      const reroutedExit = oldTrack.getExits().find((exit) => !reroutedTrack.exits.includes(exit));
-      assert(isDirection(reroutedExit));
-      if (!space.isDangling(reroutedExit)) {
+      if (!this.grid().dangles(oldTrack)) {
         return 'cannot change non-dangling track';
       }
     }
@@ -70,7 +71,7 @@ export class Validator {
     for (const track of [...newTracks, ...rerouted]) {
       for (const exit of track.exits) {
         if (exit === TOWN) continue;
-        if (space.getNeighbor(exit) == null) {
+        if (grid.getNeighbor(space.coordinates, exit) == null) {
           return 'cannot have an exit to unpassable terrain';
         }
       }
@@ -106,14 +107,14 @@ export class Validator {
     if (exit === TOWN) {
       return coordinates;
     }
-    const neighbor = this.grid.connection(coordinates, exit);
+    const neighbor = this.grid().connection(coordinates, exit);
     if (neighbor == null) {
       return coordinates.neighbor(exit);
     }
     if (neighbor instanceof City) {
       return neighbor.coordinates;
     }
-    const [coordinates2, toExit] = neighbor.getEnd(getOpposite(exit));
+    const [coordinates2, toExit] = this.grid().getEnd(neighbor, getOpposite(exit));
     if (toExit === TOWN) {
       return coordinates;
     }
@@ -164,7 +165,7 @@ export class Validator {
       if (exit === TOWN) {
         return space.getTrack().some((track) => track.getOwner() == owner);
       }
-      const neighbor = space.getNeighbor(exit);
+      const neighbor = this.grid().getNeighbor(space.coordinates, exit);
       if (neighbor == null) return false;
       if (neighbor instanceof City) return true;
       return neighbor.trackExiting(getOpposite(exit))?.getOwner() == owner;

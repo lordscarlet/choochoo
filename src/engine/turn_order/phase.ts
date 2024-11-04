@@ -4,7 +4,7 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
-import { currentPlayer, TURN_ORDER } from "../game/state";
+import { injectCurrentPlayer, TURN_ORDER } from "../game/state";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { BidAction } from "./bid";
@@ -20,6 +20,7 @@ export class TurnOrderPhase extends PhaseModule {
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly helper = inject(TurnOrderHelper);
   private readonly log = inject(Log);
+  private readonly currentPlayer = injectCurrentPlayer();
 
   configureActions() {
     this.installAction(BidAction);
@@ -37,7 +38,7 @@ export class TurnOrderPhase extends PhaseModule {
   }
 
   autoAction(): ActionBundle<{}> | undefined {
-    const canAffordBid = currentPlayer().money >= this.helper.getMinBid();
+    const canAffordBid = this.currentPlayer().money >= this.helper.getMinBid();
     if (!canAffordBid && !this.helper.canUseTurnOrderPass()) {
       return { action: PassAction, data: {} };
     }
