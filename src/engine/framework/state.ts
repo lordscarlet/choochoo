@@ -148,8 +148,8 @@ function mergeMap<R, S>(newMap: ImmutableMap<R, S>, oldMap: ImmutableMap<R, S>):
   return [updatedMap, differentKeys];
 }
 
-export type MappableArray<Tuple extends [...any[]]> = {
-  [Index in keyof Tuple]: Mappable<Tuple[Index]>;
+export type KeyArray<Tuple extends [...any[]]> = {
+  [Index in keyof Tuple]: Key<Tuple[Index]>;
 } & { length: Tuple['length'] };
 
 interface InjectedOps<Data> {

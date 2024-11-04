@@ -152,6 +152,7 @@ export class Grid {
   }
 
   merge(gridData: GridData): Grid {
+    console.log('performing merge');
     let map = this.grid;
     for (const [coordinates, spaceData] of gridData) {
       if (map.has(coordinates) && deepEquals(map.get(coordinates)!.data, spaceData)) {
@@ -168,6 +169,7 @@ export class Grid {
   }
 
   static fromData(gridData: GridData): Grid {
+    console.log('creating grid from data');
     return new Grid(ImmutableMap()).merge(gridData);
   }
 }
