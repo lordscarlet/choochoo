@@ -11,6 +11,7 @@ export const buildPromise = context({
   jsx: 'automatic',
   // format: 'esm',
   outfile: "dist/index.js",
+  treeShaking: true,
   plugins: [{
     name: 'rebuild-notify',
     setup(build) {

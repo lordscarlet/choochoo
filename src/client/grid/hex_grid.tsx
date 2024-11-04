@@ -51,7 +51,6 @@ export function HexGrid() {
   const grid = useGrid();
   const gridHelper = useInjected(GridHelper);
   const rows = useMemo(() => [...calculateRows(grid.values())], [grid]);
-  console.log('rendering grid', grid, rows);
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
   const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
   const phase = useInjectedState(PHASE);

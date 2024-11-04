@@ -154,7 +154,7 @@ export class Grid {
   merge(gridData: GridData): Grid {
     let map = this.grid;
     for (const [coordinates, spaceData] of gridData) {
-      if (this.has(coordinates) && deepEquals(this.get(coordinates)!.data, spaceData)) {
+      if (map.has(coordinates) && deepEquals(map.get(coordinates)!.data, spaceData)) {
         continue;
       }
       if (spaceData.type === LocationType.CITY) {

@@ -71,8 +71,8 @@ export function useGrid(): Grid {
   const previousGrid = useRef<Grid | undefined>(undefined);
   return useMemo(() => {
     if (previousGrid.current != null) {
-      return previousGrid.current.merge(gridData);
+      return previousGrid.current = previousGrid.current.merge(gridData);
     }
-    return Grid.fromData(gridData);
+    return previousGrid.current = Grid.fromData(gridData);
   }, [grid]);
 }
