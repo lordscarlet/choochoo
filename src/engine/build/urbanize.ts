@@ -7,7 +7,7 @@ import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { AVAILABLE_CITIES, injectCurrentPlayer, injectGrid } from "../game/state";
 import { City } from "../map/city";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
 import { Track } from "../map/track";
 import { Action } from "../state/action";

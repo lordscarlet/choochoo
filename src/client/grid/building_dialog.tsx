@@ -8,7 +8,7 @@ import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
 import { rotateDirectionClockwise } from "../../engine/map/direction";
-import { GridHelper } from '../../engine/map/grid';
+import { GridHelper } from "../../engine/map/grid_helper";
 import { Location } from "../../engine/map/location";
 import { Action } from "../../engine/state/action";
 import { ComplexTileType, Direction, SimpleTileType, TownTileType } from "../../engine/state/tile";

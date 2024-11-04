@@ -3,7 +3,7 @@ import { Map as ImmutableMap } from 'immutable';
 import { duplicate, shuffle } from '../../utils/functions';
 import { assert } from '../../utils/validate';
 import { inject, injectState } from "../framework/execution_context";
-import { GridHelper } from '../map/grid';
+import { GridHelper } from "../map/grid_helper";
 import { AvailableCity } from '../state/available_city';
 import { CityGroup } from '../state/city_group';
 import { Good } from '../state/good';

@@ -4,7 +4,7 @@ import { PHASE } from "../../engine/game/phase";
 import { injectGrid } from "../../engine/game/state";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { City } from "../../engine/map/city";
-import { GridHelper } from "../../engine/map/grid";
+import { GridHelper } from "../../engine/map/grid_helper";
 import { Location } from "../../engine/map/location";
 import { MoveAction, MoveData } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";

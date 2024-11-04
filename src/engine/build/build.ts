@@ -7,7 +7,7 @@ import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
 import { injectCurrentPlayer, injectGrid } from "../game/state";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { calculateTrackInfo, Location } from "../map/location";
 import { TOWN, Track } from "../map/track";
 import { LocationType } from "../state/location_type";

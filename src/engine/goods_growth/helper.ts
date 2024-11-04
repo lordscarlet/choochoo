@@ -1,6 +1,6 @@
 import { inject } from "../framework/execution_context";
 import { City } from "../map/city";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 
 export class GoodsHelper {
   private readonly grid = inject(GridHelper);

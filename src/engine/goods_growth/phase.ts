@@ -4,7 +4,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
 import { BAG, PLAYERS } from "../game/state";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";

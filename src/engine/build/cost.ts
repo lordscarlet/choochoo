@@ -1,7 +1,7 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { Location, toBaseTile } from "../map/location";
 import { crosses, isComplexTile, isSimpleTile, isTownTile } from "../map/tile";
 import { LocationType } from "../state/location_type";

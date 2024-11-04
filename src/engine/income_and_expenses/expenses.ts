@@ -4,7 +4,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
 import { PLAYERS, TURN_ORDER } from "../game/state";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
 import { LocationType } from "../state/location_type";
 import { Phase } from "../state/phase";

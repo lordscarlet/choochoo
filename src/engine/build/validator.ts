@@ -4,7 +4,7 @@ import { inject } from "../framework/execution_context";
 import { injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { calculateTrackInfo, Location } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";

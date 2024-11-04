@@ -8,7 +8,7 @@ import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
 import { City } from "../map/city";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
 import { getGoodColor, Good } from "../state/good";
 import { LocationType } from "../state/location_type";

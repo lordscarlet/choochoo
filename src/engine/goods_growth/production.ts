@@ -6,7 +6,7 @@ import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
 import { City } from "../map/city";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";
 import { LocationType } from "../state/location_type";

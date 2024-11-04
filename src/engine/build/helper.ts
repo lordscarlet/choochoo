@@ -2,7 +2,7 @@
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { injectCurrentPlayer } from "../game/state";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Action } from "../state/action";

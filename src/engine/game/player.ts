@@ -1,5 +1,5 @@
 import { inject, injectState } from "../framework/execution_context";
-import { GridHelper } from "../map/grid";
+import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
 import { MutablePlayerData, PlayerColor, PlayerData } from "../state/player";
 import { CURRENT_PLAYER, PLAYERS } from "./state";
