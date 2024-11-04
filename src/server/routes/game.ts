@@ -96,6 +96,7 @@ const router = initServer().router(gameContract, {
     game.gameData = gameData;
     game.status = GameStatus.ACTIVE;
     game.activePlayerId = activePlayerId;
+    console.log('starting', game.activePlayerId);
     const newGame = await game.save();
     return { status: 200, body: { game: newGame.toApi() } };
   },

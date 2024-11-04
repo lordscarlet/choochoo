@@ -24,7 +24,7 @@ export const MyUserApi = z.object({
 });
 
 export const ListQueryApi = z.object({
-  id: z.array(z.number()),
+  id: z.array(z.coerce.number()),
 });
 
 export type CreateUserApi = z.infer<typeof CreateUserApi>;

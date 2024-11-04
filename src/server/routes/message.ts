@@ -31,12 +31,13 @@ const router = initServer().router(messageContract, {
         ],
       };
     }
-    const modelMessages = await LogModel.findAll({ where, order: [['createdDate', 'DESC'], ['index', 'DESC']] });
-    const messages = modelMessages.reverse().map(m => m.toApi());
-    const nextPageCursor = {
+    const limit = 21;
+    const modelMessages = await LogModel.findAll({ where, limit, order: [['createdDate', 'DESC'], ['index', 'DESC']] });
+    const messages = modelMessages.slice(-20).reverse().map(m => m.toApi());
+    const nextPageCursor = modelMessages.length > limit ? {
       beforeDate: modelMessages[0].createdDate.toString(),
       beforeIndex: modelMessages[0].index,
-    };
+    } : undefined;
     return { status: 200, body: { messages, nextPageCursor } };
   },
 

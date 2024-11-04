@@ -106,7 +106,12 @@ export class StateStore {
     for (const [key, value] of Object.entries(map)) {
       const newValue = unserialize(value);
       const oldValue = this.state.get(key)?.state;
-      if (oldValue == null || deepEquals(newValue, oldValue)) {
+      if (oldValue == null) {
+        this.initContainer(key, newValue);
+        changes.push({ key });
+        continue;
+      }
+      if (deepEquals(newValue, oldValue)) {
         continue;
       }
       if (ImmutableMap.isMap(key)) {

@@ -42,7 +42,7 @@ export const GameApi = z.object({
 });
 
 export const ListGamesApi = z.object({
-  user: z.string().optional(),
+  userId: z.coerce.number().optional(),
   status: z.nativeEnum(GameStatus).optional(),
   gameKey: z.string().optional(),
   name: z.string().optional(),

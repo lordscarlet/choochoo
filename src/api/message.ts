@@ -28,7 +28,7 @@ export const PageCursor = z.object({
 export type PageCursor = z.infer<typeof PageCursor>;
 
 export const ListMessageApi = z.object({
-  gameId: z.number().optional(),
+  gameId: z.coerce.number().optional(),
   pageCursor: PageCursor.optional(),
 });
 

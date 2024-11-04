@@ -35,8 +35,10 @@ export class GameModel extends Model<GameModel, GameCreation> {
   @Column(DataTypes.ARRAY(DataTypes.INTEGER))
   playerIds!: number[];
 
+  @Column
   activePlayerId?: number;
 
+  @Column
   undoPlayerId?: number;
 
   @CreatedAt
