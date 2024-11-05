@@ -23,7 +23,7 @@ export function Hex({ space, onSelectGood, onClick }: HexProps) {
     onSelectGood(space as City, good);
   }, [space]);
   return useMemo(() => {
-    return <RawHex className={styles['hex-container']} space={space} tile={useMemo(() => removeContext(space), [space])} onClick={onClickInternal}>
+    return <RawHex className={styles['hex-container']} space={space} tile={removeContext(space)} onClick={onClickInternal}>
       {space instanceof City && <GoodsBlock onClick={onSelectGoodInternal} goods={space.getGoods()} />}
     </RawHex>;
   }, [space, onSelectGood, onClick]);

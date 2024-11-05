@@ -75,17 +75,17 @@ export function usePhaseState<T>(phase: Phase, key: Key<T>): Immutable<T> | unde
 function useOptionalInjectedState<T>(key: Key<T>, optionalCheck: boolean): Immutable<T> | undefined {
   const ctx = useExecutionContext();
   const injectedState = ctx.gameState.injectState(key);
-  const [value, setValue] = useState<Immutable<T> | undefined>(() => optionalCheck ? injectedState() : undefined);
+  const [_, setValue] = useState<Immutable<T> | undefined>(() => optionalCheck ? injectedState() : undefined);
   useEffect(() => {
-    if (!optionalCheck) {
-      setValue(undefined);
-      return;
-    }
+    if (!optionalCheck) return;
     return injectedState.listen((newValue) => {
       setValue(newValue);
     });
   }, [ctx, optionalCheck]);
-  return value;
+  if (optionalCheck) {
+    return injectedState();
+  }
+  return undefined;
 }
 
 export function useInjectedState<T>(key: Key<T>): Immutable<T> {
