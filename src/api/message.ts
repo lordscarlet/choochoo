@@ -13,17 +13,13 @@ export const MessageApi = z.object({
   id: z.number(),
   message: z.string(),
   userId: z.number().optional(),
-  index: z.number(),
   gameId: z.number().optional(),
   date: z.string().optional(),
 });
 
 export type MessageApi = z.infer<typeof MessageApi>;
 
-export const PageCursor = z.object({
-  beforeDate: z.string(),
-  beforeIndex: z.number(),
-});
+export const PageCursor = z.number();
 
 export type PageCursor = z.infer<typeof PageCursor>;
 

@@ -136,11 +136,10 @@ const router = initServer().router(gameContract, {
       game.undoPlayerId = reversible ? userId : undefined;
       const newGame = await game.save({ transaction });
       await gameHistory.save({ transaction });
-      const newLogs = await LogModel.bulkCreate(logs.map((message, index) => ({
+      const newLogs = await LogModel.bulkCreate(logs.map((message) => ({
         gameId: game.id,
         message,
         version: game.version,
-        index,
       })), { transaction });
 
       transaction.afterCommit(() => {

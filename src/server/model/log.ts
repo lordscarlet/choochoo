@@ -1,4 +1,3 @@
-import { DataTypes } from "sequelize";
 import { AutoIncrement, BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from "sequelize-typescript";
 import { MessageApi } from "../../api/message";
 import { GameModel } from "./game";
@@ -9,7 +8,6 @@ interface CreateLog {
   userId?: number;
   gameId?: number;
   version?: number;
-  index: number;
 }
 
 @Table({ modelName: 'Log' })
@@ -34,9 +32,6 @@ export class LogModel extends Model<LogModel, CreateLog> {
   @BelongsTo(() => GameModel)
   game?: GameModel;
 
-  @Column(DataTypes.SMALLINT)
-  index!: number;
-
   @Column
   version?: number;
 
@@ -54,7 +49,6 @@ export class LogModel extends Model<LogModel, CreateLog> {
       id: this.id,
       message: this.message,
       userId: this.userId,
-      index: this.index,
       gameId: this.gameId,
       date: this.createdDate.toString(),
     };
