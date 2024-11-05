@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { UserApi } from "../../api/user";
-import { injectState } from "../../engine/framework/execution_context";
+import { inject, injectState } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
@@ -9,7 +9,7 @@ import { Phase } from "../../engine/state/phase";
 import { getPlayerColor, PlayerData } from "../../engine/state/player";
 import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { useUsers } from "../services/user";
-import { useInjected, useInjectedState } from "../utils/execution_context";
+import { useInject, useInjected, useInjectedState } from "../utils/execution_context";
 import * as styles from './active_game.module.css';
 
 
@@ -25,7 +25,8 @@ export function PlayerStats() {
     const user = playerUsers?.find(user => user.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
-  const columns: ColumnRenderer[] = useMemo(() => [new BidRenderer()], [1]);
+  console.log('selected action', getSelectedActionString(players[2].player.selectedAction), playerData);
+  const columns: ColumnRenderer[] = useInject(() => [inject(BidRenderer)]);
   return <table>
     <thead>
       <tr>
@@ -67,14 +68,17 @@ interface ColumnRenderer {
 
 class BidRenderer {
   readonly title = 'Bid';
+  private readonly phase = injectState(PHASE);
+  private readonly turnOrderState = injectState(TURN_ORDER_STATE);
+  private readonly turnOrder = injectState(TURN_ORDER);
 
   isEnabled(): boolean {
-    return injectState(PHASE)() === Phase.TURN_ORDER;
+    return this.phase() === Phase.TURN_ORDER;
   }
 
   calculator(player: PlayerData): string {
-    const state = injectState(TURN_ORDER_STATE)();
-    const turnOrder = state.nextTurnOrder.indexOf(player.color) + 1 + injectState(TURN_ORDER)().length - state.nextTurnOrder.length;
+    const state = this.turnOrderState();
+    const turnOrder = state.nextTurnOrder.indexOf(player.color) + 1 + this.turnOrder().length - state.nextTurnOrder.length;
     return state.nextTurnOrder.includes(player.color) ? `Passed: ${turnOrder}` :
       state.previousBids.has(player.color) ? `$${state.previousBids.get(player.color)}` : 'N/A';
   }

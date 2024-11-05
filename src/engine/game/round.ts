@@ -10,6 +10,7 @@ export const ROUND = new Key<number>('roundNumber');
 
 export class RoundEngine {
   private readonly log = inject(Log);
+  private readonly players = injectState(PLAYERS);
   private readonly currentRound = injectState(ROUND);
   private readonly phase = inject(PhaseEngine);
   private readonly game = inject(GameEngine);
@@ -38,7 +39,7 @@ export class RoundEngine {
   }
 
   maxRounds(): number {
-    const numPlayers = injectState(PLAYERS)().length;
+    const numPlayers = this.players().length;
 
     switch (numPlayers) {
       case 3: return 10;

@@ -16,7 +16,7 @@ import { assert } from "../../utils/validate";
 import { GoodBlock } from "../grid/good";
 import { HexGrid } from "../grid/hex_grid";
 import { useAction, useGame, useUndoAction } from "../services/game";
-import { ExecutionContextProvider, ignoreInjectedState, useInjected, useInjectedState } from "../utils/execution_context";
+import { ExecutionContextProvider, useInjected, useInjectedState, usePhaseState } from "../utils/execution_context";
 import { GameLog } from "./game_log";
 import { PlayerStats } from "./player_stats";
 import { SelectAction } from "./select_action";
@@ -90,8 +90,7 @@ export function Goods() {
   }, [grid, availableCities]);
 
   const { emit, canEmit } = useAction(ProductionAction);
-  const phase = useInjectedState(PHASE);
-  const productionState = phase === Phase.GOODS_GROWTH ? useInjectedState(GOODS_GROWTH_STATE) : ignoreInjectedState();
+  const productionState = usePhaseState(Phase.GOODS_GROWTH, GOODS_GROWTH_STATE);
 
   const good = useMemo(() => {
     if (productionState == null) return undefined;

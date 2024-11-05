@@ -12,18 +12,18 @@ interface StateContainer<T> {
 
 export class StateStore {
   private state = new Map<string, StateContainer<unknown>>();
-  private monitoring?: Set<string>;
+  private monitoring = new Set<Set<Key<unknown>>>();
 
   init<T>(key: Key<T>, state: T): void {
     this.initContainer(key.name, state);
   }
 
-  monitorDependentCalls(cb: () => void): Set<string> {
-    this.monitoring = new Set();
-    cb();
-    const monitoring = this.monitoring;
-    this.monitoring = undefined;
-    return monitoring;
+  startMonitoringStateDependencies(set: Set<Key<unknown>>): void {
+    this.monitoring.add(set);
+  }
+
+  stopMonitoringStateDependencies(set: Set<Key<unknown>>): void {
+    this.monitoring.delete(set);
   }
 
   private initContainer<T>(key: string, state: T): void {
@@ -38,7 +38,16 @@ export class StateStore {
   }
 
   set<T>(key: Key<T>, state: T): void {
-    this.getContainer(key).state = freeze(state);
+    const container = this.getContainer(key);
+    container.state = freeze(state);
+    this.notifyListeners(key.name);
+  }
+
+  private notifyListeners(key: string) {
+    const container = this.state.get(key)!;
+    for (const listener of container.listeners) {
+      listener(container.state);
+    }
   }
 
   isInitialized<T>(key: Key<T>): boolean {
@@ -54,6 +63,18 @@ export class StateStore {
       throw new Error(`state ${key.name} not found`);
     }
     return this.state.get(key.name) as unknown as StateContainer<T>;
+  }
+
+  listenAll(keys: Set<Key<string>>, listenerFn: () => void): () => void {
+    const cbs: Array<() => void> = [];
+    for (const key of keys) {
+      cbs.push(this.listen(key, (_) => listenerFn()));
+    }
+    return () => {
+      for (const cb of cbs) {
+        cb();
+      }
+    };
   }
 
   listen<T>(key: Key<T>, listenerFn: (v: Immutable<T>) => void): () => void {
@@ -72,7 +93,9 @@ export class StateStore {
   }
 
   injectState<T>(key: Key<T>): InjectedState<T> {
-    this.monitoring?.add(key.name);
+    for (const monitoring of this.monitoring) {
+      monitoring.add(key);
+    }
     const result = () => this.get(key);
     const ops: InjectedOps<T> = {
       initState: (state: T) => this.init(key, state),
@@ -100,7 +123,8 @@ export class StateStore {
     return JSON.stringify(serialized);
   }
 
-  merge(serializedState: string): ValueChange[] {
+  merge(serializedState: string): void {
+    console.log('merging new state');
     const map = JSON.parse(serializedState) as Map<string, unknown>;
     const changes: ValueChange[] = [];
     for (const [key, value] of Object.entries(map)) {
@@ -117,17 +141,17 @@ export class StateStore {
       if (ImmutableMap.isMap(key)) {
         const [newNewValue, mapKeys] = mergeMap(newValue, oldValue as (typeof newValue));
         if (newNewValue !== oldValue) {
-          this.state.delete(key);
-          this.initContainer(key, newNewValue);
-          changes.push({ key, mapKeys })
+          (this.state.get(key) as any).state = freeze(newNewValue);
+          changes.push({ key, mapKeys });
         }
       } else {
-        this.state.delete(key);
-        this.initContainer(key, newValue);
-        changes.push({ key })
+        (this.state.get(key) as any).state = freeze(newValue);
+        changes.push({ key });
       }
     }
-    return changes;
+    for (const change of changes) {
+      this.notifyListeners(change.key);
+    }
   }
 }
 

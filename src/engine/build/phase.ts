@@ -1,5 +1,4 @@
 
-import { Record } from "immutable";
 import { remove } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
@@ -34,11 +33,11 @@ export class BuildPhase extends PhaseModule {
 
   onStartTurn(): void {
     super.onStartTurn();
-    this.turnState.initState(Record({
+    this.turnState.initState({
       previousBuilds: [],
       hasUrbanized: false,
       danglers: this.grid().getDanglers(this.currentPlayer().color).concat(this.grid().getDanglers(undefined)),
-    })());
+    });
   }
 
   onEndTurn(): void {

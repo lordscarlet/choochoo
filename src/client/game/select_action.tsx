@@ -14,6 +14,7 @@ import { ShareHelper } from "../../engine/shares/share_helper";
 import { TakeSharesAction } from "../../engine/shares/take_shares";
 import { allActions, getSelectedActionString } from "../../engine/state/action";
 import { getGoodColor } from "../../engine/state/good";
+import { Phase } from "../../engine/state/phase";
 import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
 import { PassAction } from "../../engine/turn_order/pass";
@@ -22,7 +23,7 @@ import { iterate } from "../../utils/functions";
 import { useAction, useEmptyAction } from "../services/game";
 import { useLogin, useMe } from "../services/me";
 import { useUsers } from "../services/user";
-import { useCurrentPlayer, useInjected, useInjectedState, useOptionalInjectedState } from "../utils/execution_context";
+import { useCurrentPlayer, useInjected, useInjectedState, usePhaseState } from "../utils/execution_context";
 PassAction
 
 ProductionPassAction
@@ -42,7 +43,7 @@ export function SelectAction() {
 export function PlaceGood() {
   const { canEmit, canEmitUsername } = useAction(ProductionAction);
   const { emit: emitPass } = useEmptyAction(ProductionPassAction);
-  const state = useOptionalInjectedState(GOODS_GROWTH_STATE);
+  const state = usePhaseState(Phase.GOODS_GROWTH, GOODS_GROWTH_STATE);
   if (canEmitUsername == null) {
     return <></>;
   }
@@ -63,7 +64,7 @@ export function MoveGoods() {
   const { emit: emitLoco, canEmit, canEmitUsername } = useEmptyAction(LocoAction);
   const { emit: emitPass } = useEmptyAction(MovePassAction);
   const player = useCurrentPlayer();
-  const state = useOptionalInjectedState(MOVE_STATE);
+  const state = usePhaseState(Phase.MOVING, MOVE_STATE);
 
   if (canEmitUsername == null) {
     return <></>;

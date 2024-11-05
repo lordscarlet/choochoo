@@ -1,11 +1,16 @@
 import { NestedMap } from "../../utils/nested_map";
 import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
+import { Key } from "./key";
+import { StateStore } from "./state";
 
 export class InjectionContext {
   private readonly overrides = new Map<Constructor<unknown>, unknown>();
   private readonly inConstruction = new Map<Constructor<unknown>, ProxyObject<unknown>>();
+  private readonly stateDependencies = new Map<Constructor<unknown>, Set<Key<unknown>>>();
   private readonly injected = new NestedMap();
+
+  constructor(private readonly gameState: StateStore) { }
 
   get<R, T extends Constructor<R>>(factory: T, args: ConstructorParameters<T>): R {
     const overridden = this.overrides.get(factory) as T ?? factory;
@@ -14,13 +19,22 @@ export class InjectionContext {
       if (this.inConstruction.has(overridden)) {
         return this.inConstruction.get(overridden)!.proxy as R;
       }
+      const stateDependencies = new Set<Key<unknown>>();
+      this.gameState.startMonitoringStateDependencies(stateDependencies);
       const proxyObject = buildProxy(overridden);
       this.inConstruction.set(overridden, proxyObject);
       const result = new overridden(...args);
       proxyObject.setInternalObject(result as ConstructorReturnType<T>);
       this.inConstruction.delete(overridden);
+      this.gameState.stopMonitoringStateDependencies(stateDependencies);
+      this.stateDependencies.set(overridden, stateDependencies);
       return result;
     });
+  }
+
+  getStateDependencies(ctor: Constructor<unknown>): Key<string>[] {
+    assert(this.stateDependencies.has(ctor));
+    return [...this.stateDependencies.get(ctor)!];
   }
 
   override<R, T extends Constructor<R>, S extends Constructor<R>>(factory: T, override: S): void {

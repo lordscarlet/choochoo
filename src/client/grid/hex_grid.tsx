@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 import { BuildAction } from "../../engine/build/build";
-import { PHASE } from "../../engine/game/phase";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { City } from "../../engine/map/city";
 import { GridHelper } from "../../engine/map/grid_helper";
@@ -11,7 +10,7 @@ import { Phase } from "../../engine/state/phase";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { useAction } from "../services/game";
-import { ignoreInjectedState, useGrid, useInjected, useInjectedState } from "../utils/execution_context";
+import { useGrid, useInjected, usePhaseState } from "../utils/execution_context";
 import { BuildingDialog } from "./building_dialog";
 import * as styles from "./hex_grid.module.css";
 import { HexRow } from "./hex_row";
@@ -53,8 +52,7 @@ export function HexGrid() {
   const rows = useMemo(() => [...calculateRows(grid.values())], [grid]);
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
   const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
-  const phase = useInjectedState(PHASE);
-  const productionState = phase === Phase.GOODS_GROWTH ? useInjectedState(GOODS_GROWTH_STATE) : ignoreInjectedState();
+  const productionState = usePhaseState(Phase.GOODS_GROWTH, GOODS_GROWTH_STATE);
 
   const cellClick = useCallback((space?: Location | City) => {
     if (space instanceof Location && canEmitBuild) {
