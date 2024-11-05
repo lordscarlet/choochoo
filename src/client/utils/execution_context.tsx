@@ -1,12 +1,11 @@
-import { createContext, ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { ExecutionContext, inject, setExecutionContextGetter } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
 import { PHASE } from "../../engine/game/phase";
-import { CURRENT_PLAYER, GRID, PLAYERS } from "../../engine/game/state";
+import { CURRENT_PLAYER, injectGrid, PLAYERS } from "../../engine/game/state";
 import { Grid } from "../../engine/map/grid";
 import { Phase } from "../../engine/state/phase";
 import { PlayerData } from "../../engine/state/player";
-import { grid } from "../../maps/factory";
 import { Immutable } from "../../utils/immutable";
 import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
@@ -100,13 +99,5 @@ export function useCurrentPlayer(): PlayerData {
 }
 
 export function useGrid(): Grid {
-  // injectGrid();
-  const gridData = useInjectedState(GRID);
-  const previousGrid = useRef<Grid | undefined>(undefined);
-  return useMemo(() => {
-    if (previousGrid.current != null) {
-      return previousGrid.current = previousGrid.current.merge(gridData);
-    }
-    return previousGrid.current = Grid.fromData(gridData);
-  }, [grid]);
+  return useInject(() => injectGrid()());
 }

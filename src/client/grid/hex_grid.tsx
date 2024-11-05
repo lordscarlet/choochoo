@@ -123,6 +123,10 @@ export function HexGrid() {
     setMoveActionProgress(undefined);
   }, [setMoveActionProgress]);
 
+  const hexRows = useMemo(() => {
+    return [...rows].map((row, index) => <HexRow key={index} onSelectGood={onSelectGood} row={row} onClick={cellClick} />);
+  }, [onSelectGood, cellClick, ...[...rows].flatMap((i) => [...i])]);
+
   return <div>
     {moveActionProgress != null && <div>
       {JSON.stringify(moveActionProgress, null, 2)}
@@ -130,7 +134,7 @@ export function HexGrid() {
       <button onClick={startOver}>Start over</button>
     </div>}
     <div className={styles['hex-gridHelper']}>
-      {[...rows].map((row, index) => <HexRow key={index} onSelectGood={onSelectGood} row={row} onClick={cellClick} />)}
+      {hexRows}
       <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
     </div>
   </div>;

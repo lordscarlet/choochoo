@@ -11,6 +11,7 @@ import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { useUsers } from "../services/user";
 import { useInject, useInjected, useInjectedState } from "../utils/execution_context";
 import * as styles from './active_game.module.css';
+import { LoginButton } from "./login_button";
 
 
 export function PlayerStats() {
@@ -25,7 +26,6 @@ export function PlayerStats() {
     const user = playerUsers?.find(user => user.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
-  console.log('selected action', getSelectedActionString(players[2].player.selectedAction), playerData);
   const columns: ColumnRenderer[] = useInject(() => [inject(BidRenderer)]);
   return <table>
     <thead>
@@ -40,6 +40,7 @@ export function PlayerStats() {
         <th>Locomotive</th>
         {columns.filter(c => c.isEnabled()).map((c) => <th key={c.title}>{c.title}</th>)}
         <th>Score</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -55,6 +56,7 @@ export function PlayerStats() {
           <td>{player.locomotive}</td>
           {columns.filter(c => c.isEnabled()).map((c) => <td key={c.title}>{c.calculator(player)}</td>)}
           <td>{helper.getScore(player)}</td>
+          <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
         </tr>)}
     </tbody>
   </table>;

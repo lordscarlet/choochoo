@@ -5,11 +5,13 @@ import { assert, assertNever } from "./validate";
 
 export class Coordinates {
   private static readonly staticMap = new Map<string, Coordinates>();
-  private constructor(readonly q: number, readonly r: number) { }
+  private constructor(readonly q: number, readonly r: number) {
+    assert(!Coordinates.staticMap.has(this.serialize()), 'accidentally built a different version of coordinates');
+  }
 
   neighbor(dir: Direction): Coordinates {
     const offset = toOffset(dir);
-    return new Coordinates(this.q + offset.q, this.r + offset.r);
+    return Coordinates.from({ q: this.q + offset.q, r: this.r + offset.r });
   }
 
   equals(coordinates: Coordinates): boolean {

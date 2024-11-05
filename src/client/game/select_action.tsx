@@ -1,5 +1,3 @@
-import { useCallback } from "react";
-import { users } from "../../api/fake_data";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
@@ -21,9 +19,8 @@ import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { iterate } from "../../utils/functions";
 import { useAction, useEmptyAction } from "../services/game";
-import { useLogin, useMe } from "../services/me";
-import { useUsers } from "../services/user";
 import { useCurrentPlayer, useInjected, useInjectedState, usePhaseState } from "../utils/execution_context";
+import { LoginButton } from "./login_button";
 PassAction
 
 ProductionPassAction
@@ -125,21 +122,11 @@ export function Bid() {
 }
 
 export function SwitchToActive() {
-  const me = useMe();
   const currentPlayerColor = useInjectedState(CURRENT_PLAYER);
   const players = useInjectedState(PLAYERS);
-  const playerUsers = useUsers(players.map(({ playerId }) => playerId));
-  const { login, isPending } = useLogin();
   const currentPlayer = players.find((player) => player.color === currentPlayerColor);
-  const switchToActiveUser = useCallback(() => {
-    const currentUser = playerUsers?.find(({ id }) => id === currentPlayer?.playerId);
-    const userCreds = users.find(({ username }) => currentUser?.username === username);
-    if (userCreds != null) {
-      login({ usernameOrEmail: userCreds.username, password: userCreds.password });
-    }
-  }, [currentPlayer, players, playerUsers]);
-  if (currentPlayer == null || me?.id === currentPlayer?.playerId) return <></>
-  return <button onClick={switchToActiveUser} disabled={isPending}>Switch to active user</button>;
+  if (currentPlayer == null) return <></>;
+  return <LoginButton playerId={currentPlayer.playerId}>Switch to active user</LoginButton>;
 }
 
 export function GenericMessage({ children }: { children: string | string[] }) {

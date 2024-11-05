@@ -114,6 +114,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
       Direction.BOTTOM,
       Direction.BOTTOM_LEFT,
     ];
+    console.log('checking valid builds', coordinates);
     for (const tileType of tiles) {
       for (const orientation of orientations) {
         const action = { orientation, tileType, coordinates };
