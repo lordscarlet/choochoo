@@ -218,11 +218,6 @@ export function HexGrid() {
           emitMove(moveActionProgress);
           // TODO: only clear progress when the action gets emitted.
           setMoveActionProgress(undefined);
-        } else {
-          setMoveActionProgress({
-            ...moveActionProgress,
-            path: moveActionProgress.path.slice(0, moveActionProgress.path.length - 1),
-          });
         }
       });
     }
