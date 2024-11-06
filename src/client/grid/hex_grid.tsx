@@ -112,19 +112,19 @@ export function HexGrid() {
   const onMoveToSpace = useCallback((space?: Space) => {
     if (space == null || moveActionProgress == null) return;
     const entirePath = [moveActionProgress.startingCity, ...moveActionProgress.path.map(p => p.endingStop)];
-    const selectedIndex = entirePath.findIndex((p) => p.equals(space.coordinates));
-    if (selectedIndex >= 0) {
+    const entirePathIndex = entirePath.findIndex((p) => p.equals(space.coordinates));
+    if (entirePathIndex >= 0) {
       // Ignore all but the last two elements
-      if (selectedIndex < entirePath.length - 2) return;
-      if (selectedIndex === entirePath.length - 2) {
+      if (entirePathIndex < entirePath.length - 2) return;
+      if (entirePathIndex === entirePath.length - 2) {
         // Remove the last element of the path.
         setMoveActionProgress({
           ...moveActionProgress,
-          path: moveActionProgress.path.slice(0, selectedIndex),
+          path: moveActionProgress.path.slice(0, entirePathIndex - 1),
         });
         return;
       }
-      if (selectedIndex === 0) return;
+      if (entirePathIndex === 0) return;
       // Otherwise, just update the owner
       const fromSpace = grid.get(entirePath[entirePath.length - 2])!;
       const paths = buildPaths(grid, fromSpace.coordinates, space.coordinates);
@@ -134,7 +134,7 @@ export function HexGrid() {
       const nextPath = paths[(previousRouteExitIndex + 1) % paths.length];
       setMoveActionProgress({
         ...moveActionProgress,
-        path: moveActionProgress.path.slice(0, selectedIndex).concat(nextPath),
+        path: moveActionProgress.path.slice(0, entirePathIndex - 1).concat([nextPath]),
       });
       return;
     }
