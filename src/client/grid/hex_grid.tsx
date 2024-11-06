@@ -12,7 +12,7 @@ import { Coordinates } from "../../utils/coordinates";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { useAction } from "../services/game";
-import { useGrid } from "../utils/execution_context";
+import { useCurrentPlayer, useGrid } from "../utils/execution_context";
 import { BuildingDialog } from "./building_dialog";
 import { coordinatesToCenter, getCorners, Point } from "./point";
 import { RawHex } from "./raw_hex";
@@ -67,6 +67,7 @@ function buildPaths(grid: Grid, startingStop: Coordinates, endingStop: Coordinat
 export function HexGrid() {
   const { canEmit: canEmitBuild } = useAction(BuildAction);
   const { canEmit: canEmitMove, emit: emitMove } = useAction(MoveAction);
+  const player = useCurrentPlayer();
   const grid = useGrid();
   const spaces = useMemo(() => [...grid.values()], [grid]);
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
@@ -141,11 +142,13 @@ export function HexGrid() {
     if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.goodColor() === moveActionProgress.good) return;
     const paths = buildPaths(grid, fromSpace.coordinates, space.coordinates);
     if (paths.length === 0) return;
+
+    if (moveActionProgress.path.length >= player.locomotive) return;
     setMoveActionProgress({
       ...moveActionProgress,
       path: moveActionProgress.path.concat([paths[0]]),
     });
-  }, [moveActionProgress, grid]);
+  }, [moveActionProgress, grid, player]);
 
   const highlightedTrack = useMemo(() => {
     if (moveActionProgress == null) return [];
