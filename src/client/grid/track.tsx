@@ -4,12 +4,7 @@ import { getPlayerColor } from "../../engine/state/player";
 import { Direction } from "../../engine/state/tile";
 import { assertNever } from "../../utils/validate";
 import * as styles from "./hex_grid.module.css";
-import { offsetPoint } from "./raw_hex";
-
-export interface Point {
-  x: number;
-  y: number;
-}
+import { getExitPoint, Point } from "./point";
 
 export function TrackLegacy({ track }: { track: TrackInfo[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -66,8 +61,8 @@ export function TrackLegacy({ track }: { track: TrackInfo[] }) {
 }
 
 export function Track({ track, center, size, highlighted }: { track: TrackInfo, center: Point, size: number, highlighted: boolean }) {
-  const point1 = getPoint(center, track.exits[0], size);
-  const point2 = getPoint(center, track.exits[1], size);
+  const point1 = getExitPoint(center, track.exits[0], size);
+  const point2 = getExitPoint(center, track.exits[1], size);
 
   const curve = `M${point1.x} ${point1.y} Q ${center.x} ${center.y} ${point2.x} ${point2.y}`;
   return <>
@@ -76,36 +71,4 @@ export function Track({ track, center, size, highlighted }: { track: TrackInfo, 
   </>;
 }
 
-function getPoint(center: Point, exit: Exit, size: number): Point {
-  const right = offsetPoint(center, size, 0);
-  const bottomRight = offsetPoint(center, size, Math.PI / 3);
-  const bottomLeft = offsetPoint(center, size, Math.PI * 2 / 3);
-  const left = offsetPoint(center, size, Math.PI);
-  const topLeft = offsetPoint(center, size, Math.PI * 4 / 3);
-  const topRight = offsetPoint(center, size, Math.PI * 5 / 3);
 
-  switch (exit) {
-    case TOWN: return center;
-    case Direction.BOTTOM:
-      return pointBetween(bottomLeft, bottomRight);
-    case Direction.BOTTOM_LEFT:
-      return pointBetween(bottomLeft, left);
-    case Direction.BOTTOM_RIGHT:
-      return pointBetween(bottomRight, right);
-    case Direction.TOP_LEFT:
-      return pointBetween(topLeft, left);
-    case Direction.TOP_RIGHT:
-      return pointBetween(topRight, right);
-    case Direction.TOP:
-      return pointBetween(topRight, topLeft);
-    default:
-      assertNever(exit);
-  }
-}
-
-export function pointBetween(point1: Point, point2: Point, portion = 0.5): Point {
-  return {
-    x: (point1.x * portion) + (point2.x * (1 - portion)),
-    y: (point1.y * portion) + (point2.y * (1 - portion)),
-  };
-}

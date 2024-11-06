@@ -11,7 +11,7 @@ import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
 import { Track } from "../map/track";
 import { Action } from "../state/action";
-import { CityGroup } from "../state/city_group";
+import { toLetter } from "../state/city_group";
 import { LocationType } from "../state/location_type";
 import { allDirections } from "../state/tile";
 import { BuilderHelper } from "./helper";
@@ -86,11 +86,4 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
     this.log.currentPlayer(`places city ${toLetter(city.group, city.onRoll[0])} in ${data.coordinates.toString()}`);
     return this.helper.isAtEndOfTurn();
   }
-}
-
-function toLetter(group: CityGroup, onRoll: number): string {
-  if (group === CityGroup.WHITE) {
-    return String.fromCharCode('A'.charCodeAt(0) + onRoll - 2);
-  }
-  return String.fromCharCode('E'.charCodeAt(0) + onRoll);
 }

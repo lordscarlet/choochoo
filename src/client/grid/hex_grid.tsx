@@ -14,8 +14,8 @@ import { assert } from "../../utils/validate";
 import { useAction } from "../services/game";
 import { useGrid } from "../utils/execution_context";
 import { BuildingDialog } from "./building_dialog";
+import { coordinatesToCenter, getCorners, Point } from "./point";
 import { RawHex } from "./raw_hex";
-import { Point } from "./track";
 
 
 function cubeRound(qFrac: number, rFrac: number): Coordinates {
@@ -70,11 +70,27 @@ export function HexGrid() {
   const grid = useGrid();
   const spaces = useMemo(() => [...grid.values()], [grid]);
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
+
   const size = 70;
-  const offset: Point = {
-    x: size,
-    y: size,
-  };
+  const padding = 20;
+
+  const offset: Point = useMemo(() => {
+    const allCorners = [...grid.keys()].flatMap(c => getCorners(coordinatesToCenter(c, size), size));
+    return {
+      x: padding - Math.min(...allCorners.map(c => c.x)),
+      y: padding - Math.min(...allCorners.map(c => c.y)),
+    };
+  }, [...grid.keys()]);
+
+  const viewBox: Point = useMemo(() => {
+    const allCorners = [...grid.keys()].flatMap(c => getCorners(coordinatesToCenter(c, size), size));
+    return {
+      x: Math.max(...allCorners.map((c => c.x))) + offset.x + padding,
+      y: Math.max(...allCorners.map((c => c.y))) + offset.y + padding,
+    };
+  }, [...grid.keys()]);
+
+  // console.log('offset', offset);
 
   const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
 
@@ -93,8 +109,7 @@ export function HexGrid() {
   }, [canEmitMove, moveActionProgress, setMoveActionProgress]);
 
   const onMoveToSpace = useCallback((space?: Space) => {
-    if (space == null) return;
-    assert(moveActionProgress != null);
+    if (space == null || moveActionProgress == null) return;
     const entirePath = [moveActionProgress.startingCity, ...moveActionProgress.path.map(p => p.endingStop)];
     const selectedIndex = entirePath.findIndex((p) => p.equals(space.coordinates));
     if (selectedIndex >= 0) {
@@ -132,51 +147,6 @@ export function HexGrid() {
     });
   }, [moveActionProgress, grid]);
 
-  const onClick = useCallback((e: MouseEvent) => {
-    const canvas = e.currentTarget as HTMLCanvasElement;
-    const rect = canvas.getBoundingClientRect();
-    const coordinates = pixelToCoordinates({
-      x: e.clientX - rect.left - offset.x,
-      y: e.clientY - rect.top - offset.y,
-    }, size);
-    const space = grid.get(coordinates);
-    if (canEmitMove) {
-      const maybeGood = (e.target as HTMLElement).dataset.good;
-      if (maybeGood != null) {
-        const good: Good = parseInt(maybeGood);
-        assert(space instanceof City);
-        if (onSelectGood(space, good)) {
-          return;
-        }
-      }
-      onMoveToSpace(space);
-      return;
-    }
-    if (canEmitBuild && space instanceof Location) {
-      setBuildingSpace(space);
-      return;
-    }
-  }, [grid, onSelectGood, setBuildingSpace, onMoveToSpace]);
-
-  const canSendGood = useMemo(() => {
-    if (moveActionProgress == null) return false;
-    if (moveActionProgress.path.length === 0) return false;
-    const destination = grid.get(peek(moveActionProgress.path).endingStop);
-    if (!(destination instanceof City)) return false;
-    return destination.goodColor() === moveActionProgress.good;
-  }, [grid, moveActionProgress]);
-
-  const sendGood = useCallback(() => {
-    assert(moveActionProgress != null);
-    emitMove(moveActionProgress);
-    // TODO: only clear progress when the action gets emitted.
-    setMoveActionProgress(undefined);
-  }, [emitMove, moveActionProgress, setMoveActionProgress]);
-
-  const startOver = useCallback(() => {
-    setMoveActionProgress(undefined);
-  }, [setMoveActionProgress]);
-
   const highlightedTrack = useMemo(() => {
     if (moveActionProgress == null) return [];
     return moveActionProgress.path.flatMap((p, index) => {
@@ -200,6 +170,33 @@ export function HexGrid() {
       coordinates: moveActionProgress.startingCity
     };
   }, [moveActionProgress]);
+
+  const onClick = useCallback((e: MouseEvent) => {
+    const canvas = e.currentTarget as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const coordinates = pixelToCoordinates({
+      x: e.clientX - rect.left - offset.x,
+      y: e.clientY - rect.top - offset.y,
+    }, size);
+
+    const space = grid.get(coordinates);
+    if (canEmitMove) {
+      const maybeGood = (e.target as HTMLElement).dataset.good;
+      if (maybeGood != null) {
+        const good: Good = parseInt(maybeGood);
+        assert(space instanceof City);
+        if (onSelectGood(space, good)) {
+          return;
+        }
+      }
+      onMoveToSpace(space);
+      return;
+    }
+    if (canEmitBuild && space instanceof Location) {
+      setBuildingSpace(space);
+      return;
+    }
+  }, [grid, canEmitBuild, offset, size, onSelectGood, setBuildingSpace, onMoveToSpace]);
 
   const dialogs = useDialogs();
 
@@ -226,15 +223,15 @@ export function HexGrid() {
     }
   }, [moveActionProgress, grid]);
 
-  return <>
+  return <div style={{ overflowX: 'auto', width: '100%' }}>
     <svg xmlns="http://www.w3.org/2000/svg"
-      width="100%"
-      height="3000"
+      width={viewBox.x}
+      height={viewBox.y}
       fill="currentColor"
       className="bi bi-google"
       onClick={onClick}>
-      {spaces.map(c => <RawHex key={c.coordinates.serialize()} selectedGood={selectedGood} highlightedTrack={highlightedTrack} offsetX={offset.x} offsetY={offset.y} space={c} size={size} />)}
+      {spaces.map(c => <RawHex key={c.coordinates.serialize()} selectedGood={selectedGood} highlightedTrack={highlightedTrack} offset={offset} space={c} size={size} />)}
     </svg>
     <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
-  </>;
+  </div>;
 }
