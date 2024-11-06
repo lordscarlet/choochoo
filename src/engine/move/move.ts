@@ -13,10 +13,13 @@ import { Location } from "../map/location";
 import { getGoodColor, Good } from "../state/good";
 import { LocationType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
+import { Direction } from "../state/tile";
 
 export const Path = z.object({
   owner: z.nativeEnum(PlayerColor).optional(),
   endingStop: CoordinatesZod,
+  // The direction from the previous endingStop that points to the track.
+  startingExit: z.nativeEnum(Direction),
 });
 
 export type Path = z.infer<typeof Path>;
@@ -40,6 +43,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
   readonly assertInput = MoveData.parse;
   validate(action: MoveData): void {
+    const grid = this.grid();
     const curr = this.currentPlayer();
     if (action.path.length > curr.locomotive) {
       throw new InvalidInputError(`Can only move ${curr.locomotive} steps`);
@@ -48,11 +52,11 @@ export class MoveAction implements ActionProcessor<MoveData> {
       throw new InvalidInputError('must move over at least one route');
     }
 
-    const startingCity = this.gridHelper.lookup(action.startingCity);
+    const startingCity = grid.get(action.startingCity);
     assert(startingCity instanceof City);
     assert(startingCity.getGoods().includes(action.good), `${action.good} good not found at the indicated location`);
 
-    const endingLocation = this.gridHelper.lookup(peek(action.path).endingStop);
+    const endingLocation = grid.get(peek(action.path).endingStop);
 
     if (!(endingLocation instanceof City)) {
       throw new InvalidInputError(`${action.good} good cannot be delivered to non city`);
@@ -63,7 +67,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
     // Validate that the route passes through cities and towns
     for (const step of action.path.slice(0, action.path.length - 1)) {
-      const location = this.gridHelper.lookup(step.endingStop);
+      const location = grid.get(step.endingStop);
       if (!(location instanceof City) && !(location instanceof Location && location.hasTown())) {
         throw new InvalidInputError('Invalid path, must pass through cities and towns');
       }
@@ -85,16 +89,17 @@ export class MoveAction implements ActionProcessor<MoveData> {
     let fromCity: City | Location = startingCity;
     for (const step of action.path) {
       const toCoordinates = step.endingStop;
-      const eligibleOwners = this.grid().findRoutesToLocation(fromCity.coordinates, toCoordinates);
-      if (eligibleOwners.size === 0) {
-        throw new InvalidInputError(`no route found from ${fromCity.coordinates} to ${toCoordinates}`);
-      }
+      const startingRouteTrack = fromCity instanceof City
+        ? this.grid().connection(fromCity.coordinates, step.startingExit!)
+        : fromCity.trackExiting(step.startingExit!);
+      assert(startingRouteTrack != null, { invalidInput: `no route found from ${fromCity.coordinates} exiting ${step.startingExit}` });
+      assert(!(startingRouteTrack instanceof City), `cannot move from city to city`);
+      assert(startingRouteTrack.getOwner() === step.owner, { invalidInput: `route not owned by ${step.owner}` });
+      assert(
+        this.grid().endsWith(startingRouteTrack, step.endingStop),
+        { invalidInput: `indicated track does not end with ${step.endingStop}` });
 
-      if (!eligibleOwners.has(step.owner)) {
-        throw new InvalidInputError(`no route found from ${fromCity.coordinates} to ${toCoordinates} owned by ${step.owner}`);
-      }
-
-      fromCity = this.gridHelper.lookup(toCoordinates)!;
+      fromCity = grid.get(toCoordinates)!;
     }
   }
 

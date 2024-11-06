@@ -123,7 +123,7 @@ export class Grid {
     return route[0].exitsTo(coordinates) || peek(route).exitsTo(coordinates);
   }
 
-  findRoutesToLocation(fromCoordinates: Coordinates, toCoordinates: Coordinates): Set<PlayerColor | undefined> {
+  findRoutesToLocation(fromCoordinates: Coordinates, toCoordinates: Coordinates): Track[] {
     const space = this.grid.get(fromCoordinates);
     assert(space != null, 'cannot call findRoutes from null location');
     if (space instanceof City) {
@@ -132,14 +132,13 @@ export class Grid {
     return this.findRoutesToLocationFromTown(space, toCoordinates);
   }
 
-  findRoutesToLocationFromTown(location: Location, coordinates: Coordinates): Set<PlayerColor | undefined> {
+  findRoutesToLocationFromTown(location: Location, coordinates: Coordinates): Track[] {
     assert(location.hasTown(), 'cannot call findRoutesToLocation from a non-town hex');
-    return new Set(
-      location.getTrack().filter((track) => this.endsWith(track, coordinates)).map((track) => track.getOwner()));
+    return location.getTrack().filter((track) => this.endsWith(track, coordinates));
   }
 
-  findRoutesToLocationFromCity(city: City, coordinates: Coordinates): Set<PlayerColor | undefined> {
-    return new Set(allDirections.map((direction) => {
+  findRoutesToLocationFromCity(city: City, coordinates: Coordinates): Track[] {
+    return allDirections.map((direction) => {
       const neighbor = this.get(city.coordinates.neighbor(direction));
       if (neighbor == null || neighbor instanceof City) {
         return undefined;
@@ -147,8 +146,7 @@ export class Grid {
       return neighbor.trackExiting(getOpposite(direction));
     })
       .filter(track => track != null)
-      .filter((track) => this.endsWith(track, coordinates))
-      .map((track) => track.getOwner()));
+      .filter((track) => this.endsWith(track, coordinates));
   }
 
   merge(gridData: GridData): Grid {

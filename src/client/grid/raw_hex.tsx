@@ -2,12 +2,13 @@ import { ReactNode, useMemo } from "react";
 import { City } from "../../engine/map/city";
 import { BaseTileData, calculateTrackInfo, Location } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
+import { Track, TrackInfo } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { LocationType } from "../../engine/state/location_type";
 import { assertNever } from "../../utils/validate";
 import { HexNameLegacy, Town } from "./hex";
 import * as styles from "./hex_grid.module.css";
-import { Point, pointBetween, Track, TrackLegacy } from "./track";
+import { Point, pointBetween, TrackLegacy, Track as TrackSvg } from "./track";
 
 interface RawHexLegacyProps {
   space?: Location | City;
@@ -114,14 +115,15 @@ interface RawHexProps {
   hideGoods?: boolean;
   offsetX?: number;
   offsetY?: number;
+  highlightedTrack?: Track[];
 }
 
-export function RawHex({ space, asCity, tile, size, hideGoods }: RawHexProps) {
+export function RawHex({ space, asCity, highlightedTrack, tile, size, hideGoods, offsetX, offsetY }: RawHexProps) {
   const coordinates = space.coordinates;
-  const center = useMemo(() => offsetPoint({
-    x: size * (1.5 * coordinates.q),
-    y: size * ((Math.sqrt(3) / 2 * coordinates.q) + (Math.sqrt(3) * coordinates.r)),
-  }, 100, Math.PI * 1 / 4), [coordinates]);
+  const center = useMemo(() => ({
+    x: size * (1.5 * coordinates.q) + (offsetX ?? 0),
+    y: size * ((Math.sqrt(3) / 2 * coordinates.q) + (Math.sqrt(3) * coordinates.r)) + (offsetY ?? 0),
+  }), [coordinates]);
   const corners = useMemo(() =>
     [
       offsetPoint(center, size, 0),
@@ -133,10 +135,19 @@ export function RawHex({ space, asCity, tile, size, hideGoods }: RawHexProps) {
     ].map((p) => [p.x, p.y].join(' ')).join(',')
     , [center, size]);
   const hexColor = asCity ? goodColor(asCity) : color(space);
-  const tileInfo = tile != null ? tile : space instanceof Location ? space.getTileData() : undefined;
+  const trackInfo = useMemo(() => {
+    const tileData = tile != null ? tile : space instanceof Location ? space.getTileData() : undefined;
+    if (tileData == null) return [];
+    return calculateTrackInfo(tileData);
+  }, [space, tile]);
+  const highlightedTrackSet = useMemo(() => {
+    if (highlightedTrack == null) return new Set<TrackInfo>();
+    const inHex = highlightedTrack.filter(t => t.coordinates.equals(coordinates));
+    return new Set(trackInfo.filter((t) => t.exits.every(e => inHex.some(t => t.getExits().includes(e)))));
+  }, [highlightedTrack, coordinates, trackInfo]);
   return <>
     <polygon data-coordinates={space.coordinates.toString()} points={corners} stroke="black" fill={hexColor} strokeWidth="1" />
-    {tileInfo && calculateTrackInfo(tileInfo).map((t, index) => <Track key={index} center={center} size={size} track={t} />)}
+    {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Location && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
     {space instanceof City && <HexName name={space.cityName()} center={center} size={size} />}

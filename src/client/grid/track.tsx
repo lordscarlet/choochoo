@@ -65,12 +65,15 @@ export function TrackLegacy({ track }: { track: TrackInfo[] }) {
   return <canvas ref={ref} className={styles.tile}></canvas>
 }
 
-export function Track({ track, center, size }: { track: TrackInfo, center: Point, size: number }) {
+export function Track({ track, center, size, highlighted }: { track: TrackInfo, center: Point, size: number, highlighted: boolean }) {
   const point1 = getPoint(center, track.exits[0], size);
   const point2 = getPoint(center, track.exits[1], size);
 
   const curve = `M${point1.x} ${point1.y} Q ${center.x} ${center.y} ${point2.x} ${point2.y}`;
-  return <path d={curve} stroke={getPlayerColor(track.owner)} strokeWidth="4" strokeLinecap="round" fill="transparent"></path>;
+  return <>
+    {highlighted && <path d={curve} stroke="yellow" strokeWidth="6" strokeLinecap="round" fill="transparent"></path>}
+    <path d={curve} stroke={getPlayerColor(track.owner)} strokeWidth="3" strokeLinecap="round" fill="transparent"></path>
+  </>;
 }
 
 function getPoint(center: Point, exit: Exit, size: number): Point {
