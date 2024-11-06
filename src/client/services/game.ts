@@ -2,8 +2,8 @@ import { useNotifications } from "@toolpad/core";
 import { initClient } from "@ts-rest/core";
 import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { GameApi, gameContract } from "../../api/game";
+import { useNavigate, useParams } from "react-router-dom";
+import { CreateGameApi, GameApi, gameContract } from "../../api/game";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { useInjected } from "../utils/execution_context";
@@ -50,6 +50,19 @@ function useSetGame(): (game: GameApi) => void {
     tsrQueryClient.games.get.setQueryData(getQueryKey(game.id), (r) => r && ({ ...r, status: 200, body: { game } }));
     tsrQueryClient.games.list.setQueryData(getQueryKey('list'), (r) => r && ({ ...r, status: 200, body: { games: r.body.games.map(other => other.id === game.id ? game : other) } }));
   }, []);
+}
+
+export function useCreateGame(): { createGame: (game: CreateGameApi) => void, isPending: boolean } {
+  const { mutate, isPending } = tsr.games.create.useMutation();
+  const navigate = useNavigate();
+
+  const createGame = useCallback((body: CreateGameApi) => mutate({ body }, {
+    onSuccess: (data) => {
+      navigate('/games/' + data.body.game.id);
+    },
+  }), []);
+
+  return { createGame, isPending };
 }
 
 interface GameAction {
