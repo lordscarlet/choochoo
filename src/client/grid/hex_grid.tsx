@@ -214,8 +214,6 @@ export function HexGrid() {
       }).then((confirmed) => {
         if (confirmed) {
           emitMove(moveActionProgress);
-          // TODO: only clear progress when the action gets emitted.
-          setMoveActionProgress(undefined);
         }
       });
     }
