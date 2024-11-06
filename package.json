@@ -1,8 +1,8 @@
 {
   "scripts": {
     "dev": "nodemon src/server/index.ts",
-    "build": "esbuild --minify --bundle --outfile=dist/index.js --jsx=automatic --tree-shaking --sourcemap --platform=browser src/client/main.tsx",
-    "prod": "ts-node src/server/index.ts",
+    "build": "esbuild --minify --bundle --define:process.env.NODE_ENV=\\\"production\\\" --outfile=dist/index.js --jsx=automatic --tree-shaking --sourcemap --platform=browser src/client/main.tsx",
+    "prod": "NODE_ENV=production ts-node src/server/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

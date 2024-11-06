@@ -6,7 +6,7 @@ import { redisSession } from './redis';
 import { gameApp } from './routes/game';
 import { homeApp } from './routes/home';
 import { messageApp } from './routes/message';
-import { jsApp } from './routes/script';
+import { scriptApp } from './routes/script';
 import { userApp } from './routes/user';
 import { waitForSequelize } from './sequelize';
 import { io } from './socket';
@@ -19,11 +19,14 @@ app.use(redisSession);
 app.use(express.json());
 app.use(waitForSequelize());
 
-app.use('/dist', jsApp);
 app.use('/api', gameApp);
 app.use('/api', userApp);
 app.use('/api', messageApp);
-app.use(homeApp);
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/dist', scriptApp());
+  app.use(homeApp);
+}
 
 app.use((err: unknown, req: Request, res: Response, next: (t: unknown) => void) => {
   if (res.headersSent) {
