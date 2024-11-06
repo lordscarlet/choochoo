@@ -144,9 +144,11 @@ export function HexGrid() {
     if (paths.length === 0) return;
 
     if (moveActionProgress.path.length >= player.locomotive) return;
+    // Prefer the path belonging to the current player.
+    const path = paths.find((p) => p.owner === player.color) ?? paths[0];
     setMoveActionProgress({
       ...moveActionProgress,
-      path: moveActionProgress.path.concat([paths[0]]),
+      path: moveActionProgress.path.concat([path]),
     });
   }, [moveActionProgress, grid, player]);
 
