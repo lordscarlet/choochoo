@@ -35,6 +35,10 @@ export class Grid {
     return this.grid.values();
   }
 
+  cities(): City[] {
+    return [...this.values()].filter(s => s instanceof City);
+  }
+
   entries(): Iterable<[Coordinates, Space]> {
     return this.grid.entries();
   }

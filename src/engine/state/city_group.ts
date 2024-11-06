@@ -25,7 +25,7 @@ export function cityGroupTextColor(group: CityGroup): string {
 
 export function toLetter(group: CityGroup, onRoll: number) {
   if (group === CityGroup.WHITE) {
-    return String.fromCharCode('A'.charCodeAt(0) + onRoll - 2);
+    return String.fromCharCode('A'.charCodeAt(0) + onRoll - 3);
   }
-  return String.fromCharCode('E'.charCodeAt(0) + onRoll);
+  return String.fromCharCode('E'.charCodeAt(0) + onRoll - 1);
 }

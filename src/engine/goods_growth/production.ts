@@ -42,13 +42,13 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
   }
 
   validate(data: ProductionData) {
-    assert(this.turnState().goods.includes(data.good), 'must place one of the goods');
+    assert(this.turnState().goods.includes(data.good), { invalidInput: 'must place one of the goods' });
     const city = this.findCity(data);
-    assert(city != null, 'must place good on a city');
+    assert(city != null, { invalidInput: 'must place good on a city' });
     const onRollIndex = city.onRoll().indexOf(data.onRoll);
-    assert(city.getUpcomingGoods()[onRollIndex] != null, 'must place in valid onRoll');
+    assert(city.getUpcomingGoods()[onRollIndex] != null, { invalidInput: 'must place in valid onRoll' });
     const maxGoods = city.isUrbanized() ? 2 : 3;
-    assert(city.getUpcomingGoods()[onRollIndex].length < maxGoods, 'chosen onroll is full');
+    assert(city.getUpcomingGoods()[onRollIndex].length < maxGoods, { invalidInput: 'chosen onroll is full' });
   }
 
   process(data: ProductionData): boolean {
