@@ -85,7 +85,6 @@ const map = grid([
     PLAIN,
     town('Terre Haute'),
     PLAIN,
-    PLAIN,
   ],
   [
     ...duplicate(5, UNPASSABLE),

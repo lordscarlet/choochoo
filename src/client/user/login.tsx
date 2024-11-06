@@ -1,6 +1,6 @@
 import { Box, Button, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
-import { RouteObject, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useLogin, useMe } from "../services/me";
 import { useFormState } from "../utils/form_state";
 
@@ -48,9 +48,4 @@ export function LoginPage() {
       <Button type="submit" disabled={isPending}>Login</Button>
     </div>
   </Box>;
-}
-
-export const loginRoute: RouteObject = {
-  path: '/users/login',
-  element: <LoginPage />,
 }

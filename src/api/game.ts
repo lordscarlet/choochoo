@@ -120,6 +120,7 @@ export const gameContract = c.router({
     body: ActionApi,
     responses: {
       200: z.object({ game: GameApi }),
+      400: z.object({ error: z.string() }),
     },
     summary: 'Performs an action on a game',
   },

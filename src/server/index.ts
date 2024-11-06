@@ -32,11 +32,12 @@ app.use((err: unknown, req: Request, res: Response, next: (t: unknown) => void) 
   }
   if (err instanceof UserError) {
     res.status(err.statusCode);
+    res.json({ success: false, error: err.message });
   } else {
+    console.error(err);
     res.status(500)
+    res.json({ success: false });
   }
-  console.error(err);
-  res.json({ success: false });
 });
 
 const server = createServer(app);

@@ -1,5 +1,6 @@
 import { useNotifications } from "@toolpad/core";
 import { initClient } from "@ts-rest/core";
+import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { GameApi, gameContract } from "../../api/game";
@@ -156,8 +157,12 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
         setGame(data.body.game);
       },
       onError(error) {
-        console.error(error);
-        notifications.show('Error performing action');
+        if (!isFetchError(error) && error.status === 400) {
+          notifications.show(error.body.error);
+        } else {
+          console.error(error);
+          notifications.show('Error performing action');
+        }
       },
     });
   }, [game.id, actionName]);
