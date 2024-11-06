@@ -120,7 +120,23 @@ export class Grid {
   /** Returns whether the given coordinates are at the end of the given track */
   endsWith(track: Track, coordinates: Coordinates): boolean {
     const route = this.getRoute(track);
-    return route[0].exitsTo(coordinates) || peek(route).exitsTo(coordinates);
+    const end = this.get(coordinates);
+    if (end == null) return false;
+    if (end instanceof City) {
+      return exitsToCity(route[0]) || exitsToCity(peek(route));
+
+      function exitsToCity(track: Track): boolean {
+        return track.getExits().some(e => e !== TOWN && track.coordinates.neighbor(e).equals(coordinates));
+      }
+    } else if (end.hasTown()) {
+      return exitsToTown(route[0]) || exitsToTown(peek(route));
+
+      function exitsToTown(track: Track) {
+        return track.coordinates.equals(coordinates);
+      }
+    } else {
+      return false;
+    }
   }
 
   findRoutesToLocation(fromCoordinates: Coordinates, toCoordinates: Coordinates): Track[] {

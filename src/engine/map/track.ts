@@ -1,11 +1,9 @@
 import { z } from "zod";
 import { Coordinates } from "../../utils/coordinates";
-import { peek } from "../../utils/functions";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
 import { City } from "./city";
-import { getOpposite, rotateDirectionClockwise } from "./direction";
-import { Grid } from "./grid";
+import { rotateDirectionClockwise } from "./direction";
 
 
 export class Track {
@@ -27,20 +25,6 @@ export class Track {
   /** Returns whether this track exits this direction */
   hasExit(exit: Exit): boolean {
     return this.track.exits.includes(exit);
-  }
-
-  /** Returns whether this exits to the given coordinates. */
-  exitsTo(coordinates: Coordinates): boolean {
-    return this.getExits().some((e) => {
-      if (e === TOWN) {
-        return this.coordinates.equals(coordinates);
-      }
-      return this.coordinates.neighbor(e).equals(coordinates);
-    });
-  }
-
-  private getOtherExit(exit: Exit): Exit {
-    return this.getExits().find(e => e !== exit)!;
   }
 
   equals(other: Track): boolean {

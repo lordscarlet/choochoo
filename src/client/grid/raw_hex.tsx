@@ -5,7 +5,8 @@ import { isTownTile } from "../../engine/map/tile";
 import { Track, TrackInfo } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { LocationType } from "../../engine/state/location_type";
-import { assertNever } from "../../utils/validate";
+import { Coordinates } from "../../utils/coordinates";
+import { assert, assertNever } from "../../utils/validate";
 import { HexNameLegacy, Town } from "./hex";
 import * as styles from "./hex_grid.module.css";
 import { Point, pointBetween, TrackLegacy, Track as TrackSvg } from "./track";
@@ -116,9 +117,10 @@ interface RawHexProps {
   offsetX?: number;
   offsetY?: number;
   highlightedTrack?: Track[];
+  selectedGood?: { good: Good, coordinates: Coordinates };
 }
 
-export function RawHex({ space, asCity, highlightedTrack, tile, size, hideGoods, offsetX, offsetY }: RawHexProps) {
+export function RawHex({ space, asCity, selectedGood, highlightedTrack, tile, size, hideGoods, offsetX, offsetY }: RawHexProps) {
   const coordinates = space.coordinates;
   const center = useMemo(() => ({
     x: size * (1.5 * coordinates.q) + (offsetX ?? 0),
@@ -145,17 +147,23 @@ export function RawHex({ space, asCity, highlightedTrack, tile, size, hideGoods,
     const inHex = highlightedTrack.filter(t => t.coordinates.equals(coordinates));
     return new Set(trackInfo.filter((t) => t.exits.every(e => inHex.some(t => t.getExits().includes(e)))));
   }, [highlightedTrack, coordinates, trackInfo]);
+  const selectedGoodIndex = useMemo(() => {
+    if (selectedGood == null) return undefined;
+    if (!selectedGood.coordinates.equals(coordinates)) return undefined;
+    assert(space instanceof City);
+    return space.getGoods().indexOf(selectedGood.good);
+  }, [space, selectedGood]);
   return <>
     <polygon data-coordinates={space.coordinates.toString()} points={corners} stroke="black" fill={hexColor} strokeWidth="1" />
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Location && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
     {space instanceof City && <HexName name={space.cityName()} center={center} size={size} />}
-    {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} offset={index} good={g} center={center} size={size} />)}
+    {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
   </>;
 }
 
-function GoodBlock({ center, size, offset, good }: { good: Good, center: Point, size: number, offset: number }) {
+function GoodBlock({ center, size, offset, good, highlighted }: { good: Good, center: Point, size: number, offset: number, highlighted: boolean }) {
   const goodSize = size / 3;
 
   // If there are too many goods on the hex, split them up into top and bottom goods.
@@ -164,7 +172,8 @@ function GoodBlock({ center, size, offset, good }: { good: Good, center: Point, 
 
   const x = center.x - (1.8 * goodSize) + (goodSize * xOffset / 2);
   const y = center.y + (yOffset * goodSize);
-  return <rect data-good={good} width={goodSize} height={goodSize} x={x} y={y} fill={goodColor(good)} strokeWidth={1} stroke="black" />;
+  const stroke = highlighted ? 'yellow' : 'black';
+  return <rect data-good={good} width={goodSize} height={goodSize} x={x} y={y} fill={goodColor(good)} strokeWidth={1} stroke={stroke} />;
 }
 
 function HexName({ name, center, size }: { name: string, center: Point, size: number }) {

@@ -78,8 +78,17 @@ export function HexGrid() {
   const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
 
   const onSelectGood = useCallback((city: City, good: Good) => {
-    if (moveActionProgress != null) return;
+    if (moveActionProgress != null) {
+      if (moveActionProgress.startingCity.equals(city.coordinates) && moveActionProgress.good === good) {
+        setMoveActionProgress(undefined);
+        return true;
+      } else if (moveActionProgress.path.length > 0) {
+        // If there is an extensive path, ignore the select good call.
+        return false;
+      }
+    }
     setMoveActionProgress({ path: [], startingCity: city.coordinates, good });
+    return true;
   }, [canEmitMove, moveActionProgress, setMoveActionProgress]);
 
   const onMoveToSpace = useCallback((space?: Space) => {
@@ -98,6 +107,7 @@ export function HexGrid() {
         });
         return;
       }
+      if (selectedIndex === 0) return;
       // Otherwise, just update the owner
       const fromSpace = grid.get(entirePath[entirePath.length - 2])!;
       const paths = buildPaths(grid, fromSpace.coordinates, space.coordinates);
@@ -130,13 +140,13 @@ export function HexGrid() {
     }, size);
     const space = grid.get(coordinates);
     if (canEmitMove) {
-      if (moveActionProgress == null) {
-        const maybeGood = (e.target as HTMLElement).dataset.good;
-        if (maybeGood == null) return;
+      const maybeGood = (e.target as HTMLElement).dataset.good;
+      if (maybeGood != null) {
         const good: Good = parseInt(maybeGood);
         assert(space instanceof City);
-        onSelectGood(space, good);
-        return;
+        if (onSelectGood(space, good)) {
+          return;
+        }
       }
       onMoveToSpace(space);
       return;
@@ -182,6 +192,14 @@ export function HexGrid() {
     });
   }, [grid, moveActionProgress]);
 
+  const selectedGood = useMemo(() => {
+    if (!moveActionProgress) return undefined;
+    return {
+      good: moveActionProgress.good,
+      coordinates: moveActionProgress.startingCity
+    };
+  }, [moveActionProgress]);
+
   return <>
     {moveActionProgress != null && <div>
       {JSON.stringify(moveActionProgress, null, 2)}
@@ -194,7 +212,7 @@ export function HexGrid() {
       fill="currentColor"
       className="bi bi-google"
       onClick={onClick}>
-      {spaces.map(c => <RawHex key={c.coordinates.serialize()} highlightedTrack={highlightedTrack} offsetX={offset.x} offsetY={offset.y} space={c} size={size} />)}
+      {spaces.map(c => <RawHex key={c.coordinates.serialize()} selectedGood={selectedGood} highlightedTrack={highlightedTrack} offsetX={offset.x} offsetY={offset.y} space={c} size={size} />)}
     </svg>
     <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
   </>;
