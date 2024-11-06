@@ -1,9 +1,8 @@
 import { useNotifications } from "@toolpad/core";
-import { initClient } from "@ts-rest/core";
 import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { CreateGameApi, GameApi, gameContract } from "../../api/game";
+import { CreateGameApi, GameApi } from "../../api/game";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { useInjected } from "../utils/execution_context";
@@ -11,11 +10,6 @@ import { tsr } from "./client";
 import { useMe } from "./me";
 import { socket, useJoinRoom } from "./socket";
 import { useUsers } from "./user";
-
-export const gameClient = initClient(gameContract, {
-  baseUrl: '/api',
-  baseHeaders: { 'Content-Type': 'application/json' },
-});
 
 function getQueryKey(gameId: number | string): string[] {
   return ['games', `${gameId}`];
