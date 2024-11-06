@@ -9,7 +9,6 @@ export const buildPromise = context({
   minify: false,
   platform: 'browser',
   jsx: 'automatic',
-  // format: 'esm',
   outfile: "dist/index.js",
   treeShaking: true,
   plugins: [{
@@ -33,9 +32,8 @@ export const buildPromise = context({
 
 export const jsApp = express();
 
-jsApp.use((req: Request, res: Response, next: (err?: any) => void) => {
+jsApp.use((_: Request, __: Response, next: (err?: any) => void) => {
   return buildPromise.then(() => {
-    console.log('done building');
     next();
   }).catch(next);
 });
