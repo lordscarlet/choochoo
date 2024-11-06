@@ -1,4 +1,5 @@
-import { MouseEvent, useCallback, useMemo, useState } from "react";
+import { useDialogs } from "@toolpad/core";
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
@@ -200,12 +201,32 @@ export function HexGrid() {
     };
   }, [moveActionProgress]);
 
+  const dialogs = useDialogs();
+
+  useEffect(() => {
+    if (moveActionProgress == null) return;
+    if (moveActionProgress.path.length === 0) return;
+    const endingStop = grid.get(peek(moveActionProgress.path).endingStop);
+    if (endingStop instanceof City && endingStop.goodColor() === moveActionProgress.good) {
+      dialogs.confirm('Deliver to ' + endingStop.cityName(), {
+        okText: 'Confirm Delivery',
+        cancelText: 'Cancel',
+      }).then((confirmed) => {
+        if (confirmed) {
+          emitMove(moveActionProgress);
+          // TODO: only clear progress when the action gets emitted.
+          setMoveActionProgress(undefined);
+        } else {
+          setMoveActionProgress({
+            ...moveActionProgress,
+            path: moveActionProgress.path.slice(0, moveActionProgress.path.length - 1),
+          });
+        }
+      });
+    }
+  }, [moveActionProgress, grid]);
+
   return <>
-    {moveActionProgress != null && <div>
-      {JSON.stringify(moveActionProgress, null, 2)}
-      {canSendGood && <button onClick={sendGood}>Commit</button>}
-      <button onClick={startOver}>Start over</button>
-    </div>}
     <svg xmlns="http://www.w3.org/2000/svg"
       width="100%"
       height="3000"

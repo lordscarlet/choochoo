@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
-import { NotificationsProvider } from "@toolpad/core";
+import { DialogsProvider, NotificationsProvider } from "@toolpad/core";
 import { Suspense, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { tsr } from '../services/client';
@@ -11,15 +11,17 @@ export function App() {
   const { reset } = useQueryErrorResetBoundary();
 
   return <Suspense fallback={<Loading />}>
-    <NotificationsProvider>
-      <ErrorBoundary onReset={reset} fallbackRender={({ resetErrorBoundary }) => <ResetError resetErrorBoundary={resetErrorBoundary} />}>
-        <QueryClientProvider client={queryClient}>
-          <tsr.ReactQueryProvider>
-            <Router />
-          </tsr.ReactQueryProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </NotificationsProvider>
+    <DialogsProvider>
+      <NotificationsProvider>
+        <ErrorBoundary onReset={reset} fallbackRender={({ resetErrorBoundary }) => <ResetError resetErrorBoundary={resetErrorBoundary} />}>
+          <QueryClientProvider client={queryClient}>
+            <tsr.ReactQueryProvider>
+              <Router />
+            </tsr.ReactQueryProvider>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </NotificationsProvider>
+    </DialogsProvider>
   </Suspense>;
 }
 
