@@ -15,7 +15,7 @@ import { ComplexTileType, Direction, SimpleTileType, TownTileType } from "../../
 import { Coordinates } from "../../utils/coordinates";
 import { useAction } from '../services/game';
 import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/execution_context";
-import { RawHex } from "./raw_hex";
+import { RawHexLegacy } from "./raw_hex";
 
 
 interface BuildingProps {
@@ -70,11 +70,11 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
         <p><input type="checkbox" checked={showReasons} onChange={e => setShowReasons(e.target.checked)} />Show failure reasons</p>
         {showReasons && <button onClick={rotate}>Rotate</button>}
         {eligible.map((build, index) => <div key={index}>
-          <RawHex key={index} space={space!} tile={build.action} onClick={() => build.reason == null && onSelect(build.action)} />
+          <RawHexLegacy key={index} space={space!} tile={build.action} onClick={() => build.reason == null && onSelect(build.action)} />
           {build.reason}
         </div>)}
         {curr.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
-          <RawHex key={city.group * 10 + city.onRoll[0]} space={space!} asCity={city.color} onClick={() => selectAvailableCity(index)} />
+          <RawHexLegacy key={city.group * 10 + city.onRoll[0]} space={space!} asCity={city.color} onClick={() => selectAvailableCity(index)} />
         )}
       </DialogContent>
     </Dialog>

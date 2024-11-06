@@ -1,19 +1,18 @@
-import { useCallback, useMemo, useState } from "react";
+import { MouseEvent, useCallback, useMemo, useState } from "react";
 import { BuildAction } from "../../engine/build/build";
-import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { City } from "../../engine/map/city";
-import { GridHelper } from "../../engine/map/grid_helper";
+import { Space } from "../../engine/map/grid";
 import { Location } from "../../engine/map/location";
 import { MoveAction, MoveData } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";
-import { Phase } from "../../engine/state/phase";
+import { Coordinates } from "../../utils/coordinates";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { useAction } from "../services/game";
-import { useGrid, useInjected, usePhaseState } from "../utils/execution_context";
+import { useGrid } from "../utils/execution_context";
 import { BuildingDialog } from "./building_dialog";
-import * as styles from "./hex_grid.module.css";
-import { HexRow } from "./hex_row";
+import { RawHex } from "./raw_hex";
+import { Point } from "./track";
 
 function* calculateRows(locations: Iterable<City | Location>): Iterable<Iterable<City | Location | undefined>> {
   const rows = new Map<number, Array<City | Location>>();
@@ -44,73 +43,124 @@ function* calculateRows(locations: Iterable<City | Location>): Iterable<Iterable
   }
 }
 
+function cubeRound(qFrac: number, rFrac: number): Coordinates {
+  const sFrac = - (qFrac + rFrac);
+  let q = Math.round(qFrac)
+  let r = Math.round(rFrac)
+  let s = Math.round(sFrac)
+
+  const qDiff = Math.abs(q - qFrac)
+  const rDiff = Math.abs(r - rFrac)
+  const sDiff = Math.abs(s - sFrac)
+
+  if (qDiff > rDiff && qDiff > sDiff) {
+    q = -r - s;
+  } else if (rDiff > sDiff) {
+    r = -q - s;
+  } else {
+    s = -q - r;
+  }
+
+  return Coordinates.from({ q, r });
+}
+
+
+function pixelToCoordinates(point: Point, size: number): Coordinates {
+  const q = (2. / 3 * point.x) / size;
+  const r = (-1. / 3 * point.x + Math.sqrt(3) / 3 * point.y) / size;
+  return cubeRound(q, r);
+}
+
 export function HexGrid() {
   const { canEmit: canEmitBuild } = useAction(BuildAction);
   const { canEmit: canEmitMove, emit: emitMove } = useAction(MoveAction);
   const grid = useGrid();
-  const gridHelper = useInjected(GridHelper);
-  const rows = useMemo(() => [...calculateRows(grid.values())], [grid]);
+  const spaces = useMemo(() => [...grid.values()], [grid]);
   const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
+  const size = 70;
+  const offset: Point = {
+    x: size,
+    y: size,
+  };
   const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
-  const productionState = usePhaseState(Phase.GOODS_GROWTH, GOODS_GROWTH_STATE);
-
-  const cellClick = useCallback((space?: Location | City) => {
-    if (space instanceof Location && canEmitBuild) {
-      setBuildingSpace(space);
-    }
-    if (moveActionProgress) {
-      if (space == null) return;
-      const entirePath = [moveActionProgress.startingCity, ...moveActionProgress.path.map(p => p.endingStop)];
-      const selectedIndex = entirePath.findIndex((p) => p.equals(space.coordinates));
-      if (selectedIndex >= 0) {
-        if (selectedIndex === 0) return;
-        // Ignore all but the last two elements
-        if (selectedIndex < entirePath.length - 2) return;
-        if (selectedIndex === entirePath.length - 2) {
-          // Remove the last element of the path.
-          setMoveActionProgress({
-            ...moveActionProgress,
-            path: moveActionProgress.path.slice(0, selectedIndex + 1),
-          });
-          return;
-        }
-        // Otherwise, just update the owner
-        const fromSpace = gridHelper.lookup(entirePath[entirePath.length - 2])!;
-        const eligibleOwners = [...grid.findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
-        const previousOwner = peek(moveActionProgress.path).owner;
-        const nextOwner = eligibleOwners[(eligibleOwners.indexOf(previousOwner) + 1) % eligibleOwners.length];
-        if (nextOwner === previousOwner) return;
-        setMoveActionProgress({
-          ...moveActionProgress,
-          path: moveActionProgress.path.slice(0, selectedIndex).concat({ owner: nextOwner, endingStop: space.coordinates }),
-        });
-        return;
-      }
-      const fromSpace = gridHelper.lookup(peek(entirePath))!;
-      if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.goodColor() === moveActionProgress.good) return;
-      const eligibleOwners = [...grid.findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
-      if (eligibleOwners.length === 0) return;
-      setMoveActionProgress({
-        ...moveActionProgress,
-        path: moveActionProgress.path.concat([{ owner: eligibleOwners[0], endingStop: space.coordinates }]),
-      });
-    }
-  }, [canEmitBuild, moveActionProgress, grid, gridHelper, productionState]);
 
   const onSelectGood = useCallback((city: City, good: Good) => {
     if (moveActionProgress != null) return;
-    if (canEmitMove) {
-      setMoveActionProgress({ path: [], startingCity: city.coordinates, good });
-    }
+    setMoveActionProgress({ path: [], startingCity: city.coordinates, good });
   }, [canEmitMove, moveActionProgress, setMoveActionProgress]);
+
+  const onMoveToSpace = useCallback((space?: Space) => {
+    if (space == null) return;
+    assert(moveActionProgress != null);
+    const entirePath = [moveActionProgress.startingCity, ...moveActionProgress.path.map(p => p.endingStop)];
+    const selectedIndex = entirePath.findIndex((p) => p.equals(space.coordinates));
+    if (selectedIndex >= 0) {
+      if (selectedIndex === 0) return;
+      // Ignore all but the last two elements
+      if (selectedIndex < entirePath.length - 2) return;
+      if (selectedIndex === entirePath.length - 2) {
+        // Remove the last element of the path.
+        setMoveActionProgress({
+          ...moveActionProgress,
+          path: moveActionProgress.path.slice(0, selectedIndex + 1),
+        });
+        return;
+      }
+      // Otherwise, just update the owner
+      const fromSpace = grid.get(entirePath[entirePath.length - 2])!;
+      const eligibleOwners = [...grid.findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
+      const previousOwner = peek(moveActionProgress.path).owner;
+      const nextOwner = eligibleOwners[(eligibleOwners.indexOf(previousOwner) + 1) % eligibleOwners.length];
+      if (nextOwner === previousOwner) return;
+      setMoveActionProgress({
+        ...moveActionProgress,
+        path: moveActionProgress.path.slice(0, selectedIndex).concat({ owner: nextOwner, endingStop: space.coordinates }),
+      });
+      return;
+    }
+    const fromSpace = grid.get(peek(entirePath))!;
+    if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.goodColor() === moveActionProgress.good) return;
+    const eligibleOwners = [...grid.findRoutesToLocation(fromSpace.coordinates, space.coordinates)];
+    if (eligibleOwners.length === 0) return;
+    setMoveActionProgress({
+      ...moveActionProgress,
+      path: moveActionProgress.path.concat([{ owner: eligibleOwners[0], endingStop: space.coordinates }]),
+    });
+  }, [moveActionProgress, grid]);
+
+  const onClick = useCallback((e: MouseEvent) => {
+    const canvas = e.currentTarget as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const coordinates = pixelToCoordinates({
+      x: e.clientX - rect.left - offset.x,
+      y: e.clientY - rect.top - offset.y,
+    }, size);
+    const space = grid.get(coordinates);
+    if (canEmitMove) {
+      if (moveActionProgress == null) {
+        const maybeGood = (e.target as HTMLElement).dataset.good;
+        if (maybeGood == null) return;
+        const good: Good = parseInt(maybeGood);
+        assert(space instanceof City);
+        onSelectGood(space, good);
+        return;
+      }
+      onMoveToSpace(space);
+      return;
+    }
+    if (canEmitBuild && space instanceof Location) {
+      setBuildingSpace(space);
+      return;
+    }
+  }, [grid, onSelectGood, setBuildingSpace, onMoveToSpace]);
 
   const canSendGood = useMemo(() => {
     if (moveActionProgress == null) return false;
     if (moveActionProgress.path.length === 0) return false;
-    const destination = gridHelper.lookup(peek(moveActionProgress.path).endingStop);
+    const destination = grid.get(peek(moveActionProgress.path).endingStop);
     if (!(destination instanceof City)) return false;
     return destination.goodColor() === moveActionProgress.good;
-  }, [gridHelper, moveActionProgress]);
+  }, [grid, moveActionProgress]);
 
   const sendGood = useCallback(() => {
     assert(moveActionProgress != null);
@@ -123,19 +173,20 @@ export function HexGrid() {
     setMoveActionProgress(undefined);
   }, [setMoveActionProgress]);
 
-  const hexRows = useMemo(() => {
-    return [...rows].map((row, index) => <HexRow key={index} onSelectGood={onSelectGood} row={row} onClick={cellClick} />);
-  }, [onSelectGood, cellClick, ...[...rows].flatMap((i) => [...i])]);
-
-  return <div>
+  return <>
     {moveActionProgress != null && <div>
       {JSON.stringify(moveActionProgress, null, 2)}
       {canSendGood && <button onClick={sendGood}>Commit</button>}
       <button onClick={startOver}>Start over</button>
     </div>}
-    <div className={styles['hex-gridHelper']}>
-      {hexRows}
-      <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
-    </div>
-  </div>;
+    <svg xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="3000"
+      fill="currentColor"
+      className="bi bi-google"
+      onClick={onClick}>
+      {spaces.map(c => <RawHex key={c.coordinates.serialize()} offsetX={offset.x} offsetY={offset.y} space={c} size={size} />)}
+    </svg>
+    <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
+  </>;
 }

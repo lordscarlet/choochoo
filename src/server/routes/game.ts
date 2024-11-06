@@ -143,6 +143,7 @@ const router = initServer().router(gameContract, {
       })), { transaction });
 
       transaction.afterCommit(() => {
+        if (newLogs.length === 0) return;
         emitToRoom(newLogs, newGame);
       });
 

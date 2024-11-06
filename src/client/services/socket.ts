@@ -35,12 +35,13 @@ export function useMessages(gameId?: number): MessageApi[] | undefined {
 
   useEffect(() => {
     const listener = (messages: MessageApi[]) => {
+      if (messages.length === 0) {
+        console.warn('server sent emptty messages...');
+        return;
+      }
       // TODO: fix the typing of this particular method.
       queryClient.messages.list.setQueryData(queryKey, (r: any) => {
-        const nextPageCursor = {
-          beforeDate: messages[0].date,
-          beforeIndex: messages[0].index,
-        };
+        const nextPageCursor = messages[0].id;
         return {
           pageParams: r.pageParams.concat([undefined]),
           pages: r.pages.concat({ status: 200, headers: new Headers(), body: { messages, nextPageCursor } }),
