@@ -1,6 +1,6 @@
 import { useNotifications } from "@toolpad/core";
 import { initClient } from "@ts-rest/core";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { GameApi, gameContract } from "../../api/game";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
@@ -120,6 +120,19 @@ export function useEmptyAction(action: ActionConstructor<Record<string, never>>)
     oldEmit({});
   }, [oldEmit]);
   return { emit, canEmit, canEmitUsername };
+}
+
+/** Like `useState` but it resets when the game version changes. */
+export function useGameVersionState<T>(initialValue: T): [T, (t: T) => void] {
+  const game = useGame();
+  const [state, setState] = useState(initialValue);
+  const ref = useRef(game.version);
+  const externalState = ref.current === game.version ? state : initialValue;
+  const externalSetState = useCallback((state: T) => {
+    ref.current = game.version;
+    setState(state);
+  }, [setState, game]);
+  return [externalState, externalSetState];
 }
 
 export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHandler<T> {

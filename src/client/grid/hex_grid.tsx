@@ -1,5 +1,5 @@
 import { useDialogs } from "@toolpad/core";
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { MouseEvent, useCallback, useEffect, useMemo } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
@@ -11,7 +11,7 @@ import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
-import { useAction } from "../services/game";
+import { useAction, useGameVersionState } from "../services/game";
 import { useCurrentPlayer, useGrid } from "../utils/execution_context";
 import { BuildingDialog } from "./building_dialog";
 import { coordinatesToCenter, getCorners, Point } from "./point";
@@ -70,7 +70,7 @@ export function HexGrid() {
   const player = useCurrentPlayer();
   const grid = useGrid();
   const spaces = useMemo(() => [...grid.values()], [grid]);
-  const [buildingSpace, setBuildingSpace] = useState<Location | undefined>();
+  const [buildingSpace, setBuildingSpace] = useGameVersionState<Location | undefined>(undefined);
 
   const size = 70;
   const padding = 20;
@@ -91,9 +91,7 @@ export function HexGrid() {
     };
   }, [...grid.keys()]);
 
-  // console.log('offset', offset);
-
-  const [moveActionProgress, setMoveActionProgress] = useState<MoveData | undefined>(undefined);
+  const [moveActionProgress, setMoveActionProgress] = useGameVersionState<MoveData | undefined>(undefined);
 
   const onSelectGood = useCallback((city: City, good: Good) => {
     if (moveActionProgress != null) {
