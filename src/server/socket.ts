@@ -12,7 +12,7 @@ function roomName(gameId?: number) {
 }
 
 export function emitToRoom(logs: LogModel[], game?: GameApi): void {
-  io.to(roomName(game?.id)).emit('logsUpdate', logs.map((l) => l.toApi()));
+  io.to(roomName(game?.id)).emit('newLogs', logs.map((l) => l.toApi()));
   if (game != null) {
     io.to(roomName(game?.id)).emit('gameUpdate', game);
   }

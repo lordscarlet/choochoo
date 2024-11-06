@@ -36,10 +36,9 @@ const router = initServer().router(userContract, {
     return { status: 200, body: { user: user.toApi() } };
   },
 
-  async create({ body }) {
-    console.log('creating', body);
+  async create({ req, body }) {
     const user = await UserModel.register(body);
-    console.log('created', body);
+    req.session.userId = user.id;
     return { status: 200, body: { user: user.toMyApi() } };
   },
 

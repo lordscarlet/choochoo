@@ -48,9 +48,9 @@ export function useMessages(gameId?: number): MessageApi[] | undefined {
         } as any;
       });
     };
-    socket.on('logsUpdate', listener);
+    socket.on('newLogs', listener);
     return () => {
-      socket.off('logsUpdate', listener);
+      socket.off('newLogs', listener);
     };
   }, [gameId]);
 

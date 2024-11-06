@@ -1,6 +1,7 @@
+import { Box, Button, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
 import { RouteObject, useNavigate } from "react-router-dom";
-import { useLogin, useMe } from "../services/me";
+import { useMe, useRegister } from "../services/me";
 import { useFormState } from "../utils/form_state";
 import { LoginPage } from "./login";
 
@@ -8,7 +9,7 @@ export function RegisterPage() {
   const [email, setEmail] = useFormState('');
   const [username, setUsername] = useFormState('');
   const [password, setPassword] = useFormState('');
-  const login = useLogin();
+  const { register, isPending } = useRegister();
   const navigate = useNavigate();
   const me = useMe();
   useEffect(() => {
@@ -16,17 +17,48 @@ export function RegisterPage() {
       navigate('/');
     }
   }, [me]);
+
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // login({usernameOrEmail, password});
+    register({ username, email, password });
   }, [username, email, password]);
 
-  return <form onSubmit={onSubmit}>
-    <input type="text" placeholder="Username" value={username} onChange={setUsername} />
-    <input type="text" placeholder="Email" value={email} onChange={setEmail} />
-    <input type="password" placeholder="Password" value={password} onChange={setPassword} />
-    <button type="submit">Login</button>
-  </form>;
+  return <Box
+    component="form"
+    sx={{ '& .MuiTextField-root': { m: 1, width: '25ch' } }}
+    noValidate
+    autoComplete="off"
+    onSubmit={onSubmit}
+  >
+    <div>
+      <TextField
+        required
+        label="Username"
+        value={username}
+        onChange={setUsername}
+      />
+    </div>
+    <div>
+      <TextField
+        required
+        label="Email"
+        value={email}
+        onChange={setEmail}
+      />
+    </div>
+    <div>
+      <TextField
+        required
+        label="Password"
+        type="password"
+        value={password}
+        onChange={setPassword}
+      />
+    </div>
+    <div>
+      <Button type="submit" disabled={isPending}>Register</Button>
+    </div>
+  </Box>;
 }
 
 export const loginRoute: RouteObject = {
