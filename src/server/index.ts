@@ -1,4 +1,5 @@
 import cookieParser from 'cookie-parser';
+import csrf from 'csurf';
 import express, { Request, Response } from 'express';
 import { createServer } from 'http';
 import { UserError } from '../utils/error';
@@ -16,8 +17,13 @@ const port = 3000;
 
 app.use(cookieParser());
 app.use(redisSession);
+app.use(csrf());
 app.use(express.json());
 app.use(waitForSequelize());
+
+app.get('/api/xsrf', (req: Request, res: Response) => {
+  res.json({ xsrf: req.csrfToken() });
+});
 
 app.use('/api', gameApp);
 app.use('/api', userApp);

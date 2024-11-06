@@ -1,4 +1,4 @@
-import { initClient, initContract } from '@ts-rest/core';
+import { ApiFetcherArgs, initClient, initContract, tsRestFetchApi } from '@ts-rest/core';
 import { initTsrReactQuery } from '@ts-rest/react-query/v5';
 import { gameContract } from '../../api/game';
 import { messageContract } from '../../api/message';
@@ -16,11 +16,17 @@ export const contract = c.router({
   },
 });
 
+const xsrfToken = fetch('/api/xsrf').then((r) => r.json()).then(({ xsrf }) => xsrf);
+
 export const clientArgs = {
   baseUrl: '/api',
   baseHeaders: {
     'x-app-source': 'ts-rest',
   },
+  async api(args: ApiFetcherArgs) {
+    args.headers['xsrf-token'] = await xsrfToken;
+    return tsRestFetchApi(args);
+  }
 };
 
 export const networkClient = initClient(contract, clientArgs);
