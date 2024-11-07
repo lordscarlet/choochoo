@@ -1,4 +1,5 @@
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import csrf from 'csurf';
 import express, { Request, Response } from 'express';
 import { createServer } from 'http';
@@ -18,6 +19,7 @@ const port = 3000;
 app.use(cookieParser());
 app.use(redisSession);
 app.use(csrf());
+app.use(cors({ origin: 'https://www.choochoo.games' }));
 app.use(express.json());
 app.use(waitForSequelize());
 
