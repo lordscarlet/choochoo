@@ -12,6 +12,8 @@ const options: SequelizeOptions = {
   database: environment.postgresUrl.pathname!.substring(1),
   host: environment.postgresUrl.hostname!,
   port: environment.postgresUrl.port ? parseInt(environment.postgresUrl.port) : undefined,
+  username: environment.postgresUrl.username,
+  password: environment.postgresUrl.password,
   ssl: true,
 };
 
