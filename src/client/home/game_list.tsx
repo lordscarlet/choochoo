@@ -10,7 +10,7 @@ export function GameList() {
   const { createGame } = useCreateGame();
 
   const goToGame = useCallback((game: GameApi) => {
-    navigate(`/games/${game.id}`);
+    navigate(`/app/games/${game.id}`);
   }, [navigate]);
 
   const createEasyGame = useCallback(async () => {
@@ -21,7 +21,7 @@ export function GameList() {
 
   return <div>
     <h2>Select game</h2>
-    <button onClick={createEasyGame}>Create Game</button>
+    <Button onClick={createEasyGame}>Create Game</Button>
     {games.map((game) => <div key={game.id}>
       {game.name}
       <Button onClick={() => goToGame(game)}>View</Button>

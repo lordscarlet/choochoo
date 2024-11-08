@@ -1,9 +1,20 @@
-import { Server } from "socket.io";
+import { Server, ServerOptions } from "socket.io";
 import { GameApi } from "../api/game";
 import { ClientToServerEvents, ServerToClientEvents } from "../api/socket";
 import { LogModel } from "./model/log";
+import { environment } from "./util/environment";
 
-export const io = new Server<ClientToServerEvents, ServerToClientEvents>();
+const args: Partial<ServerOptions> = {};
+
+if (environment.clientOrigin != null) {
+  args.cors = {
+    origin: environment.clientOrigin,
+    methods: ["GET", "POST"],
+    credentials: true,
+  };
+}
+
+export const io = new Server<ClientToServerEvents, ServerToClientEvents>(args);
 
 const HOME_ROOM = 'HOME_ROOM';
 

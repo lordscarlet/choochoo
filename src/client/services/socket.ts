@@ -5,13 +5,14 @@ import { io, Socket } from 'socket.io-client';
 import { MessageApi, PageCursor } from '../../api/message';
 import { ClientToServerEvents, ServerToClientEvents } from '../../api/socket';
 import { tsr } from './client';
+import { environment } from './environment';
 
-export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io();
+export const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
+  io(environment.socketHost);
 
 socket.on('connect', () => {
   console.log('got a connection');
 });
-
 
 const RESET = 'RESET';
 

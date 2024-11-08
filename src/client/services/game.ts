@@ -52,7 +52,7 @@ export function useCreateGame(): { createGame: (game: CreateGameApi) => void, is
 
   const createGame = useCallback((body: CreateGameApi) => mutate({ body }, {
     onSuccess: (data) => {
-      navigate('/games/' + data.body.game.id);
+      navigate('/app/games/' + data.body.game.id);
     },
   }), []);
 

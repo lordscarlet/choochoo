@@ -16,19 +16,19 @@ export function Router() {
           path: '/',
           element: <HomePage />,
         }, {
-          path: '/users/login',
+          path: '/app/users/login',
           element: <LoginPage />,
         },
         {
-          path: '/users/register',
+          path: '/app/users/register',
           element: <RegisterPage />,
         },
         {
-          path: '/games/create',
+          path: '/app/games/create',
           element: <CreateGamePage />,
         },
         {
-          path: '/games/:gameId',
+          path: '/app/games/:gameId',
           element: <GamePage />
         },
       ],

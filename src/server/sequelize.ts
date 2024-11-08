@@ -1,19 +1,21 @@
 import { Request, Response } from 'express';
-import { Sequelize } from 'sequelize-typescript';
+import { Sequelize, SequelizeOptions } from 'sequelize-typescript';
 import { users } from '../api/fake_data';
 import { GameModel } from './model/game';
 import { GameHistoryModel } from './model/history';
 import { LogModel } from './model/log';
 import { UserModel } from './model/user';
+import { environment } from './util/environment';
 
-export const sequelize = new Sequelize({
+const options: SequelizeOptions = {
   dialect: 'postgres',
-  database: 'aos',
-  host: 'localhost',
-  port: 5432,
-  // logging: false,
+  database: environment.postgresUrl.pathname!.substring(1),
+  host: environment.postgresUrl.hostname!,
+  port: environment.postgresUrl.port ? parseInt(environment.postgresUrl.port) : undefined,
   ssl: true,
-});
+};
+
+export const sequelize = new Sequelize(options);
 
 sequelize.addModels([
   GameModel,

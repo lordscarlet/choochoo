@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "dev": "nodemon src/server/index.ts",
-    "build": "esbuild --minify --bundle --define:process.env.NODE_ENV=\\\"production\\\" --outfile=dist/index.js --jsx=automatic --tree-shaking --sourcemap --platform=browser src/client/main.tsx",
-    "prod": "NODE_ENV=production ts-node src/server/index.ts",
+    "dev": "NODE_ENV=development POSTGRES_URL=postgres://localhost:5432/aos REDIS_URL=redis://localhost:6379/ SESSION_SECRET=foobar nodemon --ignore src/client src/server/index.ts",
+    "build": "NODE_ENV=production API_HOST=\"https://api.choochoo.games\" SOCKET_HOST=\"ws://api.choochoo.games\" ts-node scripts/client_build.ts",
+    "prod": "NODE_ENV=production CLIENT_ORIGIN=\"https://www.choochoo.games\" ts-node src/server/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

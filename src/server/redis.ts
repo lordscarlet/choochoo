@@ -3,8 +3,14 @@ import RedisStore from "connect-redis";
 import express from 'express';
 import session from 'express-session';
 import { createClient } from "redis";
+import { environment } from "./util/environment";
 
-const redisClient = createClient();
+const redisClient = createClient({
+  socket: {
+    host: environment.redisUrl.hostname!,
+    port: environment.redisUrl.port != null ? parseInt(environment.redisUrl.port) : 0,
+  },
+});
 redisClient.connect().catch(console.error);
 
 export const redisStore = new RedisStore({

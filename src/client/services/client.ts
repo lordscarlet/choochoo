@@ -3,6 +3,7 @@ import { initTsrReactQuery } from '@ts-rest/react-query/v5';
 import { gameContract } from '../../api/game';
 import { messageContract } from '../../api/message';
 import { userContract } from '../../api/user';
+import { environment } from './environment';
 
 const c = initContract();
 
@@ -16,10 +17,10 @@ export const contract = c.router({
   },
 });
 
-const xsrfToken = fetch('/api/xsrf').then((r) => r.json()).then(({ xsrf }) => xsrf);
+const xsrfToken = fetch(`${environment.apiHost}/api/xsrf`).then((r) => r.json()).then(({ xsrf }) => xsrf);
 
 export const clientArgs = {
-  baseUrl: '/api',
+  baseUrl: `${environment.apiHost}/api`,
   baseHeaders: {
     'x-app-source': 'ts-rest',
   },

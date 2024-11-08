@@ -5,13 +5,13 @@ import express, { Request, Response } from 'express';
 import { createServer } from 'http';
 import { UserError } from '../utils/error';
 import { redisSession } from './redis';
+import { devApp } from './routes/dev';
 import { gameApp } from './routes/game';
-import { homeApp } from './routes/home';
 import { messageApp } from './routes/message';
-import { scriptApp } from './routes/script';
 import { userApp } from './routes/user';
 import { waitForSequelize } from './sequelize';
 import { io } from './socket';
+import { environment, Stage } from './util/environment';
 
 const app = express();
 const port = 3000;
@@ -19,7 +19,9 @@ const port = 3000;
 app.use(cookieParser());
 app.use(redisSession);
 app.use(csrf());
-app.use(cors({ origin: 'https://www.choochoo.games' }));
+if (environment.clientOrigin) {
+  app.use(cors({ origin: environment.clientOrigin }));
+}
 app.use(express.json());
 app.use(waitForSequelize());
 
@@ -31,9 +33,8 @@ app.use('/api', gameApp);
 app.use('/api', userApp);
 app.use('/api', messageApp);
 
-if (process.env.NODE_ENV !== 'production') {
-  app.use('/dist', scriptApp());
-  app.use(homeApp);
+if (environment.stage !== Stage.enum.production) {
+  app.use(devApp());
 }
 
 app.use((err: unknown, req: Request, res: Response, next: (t: unknown) => void) => {

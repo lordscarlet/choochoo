@@ -5,41 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
-      "runtimeExecutable": "nodemon",
+      "type": "node-terminal",
       "request": "launch",
       "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**",
-        "src/client/**/**",
-      ],
-      "program": "${workspaceFolder}/src/server/index.ts",
-      "outFiles": [
-        "${workspaceFolder}/**/*.js"
-      ],
-      "sourceMaps": true,
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Production Launch Program",
-      "skipFiles": [
-        "<node_internals>/**",
-        "src/client/**/**",
-      ],
-      "program": "${workspaceFolder}/src/server/index.ts",
-      "outFiles": [
-        "${workspaceFolder}/**/*.js"
-      ],
-      "sourceMaps": false,
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ]
+      "command": "npm run dev"
     }
   ]
 }
