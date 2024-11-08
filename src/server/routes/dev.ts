@@ -2,7 +2,7 @@
 import express, { Request, Response } from 'express';
 import fs from 'fs';
 import { join } from 'path';
-import { buildApp } from '../../../scripts/client_build';
+import { buildApp } from '../../scripts/client_build';
 
 export function devApp() {
   const buildPromise = buildApp({ watch: true });
