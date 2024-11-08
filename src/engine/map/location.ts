@@ -6,6 +6,10 @@ import { ComplexTileType, Direction, SimpleTileType, TileData, TileType, TownTil
 import { rotateDirectionClockwise } from "./direction";
 import { Exit, rotateExitClockwise, TOWN, Track, TrackInfo } from "./track";
 
+export function isLocation(s: unknown): s is Location {
+  return s instanceof Location;
+}
+
 export class Location {
   private readonly track: Track[];
 

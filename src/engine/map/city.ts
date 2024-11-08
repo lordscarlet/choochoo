@@ -3,6 +3,10 @@ import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";
 import { CityData } from "../state/space";
 
+export function isCity(s: unknown): s is City {
+  return s instanceof City;
+}
+
 export class City {
   constructor(readonly coordinates: Coordinates, readonly data: CityData) { }
 

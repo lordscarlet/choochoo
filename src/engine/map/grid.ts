@@ -2,13 +2,13 @@ import { Map as ImmutableMap } from 'immutable';
 import { z } from "zod";
 import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
 import { deepEquals } from '../../utils/deep_equals';
-import { peek } from "../../utils/functions";
+import { isNotNull, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GridData } from "../state/grid";
 import { LocationType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
-import { allDirections, Direction } from "../state/tile";
-import { City } from "./city";
+import { allDirections, Direction, isDirection } from "../state/tile";
+import { City, isCity } from "./city";
 import { getOpposite } from "./direction";
 import { Location } from "./location";
 import { Exit, TOWN, Track, tupleMap } from "./track";
@@ -36,7 +36,7 @@ export class Grid {
   }
 
   cities(): City[] {
-    return [...this.values()].filter(s => s instanceof City);
+    return [...this.values()].filter(isCity);
   }
 
   entries(): Iterable<[Coordinates, Space]> {
@@ -56,7 +56,7 @@ export class Grid {
         if (!this.dangles(track)) continue;
         danglers.push({
           coordinates: space.coordinates,
-          immovableExit: this.immovableExits(track).filter(e => e !== TOWN)[0],
+          immovableExit: this.immovableExits(track).filter(isDirection)[0],
           length: this.getRoute(track).length,
         });
       }
@@ -165,7 +165,7 @@ export class Grid {
       }
       return neighbor.trackExiting(getOpposite(direction));
     })
-      .filter(track => track != null)
+      .filter(isNotNull)
       .filter((track) => this.endsWith(track, coordinates));
   }
 

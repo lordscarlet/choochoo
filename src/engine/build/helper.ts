@@ -66,7 +66,7 @@ export class BuilderHelper {
 
     const townTiles = new Map<TownTileType, number>();
 
-    const tiles = [...this.grid.all()].filter((space) =>
+    const tiles = [...this.grid.all()].filter((space): space is Location =>
       space instanceof Location).filter(space => space.hasTile())
       .map((space) => space.getTileType()!);
     // We have to verify the new tile before shifting through all the

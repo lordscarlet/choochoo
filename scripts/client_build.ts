@@ -9,6 +9,7 @@ export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<voi
     'SOCKET_HOST',
   ];
   const plugins = production ? [] : rebuildPlugins();
+
   const ctx = await context({
     entryPoints: ["src/client/main.tsx"],
     bundle: true,
@@ -21,6 +22,7 @@ export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<voi
     define: Object.fromEntries(environmentVariables.map(v => [`process.env.${v}`, process.env[v] != null ? `"${process.env[v]}"` : 'undefined'])),
     plugins,
   });
+
   if (watch) {
     await ctx.watch();
   } else {

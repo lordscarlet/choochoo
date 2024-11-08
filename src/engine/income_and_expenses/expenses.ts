@@ -5,7 +5,7 @@ import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
 import { PLAYERS, TURN_ORDER } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
-import { Location } from "../map/location";
+import { isLocation, Location } from "../map/location";
 import { LocationType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
@@ -53,7 +53,7 @@ export class ExpensesPhase extends PhaseModule {
 
   protected removeOwnershipMarkers(players: Set<PlayerColor>): void {
     const grid = inject(GridHelper);
-    const toUpdate: Location[] = [...grid.all()].filter((space) => space instanceof Location)
+    const toUpdate: Location[] = [...grid.all()].filter(isLocation)
       .filter((location) => {
         return [...location.getTrack()].some((track) => {
           const owner = track.getOwner();

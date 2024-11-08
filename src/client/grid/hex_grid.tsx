@@ -5,9 +5,10 @@ import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
 import { Grid, Space } from "../../engine/map/grid";
 import { Location } from "../../engine/map/location";
-import { TOWN, Track } from "../../engine/map/track";
+import { Track } from "../../engine/map/track";
 import { MoveAction, MoveData, Path } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";
+import { isDirection } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
@@ -53,13 +54,13 @@ function buildPaths(grid: Grid, startingStop: Coordinates, endingStop: Coordinat
       return {
         owner: track.getOwner(),
         endingStop,
-        startingExit: track.getExits().find((e) => e !== TOWN)!,
+        startingExit: track.getExits().find(isDirection)!,
       };
     }
     return {
       owner: track.getOwner(),
       endingStop,
-      startingExit: getOpposite(track.getExits().filter((e) => e !== TOWN).find(e => track.coordinates.neighbor(e).equals(startingStop))!),
+      startingExit: getOpposite(track.getExits().filter(isDirection).find(e => track.coordinates.neighbor(e).equals(startingStop))!),
     };
   });
 }

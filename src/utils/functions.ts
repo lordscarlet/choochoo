@@ -92,3 +92,7 @@ export function infiniteLoopCheck(numChecks: number, data?: string): () => void 
     assert(numRuns++ < numChecks, `found infinite loop w/ data: ${data}`);
   };
 }
+
+export function isNotNull<T>(t: T): t is NonNullable<T> {
+  return t != null;
+}
