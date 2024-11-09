@@ -37,6 +37,7 @@ const router = initServer().router(userContract, {
   },
 
   async create({ req, body }) {
+    // TODO: don't allow empty or invalid usernames/emails/passwords
     const user = await UserModel.register(body);
     req.session.userId = user.id;
     return { status: 200, body: { user: user.toMyApi() } };
