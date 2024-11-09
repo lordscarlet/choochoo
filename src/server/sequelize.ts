@@ -40,7 +40,8 @@ connection.then(() => {
     }
   }
 }).catch((err) => {
-  console.log('failed to connect', err);
+  console.log('failed to connect to sql database', err);
+  process.exit();
 });
 
 export function waitForSequelize() {

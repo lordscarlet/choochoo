@@ -6,6 +6,8 @@ import { createClient } from "redis";
 import { environment } from "./util/environment";
 
 const redisClient = createClient({
+  username: environment.redisUrl.username,
+  password: environment.redisUrl.password,
   socket: {
     host: environment.redisUrl.hostname!,
     port: environment.redisUrl.port != null ? parseInt(environment.redisUrl.port) : 0,

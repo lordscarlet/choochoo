@@ -16,8 +16,13 @@ export const environment = {
   clientOrigin: process.env.CLIENT_ORIGIN,
   postgresUrl,
   redisUrl: new URL(process.env.REDIS_URL),
+  port: Number(process.env.PORT ?? 3000),
+  cert: process.env.CERT,
+  certKey: process.env.CERT_KEY,
 } as const;
 
-assert(
-  environment.stage === Stage.enum.development || environment.clientOrigin != null,
-  'must provide CLIENT_ORIGIN unless in development mode');
+if (environment.stage !== Stage.enum.development) {
+  assert(environment.cert != null, 'must provide CERT and CERT_KEY in prod mode')
+  assert(environment.port === 443, 'PORT must be 443 in prod mode');
+  assert(environment.clientOrigin != null, 'must provide CLIENT_ORIGIN in prd mode');
+}

@@ -2,8 +2,12 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import csrf from 'csurf';
 import express, { Request, Response } from 'express';
+import { readFile } from 'fs/promises';
 import { createServer } from 'http';
+import { createServer as createSecureServer } from 'https';
+import { resolve } from 'path';
 import { UserError } from '../utils/error';
+import { assert } from '../utils/validate';
 import { redisSession } from './redis';
 import { devApp } from './routes/dev';
 import { gameApp } from './routes/game';
@@ -52,11 +56,33 @@ app.use((err: unknown, req: Request, res: Response, next: (t: unknown) => void) 
   }
 });
 
-const server = createServer(app);
 
-io.attach(server);
+if (environment.cert != null) {
+  assert(environment.certKey != null, 'cannot provide cert without certkey');
+  Promise.all([
+    readFile(resolve(environment.certKey), { encoding: 'utf-8' }),
+    readFile(resolve(environment.cert), { encoding: 'utf-8' }),
+  ]).then(([key, cert]) => {
+    const server = createSecureServer({ key, cert }, app);
 
-/// Start
-server.listen(3000, () => {
-  console.log(`AoS listening on port ${port}`);
-});
+    io.attach(server);
+
+    /// Start
+    server.listen(environment.port, () => {
+      console.log(`AoS listening on port ${port}`);
+    });
+  }).catch((e) => {
+    console.log('unknown system error');
+    console.error(e);
+    process.exit();
+  });
+} else {
+  const server = createServer(app);
+
+  io.attach(server);
+
+  /// Start
+  server.listen(environment.port, () => {
+    console.log(`AoS listening on port ${port}`);
+  });
+}

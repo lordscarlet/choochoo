@@ -1,7 +1,8 @@
-import { BuildResult, context, Plugin } from 'esbuild';
+import type { BuildResult, Plugin } from 'esbuild';
 import { resolve } from 'path';
 
 export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<void> {
+  const { context } = await import('esbuild');
   const production = process.env.NODE_ENV === 'production';
   const environmentVariables = [
     'NODE_ENV',
