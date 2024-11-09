@@ -1,3 +1,4 @@
+import { useNotifications } from "@toolpad/core";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { CreateUserApi, LoginUserApi, MyUserApi } from "../../api/user";
@@ -55,12 +56,14 @@ export function useLogout() {
   const tsrQueryClient = tsr.useQueryClient();
   const { mutate, error, isPending } = tsr.users.logout.useMutation();
   handleError(isPending, error);
+  const notifications = useNotifications();
 
   const logout = useCallback(() => {
     mutate({}, {
       onSuccess({ status, body }) {
         assert(status === 200 && body.success);
         tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: undefined } }));
+        notifications.show('Logout successful');
       },
     });
   }, []);
