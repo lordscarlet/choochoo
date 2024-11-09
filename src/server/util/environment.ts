@@ -7,6 +7,7 @@ export type Stage = z.infer<typeof Stage>;
 
 assert(process.env.POSTGRES_URL != null, 'must provide POSTGRES_URL');
 assert(process.env.REDIS_URL != null, 'must provide REDIS_URL');
+assert(process.env.SESSION_SECRET != null, 'must provide SESSION_SECRET');
 
 const postgresUrl = new URL(process.env.POSTGRES_URL);
 assert(postgresUrl != null, 'must provide POSTGRES_URL in url format');
@@ -19,6 +20,7 @@ export const environment = {
   port: Number(process.env.PORT ?? 3000),
   cert: process.env.CERT,
   certKey: process.env.CERT_KEY,
+  sessionSecret: process.env.SESSION_SECRET,
 } as const;
 
 if (environment.stage !== Stage.enum.development) {

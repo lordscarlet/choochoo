@@ -14,7 +14,7 @@ redisClient.connect().catch((e) => {
 
 export const redisStore = new RedisStore({
   client: redisClient,
-  prefix: "aos:",
+  prefix: "choo:",
 });
 
 export const redisSession = express();
@@ -23,7 +23,7 @@ export const sessionParser = session({
   store: redisStore,
   resave: false,
   saveUninitialized: false,
-  secret: "keyboard cat",
+  secret: environment.sessionSecret,
 });
 
 redisSession.use(sessionParser);
