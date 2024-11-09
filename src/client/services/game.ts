@@ -1,13 +1,14 @@
 import { useNotifications } from "@toolpad/core";
-import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ValidationError } from "../../api/error";
 import { CreateGameApi, GameApi } from "../../api/game";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { useInjected } from "../utils/execution_context";
 import { tsr } from "./client";
 import { useMe } from "./me";
+import { handleError } from "./network";
 import { socket, useJoinRoom } from "./socket";
 import { useUsers } from "./user";
 
@@ -46,9 +47,10 @@ function useSetGame(): (game: GameApi) => void {
   }, []);
 }
 
-export function useCreateGame(): { createGame: (game: CreateGameApi) => void, isPending: boolean } {
-  const { mutate, isPending } = tsr.games.create.useMutation();
+export function useCreateGame(): { createGame: (game: CreateGameApi) => void, isPending: boolean, error?: ValidationError } {
+  const { mutate, error, isPending } = tsr.games.create.useMutation();
   const navigate = useNavigate();
+  const validationError = handleError(isPending, error);
 
   const createGame = useCallback((body: CreateGameApi) => mutate({ body }, {
     onSuccess: (data) => {
@@ -56,7 +58,7 @@ export function useCreateGame(): { createGame: (game: CreateGameApi) => void, is
     },
   }), []);
 
-  return { createGame, isPending };
+  return { createGame, isPending, error: validationError };
 }
 
 interface GameAction {
@@ -69,7 +71,8 @@ export function useJoinGame(): GameAction {
   const game = useGame();
   const me = useMe();
   const setGame = useSetGame();
-  const { mutate, isPending } = tsr.games.join.useMutation();
+  const { mutate, error, isPending } = tsr.games.join.useMutation();
+  handleError(isPending, error);
 
   const perform = useCallback(() => mutate({ params: { gameId: game.id } }, {
     onSuccess: (data) => {
@@ -86,7 +89,8 @@ export function useLeaveGame(): GameAction {
   const game = useGame();
   const me = useMe();
   const setGame = useSetGame();
-  const { mutate, isPending } = tsr.games.leave.useMutation();
+  const { mutate, error, isPending } = tsr.games.leave.useMutation();
+  handleError(isPending, error);
 
   const perform = useCallback(() => mutate({ params: { gameId: game.id } }, {
     onSuccess: (data) => {
@@ -103,7 +107,8 @@ export function useStartGame(): GameAction {
   const game = useGame();
   const me = useMe();
   const setGame = useSetGame();
-  const { mutate, isPending } = tsr.games.start.useMutation();
+  const { mutate, error, isPending } = tsr.games.start.useMutation();
+  handleError(isPending, error);
 
   const perform = useCallback(() => mutate({ params: { gameId: game.id } }, {
     onSuccess: (data) => {
@@ -149,7 +154,8 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
   const setGame = useSetGame();
   const phaseDelegator = useInjected(PhaseDelegator);
   const notifications = useNotifications();
-  const { mutate } = tsr.games.performAction.useMutation();
+  const { mutate, isPending, error } = tsr.games.performAction.useMutation();
+  handleError(isPending, error);
   const users = useUsers(game.activePlayerId != null ? [game.activePlayerId] : []);
 
   const actionName = action.action;
@@ -162,14 +168,6 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
     mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
       onSuccess: (data) => {
         setGame(data.body.game);
-      },
-      onError(error) {
-        if (!isFetchError(error) && error.status === 400) {
-          notifications.show(error.body.error);
-        } else {
-          console.error(error);
-          notifications.show('Error performing action');
-        }
       },
     });
   }, [game.id, actionName]);

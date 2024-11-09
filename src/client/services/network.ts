@@ -1,6 +1,6 @@
 import { useNotifications } from "@toolpad/core";
 import { isFetchError } from "@ts-rest/react-query/v5";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { ValidationError } from "../../api/error";
 
 interface NetworkError {
@@ -8,13 +8,26 @@ interface NetworkError {
   body: unknown;
 }
 
-export function handleError(isPending: boolean, error?: Error | NetworkError | null): ValidationError | undefined {
+interface ErrorBody {
+  error: string;
+}
+
+function isErrorBody(t: unknown): t is ErrorBody {
+  return t != null && typeof t === 'object' && 'error' in t;
+}
+
+export function useErrorNotifier(): (error: Error | NetworkError) => void {
   const notifications = useNotifications();
+  return useCallback((error: Error | NetworkError) => notifications.show(toMessage(error), {
+    severity: 'error',
+  }), [notifications]);
+}
+
+export function handleError(isPending: boolean, error?: Error | NetworkError | null): ValidationError | undefined {
+  const notify = useErrorNotifier();
   useEffect(() => {
     if (error == null || isPending) return;
-    notifications.show(toMessage(error), {
-      severity: 'error',
-    });
+    notify(error);
   }, [error]);
 
   if (isPending || error == null || isFetchError(error)) {
@@ -29,6 +42,7 @@ export function handleError(isPending: boolean, error?: Error | NetworkError | n
 }
 
 function toMessage(error: Error | NetworkError): string {
+  console.log('to message', error);
   if (isFetchError(error) || error.status >= 500) {
     console.error(error);
     return 'An unknown error occurred';
@@ -37,9 +51,12 @@ function toMessage(error: Error | NetworkError): string {
     return 'You are not authorized to perform that operation';
   }
   if (error.status === 401) {
-    return 'Invalid credentials';
+    return 'Invalid username and password';
   }
   if (error.status === 400) {
+    if (isErrorBody(error.body)) {
+      return `Invalid request: ${error.body.error}`;
+    }
     return 'Invalid request';
   }
   console.error(error);
