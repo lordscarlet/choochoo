@@ -75,9 +75,7 @@ export class UserModel extends Model<UserModel, CreateUserApi> {
   }
 
   static async register(user: CreateUserApi): Promise<UserModel> {
-    console.log('about to create');
     const password = await UserModel.hashPassword(user.password);
-    console.log('hashed password', password);
     const newUser = await UserModel.create({
       username: user.username,
       email: user.email,
