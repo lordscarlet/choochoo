@@ -53,7 +53,7 @@ export function emitError(err: ErrorInput): never {
   } else if (err.notFound != null) {
     throw new NotFoundError(err.notFound === true ? 'notFound' : err.notFound);
   } else if (err.unauthorized != null) {
-    throw new NotFoundError(err.unauthorized === true ? 'unauthorized' : err.unauthorized);
+    throw new UnauthorizedError(err.unauthorized === true ? 'unauthorized' : err.unauthorized);
   } else {
     throw new Error('unknown');
   }
