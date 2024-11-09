@@ -1,6 +1,6 @@
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLogin, useMe } from "../services/me";
 import { useTextInputState } from "../utils/form_state";
 
@@ -10,11 +10,13 @@ export function LoginPage() {
   const { login, isPending } = useLogin(true);
   const navigate = useNavigate();
   const me = useMe();
+
   useEffect(() => {
     if (me != null) {
       navigate('/');
     }
   }, [me]);
+
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     login({ usernameOrEmail, password });
@@ -27,15 +29,15 @@ export function LoginPage() {
     autoComplete="off"
     onSubmit={onSubmit}
   >
-    <div>
+    <FormControl>
       <TextField
         required
         label="Username or Email"
         value={usernameOrEmail}
         onChange={setUsernameOrEmail}
       />
-    </div>
-    <div>
+    </FormControl>
+    <FormControl>
       <TextField
         required
         label="Password"
@@ -43,9 +45,10 @@ export function LoginPage() {
         value={password}
         onChange={setPassword}
       />
-    </div>
+    </FormControl>
     <div>
       <Button type="submit" disabled={isPending}>Login</Button>
     </div>
+    <Link to="/app/users/register">Register</Link>
   </Box>;
 }
