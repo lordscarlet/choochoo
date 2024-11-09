@@ -44,7 +44,7 @@ const router = initServer().router(gameContract, {
       gameKey: body.gameKey,
       name: body.name,
       status: GameStatus.LOBBY,
-      playerIds: [4, 5, 6],
+      playerIds: [userId],
     });
     return { status: 201, body: { game: game.toApi() } };
   },
