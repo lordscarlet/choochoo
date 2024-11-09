@@ -2,11 +2,11 @@ import { Box, Button, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLogin, useMe } from "../services/me";
-import { useFormState } from "../utils/form_state";
+import { useTextInputState } from "../utils/form_state";
 
 export function LoginPage() {
-  const [usernameOrEmail, setUsernameOrEmail] = useFormState('');
-  const [password, setPassword] = useFormState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useTextInputState('');
+  const [password, setPassword] = useTextInputState('');
   const { login, isPending } = useLogin(true);
   const navigate = useNavigate();
   const me = useMe();

@@ -86,9 +86,8 @@ const router = initServer().router(gameContract, {
 
     const game = await GameModel.findByPk(params.gameId);
     assert(game != null);
-    assert(game.status === GameStatus.LOBBY, {invalidInput: 'cannot start a game that has already been started'});
-    assert(game.playerIds[0] === userId, {invalidInput: 'only the owner can start the game'});
-    assert(game.playerIds.length >= new MapRegistry().get(game.gameKey)!.minPlayers, {invalidInput: 'not enough players to start'});
+    assert(game.status === GameStatus.LOBBY, { invalidInput: 'cannot start a game that has already been started' });
+    assert(game.playerIds[0] === userId, { invalidInput: 'only the owner can start the game' });
 
     const engine = new Engine();
     const { gameData, logs, activePlayerId } = engine.start(game.playerIds, { mapKey: game.gameKey });

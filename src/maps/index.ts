@@ -11,6 +11,10 @@ export class MapRegistry {
     this.add(new RustBeltMapSettings());
   }
 
+  values(): Iterable<MapSettings> {
+    return this.maps.values();
+  }
+
   add(map: MapSettings): void {
     assert(!this.maps.has(map.key), `duplicate maps with key ${map.key}`);
     this.maps.set(map.key, map);

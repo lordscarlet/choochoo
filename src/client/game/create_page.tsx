@@ -1,15 +1,18 @@
-import { Box, Button, TextField } from "@mui/material";
-import { FormEvent, useCallback } from "react";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { FormEvent, useCallback, useMemo } from "react";
+import { MapRegistry } from "../../maps";
 import { useCreateGame } from "../services/game";
-import { useFormState } from "../utils/form_state";
+import { useSelectState, useTextInputState } from "../utils/form_state";
 
 export function CreateGamePage() {
-  const [name, setName] = useFormState('');
+  const maps = useMemo(() => [...new MapRegistry().values()], []);
+  const [name, setName] = useTextInputState('');
+  const [gameKey, setGameKey] = useSelectState(maps[0].key);
   const { createGame, isPending } = useCreateGame();
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createGame({ name, gameKey: 'rust-belt' });
+    createGame({ name, gameKey });
   }, [name]);
 
   return <Box
@@ -19,7 +22,7 @@ export function CreateGamePage() {
     autoComplete="off"
     onSubmit={onSubmit}
   >
-    <div>
+    <FormControl>
       <TextField
         required
         label="Name"
@@ -27,7 +30,20 @@ export function CreateGamePage() {
         disabled={isPending}
         onChange={setName}
       />
-    </div>
+    </FormControl>
+    <FormControl sx={{ m: 1, minWidth: 80 }}>
+      <InputLabel>Map</InputLabel>
+      <Select
+        required
+        value={gameKey}
+        disabled={isPending}
+        onChange={setGameKey}
+        autoWidth
+        label="Map"
+      >
+        {maps.map((m) => <MenuItem value={m.key}>{m.name}</MenuItem>)}
+      </Select>
+    </FormControl>
     <div>
       <Button type="submit" disabled={isPending}>Create</Button>
     </div>
