@@ -9,8 +9,8 @@ export function Layout() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Steam Ages
+          <Typography color="white" style={{ textDecoration: 'none' }} variant="h6" sx={{ flexGrow: 1 }} component={Link} to="/">
+            Choo Choo Games
           </Typography>
           {me == null ?
             <Button color="inherit" component={Link} to="/app/users/login">Login</Button> :
