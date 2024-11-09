@@ -5,15 +5,12 @@ import session from 'express-session';
 import { createClient } from "redis";
 import { environment } from "./util/environment";
 
-const redisClient = createClient({
-  username: environment.redisUrl.username,
-  password: environment.redisUrl.password,
-  socket: {
-    host: environment.redisUrl.hostname!,
-    port: environment.redisUrl.port != null ? parseInt(environment.redisUrl.port) : 0,
-  },
+const redisClient = createClient({ url: environment.redisUrl.toString() });
+redisClient.connect().catch((e) => {
+  console.log('failed to connect to redis');
+  console.error(e);
+  process.exit();
 });
-redisClient.connect().catch(console.error);
 
 export const redisStore = new RedisStore({
   client: redisClient,

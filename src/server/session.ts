@@ -3,6 +3,7 @@ import 'express-session';
 
 declare module 'express-session' {
   export interface SessionData {
-    userId: number;
+    userId?: number;
+    xsrfToken?: string;
   }
 }

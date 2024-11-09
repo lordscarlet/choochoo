@@ -1,6 +1,5 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import csrf from 'csurf';
 import express, { Request, Response } from 'express';
 import { readFile } from 'fs/promises';
 import { createServer } from 'http';
@@ -16,21 +15,18 @@ import { userApp } from './routes/user';
 import { waitForSequelize } from './sequelize';
 import { io } from './socket';
 import { environment, Stage } from './util/environment';
+import { xsrfApp } from './xsrf';
 
 const app = express();
 
 app.use(cookieParser());
 app.use(redisSession);
-app.use(csrf());
 if (environment.clientOrigin) {
   app.use(cors({ origin: environment.clientOrigin }));
 }
+app.use(xsrfApp);
 app.use(express.json());
 app.use(waitForSequelize());
-
-app.get('/api/xsrf', (req: Request, res: Response) => {
-  res.json({ xsrf: req.csrfToken() });
-});
 
 app.use('/api', gameApp);
 app.use('/api', userApp);
@@ -68,7 +64,7 @@ if (environment.cert != null) {
 
     /// Start
     server.listen(environment.port, () => {
-      console.log(`AoS listening on port ${port}`);
+      console.log(`AoS listening on port ${environment.port}`);
     });
   }).catch((e) => {
     console.log('unknown system error');
