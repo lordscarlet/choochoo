@@ -17,7 +17,7 @@ export const contract = c.router({
   },
 });
 
-const xsrfToken = fetch(`${environment.apiHost}/api/xsrf`).then((r) => r.json()).then(({ xsrf }) => xsrf);
+const xsrfToken = fetch(`${environment.apiHost}/api/xsrf`).then((r) => r.json()).then(({ xsrfToken }) => xsrfToken);
 
 export const clientArgs = {
   baseUrl: `${environment.apiHost}/api`,
