@@ -15,7 +15,7 @@ xsrfApp.use((req: Request, res: Response, next: (e?: Error) => void) => {
 
 async function getXsrfToken(req: Request) {
   if (req.session.xsrfToken == null) {
-    const buffer = await randomBytes(48);
+    const buffer = await randomBytes(32);
     req.session.xsrfToken = buffer.toString('hex');
   }
   return req.session.xsrfToken;

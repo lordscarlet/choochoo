@@ -22,7 +22,10 @@ const app = express();
 app.use(cookieParser());
 app.use(redisSession);
 if (environment.clientOrigin) {
-  app.use(cors({ origin: environment.clientOrigin }));
+  app.use(cors({
+    credentials: true,
+    origin: environment.clientOrigin,
+  }));
 }
 app.use(xsrfApp);
 app.use(express.json());
