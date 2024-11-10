@@ -3,12 +3,14 @@ import { z } from 'zod';
 
 import { initContract } from '@ts-rest/core';
 
-export enum GameStatus {
-  LOBBY = 'LOBBY',
-  ACTIVE = 'ACTIVE',
-  ENDED = 'ENDED',
-  ABANDONED = 'ABANDONED',
-}
+export const GameStatus = z.enum([
+  'LOBBY',
+  'ACTIVE',
+  'ENDED',
+  'ABANDONED',
+]);
+
+export type GameStatus = z.infer<typeof GameStatus>;
 
 export const ActionApi = z.object({
   actionName: z.string(),
@@ -34,7 +36,7 @@ export const GameApi = z.object({
   version: z.number(),
   name: z.string(),
   playerIds: z.array(z.number()),
-  status: z.nativeEnum(GameStatus),
+  status: GameStatus,
   gameData: z.string().optional(),
   activePlayerId: z.number().optional(),
   undoPlayerId: z.number().optional(),
@@ -43,7 +45,7 @@ export const GameApi = z.object({
 
 export const ListGamesApi = z.object({
   userId: z.coerce.number().optional(),
-  status: z.nativeEnum(GameStatus).optional(),
+  status: GameStatus.optional(),
   gameKey: z.string().optional(),
   name: z.string().optional(),
 });

@@ -9,11 +9,11 @@ export function GamePage() {
   const game = useGame();
 
   switch (game.status) {
-    case GameStatus.LOBBY:
+    case GameStatus.enum.LOBBY:
       return <Lobby />
-    case GameStatus.ACTIVE:
-    case GameStatus.ENDED:
-    case GameStatus.ABANDONED:
+    case GameStatus.enum.ACTIVE:
+    case GameStatus.enum.ENDED:
+    case GameStatus.enum.ABANDONED:
       return <ActiveGame />
     default:
       assertNever(game.status);

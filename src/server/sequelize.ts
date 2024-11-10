@@ -1,5 +1,6 @@
+import Sequelize from '@sequelize/core';
+import { PostgresDialect } from '@sequelize/postgres';
 import { Request, Response } from 'express';
-import { Sequelize, SequelizeOptions } from 'sequelize-typescript';
 import { users } from '../api/fake_data';
 import { GameModel } from './model/game';
 import { GameHistoryModel } from './model/history';
@@ -7,24 +8,16 @@ import { LogModel } from './model/log';
 import { UserModel } from './model/user';
 import { environment } from './util/environment';
 
-const options: SequelizeOptions = {
-  dialect: 'postgres',
-  database: environment.postgresUrl.pathname!.substring(1),
-  host: environment.postgresUrl.hostname!,
-  port: environment.postgresUrl.port ? parseInt(environment.postgresUrl.port) : undefined,
-  username: environment.postgresUrl.username,
-  password: environment.postgresUrl.password,
-  ssl: true,
-};
-
-export const sequelize = new Sequelize(options);
-
-sequelize.addModels([
-  GameModel,
-  UserModel,
-  LogModel,
-  GameHistoryModel,
-]);
+export const sequelize = new Sequelize({
+  dialect: PostgresDialect,
+  url: environment.postgresUrl.toString(),
+  models: [
+    GameModel,
+    UserModel,
+    LogModel,
+    GameHistoryModel,
+  ],
+});
 
 const connection = sequelize.authenticate();
 
@@ -39,7 +32,7 @@ connection.then(() => {
       await UserModel.register(user);
     }
   }
-}).catch((err) => {
+}).catch((err: unknown) => {
   console.log('failed to connect to sql database', err);
   process.exit();
 });

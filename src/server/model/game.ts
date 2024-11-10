@@ -1,51 +1,54 @@
-import { DataTypes } from 'sequelize';
-import { AutoIncrement, Column, CreatedAt, DeletedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript';
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
+import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { GameApi, GameStatus } from '../../api/game';
 
-interface GameCreation {
-  version: number;
-  gameKey: string;
-  name: string;
-  status: GameStatus;
-  playerIds: number[];
-}
-
 @Table({ modelName: 'Game' })
-export class GameModel extends Model<GameModel, GameCreation> {
+export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAttributes<GameModel>> {
   @AutoIncrement
   @PrimaryKey
-  @Column
-  id!: number;
+  @Attribute(DataTypes.INTEGER)
+  declare id: CreationOptional<number>;
 
-  @Column
-  version!: number;
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare version: number;
 
-  @Column
-  gameKey!: string;
+  @Attribute(DataTypes.STRING)
+  @NotNull
+  declare gameKey: string;
 
-  @Column
-  name!: string;
+  @Attribute(DataTypes.STRING)
+  @NotNull
+  declare name: string;
 
-  @Column(DataTypes.TEXT)
-  gameData?: string;
+  @Attribute(DataTypes.TEXT)
+  declare gameData?: string;
 
-  @Column
-  status!: GameStatus;
+  @Attribute(DataTypes.ENUM(GameStatus.options))
+  @NotNull
+  declare status: GameStatus;
 
-  @Column(DataTypes.ARRAY(DataTypes.INTEGER))
-  playerIds!: number[];
+  @Attribute(DataTypes.ARRAY(DataTypes.INTEGER))
+  @NotNull
+  declare playerIds: number[];
 
-  @Column
-  activePlayerId?: number;
+  @Attribute({ type: DataTypes.INTEGER, allowNull: true })
+  declare activePlayerId?: number;
 
-  @Column
-  undoPlayerId?: number;
+  @Attribute({ type: DataTypes.INTEGER, allowNull: true })
+  declare undoPlayerId?: number;
+
+  @Version
+  @NotNull
+  declare internalVersion: CreationOptional<number>;
 
   @CreatedAt
-  createdDate!: Date;
+  @NotNull
+  declare createdDate: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedDate!: Date;
+  @NotNull
+  declare updatedDate: CreationOptional<Date>;
 
   @DeletedAt
   deletedDate?: Date;

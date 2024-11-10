@@ -1,35 +1,40 @@
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
+import { Attribute, AutoIncrement, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { compare, hash } from 'bcrypt';
-import { AutoIncrement, Column, CreatedAt, DeletedAt, Index, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript';
 import { CreateUserApi, MyUserApi, UserApi } from '../../api/user';
 
 const saltRounds = 10;
 
 @Table({ modelName: 'User' })
-export class UserModel extends Model<UserModel, CreateUserApi> {
+export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
   @AutoIncrement
   @PrimaryKey
-  @Column
-  id!: number;
+  @Attribute(DataTypes.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Index({ unique: true })
-  @Column
-  username!: string;
+  @Attribute(DataTypes.STRING)
+  declare username: string;
 
   @Index({ unique: true })
-  @Column
-  email!: string;
+  @Attribute(DataTypes.STRING)
+  declare email: string;
 
-  @Column
-  password!: string;
+  @Attribute(DataTypes.STRING)
+  declare password: string;
+
+  @Version
+  @NotNull
+  declare internalVersion: CreationOptional<number>;
 
   @CreatedAt
-  createdDate!: Date;
+  declare createdDate: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedDate!: Date;
+  declare updatedDate: CreationOptional<Date>;
 
   @DeletedAt
-  deletedDate?: Date;
+  declare deletedDate?: Date;
 
   // Helper methods
 

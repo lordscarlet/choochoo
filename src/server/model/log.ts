@@ -1,4 +1,5 @@
-import { AutoIncrement, BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from "sequelize-typescript";
+import { CreationOptional, DataTypes, Model } from "@sequelize/core";
+import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from "@sequelize/core/decorators-legacy";
 import { MessageApi } from "../../api/message";
 import { GameModel } from "./game";
 import { UserModel } from "./user";
@@ -14,35 +15,39 @@ interface CreateLog {
 export class LogModel extends Model<LogModel, CreateLog> {
   @AutoIncrement
   @PrimaryKey
-  @Column
-  id!: number;
+  @Attribute(DataTypes.INTEGER)
+  declare id: CreationOptional<number>;
 
-  @Column
-  message!: string;
+  @Attribute(DataTypes.STRING)
+  declare message: string;
 
-  @ForeignKey(() => UserModel)
-  userId?: number;
+  @Attribute(DataTypes.INTEGER)
+  declare userId?: number;
 
-  @BelongsTo(() => UserModel)
-  user?: UserModel;
+  @BelongsTo(() => UserModel, 'userId')
+  declare user?: UserModel;
 
-  @ForeignKey(() => GameModel)
-  gameId?: number;
+  @Attribute(DataTypes.INTEGER)
+  declare gameId?: number;
 
-  @BelongsTo(() => GameModel)
-  game?: GameModel;
+  @BelongsTo(() => GameModel, 'gameId')
+  declare game?: GameModel;
 
-  @Column
-  version?: number;
+  @Attribute(DataTypes.INTEGER)
+  declare version?: number;
+
+  @Version
+  @NotNull
+  declare internalVersion: CreationOptional<number>;
 
   @CreatedAt
-  createdDate!: Date;
+  declare createdDate: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedDate!: Date;
+  declare updatedDate: CreationOptional<Date>;
 
   @DeletedAt
-  deletedDate?: Date;
+  declare deletedDate?: Date;
 
   toApi(): MessageApi {
     return {

@@ -1,66 +1,69 @@
-import { DataTypes } from "sequelize";
-import { AutoIncrement, BelongsTo, Column, CreatedAt, DeletedAt, ForeignKey, Index, Model, PrimaryKey, Table, UpdatedAt } from "sequelize-typescript";
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, NonAttribute } from "@sequelize/core";
+import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from "@sequelize/core/decorators-legacy";
 import { GameModel } from "./game";
 import { UserModel } from "./user";
-
-export interface GameHistoryCreate {
-  version: number;
-  patch: string;
-  previousGameData: string;
-  actionName: string;
-  actionData: string;
-  reversible: boolean;
-  gameId: number;
-  userId: number;
-}
 
 const gameVersionIndex = 'game-version';
 
 @Table({ modelName: 'GameHistory' })
-export class GameHistoryModel extends Model<GameHistoryModel, GameHistoryCreate> {
+export class GameHistoryModel extends Model<InferAttributes<GameHistoryModel>, InferCreationAttributes<GameHistoryModel>> {
   @AutoIncrement
   @PrimaryKey
-  @Column
-  id!: number;
+  @Attribute(DataTypes.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Index(gameVersionIndex)
-  @Column
-  version!: number;
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare version: number;
 
-  @Column(DataTypes.TEXT)
-  previousGameData!: string;
+  @Attribute(DataTypes.TEXT)
+  @NotNull
+  declare previousGameData: string;
 
-  @Column(DataTypes.TEXT)
-  patch!: string;
+  @Attribute(DataTypes.TEXT)
+  @NotNull
+  declare patch: string;
 
-  @Column
-  actionName!: string;
+  @Attribute(DataTypes.STRING)
+  @NotNull
+  declare actionName: string;
 
-  @Column(DataTypes.TEXT)
-  actionData!: string;
+  @Attribute(DataTypes.TEXT)
+  @NotNull
+  declare actionData: string;
 
-  @Column
-  reversible!: boolean;
+  @Attribute(DataTypes.BOOLEAN)
+  @NotNull
+  declare reversible: boolean;
 
   @Index(gameVersionIndex)
-  @ForeignKey(() => GameModel)
-  gameId!: number;
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare gameId: number;
 
-  @BelongsTo(() => GameModel)
-  game!: GameModel;
+  @BelongsTo(() => GameModel, 'gameId')
+  declare game: NonAttribute<GameModel>;
 
-  @ForeignKey(() => UserModel)
-  userId!: number;
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare userId: number;
 
-  @BelongsTo(() => UserModel)
-  user!: UserModel;
+  @BelongsTo(() => UserModel, 'userId')
+  declare user: NonAttribute<UserModel>;
+
+  @Version
+  @NotNull
+  declare internalVersion: CreationOptional<number>;
 
   @CreatedAt
-  createdDate!: Date;
+  @NotNull
+  declare createdDate: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedDate!: Date;
+  @NotNull
+  declare updatedDate: CreationOptional<Date>;
 
   @DeletedAt
-  deletedDate?: Date;
+  declare deletedDate?: Date;
 }

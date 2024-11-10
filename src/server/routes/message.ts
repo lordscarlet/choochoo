@@ -2,7 +2,7 @@
 import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
 
-import { Op, WhereOptions } from 'sequelize';
+import { Op, WhereOptions } from '@sequelize/core';
 import { messageContract } from '../../api/message';
 import { LogModel } from '../model/log';
 import '../session';

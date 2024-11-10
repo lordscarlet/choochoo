@@ -5,7 +5,7 @@ import { gameContract, GameStatus } from '../../api/game';
 import { assert } from '../../utils/validate';
 import { GameModel } from '../model/game';
 
-import { Op } from 'sequelize';
+import { Op } from '@sequelize/core';
 import { Engine } from '../../engine/framework/engine';
 import { MapRegistry } from '../../maps';
 import { GameHistoryModel } from '../model/history';
@@ -43,7 +43,7 @@ const router = initServer().router(gameContract, {
       version: 1,
       gameKey: body.gameKey,
       name: body.name,
-      status: GameStatus.LOBBY,
+      status: GameStatus.enum.LOBBY,
       playerIds: [userId],
     });
     return { status: 201, body: { game: game.toApi() } };
@@ -55,7 +55,7 @@ const router = initServer().router(gameContract, {
 
     const game = await GameModel.findByPk(params.gameId);
     assert(game != null);
-    assert(game.status === GameStatus.LOBBY, 'cannot join started game');
+    assert(game.status === GameStatus.enum.LOBBY, 'cannot join started game');
     assert(!game.playerIds.includes(userId), { invalidInput: true });
     game.playerIds = [...game.playerIds, userId];
     const newGame = await game.save();
@@ -68,7 +68,7 @@ const router = initServer().router(gameContract, {
 
     const game = await GameModel.findByPk(params.gameId);
     assert(game != null);
-    assert(game.status === GameStatus.LOBBY, 'cannot leave started game');
+    assert(game.status === GameStatus.enum.LOBBY, 'cannot leave started game');
     const index = game.playerIds.indexOf(userId);
     assert(index >= 0, { invalidInput: 'cannot leave game you are not in' });
     // Figure out what to do if the owner wants to leave
@@ -86,14 +86,14 @@ const router = initServer().router(gameContract, {
 
     const game = await GameModel.findByPk(params.gameId);
     assert(game != null);
-    assert(game.status === GameStatus.LOBBY, { invalidInput: 'cannot start a game that has already been started' });
+    assert(game.status === GameStatus.enum.LOBBY, { invalidInput: 'cannot start a game that has already been started' });
     assert(game.playerIds[0] === userId, { invalidInput: 'only the owner can start the game' });
 
     const engine = new Engine();
     const { gameData, logs, activePlayerId } = engine.start(game.playerIds, { mapKey: game.gameKey });
 
     game.gameData = gameData;
-    game.status = GameStatus.ACTIVE;
+    game.status = GameStatus.enum.ACTIVE;
     game.activePlayerId = activePlayerId;
     console.log('starting', game.activePlayerId);
     const newGame = await game.save();
@@ -101,13 +101,13 @@ const router = initServer().router(gameContract, {
   },
 
   async performAction({ req, params, body }) {
-    return await sequelize.transaction(async transaction => {
+    return await sequelize.transaction(async (transaction) => {
       const userId = req.session.userId;
       assert(userId != null, { permissionDenied: true });
 
       const game = await GameModel.findByPk(params.gameId, { transaction });
       assert(game != null);
-      assert(game.status === GameStatus.ACTIVE, 'cannot perform an action unless the game is live');
+      assert(game.status === GameStatus.enum.ACTIVE, 'cannot perform an action unless the game is live');
       assert(game.gameData != null);
       assert(game.activePlayerId === req.session.userId, { permissionDenied: true });
 
