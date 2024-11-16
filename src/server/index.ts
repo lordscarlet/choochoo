@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { readFile } from 'fs/promises';
 import { createServer } from 'http';
 import { createServer as createSecureServer } from 'https';
@@ -14,6 +14,7 @@ import { messageApp } from './routes/message';
 import { userApp } from './routes/user';
 import { waitForSequelize } from './sequelize';
 import { io } from './socket';
+import { enforceRoleMiddleware } from './util/enforce_role';
 import { environment, Stage } from './util/environment';
 import { xsrfApp } from './xsrf';
 
@@ -31,15 +32,15 @@ app.use(xsrfApp);
 app.use(express.json());
 app.use(waitForSequelize());
 
-app.use('/api', gameApp);
+app.use('/api', enforceRoleMiddleware(), gameApp);
+app.use('/api', enforceRoleMiddleware(), messageApp);
 app.use('/api', userApp);
-app.use('/api', messageApp);
 
 if (environment.stage !== Stage.enum.production) {
   app.use(devApp());
 }
 
-app.use((err: unknown, req: Request, res: Response, next: (t: unknown) => void) => {
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     next(err);
     return;

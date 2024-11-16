@@ -31,7 +31,6 @@ const router = initServer().router(gameContract, {
 
   async get({ params }) {
     const game = await GameModel.findByPk(params.gameId);
-    console.log('getting', params, game);
     assert(game != null, { notFound: true });
     return { status: 200, body: { game: game.toApi() } };
   },

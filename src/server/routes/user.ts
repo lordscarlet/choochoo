@@ -1,6 +1,6 @@
 import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
-import { userContract } from '../../api/user';
+import { userContract, UserRole } from '../../api/user';
 import { assert } from '../../utils/validate';
 import { UserModel } from '../model/user';
 import '../session';
@@ -17,7 +17,7 @@ const router = initServer().router(userContract, {
     if (req.session.userId == null) {
       return { status: 200, body: { user: undefined } };
     }
-    const user = await UserModel.findByPk(req.session.userId);
+    const user = await UserModel.getUser(req.session.userId);
 
     assert(user != null);
     return { status: 200, body: { user: user.toMyApi() } };
@@ -31,7 +31,7 @@ const router = initServer().router(userContract, {
   },
 
   async get({ params }) {
-    const user = await UserModel.findByPk(params.userId);
+    const user = await UserModel.getUser(params.userId);
     assert(user != null, { notFound: true });
     return { status: 200, body: { user: user.toApi() } };
   },
@@ -45,7 +45,7 @@ const router = initServer().router(userContract, {
 
   async login({ req, body }) {
     const user = await UserModel.login(body.usernameOrEmail, body.password);
-    assert(user != null, { unauthorized: true });
+    assert(user != null && user.role !== UserRole.enum.BLOCKED, { unauthorized: true });
     req.session.userId = user.id;
     return { status: 200, body: { user: user.toMyApi() } };
   },

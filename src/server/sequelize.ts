@@ -1,6 +1,6 @@
 import Sequelize from '@sequelize/core';
 import { PostgresDialect } from '@sequelize/postgres';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { users } from '../api/fake_data';
 import { GameModel } from './model/game';
 import { GameHistoryModel } from './model/history';
@@ -38,7 +38,7 @@ connection.then(() => {
 });
 
 export function waitForSequelize() {
-  return (req: Request, res: Response, next: () => void): void => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     connection.then(() => next(), next);
   };
 }

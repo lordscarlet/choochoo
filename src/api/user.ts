@@ -1,6 +1,9 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
+export const UserRole = z.enum(['WAITLIST', 'USER', 'ADMIN', 'BLOCKED']);
+export type UserRole = z.infer<typeof UserRole>;
+
 export const CreateUserApi = z.object({
   email: z.string(),
   username: z.string(),
@@ -21,6 +24,7 @@ export const MyUserApi = z.object({
   id: z.number(),
   email: z.string(),
   username: z.string(),
+  role: UserRole,
 });
 
 export const ListQueryApi = z.object({
@@ -31,6 +35,7 @@ export type CreateUserApi = z.infer<typeof CreateUserApi>;
 export type LoginUserApi = z.infer<typeof LoginUserApi>;
 export type UserApi = z.infer<typeof UserApi>;
 export type MyUserApi = z.infer<typeof MyUserApi>;
+
 
 const c = initContract();
 

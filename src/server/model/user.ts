@@ -1,9 +1,12 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { compare, hash } from 'bcrypt';
-import { CreateUserApi, MyUserApi, UserApi } from '../../api/user';
+import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
+import { assert, isPositiveInteger } from '../../utils/validate';
 
 const saltRounds = 10;
+
+const userCache = new Map<number, UserModel | undefined>();
 
 @Table({ modelName: 'User' })
 export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
@@ -23,6 +26,9 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   @Attribute(DataTypes.STRING)
   declare password: string;
 
+  @Attribute(DataTypes.ENUM(UserRole.options))
+  declare role: UserRole;
+
   @Version
   @NotNull
   declare internalVersion: CreationOptional<number>;
@@ -38,6 +44,14 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
 
   // Helper methods
 
+  static async getUser(pk: number): Promise<UserModel | undefined> {
+    assert(isPositiveInteger(pk));
+    if (!userCache.has(pk)) {
+      userCache.set(pk, (await UserModel.findByPk(pk)) ?? undefined);
+    }
+    return userCache.get(pk)!;
+  }
+
   toApi(): UserApi {
     return {
       id: this.id,
@@ -49,6 +63,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     return {
       ...this.toApi(),
       email: this.email,
+      role: this.role,
     };
   }
 
@@ -85,6 +100,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
       username: user.username,
       email: user.email,
       password,
+      role: UserRole.enum.WAITLIST,
     });
     return newUser;
   }

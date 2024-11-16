@@ -1,5 +1,5 @@
 
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import { join } from 'path';
 import { buildApp } from '../../scripts/client_build';
@@ -9,7 +9,7 @@ export function devApp() {
 
   const devApp = express();
 
-  devApp.use('/dist/*', (_: Request, __: Response, next: (err?: any) => void) => {
+  devApp.use('/dist/*', (_: Request, __: Response, next: NextFunction) => {
     return buildPromise.then(() => {
       next();
     }).catch(next);
@@ -19,7 +19,7 @@ export function devApp() {
 
   const otherApps = ['/dist', '/js', '/api', '/favicon'];
 
-  devApp.get('/*', (req: Request, res: Response, next: () => void) => {
+  devApp.get('/*', (req: Request, res: Response, next: NextFunction) => {
     const otherApp = otherApps.find((other) => req.path.startsWith(other));
     if (otherApp != undefined) {
       next();
