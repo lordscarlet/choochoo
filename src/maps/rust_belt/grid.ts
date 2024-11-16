@@ -1,30 +1,11 @@
-
-import { InjectionContext } from '../engine/framework/inject';
-import { MapSettings } from '../engine/game/map_settings';
-import { CityGroup } from '../engine/state/city_group';
-import { Good } from '../engine/state/good';
-import { LocationType } from '../engine/state/location_type';
-import { LocationData } from '../engine/state/space';
-import { duplicate } from '../utils/functions';
-import { city, grid } from './factory';
-
-const PLAIN: LocationData = {
-  type: LocationType.PLAIN,
-};
-
-const UNPASSABLE = undefined;
-
-const RIVER: LocationData = {
-  type: LocationType.RIVER,
-};
-
-const MOUNTAIN: LocationData = {
-  type: LocationType.MOUNTAIN,
-};
+import { CityGroup } from '../../engine/state/city_group';
+import { Good } from '../../engine/state/good';
+import { duplicate } from '../../utils/functions';
+import { city, grid, MOUNTAIN, PLAIN, RIVER, town, UNPASSABLE } from '../factory';
 
 const { WHITE, BLACK } = CityGroup;
 
-const map = grid([
+export const map = grid([
   [
     ...duplicate(10, PLAIN),
     city('Kansas City', Good.PURPLE, WHITE, 3),
@@ -173,20 +154,3 @@ const map = grid([
     ...duplicate(4, MOUNTAIN),
   ],
 ]);
-
-function town(townName: string): LocationData {
-  return {
-    ...PLAIN,
-    townName,
-  };
-}
-
-export class RustBeltMapSettings implements MapSettings {
-  readonly key = 'rust-belt';
-  readonly name = 'Rust Belt';
-  readonly minPlayers = 3;
-  readonly maxPlayers = 6;
-  readonly startingGrid = map;
-
-  registerOverrides(ctx: InjectionContext): void { }
-}

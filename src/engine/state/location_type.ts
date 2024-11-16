@@ -4,5 +4,6 @@ export enum LocationType {
   PLAIN,
   RIVER,
   MOUNTAIN,
+  SWAMP,
   UNPASSABLE,
 }

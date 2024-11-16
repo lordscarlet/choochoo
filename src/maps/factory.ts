@@ -4,8 +4,22 @@ import { Good } from "../engine/state/good";
 import { LocationType } from "../engine/state/location_type";
 import { CitySettingData, InitialMapGrid, SpaceSettingData } from "../engine/state/map_settings";
 import { OnRoll } from "../engine/state/roll";
+import { LocationData } from '../engine/state/space';
 import { Coordinates } from "../utils/coordinates";
 
+export const PLAIN: LocationData = {
+  type: LocationType.PLAIN,
+};
+
+export const UNPASSABLE = undefined;
+
+export const RIVER: LocationData = {
+  type: LocationType.RIVER,
+};
+
+export const MOUNTAIN: LocationData = {
+  type: LocationType.MOUNTAIN,
+};
 
 export function city(name: string, color: Good, group: CityGroup, onRoll: OnRoll, startingNumCubes = 2): CitySettingData {
   return {
@@ -43,3 +57,11 @@ function offset(grid: Array<Array<SpaceSettingData | undefined>>): Array<Array<S
   }
   return newGrid;
 }
+
+export function town(townName: string): LocationData {
+  return {
+    ...PLAIN,
+    townName,
+  };
+}
+

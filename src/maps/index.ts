@@ -1,7 +1,7 @@
 
 import { MapSettings } from '../engine/game/map_settings';
 import { assert } from '../utils/validate';
-import { RustBeltMapSettings } from './rust_belt';
+import { RustBeltMapSettings } from './rust_belt/settings';
 
 
 export class MapRegistry {
