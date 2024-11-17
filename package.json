@@ -5,7 +5,7 @@
     "build-client": "NODE_ENV=production API_HOST=\"https://api.choochoo.games\" SOCKET_HOST=\"https://api.choochoo.games\" node bin/scripts/client_build.js",
     "prod": "node bin/server/index.js",
     "create-migration": "./src/scripts/create_migration.sh",
-    "migrate": "npm run build-server && node bin/scripts/migrations up",
+    "migrate": "node bin/scripts/migrations up",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
