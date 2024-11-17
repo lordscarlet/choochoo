@@ -45,7 +45,7 @@ const router = initServer().router(userContract, {
 
   async login({ req, body }) {
     const user = await UserModel.login(body.usernameOrEmail, body.password);
-    assert(user != null && user.role !== UserRole.enum.BLOCKED, { unauthorized: true });
+    assert(user != null && user.role !== UserRole.enum.BLOCKED, { unauthorized: 'Invalid credentials' });
     req.session.userId = user.id;
     return { status: 200, body: { user: user.toMyApi() } };
   },

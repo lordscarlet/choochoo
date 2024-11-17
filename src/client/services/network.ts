@@ -42,7 +42,6 @@ export function handleError(isPending: boolean, error?: Error | NetworkError | n
 }
 
 function toMessage(error: Error | NetworkError): string {
-  console.log('to message', error);
   if (isFetchError(error) || error.status >= 500) {
     console.error(error);
     return 'An unknown error occurred';
@@ -51,7 +50,10 @@ function toMessage(error: Error | NetworkError): string {
     return 'You are not authorized to perform that operation';
   }
   if (error.status === 401) {
-    return 'Invalid username and password';
+    if (isErrorBody(error.body)) {
+      return `Unauthorized: ${error.body.error}`;
+    }
+    return 'Unauthorized: ';
   }
   if (error.status === 400) {
     if (isErrorBody(error.body)) {
