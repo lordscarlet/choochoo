@@ -75,6 +75,15 @@ export const userContract = c.router({
     method: 'POST',
     path: '/users/:userId/invite',
   },
+  makeAdmin: {
+    body: z.object({}),
+    pathParams: z.object({ userId: z.coerce.number() }),
+    responses: {
+      200: z.object({ success: z.literal(true) }),
+    },
+    method: 'POST',
+    path: '/users/:userId/adminize',
+  },
   login: {
     body: LoginUserApi,
     responses: {

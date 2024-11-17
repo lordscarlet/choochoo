@@ -66,6 +66,19 @@ const router = initServer().router(userContract, {
     return { status: 200, body: { success: true } };
   },
 
+  async makeAdmin({ params, req }) {
+    assert(req.session.userId != null, { unauthorized: true });
+    const user = await UserModel.getUser(req.session.userId);
+    assert(user != null, { unauthorized: true });
+    assert(user.role === UserRole.Enum.ADMIN, { permissionDenied: 'not an admin' });
+    const modifyUser = await UserModel.findByPk(params.userId);
+    assert(modifyUser != null, { notFound: 'user not found' });
+    modifyUser.role = UserRole.enum.ADMIN;
+    await modifyUser.save();
+    await modifyUser.updateCache();
+    return { status: 200, body: { success: true } };
+  },
+
   async useInvite({ body, req }) {
     assert(req.session.userId != null, { unauthorized: true });
     const user = await UserModel.findByPk(req.session.userId);
@@ -82,8 +95,7 @@ const router = initServer().router(userContract, {
         invitation.save({ transaction }),
       ]);
     });
-    // TODO: I need to figure out how to invalidate the cache everywhere.
-    user.updateCache();
+    await user.updateCache();
     return { status: 200, body: { user: user.toMyApi() } };
   },
 
