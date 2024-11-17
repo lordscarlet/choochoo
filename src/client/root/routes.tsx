@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CreateGamePage } from "../game/create_page";
 import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
+import { InvitationPage } from "../user/invitation";
 import { LoginPage } from "../user/login";
 import { RegisterPage } from "../user/register";
 import { Layout } from "./layout";
@@ -16,9 +17,14 @@ export function Router() {
         {
           path: '/',
           element: <HomePage />,
-        }, {
+        },
+        {
           path: '/app/users/login',
           element: <LoginPage />,
+        },
+        {
+          path: '/app/users/invitation',
+          element: <InvitationPage />,
         },
         {
           path: '/app/users/register',

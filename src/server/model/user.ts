@@ -51,7 +51,11 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     if (!userCache.has(pk)) {
       userCache.set(pk, (await UserModel.findByPk(pk)) ?? undefined);
     }
-    return userCache.get(pk)!;
+    return userCache.get(pk);
+  }
+
+  updateCache() {
+    userCache.set(this.id, this);
   }
 
   toApi(): UserApi {

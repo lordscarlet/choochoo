@@ -1,7 +1,7 @@
 import { useNotifications } from "@toolpad/core";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreateUserApi, LoginUserApi, MyUserApi } from "../../api/user";
+import { CreateInviteApi, CreateUserApi, InviteApi, LoginUserApi, MyUserApi } from "../../api/user";
 import { assert } from "../../utils/validate";
 import { tsr } from "./client";
 import { handleError } from "./network";
@@ -17,6 +17,35 @@ export function useMe(): MyUserApi | undefined {
 
   assert(data.status === 200);
   return data.body.user;
+}
+
+export function useInvitation() {
+  const tsrQueryClient = tsr.useQueryClient();
+  const navigate = useNavigate();
+  const { mutate, error, isPending } = tsr.users.useInvite.useMutation();
+  handleError(isPending, error);
+
+  const useInvitationCode = useCallback((body: InviteApi) => mutate({ body }, {
+    onSuccess: (data) => {
+      tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: data.body.user } }));
+      navigate('/');
+    },
+  }), []);
+  return { useInvitationCode, isPending };
+}
+
+export function useCreateInvitation() {
+  const me = useMe();
+  const notifications = useNotifications();
+  const { mutate, error, isPending } = tsr.users.createInvite.useMutation();
+  handleError(isPending, error);
+
+  const createInvite = useCallback((body: CreateInviteApi) => mutate({ params: { userId: me!.id }, body }, {
+    onSuccess: (_) => {
+      notifications.show('Code Created', { autoHideDuration: 2000 });
+    },
+  }), [me]);
+  return { createInvite, isPending };
 }
 
 export function useLogin(shouldNavigate = false) {

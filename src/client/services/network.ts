@@ -47,21 +47,24 @@ function toMessage(error: Error | NetworkError): string {
     console.error(error);
     return 'An unknown error occurred';
   }
-  if (error.status === 403) {
-    return 'You are not authorized to perform that operation';
-  }
-  if (error.status === 401) {
+  const prefix = toPrefix(error.status);
+  if (prefix != null) {
     if (isErrorBody(error.body)) {
-      return `Unauthorized: ${error.body.error}`;
+      return `${prefix}: ${error.body.error}`;
     }
-    return 'Unauthorized: ';
-  }
-  if (error.status === 400) {
-    if (isErrorBody(error.body)) {
-      return `Invalid request: ${error.body.error}`;
-    }
-    return 'Invalid request';
+    return prefix;
   }
   console.error(error);
   return 'An unknown error occurred';
+}
+
+function toPrefix(status: number): string | undefined {
+  switch (status) {
+    case 400: return 'Invalid request';
+    case 401: return 'Unauthorized';
+    case 403: return 'Forbidden';
+    case 404: return 'Not found';
+    default:
+      return undefined;
+  }
 }

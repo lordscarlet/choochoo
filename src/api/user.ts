@@ -31,11 +31,21 @@ export const ListQueryApi = z.object({
   id: z.array(z.coerce.number()),
 });
 
+export const InviteApi = z.object({
+  code: z.string(),
+});
+
+export const CreateInviteApi = z.object({
+  code: z.string(),
+  count: z.number(),
+});
+
 export type CreateUserApi = z.infer<typeof CreateUserApi>;
 export type LoginUserApi = z.infer<typeof LoginUserApi>;
 export type UserApi = z.infer<typeof UserApi>;
 export type MyUserApi = z.infer<typeof MyUserApi>;
-
+export type InviteApi = z.infer<typeof InviteApi>;
+export type CreateInviteApi = z.infer<typeof CreateInviteApi>;
 
 const c = initContract();
 
@@ -47,6 +57,23 @@ export const userContract = c.router({
     },
     method: 'POST',
     path: '/users/',
+  },
+  useInvite: {
+    body: InviteApi,
+    responses: {
+      200: z.object({ user: MyUserApi }),
+    },
+    method: 'POST',
+    path: '/users/use-invite',
+  },
+  createInvite: {
+    body: CreateInviteApi,
+    pathParams: z.object({ userId: z.coerce.number() }),
+    responses: {
+      200: z.object({ success: z.literal(true) }),
+    },
+    method: 'POST',
+    path: '/users/:userId/invite',
   },
   login: {
     body: LoginUserApi,

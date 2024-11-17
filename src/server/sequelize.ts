@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { users } from '../api/fake_data';
 import { GameModel } from './model/game';
 import { GameHistoryModel } from './model/history';
+import { InvitationModel } from './model/invitations';
 import { LogModel } from './model/log';
 import { UserModel } from './model/user';
 import { environment } from './util/environment';
@@ -16,6 +17,7 @@ export const sequelize = new Sequelize({
     UserModel,
     LogModel,
     GameHistoryModel,
+    InvitationModel,
   ],
 });
 
