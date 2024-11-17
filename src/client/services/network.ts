@@ -20,6 +20,7 @@ export function useErrorNotifier(): (error: Error | NetworkError) => void {
   const notifications = useNotifications();
   return useCallback((error: Error | NetworkError) => notifications.show(toMessage(error), {
     severity: 'error',
+    autoHideDuration: 2000,
   }), [notifications]);
 }
 
