@@ -10,7 +10,7 @@ import { GridHelper } from "../map/grid_helper";
 import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";
 import { LocationType } from "../state/location_type";
-import { OnRoll } from "../state/roll";
+import { OnRoll, OnRollData } from "../state/roll";
 import { GoodsHelper } from "./helper";
 import { GOODS_GROWTH_STATE } from "./state";
 
@@ -34,29 +34,32 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
   private readonly playerHelper = inject(PlayerHelper);
   private readonly turnState = injectState(GOODS_GROWTH_STATE);
 
+  private findOnRoll(onRoll: OnRollData[], data: ProductionData): OnRollData | undefined {
+    return onRoll.find(({ onRoll, group }) => onRoll === data.onRoll && group === data.cityGroup);
+  }
+
   private findCity(data: ProductionData): City | undefined {
     return [...this.grid.findAllCities()].find((city) =>
-      city.onRoll().includes(data.onRoll) &&
-      city.isUrbanized() === data.urbanized &&
-      city.group() === data.cityGroup);
+      this.findOnRoll(city.onRoll(), data) != null &&
+      city.isUrbanized() === data.urbanized);
   }
 
   validate(data: ProductionData) {
     assert(this.turnState().goods.includes(data.good), { invalidInput: 'must place one of the goods' });
     const city = this.findCity(data);
     assert(city != null, { invalidInput: 'must place good on a city' });
-    const onRollIndex = city.onRoll().indexOf(data.onRoll);
-    assert(city.getUpcomingGoods()[onRollIndex] != null, { invalidInput: 'must place in valid onRoll' });
+    const onRoll = this.findOnRoll(city.onRoll(), data);
+    assert(onRoll != null, { invalidInput: 'must place in valid onRoll' });
     const maxGoods = city.isUrbanized() ? 2 : 3;
-    assert(city.getUpcomingGoods()[onRollIndex].length < maxGoods, { invalidInput: 'chosen onroll is full' });
+    assert(onRoll.goods.length < maxGoods, { invalidInput: 'chosen onroll is full' });
   }
 
   process(data: ProductionData): boolean {
     const city = this.findCity(data);
     this.grid.update(city!.coordinates, city => {
       assert(city.type === LocationType.CITY);
-      const onRollIndex = city.onRoll.indexOf(data.onRoll);
-      city.upcomingGoods[onRollIndex].push(data.good);
+      const onRoll = this.findOnRoll(city.onRoll, data);
+      onRoll!.goods.push(data.good);
       this.log.currentPlayer(`puts ${data.good} in $${city.name}`);
     });
 

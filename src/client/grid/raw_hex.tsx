@@ -172,9 +172,9 @@ function OnRoll({ city, center, size }: { city: City, center: Point, size: numbe
   const points = polygon([boxTopRight, bottomRight, bottomLeft, boxTopLeft]);
   const numberCenter = pointBetween(boxTopRight, bottomLeft);
   return <>
-    <polygon points={points} stroke="black" fill={cityGroupColor(city.group())} strokeWidth="1" />
-    <text x={numberCenter.x} y={numberCenter.y} dominantBaseline="middle" textAnchor="middle" color={cityGroupTextColor(city.group())}>
-      {city.isUrbanized() ? toLetter(city.group(), city.onRoll()[0]) : city.onRoll()[0]}
+    <polygon points={points} stroke="black" fill={cityGroupColor(city.onRoll()[0].group)} strokeWidth="1" />
+    <text x={numberCenter.x} y={numberCenter.y} dominantBaseline="middle" textAnchor="middle" color={cityGroupTextColor(city.onRoll()[0].group)}>
+      {city.isUrbanized() ? toLetter(city.onRoll()[0]) : city.onRoll()[0].onRoll}
     </text >
   </>;
 }

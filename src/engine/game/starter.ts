@@ -53,7 +53,7 @@ export class GameStarter {
     return {
       ...location,
       goods: draw(location.startingNumCubes, bag),
-      upcomingGoods: location.onRoll.map((_) => draw(3, bag)),
+      onRoll: location.onRoll.map(({ onRoll, group }) => ({ onRoll, group, goods: draw(3, bag) })),
     };
   }
 
@@ -74,10 +74,8 @@ export class GameStarter {
       Good.PURPLE,
     ].map((color, index) => ({
       color,
-      onRoll: [OnRoll.parse(index >= 4 ? index - 3 : index + 3)],
+      onRoll: [{ goods: draw(2, bag), group: index < 4 ? CityGroup.WHITE : CityGroup.BLACK, onRoll: OnRoll.parse(index >= 4 ? index - 3 : index + 3) }],
       goods: [],
-      upcomingGoods: draw(2, bag),
-      group: index < 4 ? CityGroup.WHITE : CityGroup.BLACK,
     }));
     this.availableCities.initState(availableCities);
     this.bag.set(bag);

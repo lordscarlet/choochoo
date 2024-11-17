@@ -74,7 +74,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
           {build.reason}
         </div>)}
         {curr.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
-          <RawHexLegacy key={city.group * 10 + city.onRoll[0]} space={space!} asCity={city.color} onClick={() => selectAvailableCity(index)} />
+          <RawHexLegacy key={city.onRoll[0].group * 10 + city.onRoll[0].onRoll} space={space!} asCity={city.color} onClick={() => selectAvailableCity(index)} />
         )}
       </DialogContent>
     </Dialog>

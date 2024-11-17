@@ -1,6 +1,6 @@
 import { Coordinates } from "../../utils/coordinates";
-import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";
+import { OnRollData } from "../state/roll";
 import { CityData } from "../state/space";
 
 export function isCity(s: unknown): s is City {
@@ -26,15 +26,7 @@ export class City {
     return this.data.goods;
   }
 
-  getUpcomingGoods(): Good[][] {
-    return this.data.upcomingGoods;
-  }
-
-  group(): CityGroup {
-    return this.data.group;
-  }
-
-  onRoll(): number[] {
+  onRoll(): OnRollData[] {
     return this.data.onRoll;
   }
 }

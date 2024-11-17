@@ -1,4 +1,5 @@
 import { assertNever } from "../../utils/validate";
+import { OnRollData } from "./roll";
 
 export enum CityGroup {
   WHITE = 1,
@@ -26,7 +27,7 @@ export function cityGroupTextColor(group: CityGroup): string {
   }
 }
 
-export function toLetter(group: CityGroup, onRoll: number) {
+export function toLetter({ group, onRoll }: OnRollData): string {
   if (group === CityGroup.WHITE) {
     return String.fromCharCode('A'.charCodeAt(0) + onRoll - 3);
   }

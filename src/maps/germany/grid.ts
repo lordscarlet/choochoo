@@ -1,5 +1,6 @@
-import { BLACK, CityGroup, WHITE } from "../../engine/state/city_group";
+import { BLACK, WHITE } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
+import { CitySettingData } from "../../engine/state/map_settings";
 import { duplicate } from "../../utils/functions";
 import { city, customCity, grid, MOUNTAIN, plain, PLAIN, RIVER, town, UNPASSABLE } from "../factory";
 
@@ -49,7 +50,7 @@ export const map = grid([
     MOUNTAIN,
     MOUNTAIN,
     ...duplicate(4, PLAIN),
-    customCity({ name: 'Berlin', color: Good.BLACK, onRoll: [], startingNumCubes: 0, group: CityGroup.BLACK }),
+    customCity({ name: 'Berlin', color: Good.BLACK, onRoll: [], startingNumCubes: 0 }),
     PLAIN,
     PLAIN,
   ], [
@@ -156,7 +157,6 @@ export const map = grid([
   ],
 ]);
 
-// TODO: figure out how to represent this.
-function outlet(name: string): typeof UNPASSABLE {
-  return UNPASSABLE;
+function outlet(name: string): CitySettingData {
+  return customCity({ name, color: Good.BLACK, onRoll: [], startingNumCubes: 0 });
 }

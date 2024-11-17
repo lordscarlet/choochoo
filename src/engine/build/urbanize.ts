@@ -64,10 +64,8 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
       name: location.getTownName()!,
       color: city.color,
       goods: [],
-      upcomingGoods: [city.upcomingGoods],
       urbanized: true,
       onRoll: city.onRoll,
-      group: city.group,
     });
 
     // Take ownership of connecting unowned track.
@@ -83,7 +81,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
       this.gridHelper.setTrackOwner(track, this.currentPlayer().color);
     }
 
-    this.log.currentPlayer(`places city ${toLetter(city.group, city.onRoll[0])} in ${data.coordinates.toString()}`);
+    this.log.currentPlayer(`places city ${toLetter(city.onRoll[0])} in ${data.coordinates.toString()}`);
     return this.helper.isAtEndOfTurn();
   }
 }

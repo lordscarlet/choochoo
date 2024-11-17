@@ -22,10 +22,14 @@ export function GoodsTable() {
     const urbanizedCities = new Map<CityGroup, Good[][]>([[CityGroup.WHITE, []], [CityGroup.BLACK, []]]);
     for (const city of cities) {
       const map = city.isUrbanized() ? urbanizedCities : regularCities;
-      map.get(city.group())![city.onRoll()[0]] = city.getUpcomingGoods()[0];
+      for (const [index, onRoll] of city.onRoll().entries()) {
+        map.get(onRoll.group)![onRoll.onRoll] = onRoll.goods;
+      }
     }
     for (const availableCity of availableCities) {
-      urbanizedCities.get(availableCity.group)![availableCity.onRoll[0]] = availableCity.upcomingGoods;
+      for (const { group, onRoll, goods } of availableCity.onRoll) {
+        urbanizedCities.get(group)![onRoll] = goods;
+      }
     }
     return { regularCities, urbanizedCities };
   }, [grid, availableCities]);

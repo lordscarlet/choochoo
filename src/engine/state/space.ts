@@ -1,9 +1,8 @@
 import { z } from "zod";
 import { Immutable } from "../../utils/immutable";
-import { CityGroup } from "./city_group";
 import { Good } from "./good";
 import { LocationType } from "./location_type";
-import { OnRoll } from "./roll";
+import { OnRollData } from "./roll";
 import { MutableTileData } from "./tile";
 
 
@@ -12,10 +11,8 @@ export const MutableCityData = z.object({
   name: z.string(),
   color: z.nativeEnum(Good),
   goods: z.array(z.nativeEnum(Good)),
-  upcomingGoods: z.array(z.array(z.nativeEnum(Good))),
   urbanized: z.boolean().optional(),
-  onRoll: z.array(OnRoll),
-  group: z.nativeEnum(CityGroup),
+  onRoll: z.array(OnRollData),
 });
 
 export type MutableCityData = z.infer<typeof MutableCityData>;

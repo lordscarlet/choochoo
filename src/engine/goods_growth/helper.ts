@@ -4,12 +4,13 @@ import { GridHelper } from "../map/grid_helper";
 
 export class GoodsHelper {
   private readonly grid = inject(GridHelper);
+
   getTotalUpcomingGoodsSlots(urbanized: boolean) {
     return urbanized ? 2 : 3;
   }
 
   isAtCapacity(city: City): boolean {
-    return city.getUpcomingGoods().every(g => g.length >= this.getTotalUpcomingGoodsSlots(city.isUrbanized()));
+    return city.onRoll().every(({ goods }) => goods.length >= this.getTotalUpcomingGoodsSlots(city.isUrbanized()));
   }
 
   hasCityOpenings(): boolean {

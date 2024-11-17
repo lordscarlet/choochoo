@@ -26,7 +26,7 @@ export const MOUNTAIN: LocationData = {
 };
 
 export function city(name: string, color: Good, group: CityGroup, onRoll: OnRoll, startingNumCubes = 2): CitySettingData {
-  return customCity({ name, color, startingNumCubes, onRoll: [onRoll], group });
+  return customCity({ name, color, startingNumCubes, onRoll: [{ onRoll, group }] });
 }
 
 export function customCity(city: Omit<CitySettingData, 'type'>): CitySettingData {

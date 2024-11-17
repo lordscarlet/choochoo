@@ -72,12 +72,12 @@ export class GoodsGrowthPhase extends PhaseModule {
     this.log.log(`Black rolled ${rolls.get(CityGroup.BLACK)!.join(', ')}`);
     const cities = this.grid.findAllCities();
     for (const city of cities) {
-      for (const [index, onRoll] of city.onRoll().entries()) {
-        const numRolled = rolls.get(city.group())!.filter((r) => r === onRoll).length;
+      for (const [index, { group, onRoll }] of city.onRoll().entries()) {
+        const numRolled = rolls.get(group)!.filter((r) => r === onRoll).length;
         if (numRolled === 0) continue;
         this.grid.update(city.coordinates, (location) => {
           assert(location.type === LocationType.CITY);
-          const newGoods = location.upcomingGoods[index].splice(-numRolled, numRolled);
+          const newGoods = location.onRoll[index].goods.splice(-numRolled, numRolled);
           location.goods.push(...newGoods);
         });
       }
