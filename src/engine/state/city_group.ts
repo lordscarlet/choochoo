@@ -5,6 +5,9 @@ export enum CityGroup {
   BLACK,
 }
 
+export const WHITE = CityGroup.WHITE;
+export const BLACK = CityGroup.BLACK;
+
 export function cityGroupColor(group: CityGroup) {
   switch (group) {
     case CityGroup.WHITE: return 'white';

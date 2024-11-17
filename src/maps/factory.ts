@@ -11,6 +11,10 @@ export const PLAIN: LocationData = {
   type: LocationType.PLAIN,
 };
 
+export function plain(data: Omit<LocationData, 'type'>): LocationData {
+  return { ...data, type: LocationType.PLAIN };
+}
+
 export const UNPASSABLE = undefined;
 
 export const RIVER: LocationData = {
@@ -22,14 +26,11 @@ export const MOUNTAIN: LocationData = {
 };
 
 export function city(name: string, color: Good, group: CityGroup, onRoll: OnRoll, startingNumCubes = 2): CitySettingData {
-  return {
-    type: LocationType.CITY,
-    name,
-    color,
-    startingNumCubes,
-    onRoll: [onRoll],
-    group,
-  };
+  return customCity({ name, color, startingNumCubes, onRoll: [onRoll], group });
+}
+
+export function customCity(city: Omit<CitySettingData, 'type'>): CitySettingData {
+  return { ...city, type: LocationType.CITY };
 }
 
 export function grid(array: Array<Array<SpaceSettingData | undefined>>): InitialMapGrid {

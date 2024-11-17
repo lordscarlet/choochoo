@@ -25,6 +25,7 @@ export const MutableLocationData = z.object({
   type: z.union([z.literal(LocationType.PLAIN), z.literal(LocationType.RIVER), z.literal(LocationType.MOUNTAIN), z.literal(LocationType.SWAMP)]),
   townName: z.string().optional(),
   tile: MutableTileData.optional(),
+  terrainCost: z.number().optional(),
 });
 
 export type MutableLocationData = z.infer<typeof MutableLocationData>;
