@@ -22,7 +22,7 @@ const router = initServer().router(userContract, {
     const user = await UserModel.getUser(req.session.userId);
 
     assert(user != null);
-    return { status: 200, body: { user: user.toMyApi() } };
+    return { status: 200, body: { user } };
   },
 
   async list({ query }) {
@@ -35,7 +35,7 @@ const router = initServer().router(userContract, {
   async get({ params }) {
     const user = await UserModel.getUser(params.userId);
     assert(user != null, { notFound: true });
-    return { status: 200, body: { user: user.toApi() } };
+    return { status: 200, body: { user: UserModel.toApi(user) } };
   },
 
   async create({ req, body }) {
@@ -68,7 +68,7 @@ const router = initServer().router(userContract, {
 
   async useInvite({ body, req }) {
     assert(req.session.userId != null, { unauthorized: true });
-    const user = await UserModel.getUser(req.session.userId);
+    const user = await UserModel.findByPk(req.session.userId);
     assert(user != null, { unauthorized: true });
     assert(user.role == UserRole.Enum.WAITLIST, { permissionDenied: 'account already activated' })
     const invitation = await InvitationModel.findByPk(body.code);

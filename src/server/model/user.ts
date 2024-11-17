@@ -3,10 +3,24 @@ import { Attribute, AutoIncrement, CreatedAt, DeletedAt, Index, NotNull, Primary
 import { compare, hash } from 'bcrypt';
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
 import { assert, isPositiveInteger } from '../../utils/validate';
+import { redisClient } from '../redis';
 
 const saltRounds = 10;
 
-const userCache = new Map<number, UserModel | undefined>();
+class UserCache {
+  async get(id: number): Promise<MyUserApi | undefined> {
+    const result = await redisClient.get(`users:${id}`);
+    if (result == null) return undefined;
+    return JSON.parse(result);
+  }
+
+  async set(user: MyUserApi | undefined): Promise<void> {
+    if (user == null) return;
+    await redisClient.set(`users:${user.id}`, JSON.stringify(user), { PX: 360000 });
+  }
+}
+
+const userCache = new UserCache();
 
 @Table({ modelName: 'User' })
 export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
@@ -46,23 +60,31 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
 
   // Helper methods
 
-  static async getUser(pk: number): Promise<UserModel | undefined> {
+  static async getUser(pk: number): Promise<MyUserApi | undefined> {
     assert(isPositiveInteger(pk));
-    if (!userCache.has(pk)) {
-      userCache.set(pk, (await UserModel.findByPk(pk)) ?? undefined);
-    }
-    return userCache.get(pk);
+    const result = await userCache.get(pk);
+    if (result != null) return result;
+
+    const user = await UserModel.findByPk(pk);
+    if (!user) return undefined;
+    const asApi = user.toMyApi();
+    await userCache.set(asApi);
+    return asApi;
   }
 
   updateCache() {
-    userCache.set(this.id, this);
+    userCache.set(this);
+  }
+
+  static toApi(user: MyUserApi): UserApi {
+    return {
+      id: user.id,
+      username: user.username,
+    };
   }
 
   toApi(): UserApi {
-    return {
-      id: this.id,
-      username: this.username,
-    };
+    return UserModel.toApi(this);
   }
 
   toMyApi(): MyUserApi {
