@@ -55,7 +55,7 @@ export const up: Migration = async ({ context: queryInterface }) => {
     },
     deletedAt: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
   });
 }

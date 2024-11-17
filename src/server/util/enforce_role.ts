@@ -23,7 +23,7 @@ export async function enforceRole(req: Request): Promise<void> {
 }
 
 export function enforceRoleMiddleware() {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _: Response, next: NextFunction) => {
     enforceRole(req).then(() => next(), next);
   };
 }

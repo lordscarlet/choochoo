@@ -32,9 +32,10 @@ app.use(xsrfApp);
 app.use(express.json());
 app.use(waitForSequelize());
 
-app.use('/api', enforceRoleMiddleware(), gameApp);
-app.use('/api', enforceRoleMiddleware(), messageApp);
 app.use('/api', userApp);
+app.use(enforceRoleMiddleware());
+app.use('/api', gameApp);
+app.use('/api', messageApp);
 
 if (environment.stage !== Stage.enum.production) {
   app.use(devApp());
