@@ -82,6 +82,7 @@ const router = initServer().router(userContract, {
         invitation.save({ transaction }),
       ]);
     });
+    // TODO: I need to figure out how to invalidate the cache everywhere.
     user.updateCache();
     return { status: 200, body: { user: user.toMyApi() } };
   },
