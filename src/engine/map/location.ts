@@ -45,7 +45,7 @@ export class Location {
     return this.data.townName;
   }
 
-  getLocationType(): LocationType.MOUNTAIN | LocationType.RIVER | LocationType.PLAIN {
+  getLocationType(): LocationType.MOUNTAIN | LocationType.RIVER | LocationType.PLAIN | LocationType.SWAMP {
     return this.data.type;
   }
 

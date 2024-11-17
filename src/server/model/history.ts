@@ -3,7 +3,7 @@ import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, Index, NotNu
 import { GameModel } from "./game";
 import { UserModel } from "./user";
 
-const gameVersionIndex = 'game-version';
+const gameVersionIndex = 'game-history-game-id';
 
 @Table({ modelName: 'GameHistory' })
 export class GameHistoryModel extends Model<InferAttributes<GameHistoryModel>, InferCreationAttributes<GameHistoryModel>> {
@@ -15,7 +15,7 @@ export class GameHistoryModel extends Model<InferAttributes<GameHistoryModel>, I
   @Index(gameVersionIndex)
   @Attribute(DataTypes.INTEGER)
   @NotNull
-  declare version: number;
+  declare gameVersion: number;
 
   @Attribute(DataTypes.TEXT)
   @NotNull
@@ -58,12 +58,12 @@ export class GameHistoryModel extends Model<InferAttributes<GameHistoryModel>, I
 
   @CreatedAt
   @NotNull
-  declare createdDate: CreationOptional<Date>;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
   @NotNull
-  declare updatedDate: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedDate?: Date;
+  declare deletedAt?: Date;
 }

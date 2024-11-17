@@ -51,6 +51,9 @@ export function style(space: City | Location | undefined): string {
         return styles.river;
       case LocationType.MOUNTAIN:
         return styles.mountain;
+      case LocationType.SWAMP:
+        // TODO: learn to draw swamps.
+        return styles.mountain;
       default:
         assertNever(type);
     }
@@ -101,6 +104,8 @@ export function color(space: City | Location | undefined): string {
         return 'lightblue';
       case LocationType.MOUNTAIN:
         return 'brown';
+      case LocationType.SWAMP:
+        return 'green';
       default:
         assertNever(type);
     }

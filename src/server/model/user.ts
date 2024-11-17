@@ -34,13 +34,15 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   declare internalVersion: CreationOptional<number>;
 
   @CreatedAt
-  declare createdDate: CreationOptional<Date>;
+  @NotNull
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  declare updatedDate: CreationOptional<Date>;
+  @NotNull
+  declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedDate?: Date;
+  declare deletedAt?: Date;
 
   // Helper methods
 

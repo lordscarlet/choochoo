@@ -34,20 +34,22 @@ export class LogModel extends Model<LogModel, CreateLog> {
   declare game?: GameModel;
 
   @Attribute(DataTypes.INTEGER)
-  declare version?: number;
+  declare gameVersion?: number;
 
   @Version
   @NotNull
   declare internalVersion: CreationOptional<number>;
 
   @CreatedAt
-  declare createdDate: CreationOptional<Date>;
+  @NotNull
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  declare updatedDate: CreationOptional<Date>;
+  @NotNull
+  declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedDate?: Date;
+  declare deletedAt?: Date;
 
   toApi(): MessageApi {
     return {
@@ -55,7 +57,7 @@ export class LogModel extends Model<LogModel, CreateLog> {
       message: this.message,
       userId: this.userId,
       gameId: this.gameId,
-      date: this.createdDate.toString(),
+      date: this.createdAt.toString(),
     };
   }
 }

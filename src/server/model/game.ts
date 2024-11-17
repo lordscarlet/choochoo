@@ -44,14 +44,14 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
 
   @CreatedAt
   @NotNull
-  declare createdDate: CreationOptional<Date>;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
   @NotNull
-  declare updatedDate: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  deletedDate?: Date;
+  declare deletedAt?: Date;
 
   toApi(): GameApi {
     return this.dataValues;

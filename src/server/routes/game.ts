@@ -115,7 +115,7 @@ const router = initServer().router(gameContract, {
 
       const reversible = true;
       const gameHistory = GameHistoryModel.build({
-        version: game.version,
+        gameVersion: game.version,
         patch: '',
         previousGameData: game.gameData,
         actionName: body.actionName,
@@ -151,22 +151,22 @@ const router = initServer().router(gameContract, {
 
   async undoAction({ req, params: { gameId }, body: { version } }) {
     return await sequelize.transaction(async transaction => {
-      const gameHistory = await GameHistoryModel.findOne({ where: { gameId, version }, transaction });
+      const gameHistory = await GameHistoryModel.findOne({ where: { gameId, gameVersion: version }, transaction });
       const game = await GameModel.findByPk(gameId, { transaction });
       assert(game != null);
       assert(gameHistory != null);
-      assert(game.version === gameHistory.version + 1, 'can only undo one step');
+      assert(game.version === gameHistory.gameVersion + 1, 'can only undo one step');
       assert(gameHistory.userId === req.session.userId, { permissionDenied: true });
 
       game.version = version;
       game.gameData = gameHistory?.previousGameData;
       game.activePlayerId = gameHistory.userId;
 
-      const versionBefore = await GameHistoryModel.findOne({ where: { gameId, version: version - 1 }, transaction });
+      const versionBefore = await GameHistoryModel.findOne({ where: { gameId, gameVersion: version - 1 }, transaction });
       game.undoPlayerId = versionBefore != null && versionBefore.reversible ? versionBefore.userId : undefined;
       const newGame = await game.save({ transaction });
-      await GameHistoryModel.destroy({ where: { version: { [Op.gte]: version } }, transaction });
-      await LogModel.destroy({ where: { version: { [Op.gte]: version } }, transaction });
+      await GameHistoryModel.destroy({ where: { gameVersion: { [Op.gte]: version } }, transaction });
+      await LogModel.destroy({ where: { gameVersion: { [Op.gte]: version } }, transaction });
       return { status: 200, body: { game: newGame.toApi() } };
     });
   },
