@@ -1,3 +1,4 @@
+import { ValidationError } from '@sequelize/core';
 import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
 import { userContract, UserRole } from '../../api/user';
@@ -6,6 +7,8 @@ import { InvitationModel } from '../model/invitations';
 import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
+import { badwords } from '../util/badwords';
+import { environment, Stage } from '../util/environment';
 
 
 export const userApp = express();
@@ -39,10 +42,20 @@ const router = initServer().router(userContract, {
   },
 
   async create({ req, body }) {
-    // TODO: don't allow empty or invalid usernames/emails/passwords
-    const user = await UserModel.register(body);
-    req.session.userId = user.id;
-    return { status: 200, body: { user: user.toMyApi() } };
+    try {
+      for (const badword of badwords) {
+        assert(!body.username.includes(badword), { invalidInput: 'cannot use bad words in username' });
+      }
+      const user = await UserModel.register(body);
+      req.session.userId = user.id;
+      return { status: 200, body: { user: user.toMyApi() } };
+    } catch (e) {
+      console.log('error', e);
+      if (e instanceof ValidationError) {
+        assert(!e.errors[0].message.includes('must be unique'), { invalidInput: e.errors[0].message });
+      }
+      throw e;
+    }
   },
 
   async login({ req, body }) {
@@ -50,6 +63,14 @@ const router = initServer().router(userContract, {
     assert(user != null && user.role !== UserRole.enum.BLOCKED, { unauthorized: 'Invalid credentials' });
     req.session.userId = user.id;
     return { status: 200, body: { user: user.toMyApi() } };
+  },
+
+  async loginBypass({ req, params }) {
+    assert(environment.stage === Stage.enum.development, { permissionDenied: true });
+    const user = await UserModel.getUser(params.userId);
+    assert(user != null, { notFound: true });
+    req.session.userId = user.id;
+    return { status: 200, body: { user } };
   },
 
   async createInvite({ body, params, req }) {

@@ -1,7 +1,6 @@
 import Sequelize from '@sequelize/core';
 import { PostgresDialect } from '@sequelize/postgres';
 import { NextFunction, Request, Response } from 'express';
-import { users } from '../api/fake_data';
 import { GameModel } from './model/game';
 import { GameHistoryModel } from './model/history';
 import { InvitationModel } from './model/invitations';
@@ -25,15 +24,6 @@ const connection = sequelize.authenticate();
 
 connection.then(() => {
   console.log('connection');
-  // return sequelize.sync();
-}).then(() => {
-  // return registerUsers();
-
-  async function registerUsers() {
-    for (const user of users) {
-      await UserModel.register(user);
-    }
-  }
 }).catch((err: unknown) => {
   console.log('failed to connect to sql database', err);
   process.exit();

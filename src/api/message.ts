@@ -3,7 +3,7 @@ import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
 export const SubmitMessageApi = z.object({
-  message: z.string(),
+  message: z.string().min(1),
   gameId: z.number().optional(),
 });
 

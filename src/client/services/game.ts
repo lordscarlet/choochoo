@@ -162,7 +162,7 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
 
   const emit = useCallback((actionData: T) => {
     if ('view' in actionData && actionData['view'] instanceof Window) {
-      notifications.show('Error performing action');
+      notifications.show('Error performing action', { autoHideDuration: 2000 });
       throw new Error('Cannot use event as actionData. You likely want to use useEmptyAction');
     }
     mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {

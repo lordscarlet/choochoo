@@ -21,7 +21,7 @@ export type ActionApi = z.infer<typeof ActionApi>;
 
 export const CreateGameApi = z.object({
   gameKey: z.string(),
-  name: z.string(),
+  name: z.string().toLowerCase().min(1).regex(/^[a-zA-Z0-9_\- ]*$/, 'Can only use letters, numbers, spaces, _, and - characters'),
 });
 
 export const LogEntry = z.object({

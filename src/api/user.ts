@@ -4,21 +4,26 @@ import { z } from 'zod';
 export const UserRole = z.enum(['WAITLIST', 'USER', 'ADMIN', 'BLOCKED']);
 export type UserRole = z.infer<typeof UserRole>;
 
+const Password = z.string().min(8).max(32);
+
 export const CreateUserApi = z.object({
-  email: z.string(),
-  username: z.string(),
-  password: z.string(),
+  email: z.string().email(),
+  username: z.string().toLowerCase().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, letters and an underscore'),
+  password: Password,
 });
+export type CreateUserApi = z.infer<typeof CreateUserApi>;
 
 export const LoginUserApi = z.object({
-  usernameOrEmail: z.string(),
-  password: z.string(),
+  usernameOrEmail: z.string().min(1),
+  password: Password,
 });
+export type LoginUserApi = z.infer<typeof LoginUserApi>;
 
 export const UserApi = z.object({
   id: z.number(),
   username: z.string(),
 });
+export type UserApi = z.infer<typeof UserApi>;
 
 export const MyUserApi = z.object({
   id: z.number(),
@@ -26,26 +31,26 @@ export const MyUserApi = z.object({
   username: z.string(),
   role: UserRole,
 });
+export type MyUserApi = z.infer<typeof MyUserApi>;
 
 export const ListQueryApi = z.object({
-  id: z.array(z.coerce.number()),
+  id: z.array(z.coerce.number()).nonempty(),
 });
+export type ListQueryApi = z.infer<typeof ListQueryApi>;
 
 export const InviteApi = z.object({
-  code: z.string(),
+  code: z.string().min(1),
 });
+export type InviteApi = z.infer<typeof InviteApi>;
 
 export const CreateInviteApi = z.object({
-  code: z.string(),
-  count: z.number(),
+  code: z.string().min(1),
+  count: z.number().gte(1),
 });
-
-export type CreateUserApi = z.infer<typeof CreateUserApi>;
-export type LoginUserApi = z.infer<typeof LoginUserApi>;
-export type UserApi = z.infer<typeof UserApi>;
-export type MyUserApi = z.infer<typeof MyUserApi>;
-export type InviteApi = z.infer<typeof InviteApi>;
 export type CreateInviteApi = z.infer<typeof CreateInviteApi>;
+
+export const UserParams = z.object({ userId: z.coerce.number() });
+export type UserParams = z.infer<typeof UserParams>;
 
 const c = initContract();
 
@@ -68,7 +73,7 @@ export const userContract = c.router({
   },
   createInvite: {
     body: CreateInviteApi,
-    pathParams: z.object({ userId: z.coerce.number() }),
+    pathParams: UserParams,
     responses: {
       200: z.object({ success: z.literal(true) }),
     },
@@ -77,7 +82,7 @@ export const userContract = c.router({
   },
   makeAdmin: {
     body: z.object({}),
-    pathParams: z.object({ userId: z.coerce.number() }),
+    pathParams: UserParams,
     responses: {
       200: z.object({ success: z.literal(true) }),
     },
@@ -92,6 +97,15 @@ export const userContract = c.router({
     },
     method: 'POST',
     path: '/users/login',
+  },
+  loginBypass: {
+    body: z.object({}),
+    pathParams: UserParams,
+    responses: {
+      200: z.object({ user: MyUserApi }),
+    },
+    method: 'POST',
+    path: '/users/:userId/login',
   },
   logout: {
     body: z.object({}),
@@ -109,7 +123,7 @@ export const userContract = c.router({
     path: '/users/me',
   },
   get: {
-    pathParams: z.object({ userId: z.coerce.number() }),
+    pathParams: UserParams,
     responses: {
       200: z.object({ user: UserApi }),
     },

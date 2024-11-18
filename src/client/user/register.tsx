@@ -1,4 +1,4 @@
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
 import { RouteObject, useNavigate } from "react-router-dom";
 import { useMe, useRegister } from "../services/me";
@@ -9,7 +9,7 @@ export function RegisterPage() {
   const [email, setEmail] = useTextInputState('');
   const [username, setUsername] = useTextInputState('');
   const [password, setPassword] = useTextInputState('');
-  const { register, isPending } = useRegister();
+  const { register, validationError, isPending } = useRegister();
   const navigate = useNavigate();
   const me = useMe();
   useEffect(() => {
@@ -21,7 +21,7 @@ export function RegisterPage() {
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     register({ username, email, password });
-  }, [username, email, password]);
+  }, [register, username, email, password]);
 
   return <Box
     component="form"
@@ -30,31 +30,37 @@ export function RegisterPage() {
     autoComplete="off"
     onSubmit={onSubmit}
   >
-    <div>
+    <FormControl>
       <TextField
         required
         label="Username"
         value={username}
+        error={validationError?.username != null}
+        helperText={validationError?.username}
         onChange={setUsername}
       />
-    </div>
-    <div>
+    </FormControl>
+    <FormControl>
       <TextField
         required
         label="Email"
         value={email}
+        error={validationError?.email != null}
+        helperText={validationError?.email}
         onChange={setEmail}
       />
-    </div>
-    <div>
+    </FormControl>
+    <FormControl>
       <TextField
         required
         label="Password"
         type="password"
         value={password}
+        error={validationError?.password != null}
+        helperText={validationError?.password}
         onChange={setPassword}
       />
-    </div>
+    </FormControl>
     <div>
       <Button type="submit" disabled={isPending}>Register</Button>
     </div>

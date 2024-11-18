@@ -1,7 +1,7 @@
 import { useNotifications } from "@toolpad/core";
 import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect } from "react";
-import { ValidationError } from "../../api/error";
+import { ValidationError, ZodError } from "../../api/error";
 
 interface NetworkError {
   status: number;
@@ -35,9 +35,11 @@ export function handleError(isPending: boolean, error?: Error | NetworkError | n
     return undefined;
   }
 
-  const validationError = ValidationError.safeParse(error.body);
-  if (validationError.success) {
-    return validationError.data;
+  const zodError = ZodError.safeParse(error.body);
+  if (zodError.success) {
+    return Object.fromEntries(zodError.data.issues.map((issue) => {
+      return [issue.path[0], issue.message];
+    }));
   }
   return undefined;
 }

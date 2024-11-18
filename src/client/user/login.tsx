@@ -7,7 +7,7 @@ import { useTextInputState } from "../utils/form_state";
 export function LoginPage() {
   const [usernameOrEmail, setUsernameOrEmail] = useTextInputState('');
   const [password, setPassword] = useTextInputState('');
-  const { login, isPending } = useLogin(true);
+  const { login, validationError, isPending } = useLogin(true);
   const navigate = useNavigate();
   const me = useMe();
 
@@ -34,6 +34,8 @@ export function LoginPage() {
         required
         label="Username or Email"
         value={usernameOrEmail}
+        error={validationError?.usernameOrEmail != null}
+        helperText={validationError?.usernameOrEmail}
         onChange={setUsernameOrEmail}
       />
     </FormControl>
@@ -43,6 +45,8 @@ export function LoginPage() {
         label="Password"
         type="password"
         value={password}
+        error={validationError?.password != null}
+        helperText={validationError?.password}
         onChange={setPassword}
       />
     </FormControl>

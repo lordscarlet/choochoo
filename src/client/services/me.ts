@@ -52,7 +52,7 @@ export function useLogin(shouldNavigate = false) {
   const tsrQueryClient = tsr.useQueryClient();
   const navigate = useNavigate();
   const { mutate, error, isPending } = tsr.users.login.useMutation();
-  handleError(isPending, error);
+  const validationError = handleError(isPending, error);
 
   const login = useCallback((body: LoginUserApi) => mutate({ body }, {
     onSuccess: (data) => {
@@ -62,7 +62,20 @@ export function useLogin(shouldNavigate = false) {
       }
     },
   }), []);
-  return { login, isPending };
+  return { login, validationError, isPending };
+}
+
+export function useLoginBypass() {
+  const tsrQueryClient = tsr.useQueryClient();
+  const { mutate, error, isPending } = tsr.users.loginBypass.useMutation();
+  handleError(isPending, error);
+
+  const login = useCallback((userId: number) => mutate({ params: { userId } }, {
+    onSuccess: (data) => {
+      tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: data.body.user } }));
+    },
+  }), []);
+  return { login, isPending, error };
 }
 
 export function useRegister() {
@@ -92,7 +105,7 @@ export function useLogout() {
       onSuccess({ status, body }) {
         assert(status === 200 && body.success);
         tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: undefined } }));
-        notifications.show('Logout successful');
+        notifications.show('Logout successful', { autoHideDuration: 2000 });
       },
     });
   }, []);
