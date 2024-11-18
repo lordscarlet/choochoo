@@ -8,7 +8,7 @@ export function CreateGamePage() {
   const maps = useMemo(() => [...new MapRegistry().values()], []);
   const [name, setName] = useTextInputState('');
   const [gameKey, setGameKey] = useSelectState(maps[0].key);
-  const { createGame, isPending } = useCreateGame();
+  const { createGame, validationError, isPending } = useCreateGame();
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,6 +28,8 @@ export function CreateGamePage() {
         label="Name"
         value={name}
         disabled={isPending}
+        error={validationError?.name != null}
+        helperText={validationError?.name}
         onChange={setName}
       />
     </FormControl>
@@ -38,6 +40,7 @@ export function CreateGamePage() {
         value={gameKey}
         disabled={isPending}
         onChange={setGameKey}
+        error={validationError?.gameKey != null}
         autoWidth
         label="Map"
       >

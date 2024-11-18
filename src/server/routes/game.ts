@@ -95,7 +95,6 @@ const router = initServer().router(gameContract, {
     game.gameData = gameData;
     game.status = GameStatus.enum.ACTIVE;
     game.activePlayerId = activePlayerId;
-    console.log('starting', game.activePlayerId);
     const newGame = await game.save();
     return { status: 200, body: { game: newGame.toApi() } };
   },
@@ -112,7 +111,6 @@ const router = initServer().router(gameContract, {
       assert(game.activePlayerId === req.session.userId, { permissionDenied: true });
 
       const engine = new Engine();
-      console.log('processing action', body.actionName, body.actionData);
 
       const reversible = true;
       const gameHistory = GameHistoryModel.build({

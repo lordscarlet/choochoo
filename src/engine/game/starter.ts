@@ -58,7 +58,9 @@ export class GameStarter {
   }
 
   initializePlayers(playerIds: number[]) {
-    const players = playerIds.map(buildPlayer);
+    // TODO: figure out why sumwierdkid shows up twice in my player order.
+    const shuffledColors = shuffle(colors);
+    const players = playerIds.map((id, index) => buildPlayer(id, shuffledColors[index]));
 
     this.players.initState(players);
     this.turnOrder.initState(shuffle(players).map((player) => player.color));
@@ -90,17 +92,18 @@ function draw<T>(num: number, arr: T[]): T[] {
 
 const colors = [
   PlayerColor.RED,
-  PlayerColor.BLUE,
-  PlayerColor.BLACK,
   PlayerColor.YELLOW,
   PlayerColor.GREEN,
+  PlayerColor.PURPLE,
   PlayerColor.BLACK,
+  PlayerColor.BLUE,
+  PlayerColor.BROWN,
 ];
 
-function buildPlayer(playerId: number, index: number): PlayerData {
+function buildPlayer(playerId: number, color: PlayerColor): PlayerData {
   return {
     playerId,
-    color: colors[index],
+    color,
     income: 0,
     shares: 2,
     money: 10,

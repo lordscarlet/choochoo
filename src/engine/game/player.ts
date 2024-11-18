@@ -19,7 +19,7 @@ export class PlayerHelper {
   allPlayersEliminated(): boolean {
     const checkFor = this.players().length === 1 ? 0 : 1;
     const playersRemaining = this.players().filter(p => p.outOfGame !== true).length;
-    return playersRemaining >= checkFor;
+    return playersRemaining <= checkFor;
   }
 
   addMoney(num: number): void {

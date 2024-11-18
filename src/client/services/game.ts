@@ -1,10 +1,11 @@
 import { useNotifications } from "@toolpad/core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { CreateGameApi, GameApi } from "../../api/game";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
+import { MapRegistry } from "../../maps";
 import { useInjected } from "../utils/execution_context";
 import { tsr } from "./client";
 import { useMe } from "./me";
@@ -47,7 +48,7 @@ function useSetGame(): (game: GameApi) => void {
   }, []);
 }
 
-export function useCreateGame(): { createGame: (game: CreateGameApi) => void, isPending: boolean, error?: ValidationError } {
+export function useCreateGame(): { createGame: (game: CreateGameApi) => void, isPending: boolean, validationError?: ValidationError } {
   const { mutate, error, isPending } = tsr.games.create.useMutation();
   const navigate = useNavigate();
   const validationError = handleError(isPending, error);
@@ -58,7 +59,7 @@ export function useCreateGame(): { createGame: (game: CreateGameApi) => void, is
     },
   }), []);
 
-  return { createGame, isPending, error: validationError };
+  return { createGame, isPending, validationError };
 }
 
 interface GameAction {
@@ -80,7 +81,11 @@ export function useJoinGame(): GameAction {
     },
   }), [game.id]);
 
-  const canPerform = me != null && !game.playerIds.includes(me.id);
+  const mapSettings = useMemo(() => {
+    return new MapRegistry().get(game.gameKey);
+  }, [game.gameKey]);
+
+  const canPerform = me != null && !game.playerIds.includes(me.id) && game.playerIds.length < mapSettings.maxPlayers;
 
   return { canPerform, perform, isPending };
 }
@@ -116,7 +121,11 @@ export function useStartGame(): GameAction {
     },
   }), [game.id]);
 
-  const canPerform = me != null && game.playerIds[0] === me.id;
+  const mapSettings = useMemo(() => {
+    return new MapRegistry().get(game.gameKey);
+  }, [game.gameKey]);
+
+  const canPerform = me != null && game.playerIds[0] === me.id && game.playerIds.length >= mapSettings.minPlayers;
 
   return { canPerform, perform, isPending };
 }

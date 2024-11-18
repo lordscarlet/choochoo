@@ -24,7 +24,7 @@ export class GameEngine {
   private readonly gameStatus = injectState(GAME_STATUS);
 
   start(playerIds: number[], startingMap: InitialMapGrid) {
-    this.gameStatus.set(GameStatus.PROGRESS);
+    this.gameStatus.initState(GameStatus.PROGRESS);
     this.starter.startGame(playerIds, startingMap);
     this.round.startFirstRound();
   }

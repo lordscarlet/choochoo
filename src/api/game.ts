@@ -21,8 +21,9 @@ export type ActionApi = z.infer<typeof ActionApi>;
 
 export const CreateGameApi = z.object({
   gameKey: z.string(),
-  name: z.string().toLowerCase().min(1).regex(/^[a-zA-Z0-9_\- ]*$/, 'Can only use letters, numbers, spaces, _, and - characters'),
+  name: z.string().toLowerCase().min(1).max(32).regex(/^[a-zA-Z0-9_\- ]*$/, 'Can only use letters, numbers, spaces, _, and - characters'),
 });
+export type CreateGameApi = z.infer<typeof CreateGameApi>;
 
 export const LogEntry = z.object({
   userId: z.number().optional(),
@@ -42,6 +43,7 @@ export const GameApi = z.object({
   undoPlayerId: z.number().optional(),
   logs: z.array(LogEntry).optional(),
 });
+export type GameApi = z.infer<typeof GameApi>;
 
 export const ListGamesApi = z.object({
   userId: z.coerce.number().optional(),
@@ -51,9 +53,6 @@ export const ListGamesApi = z.object({
 });
 
 export type ListGamesApi = z.infer<typeof ListGamesApi>;
-export type CreateGameApi = z.infer<typeof CreateGameApi>;
-export type GameApi = z.infer<typeof GameApi>;
-export type GameApiUpdate = z.infer<typeof GameApi>;
 
 const c = initContract();
 

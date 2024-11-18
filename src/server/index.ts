@@ -1,3 +1,4 @@
+import { BaseError, DatabaseError } from '@sequelize/core';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
@@ -50,6 +51,9 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     res.status(err.statusCode);
     res.json({ success: false, error: err.message });
   } else {
+    if (err instanceof DatabaseError) {
+      console.log('database error', err.parameters, err.cause);
+    }
     console.error(err);
     res.status(500)
     res.json({ success: false });

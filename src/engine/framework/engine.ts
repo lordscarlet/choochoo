@@ -1,4 +1,5 @@
 import { MapRegistry } from "../../maps";
+import { assert } from "../../utils/validate";
 import { GAME_STATUS, GameEngine, GameStatus } from "../game/game";
 import { Log } from "../game/log";
 import { injectCurrentPlayer } from "../game/state";
@@ -20,8 +21,10 @@ export class Engine {
 
   start(playerIds: number[], mapConfig: MapConfig): GameState {
     return this.executeInExecutionContext(mapConfig.mapKey, undefined, () => {
+      const mapSettings = this.registry.get(mapConfig.mapKey);
+      assert(playerIds.length >= mapSettings.minPlayers, { invalidInput: 'not enough players to start' });
       const gameEngine = inject(GameEngine);
-      gameEngine.start(playerIds, this.registry.get(mapConfig.mapKey).startingGrid);
+      gameEngine.start(playerIds, mapSettings.startingGrid);
     });
   }
 
