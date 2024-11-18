@@ -4,6 +4,7 @@ import { Key } from "../framework/key";
 import { getPhaseString, Phase } from "../state/phase";
 import { Log } from "./log";
 import { PhaseDelegator } from "./phase_delegator";
+import { PlayerHelper } from "./player";
 import { RoundEngine } from "./round";
 import { TurnEngine } from "./turn";
 
@@ -15,6 +16,7 @@ export class PhaseEngine {
   private readonly delegator = inject(PhaseDelegator);
   private readonly round = inject(RoundEngine);
   private readonly turn = inject(TurnEngine);
+  private readonly playerHelper = inject(PlayerHelper);
 
   startFirstPhase(): void {
     return this.start(this.phaseOrder()[0]);
@@ -25,6 +27,11 @@ export class PhaseEngine {
     this.log.log(`Starting ${getPhaseString(phase)} phase`);
     const phaseProcessor = this.delegator.get();
     phaseProcessor.onStart();
+
+    if (this.playerHelper.allPlayersEliminated()) {
+      return;
+    }
+
     const nextPlayer = phaseProcessor.getFirstPlayer();
     if (nextPlayer == null) {
       this.end();
@@ -38,6 +45,10 @@ export class PhaseEngine {
     this.delegator.get().onEnd();
     this.phase.delete();
     this.log.log(`Ending ${getPhaseString(currentPhase)} phase`);
+
+    if (this.playerHelper.allPlayersEliminated()) {
+      return;
+    }
 
     const nextPhase = this.findNextPhase(currentPhase);
     if (nextPhase != null) {

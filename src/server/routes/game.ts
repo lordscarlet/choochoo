@@ -7,6 +7,7 @@ import { GameModel } from '../model/game';
 
 import { Op } from '@sequelize/core';
 import { Engine } from '../../engine/framework/engine';
+import { GameStatus as GameEngineStatus } from '../../engine/game/game';
 import { MapRegistry } from '../../maps';
 import { GameHistoryModel } from '../model/history';
 import { LogModel } from '../model/log';
@@ -125,12 +126,13 @@ const router = initServer().router(gameContract, {
         userId,
       });
 
-      const { gameData, logs, activePlayerId } =
+      const { gameData, logs, activePlayerId, gameStatus } =
         engine.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
 
       game.version = game.version + 1;
       game.gameData = gameData;
       game.activePlayerId = activePlayerId;
+      game.status = gameStatus === GameEngineStatus.ENDED ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
       game.undoPlayerId = reversible ? userId : undefined;
       const newGame = await game.save({ transaction });
       await gameHistory.save({ transaction });

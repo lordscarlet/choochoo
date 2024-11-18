@@ -1,8 +1,10 @@
 import { remove, replaceAll } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
+import { GameEngine } from "../game/game";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
+import { PlayerHelper } from "../game/player";
 import { PLAYERS, TURN_ORDER } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
 import { isLocation, Location } from "../map/location";
@@ -13,25 +15,31 @@ import { PlayerColor } from "../state/player";
 export class ExpensesPhase extends PhaseModule {
   static readonly phase = Phase.EXPENSES;
 
+  private readonly grid = inject(GridHelper);
+  private readonly game = inject(GameEngine);
+  private readonly log = inject(Log);
+  private readonly players = injectState(PLAYERS);
+  private readonly order = injectState(TURN_ORDER);
+  private readonly playerHelper = inject(PlayerHelper);
+
   onStart(): void {
-    const log = inject(Log);
     const outOfGamePlayers = new Set<PlayerColor>();
-    injectState(PLAYERS).update((players) => {
+    this.players.update((players) => {
       for (const player of players) {
         if (player.outOfGame) continue;
         const expenses = player.shares + player.locomotive;
         if (expenses <= player.money) {
           player.money -= expenses;
-          log.player(player.color, `earns $${player.income - player.shares - player.locomotive}`);
+          this.log.player(player.color, `earns $${player.income - player.shares - player.locomotive}`);
         } else {
           const lostIncome = expenses - player.money;
           player.money = 0;
           player.income -= lostIncome;
-          log.player(player.color, `cannot afford expenses and loses ${lostIncome} income`);
+          this.log.player(player.color, `cannot afford expenses and loses ${lostIncome} income`);
           if (player.income < 0) {
             player.outOfGame = true;
             outOfGamePlayers.add(player.color);
-            log.player(player.color, `drops out of the game`);
+            this.log.player(player.color, `drops out of the game`);
           }
         }
       }
@@ -44,16 +52,15 @@ export class ExpensesPhase extends PhaseModule {
   }
 
   protected removeFromTurnOrder(removeFromTurnOrder: Set<PlayerColor>): void {
-    injectState(TURN_ORDER).update((turnOrder) => {
-      const newTurnOrder = [...removeFromTurnOrder].reduce((newTurnOrder, toRemove) => remove(newTurnOrder, toRemove), [...turnOrder]);
+    this.order.update((order) => {
+      const newTurnOrder = [...removeFromTurnOrder].reduce((newTurnOrder, toRemove) => remove(newTurnOrder, toRemove), [...order]);
       /// TODO: What to do when only one person is left.
-      replaceAll(turnOrder, newTurnOrder);
+      replaceAll(order, newTurnOrder);
     });
   }
 
   protected removeOwnershipMarkers(players: Set<PlayerColor>): void {
-    const grid = inject(GridHelper);
-    const toUpdate: Location[] = [...grid.all()].filter(isLocation)
+    const toUpdate: Location[] = [...this.grid.all()].filter(isLocation)
       .filter((location) => {
         return [...location.getTrack()].some((track) => {
           const owner = track.getOwner();
@@ -61,7 +68,7 @@ export class ExpensesPhase extends PhaseModule {
         });
       });
     for (const location of toUpdate) {
-      grid.update(location.coordinates, (space) => {
+      this.grid.update(location.coordinates, (space) => {
         assert(space.type !== LocationType.CITY);
         assert(space.tile != null);
         space.tile.owners = space.tile.owners.map((owner) => owner != null && players.has(owner) ? undefined : owner);

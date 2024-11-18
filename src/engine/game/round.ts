@@ -35,6 +35,7 @@ export class RoundEngine {
       this.start();
       return;
     }
+
     this.game.end();
   }
 

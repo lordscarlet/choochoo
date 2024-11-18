@@ -1,15 +1,16 @@
 import { MapRegistry } from "../../maps";
-import { GameEngine } from "../game/game";
+import { GAME_STATUS, GameEngine, GameStatus } from "../game/game";
 import { Log } from "../game/log";
 import { injectCurrentPlayer } from "../game/state";
-import { ExecutionContext, getExecutionContext, inject, setExecutionContextGetter } from "./execution_context";
+import { ExecutionContext, getExecutionContext, inject, injectState, setExecutionContextGetter } from "./execution_context";
 
 interface MapConfig {
   mapKey: string;
 }
 
 interface GameState {
-  activePlayerId: number;
+  activePlayerId?: number;
+  gameStatus: GameStatus;
   gameData: string;
   logs: string[];
 }
@@ -41,10 +42,11 @@ export class Engine {
     const endInjectionMode = this.beginInjectionModeAsync(mapKey, gameState);
     try {
       const currentPlayer = injectCurrentPlayer();
+      const gameStatus = injectState(GAME_STATUS);
       process();
-      const player = currentPlayer();
       return {
-        activePlayerId: player.playerId,
+        activePlayerId: gameStatus() === GameStatus.ENDED ? undefined : currentPlayer().playerId,
+        gameStatus: gameStatus(),
         gameData: getExecutionContext().gameState.serialize(),
         logs: inject(Log).dump(),
       };
