@@ -6,6 +6,7 @@ import { getPhaseString, Phase } from "../../engine/state/phase";
 import { HexGrid } from "../grid/hex_grid";
 import { useGame, useUndoAction } from "../services/game";
 import { ExecutionContextProvider, useInjected, useInjectedState } from "../utils/execution_context";
+import { Editor } from "./editor";
 import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
 import { PlayerStats } from "./player_stats";
@@ -29,6 +30,7 @@ function InternalActiveGame() {
   return <div>
     <h2>{game.name}</h2>
     <GameLog gameId={game.id} />
+    <Editor />
     <SelectAction />
     <UndoButton />
     <CurrentPhase />

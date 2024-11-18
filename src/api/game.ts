@@ -94,6 +94,16 @@ export const gameContract = c.router({
     },
     summary: 'Joins a game',
   },
+  setGameData: {
+    method: 'PUT',
+    pathParams: z.object({ gameId: z.coerce.number() }),
+    path: '/games/:gameId/data',
+    body: z.object({ gameData: z.string() }),
+    responses: {
+      200: z.object({ game: GameApi }),
+    },
+    summary: 'Modifies the game data game',
+  },
   start: {
     method: 'POST',
     pathParams: z.object({ gameId: z.coerce.number() }),

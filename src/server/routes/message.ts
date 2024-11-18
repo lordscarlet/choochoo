@@ -24,7 +24,7 @@ const router = initServer().router(messageContract, {
       };
     }
     const limit = 21;
-    const modelMessages = await LogModel.findAll({ where, limit, order: [['createdDate', 'DESC'], ['id', 'DESC']] });
+    const modelMessages = await LogModel.findAll({ where, limit, order: [['createdAt', 'DESC'], ['id', 'DESC']] });
     const messages = modelMessages.slice(-20).reverse().map(m => m.toApi());
     const nextPageCursor = modelMessages.length > limit ? modelMessages[0].id : undefined;
     return { status: 200, body: { messages, nextPageCursor } };

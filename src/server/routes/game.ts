@@ -14,6 +14,7 @@ import { LogModel } from '../model/log';
 import { sequelize } from '../sequelize';
 import '../session';
 import { emitToRoom } from '../socket';
+import { environment, Stage } from '../util/environment';
 
 export const gameApp = express();
 
@@ -97,6 +98,15 @@ const router = initServer().router(gameContract, {
     game.activePlayerId = activePlayerId;
     const newGame = await game.save();
     return { status: 200, body: { game: newGame.toApi() } };
+  },
+
+  async setGameData({ req, params, body }) {
+    assert(environment.stage === Stage.enum.development);
+    const game = await GameModel.findByPk(params.gameId);
+    assert(game != null, { notFound: true });
+    game.gameData = body.gameData;
+    await game.save();
+    return { status: 200, body: { game: game.toApi() } };
   },
 
   async performAction({ req, params, body }) {

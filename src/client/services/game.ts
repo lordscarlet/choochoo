@@ -108,6 +108,22 @@ export function useLeaveGame(): GameAction {
   return { canPerform, perform, isPending };
 }
 
+export function useSetGameData() {
+  const game = useGame();
+  const me = useMe();
+  const setGame = useSetGame();
+  const { mutate, error, isPending } = tsr.games.setGameData.useMutation();
+  handleError(isPending, error);
+
+  const setGameData = useCallback((gameData: string) => mutate({ params: { gameId: game.id }, body: { gameData } }, {
+    onSuccess: (data) => {
+      setGame(data.body.game);
+    },
+  }), [game.id]);
+
+  return { setGameData, isPending };
+}
+
 export function useStartGame(): GameAction {
   const game = useGame();
   const me = useMe();
