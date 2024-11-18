@@ -4,8 +4,10 @@ import express from 'express';
 
 import { Op, WhereOptions } from '@sequelize/core';
 import { messageContract } from '../../api/message';
+import { assert } from '../../utils/validate';
 import { LogModel } from '../model/log';
 import '../session';
+import { badwords } from '../util/badwords';
 
 export const messageApp = express();
 
@@ -29,6 +31,9 @@ const router = initServer().router(messageContract, {
   },
 
   async sendChat({ body: { message, gameId }, req }) {
+    for (const badword of badwords) {
+      assert(!message.includes(badword), { invalidInput: 'cannot use foul language in message' });
+    }
     const log = await LogModel.create({ message, gameId, userId: req.session.userId });
     return { status: 200, body: { message: log.toApi() } };
   },
