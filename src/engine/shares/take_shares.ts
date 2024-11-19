@@ -29,7 +29,7 @@ export class TakeSharesAction implements ActionProcessor<TakeSharesData> {
   }
 
   process({ numShares }: TakeSharesData): boolean {
-    this.playerHelper.update((player) => {
+    this.playerHelper.updateCurrentPlayer((player) => {
       player.shares += numShares;
       player.money += 5 * numShares;
     });

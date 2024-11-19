@@ -9,11 +9,15 @@ export class PlayerHelper {
   private readonly players = injectState(PLAYERS);
   private readonly grid = inject(GridHelper);
 
-  update(updateFn: (data: MutablePlayerData) => void): void {
+  update(playerColor: PlayerColor, updateFn: (data: MutablePlayerData) => void): void {
     this.players.update((players) => {
-      const player = players.find((player) => player.color === this.currentPlayer());
+      const player = players.find((player) => player.color === playerColor);
       updateFn(player!);
     });
+  }
+
+  updateCurrentPlayer(updateFn: (data: MutablePlayerData) => void): void {
+    return this.update(this.currentPlayer(), updateFn);
   }
 
   allPlayersEliminated(): boolean {
@@ -22,8 +26,12 @@ export class PlayerHelper {
     return playersRemaining <= checkFor;
   }
 
-  addMoney(num: number): void {
-    return this.update((player) => player.money += num);
+  addMoneyForCurrentPlayer(num: number): void {
+    return this.addMoney(this.currentPlayer(), num);
+  }
+
+  addMoney(playerColor: PlayerColor, num: number): void {
+    return this.update(playerColor, (player) => player.money += num);
   }
 
   getScore(player: PlayerData): number | Disqualified {
@@ -43,6 +51,10 @@ export class PlayerHelper {
       }
     }
     return numTrack;
+  }
+
+  getPlayer(playerColor: PlayerColor): PlayerData {
+    return this.players().find(({ color }) => color === playerColor)!;
   }
 }
 

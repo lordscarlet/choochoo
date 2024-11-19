@@ -62,7 +62,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
 
   process(data: BuildData): boolean {
     const coordinates = data.coordinates;
-    this.playerHelper.update((player) => player.money -= this.costCalculator.costOf(coordinates, data.tileType));
+    this.playerHelper.updateCurrentPlayer((player) => player.money -= this.costCalculator.costOf(coordinates, data.tileType));
     const newTile = this.newTile(data);
     inject(Log).currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${data.coordinates}`);
     this.gridHelper.update(coordinates, (hex) => {

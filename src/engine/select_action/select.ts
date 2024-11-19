@@ -27,7 +27,7 @@ export class SelectAction implements ActionProcessor<SelectData> {
   }
 
   process({ action }: SelectData): boolean {
-    this.helper.update((player) => {
+    this.helper.updateCurrentPlayer((player) => {
       player.selectedAction = action;
       if (action === Action.LOCOMOTIVE && player.locomotive < 6) {
         player.locomotive++;

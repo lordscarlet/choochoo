@@ -4,6 +4,7 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
+import { PlayerHelper } from "../game/player";
 import { injectCurrentPlayer, TURN_ORDER } from "../game/state";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
@@ -20,6 +21,7 @@ export class TurnOrderPhase extends PhaseModule {
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly helper = inject(TurnOrderHelper);
   private readonly log = inject(Log);
+  private readonly playerHelper = inject(PlayerHelper);
   private readonly currentPlayer = injectCurrentPlayer();
 
   configureActions() {
@@ -47,21 +49,18 @@ export class TurnOrderPhase extends PhaseModule {
 
   onEnd(): void {
     super.onEnd();
-    const state = this.turnOrderState();
     const remainingBidders = this.helper.remainingBiddersOrder();
     assert(remainingBidders.length === 1, 'expected exactly one bidder');
-    this.log.player(remainingBidders[0], 'takes first place');
-    this.currentOrder.update((turnOrder) => {
-      turnOrder.splice(0, turnOrder.length);
-      turnOrder.push(remainingBidders[0], ...state.nextTurnOrder);
-    });
+    this.helper.pass(this.playerHelper.getPlayer(remainingBidders[0]));
+    this.currentOrder.set(this.turnOrderState().nextTurnOrder);
     this.turnOrderState.delete();
   }
 
   findNextPlayer(currentColor: PlayerColor): PlayerColor | undefined {
-    const remainingBiddersOrder = this.helper.remainingBiddersOrder();
+    const currentOrder = this.currentOrder();
+    const passedPlayers = new Set(this.turnOrderState().nextTurnOrder);
 
-    if (remainingBiddersOrder.length === 1) {
+    if (passedPlayers.size >= currentOrder.length - 1) {
       return undefined;
     }
 
@@ -71,12 +70,12 @@ export class TurnOrderPhase extends PhaseModule {
     let nextPlayer = currentColor;
     do {
       infiniteLoop();
-      const previousIndex = remainingBiddersOrder.indexOf(nextPlayer);
-      nextPlayer = remainingBiddersOrder[previousIndex === remainingBiddersOrder.length - 1 ? 0 : previousIndex + 1];
+      const previousIndex = currentOrder.indexOf(nextPlayer);
+      nextPlayer = currentOrder[previousIndex === currentOrder.length - 1 ? 0 : previousIndex + 1];
       if (nextPlayer === maxBidPlayer) {
         this.log.player(nextPlayer, 'does not have to bid against themselves');
       }
-    } while (nextPlayer === maxBidPlayer);
+    } while (nextPlayer === maxBidPlayer || passedPlayers.has(nextPlayer));
     return nextPlayer;
   }
 }

@@ -22,7 +22,7 @@ export class LocoAction implements ActionProcessor<{}> {
 
   process(_: {}): boolean {
     this.state.update((s) => s.locomotive.push(this.currentPlayer().color));
-    this.playerHelper.update((player) => player.locomotive++);
+    this.playerHelper.updateCurrentPlayer((player) => player.locomotive++);
     return true;
   }
 }
