@@ -27,6 +27,7 @@ export function ActiveGame() {
 
 function InternalActiveGame() {
   const game = useGame();
+  // TODO: show available urbanization cities
   return <div>
     <h2>{game.name}</h2>
     <GameLog gameId={game.id} />
