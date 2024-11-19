@@ -46,7 +46,7 @@ export class BuildPhase extends PhaseModule {
     const newDanglers = grid.getDanglers(this.currentPlayer().color);
     const toRemoveIndividual = danglers.filter((dangler) => {
       const newDangler = newDanglers.find((d) => d.coordinates.equals(dangler.coordinates) && d.immovableExit === dangler.immovableExit);
-      return newDangler && newDangler.length > dangler.length;
+      return newDangler != null && newDangler.length <= dangler.length;
     });
 
     const toRemoveAll = toRemoveIndividual.flatMap((removing) => {
