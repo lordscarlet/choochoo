@@ -18,7 +18,7 @@ import { TurnOrderHelper } from "../../engine/turn_order/helper";
 import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { iterate } from "../../utils/functions";
-import { useAction, useEmptyAction } from "../services/game";
+import { useAction, useEmptyAction, useGame } from "../services/game";
 import { useCurrentPlayer, useInjected, useInjectedState, usePhaseState } from "../utils/execution_context";
 import { LoginButton } from "./login_button";
 PassAction
@@ -34,6 +34,7 @@ export function SelectAction() {
     <MoveGoods />
     <PlaceGood />
     <SwitchToActive />
+    <SwitchToUndo />
   </div>;
 }
 
@@ -127,6 +128,12 @@ export function SwitchToActive() {
   const currentPlayer = players.find((player) => player.color === currentPlayerColor);
   if (currentPlayer == null) return <></>;
   return <LoginButton playerId={currentPlayer.playerId}>Switch to active user</LoginButton>;
+}
+
+export function SwitchToUndo() {
+  const game = useGame();
+  if (game.undoPlayerId == null) return <></>;
+  return <LoginButton playerId={game.undoPlayerId}>Switch to undo user</LoginButton>;
 }
 
 export function GenericMessage({ children }: { children: string | string[] }) {

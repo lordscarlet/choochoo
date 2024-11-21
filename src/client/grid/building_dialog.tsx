@@ -7,15 +7,19 @@ import { useCallback, useMemo, useReducer, useState } from "react";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
+import { City } from '../../engine/map/city';
 import { rotateDirectionClockwise } from "../../engine/map/direction";
+import { Grid, Space } from '../../engine/map/grid';
 import { GridHelper } from "../../engine/map/grid_helper";
 import { Location } from "../../engine/map/location";
 import { Action } from "../../engine/state/action";
-import { ComplexTileType, Direction, SimpleTileType, TownTileType } from "../../engine/state/tile";
+import { AvailableCity } from '../../engine/state/available_city';
+import { LocationType } from '../../engine/state/location_type';
+import { ComplexTileType, Direction, SimpleTileType, TileData, TownTileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { useAction } from '../services/game';
 import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/execution_context";
-import { RawHexLegacy } from "./raw_hex";
+import { HexGrid } from './hex_grid';
 
 
 interface BuildingProps {
@@ -40,10 +44,12 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
     cancelBuild();
     emitBuild(build);
   }, [cancelBuild, emitBuild]);
+
   const selectAvailableCity = useCallback((cityIndex: number) => {
     cancelBuild();
     emitUrbanize({ cityIndex, coordinates: space!.coordinates });
   }, [space, emitUrbanize]);
+
   return <>
     <Dialog
       open={coordinates != null}
@@ -70,11 +76,11 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
         <p><input type="checkbox" checked={showReasons} onChange={e => setShowReasons(e.target.checked)} />Show failure reasons</p>
         {showReasons && <button onClick={rotate}>Rotate</button>}
         {eligible.map((build, index) => <div key={index}>
-          <RawHexLegacy key={index} space={space!} tile={build.action} onClick={() => build.reason == null && onSelect(build.action)} />
+          <ModifiedSpace space={space!} tile={{ ...build.action, owners: [] }} onClick={() => build.reason == null && onSelect(build.action)} />
           {build.reason}
         </div>)}
         {curr.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
-          <RawHexLegacy key={city.onRoll[0].group * 10 + city.onRoll[0].onRoll} space={space!} asCity={city.color} onClick={() => selectAvailableCity(index)} />
+          <ModifiedSpace key={city.onRoll[0].group * 10 + city.onRoll[0].onRoll} space={space!} asCity={city} onClick={() => selectAvailableCity(index)} />
         )}
       </DialogContent>
     </Dialog>
@@ -114,7 +120,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
       Direction.BOTTOM,
       Direction.BOTTOM_LEFT,
     ];
-    console.log('checking valid builds', coordinates);
+
     for (const tileType of tiles) {
       for (const orientation of orientations) {
         const action = { orientation, tileType, coordinates };
@@ -129,4 +135,32 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
       }
     }
   }
+}
+
+interface ModifiedSpaceProps {
+  space: Space;
+  tile?: TileData;
+  asCity?: AvailableCity;
+  onClick(space: Space): void;
+}
+
+export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpaceProps) {
+  const newSpace = useMemo(() => {
+    if (space instanceof City) {
+      return new City(space.coordinates, space.data);
+    } else if (asCity != null) {
+      return new City(space.coordinates, {
+        type: LocationType.CITY,
+        name: space.getTownName()!,
+        color: asCity.color,
+        goods: [],
+        urbanized: true,
+        onRoll: asCity.onRoll,
+      });
+    } else {
+      return new Location(space.coordinates, { ...space.data, tile });
+    }
+  }, [space]);
+  const grid = useMemo(() => Grid.fromSpaces([newSpace]), [newSpace]);
+  return <HexGrid grid={grid} onClick={onClick} />
 }

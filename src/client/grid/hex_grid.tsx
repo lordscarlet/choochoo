@@ -16,7 +16,7 @@ import { useAction, useGameVersionState } from "../services/game";
 import { useCurrentPlayer, useGrid } from "../utils/execution_context";
 import { BuildingDialog } from "./building_dialog";
 import { coordinatesToCenter, getCorners, Point } from "./point";
-import { RawHex } from "./raw_hex";
+import { Hex } from "./raw_hex";
 
 
 function cubeRound(qFrac: number, rFrac: number): Coordinates {
@@ -65,32 +65,12 @@ function buildPaths(grid: Grid, startingStop: Coordinates, endingStop: Coordinat
   });
 }
 
-export function HexGrid() {
+export function GameMap() {
   const { canEmit: canEmitBuild } = useAction(BuildAction);
   const { canEmit: canEmitMove, emit: emitMove } = useAction(MoveAction);
   const player = useCurrentPlayer();
   const grid = useGrid();
-  const spaces = useMemo(() => [...grid.values()], [grid]);
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Location | undefined>(undefined);
-
-  const size = 70;
-  const padding = 20;
-
-  const offset: Point = useMemo(() => {
-    const allCorners = [...grid.keys()].flatMap(c => getCorners(coordinatesToCenter(c, size), size));
-    return {
-      x: padding - Math.min(...allCorners.map(c => c.x)),
-      y: padding - Math.min(...allCorners.map(c => c.y)),
-    };
-  }, [...grid.keys()]);
-
-  const viewBox: Point = useMemo(() => {
-    const allCorners = [...grid.keys()].flatMap(c => getCorners(coordinatesToCenter(c, size), size));
-    return {
-      x: Math.max(...allCorners.map((c => c.x))) + offset.x + padding,
-      y: Math.max(...allCorners.map((c => c.y))) + offset.y + padding,
-    };
-  }, [...grid.keys()]);
 
   const [moveActionProgress, setMoveActionProgress] = useGameVersionState<MoveData | undefined>(undefined);
 
@@ -175,19 +155,9 @@ export function HexGrid() {
     };
   }, [moveActionProgress]);
 
-  const onClick = useCallback((e: MouseEvent) => {
-    const canvas = e.currentTarget as HTMLCanvasElement;
-    const rect = canvas.getBoundingClientRect();
-    const coordinates = pixelToCoordinates({
-      x: e.clientX - rect.left - offset.x,
-      y: e.clientY - rect.top - offset.y,
-    }, size);
-
-    const space = grid.get(coordinates);
+  const onClick = useCallback((space: Space, good: Good) => {
     if (canEmitMove) {
-      const maybeGood = (e.target as HTMLElement).dataset.good;
-      if (maybeGood != null) {
-        const good: Good = parseInt(maybeGood);
+      if (good != null) {
         assert(space instanceof City);
         if (onSelectGood(space, good)) {
           return;
@@ -200,7 +170,7 @@ export function HexGrid() {
       setBuildingSpace(space);
       return;
     }
-  }, [grid, canEmitBuild, offset, size, onSelectGood, setBuildingSpace, onMoveToSpace]);
+  }, [grid, canEmitBuild, onSelectGood, setBuildingSpace, onMoveToSpace]);
 
   const dialogs = useDialogs();
 
@@ -221,14 +191,62 @@ export function HexGrid() {
   }, [moveActionProgress, grid]);
 
   return <div style={{ overflowX: 'auto', width: '100%' }}>
-    <svg xmlns="http://www.w3.org/2000/svg"
-      width={viewBox.x}
-      height={viewBox.y}
-      fill="currentColor"
-      className="bi bi-google"
-      onClick={onClick}>
-      {spaces.map(c => <RawHex key={c.coordinates.serialize()} selectedGood={selectedGood} highlightedTrack={highlightedTrack} offset={offset} space={c} size={size} />)}
-    </svg>
+    <HexGrid onClick={onClick} highlightedTrack={highlightedTrack} selectedGood={selectedGood} grid={grid} />
     <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
   </div>;
+}
+
+interface HexGridProps {
+  grid: Grid;
+  onClick(space: Space, good?: Good): void;
+  highlightedTrack?: Track[];
+  selectedGood?: { good: Good, coordinates: Coordinates };
+}
+
+export function HexGrid({ onClick, highlightedTrack, selectedGood, grid }: HexGridProps) {
+  const size = 70;
+  const padding = 20;
+
+  const spaces = useMemo(() => [...grid.values()], [grid]);
+
+  const offset: Point = useMemo(() => {
+    const allCorners = spaces.flatMap(({ coordinates: c }) => getCorners(coordinatesToCenter(c, size), size));
+    return {
+      x: padding - Math.min(...allCorners.map(c => c.x)),
+      y: padding - Math.min(...allCorners.map(c => c.y)),
+    };
+  }, spaces);
+
+  const viewBox: Point = useMemo(() => {
+    const allCorners = spaces.flatMap(({ coordinates: c }) => getCorners(coordinatesToCenter(c, size), size));
+    return {
+      x: Math.max(...allCorners.map((c => c.x))) + offset.x + padding,
+      y: Math.max(...allCorners.map((c => c.y))) + offset.y + padding,
+    };
+  }, spaces);
+
+  const internalOnClick = useCallback((e: MouseEvent) => {
+    const canvas = e.currentTarget as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const coordinates = pixelToCoordinates({
+      x: e.clientX - rect.left - offset.x,
+      y: e.clientY - rect.top - offset.y,
+    }, size);
+
+    const space = grid.get(coordinates);
+    if (space == null) return;
+
+    const maybeGood = (e.target as HTMLElement).dataset.good;
+    if (maybeGood == null) return onClick(space);
+    onClick(space, parseInt(maybeGood) as Good);
+  }, [grid, offset, size]);
+
+  return <svg xmlns="http://www.w3.org/2000/svg"
+    width={viewBox.x}
+    height={viewBox.y}
+    fill="currentColor"
+    className="bi bi-google"
+    onClick={internalOnClick}>
+    {spaces.map(c => <Hex key={c.coordinates.serialize()} selectedGood={selectedGood} highlightedTrack={highlightedTrack} offset={offset} space={c} size={size} />)}
+  </svg>;
 }

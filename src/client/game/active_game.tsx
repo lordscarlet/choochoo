@@ -3,7 +3,7 @@ import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
 import { MOVE_STATE } from "../../engine/move/state";
 import { getPhaseString, Phase } from "../../engine/state/phase";
-import { HexGrid } from "../grid/hex_grid";
+import { GameMap } from "../grid/hex_grid";
 import { useGame, useUndoAction } from "../services/game";
 import { ExecutionContextProvider, useInjected, useInjectedState } from "../utils/execution_context";
 import { Editor } from "./editor";
@@ -36,7 +36,7 @@ function InternalActiveGame() {
     <UndoButton />
     <CurrentPhase />
     <PlayerStats />
-    <HexGrid />
+    <GameMap />
     <GoodsTable />
   </div>;
 }

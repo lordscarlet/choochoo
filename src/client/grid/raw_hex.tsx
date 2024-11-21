@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import { City } from "../../engine/map/city";
 import { BaseTileData, calculateTrackInfo, Location } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
@@ -8,19 +8,9 @@ import { Good } from "../../engine/state/good";
 import { LocationType } from "../../engine/state/location_type";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
-import { HexNameLegacy, Town } from "./hex";
 import * as styles from "./hex_grid.module.css";
 import { coordinatesToCenter, getCorners, movePointInDirection, offsetPoint, Point, pointBetween, polygon } from "./point";
-import { TrackLegacy, Track as TrackSvg } from "./track";
-
-interface RawHexLegacyProps {
-  space?: Location | City;
-  tile?: BaseTileData;
-  asCity?: Good;
-  children?: ReactNode;
-  className?: string;
-  onClick(): void;
-}
+import { Track as TrackSvg } from "./track";
 
 export function goodStyle(good: Good): string {
   switch (good) {
@@ -60,19 +50,6 @@ export function style(space: City | Location | undefined): string {
   } else {
     return styles.unpassable;
   }
-}
-
-export function RawHexLegacy({ space, asCity, className, tile, children, onClick }: RawHexLegacyProps) {
-  return <div data-coordinates={space?.coordinates.serialize()} className={[className, styles['hex'], asCity != null ? goodStyle(asCity) : style(space)].join(' ')} onClick={onClick}>
-    <div className={styles['hex-left']}></div>
-    <div className={styles['hex-body']}></div>
-    <div className={styles['hex-right']}></div>
-    {tile && <TrackLegacy track={calculateTrackInfo(tile)} />}
-    {space instanceof Location && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <Town />}
-    {space instanceof City && <HexNameLegacy name={space.cityName()} />}
-    {space instanceof Location && space.hasTown() && <HexNameLegacy name={space.getTownName()!} />}
-    {children}
-  </div>;
 }
 
 export function goodColor(good: Good): string {
@@ -126,7 +103,7 @@ interface RawHexProps {
   selectedGood?: { good: Good, coordinates: Coordinates };
 }
 
-export function RawHex({ space, asCity, selectedGood, highlightedTrack, tile, size, hideGoods, offset }: RawHexProps) {
+export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size, hideGoods, offset }: RawHexProps) {
   const coordinates = space.coordinates;
   const center = useMemo(() => offsetPoint(coordinatesToCenter(coordinates, size), offset), [coordinates, offset, size]);
 

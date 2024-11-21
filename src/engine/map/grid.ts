@@ -188,6 +188,10 @@ export class Grid {
   static fromData(gridData: GridData): Grid {
     return new Grid(ImmutableMap()).merge(gridData);
   }
+
+  static fromSpaces(spaces: Space[]): Grid {
+    return new Grid(ImmutableMap(spaces.map(s => [s.coordinates, s])));
+  }
 }
 
 export const DanglerInfo = z.object({
