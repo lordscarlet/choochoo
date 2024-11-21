@@ -59,6 +59,11 @@ export type MakeOptional<T, Optional extends string> =
 
 export type BaseTileData = MakeOptional<TileData, 'owners'>;
 
+export function trackEquals(track1: TrackInfo, track2: TrackInfo): boolean {
+  return track1.owner === track2.owner &&
+    track1.exits.every(exit => track2.exits.includes(exit));
+}
+
 export function calculateTrackInfo(tileData?: BaseTileData): TrackInfo[] {
   if (!tileData) return [];
   let trackInfo = toBaseTile(tileData.tileType);

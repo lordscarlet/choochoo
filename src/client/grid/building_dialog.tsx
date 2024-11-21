@@ -11,7 +11,7 @@ import { City } from '../../engine/map/city';
 import { rotateDirectionClockwise } from "../../engine/map/direction";
 import { Grid, Space } from '../../engine/map/grid';
 import { GridHelper } from "../../engine/map/grid_helper";
-import { Location } from "../../engine/map/location";
+import { calculateTrackInfo, Location, trackEquals } from "../../engine/map/location";
 import { Action } from "../../engine/state/action";
 import { AvailableCity } from '../../engine/state/available_city';
 import { LocationType } from '../../engine/state/location_type';
@@ -37,9 +37,17 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
   const [showReasons, setShowReasons] = useState(false);
   const [direction, rotate] = useReducer((prev: Direction, _: {}) => rotateDirectionClockwise(prev), Direction.TOP);
   const space = coordinates && (grid.lookup(coordinates) as Location);
-  const eligible = useMemo(() =>
-    coordinates ? [...getEligibleBuilds(action, coordinates, direction, showReasons)] : [],
-    [direction, showReasons, action, coordinates?.q, coordinates?.r]);
+  const eligible = useMemo(() => {
+    if (coordinates == null) return [];
+    const builds = [...getEligibleBuilds(action, coordinates, direction, showReasons)];
+    return builds.filter((build1, index) => {
+      const tileInfo1 = calculateTrackInfo(build1.tile);
+      return !builds.slice(index + 1).some((build2) => {
+        const tileInfo2 = calculateTrackInfo(build2.tile);
+        return tileInfo1.every((track1) => tileInfo2.some((track2) => trackEquals(track1, track2)));
+      });
+    });
+  }, [direction, showReasons, action, coordinates?.q, coordinates?.r]);
   const onSelect = useCallback((build: BuildData) => {
     cancelBuild();
     emitBuild(build);
@@ -76,7 +84,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
         <p><input type="checkbox" checked={showReasons} onChange={e => setShowReasons(e.target.checked)} />Show failure reasons</p>
         {showReasons && <button onClick={rotate}>Rotate</button>}
         {eligible.map((build, index) => <div key={index}>
-          <ModifiedSpace space={space!} tile={{ ...build.action, owners: [] }} onClick={() => build.reason == null && onSelect(build.action)} />
+          <ModifiedSpace space={space!} tile={build.tile} onClick={() => build.reason == null && onSelect(build.action)} />
           {build.reason}
         </div>)}
         {curr.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
@@ -86,7 +94,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
     </Dialog>
   </>;
 
-  function* getEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates, direction: Direction, showReasons: boolean): Iterable<{ action: BuildData, reason?: string }> {
+  function* getEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates, direction: Direction, showReasons: boolean): Iterable<{ action: BuildData, tile: TileData, reason?: string }> {
     // TODO: figure out a more efficient way. For now, just try every build in every orientation.
     const tiles = [
       SimpleTileType.STRAIGHT,
@@ -124,12 +132,13 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
     for (const tileType of tiles) {
       for (const orientation of orientations) {
         const action = { orientation, tileType, coordinates };
+        const tile = { orientation, tileType, owners: [] };
         try {
           actionProcessor.validate(action);
-          yield { action };
+          yield { action, tile };
         } catch (e: unknown) {
           if (showReasons) {
-            yield { action, reason: (e as Error).message };
+            yield { action, tile, reason: (e as Error).message };
           }
         }
       }
