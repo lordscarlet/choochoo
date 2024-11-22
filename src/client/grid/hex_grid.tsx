@@ -3,8 +3,8 @@ import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
+import { Hex } from "./hex";
 import { coordinatesToCenter, getCorners, Point } from "./point";
-import { Hex } from "./raw_hex";
 
 
 function cubeRound(qFrac: number, rFrac: number): Coordinates {

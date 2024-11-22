@@ -3,13 +3,15 @@ import { City } from "../../engine/map/city";
 import { BaseTileData, calculateTrackInfo, Location } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
 import { Track, TrackInfo } from "../../engine/map/track";
-import { cityGroupColor, cityGroupTextColor, toLetter } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
 import { LocationType } from "../../engine/state/location_type";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
-import * as styles from "./hex_grid.module.css";
-import { coordinatesToCenter, getCorners, movePointInDirection, offsetPoint, Point, pointBetween, polygon } from "./point";
+import { GoodBlock } from "./good_block";
+import * as styles from './hex_grid.module.css';
+import { HexName } from "./hex_name";
+import { OnRoll } from "./on_roll";
+import { coordinatesToCenter, getCorners, offsetPoint, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
 export function goodStyle(good: Good): string {
@@ -26,29 +28,6 @@ export function goodStyle(good: Good): string {
       return styles.yellow;
     default:
       assertNever(good);
-  }
-}
-
-export function style(space: City | Location | undefined): string {
-  if (space instanceof City) {
-    return goodStyle(space.goodColor());
-  } else if (space instanceof Location) {
-    const type = space.getLocationType();
-    switch (type) {
-      case LocationType.PLAIN:
-        return styles.plain;
-      case LocationType.RIVER:
-        return styles.river;
-      case LocationType.MOUNTAIN:
-        return styles.mountain;
-      case LocationType.SWAMP:
-        // TODO: learn to draw swamps.
-        return styles.mountain;
-      default:
-        assertNever(type);
-    }
-  } else {
-    return styles.unpassable;
   }
 }
 
@@ -69,7 +48,7 @@ export function goodColor(good: Good): string {
   }
 }
 
-export function color(space: City | Location | undefined): string {
+function color(space: City | Location | undefined): string {
   if (space instanceof City) {
     return goodColor(space.goodColor());
   } else if (space instanceof Location) {
@@ -143,56 +122,4 @@ export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size,
   </>;
 }
 
-const hexNameDiff = 0.25;
-
-function OnRoll({ city, center, size }: { city: City, center: Point, size: number }) {
-  const [_, bottomRight, bottomLeft, left] = getCorners(center, size);
-  const bottomLeftCorner = pointBetween(bottomLeft, left, hexNameDiff);
-  const buffer = 2;
-  const boxTopRight = { x: bottomRight.x, y: bottomLeftCorner.y + buffer };
-  const boxTopLeft = { x: bottomLeft.x, y: bottomLeftCorner.y + buffer };
-  const points = polygon([boxTopRight, bottomRight, bottomLeft, boxTopLeft]);
-  const numberCenter = pointBetween(boxTopRight, bottomLeft);
-  return <>
-    <polygon points={points} stroke="black" fill={cityGroupColor(city.onRoll()[0].group)} strokeWidth="1" />
-    <text x={numberCenter.x} y={numberCenter.y} dominantBaseline="middle" textAnchor="middle" color={cityGroupTextColor(city.onRoll()[0].group)}>
-      {city.isUrbanized() ? toLetter(city.onRoll()[0]) : city.onRoll()[0].onRoll}
-    </text >
-  </>;
-}
-
-function GoodBlock({ center, size, offset, good, highlighted }: { good: Good, center: Point, size: number, offset: number, highlighted: boolean }) {
-  const goodSize = size / 3;
-
-  // If there are too many goods on the hex, split them up into top and bottom goods.
-  const xOffset = offset % 6;
-  const yOffset = offset < 6 ? -2.2 : 1.2;
-
-  const x = center.x - (1.7 * goodSize) + (goodSize * xOffset / 2);
-  const y = center.y + (yOffset * goodSize);
-  const stroke = highlighted ? (good === Good.YELLOW ? 'yellow' : 'black') : (good === Good.BLACK ? 'grey' : 'black');
-  return <rect data-good={good} width={goodSize} height={goodSize} x={x} y={y} fill={goodColor(good)} strokeWidth={1} stroke={stroke} />;
-}
-
-function HexName({ name, center, size }: { name: string, center: Point, size: number }) {
-  const right = movePointInDirection(center, size, 0);
-  const bottomRight = movePointInDirection(center, size, Math.PI / 3);
-  const bottomLeft = movePointInDirection(center, size, Math.PI * 2 / 3);
-  const left = movePointInDirection(center, size, Math.PI);
-  const topLeft = movePointInDirection(center, size, Math.PI * 4 / 3);
-  const topRight = movePointInDirection(center, size, Math.PI * 5 / 3);
-  const townCorners = useMemo(() => [
-    left,
-    pointBetween(topLeft, left, hexNameDiff),
-    pointBetween(topRight, right, hexNameDiff),
-    right,
-    pointBetween(bottomRight, right, hexNameDiff),
-    pointBetween(bottomLeft, left, hexNameDiff),
-  ].map((p) => [p.x, p.y].join(' ')).join(',')
-    , [center, size]);
-  return <>
-    <polygon points={townCorners} stroke="white" fill="white" strokeWidth="1" />
-    <text x={center.x} y={center.y} dominantBaseline="middle" textAnchor="middle">{name}</text>
-  </>;
-}
 

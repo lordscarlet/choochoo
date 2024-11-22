@@ -1,6 +1,6 @@
 import { Good } from "../../engine/state/good";
+import { goodStyle } from "./hex";
 import * as styles from "./hex_grid.module.css";
-import { goodStyle } from "./raw_hex";
 
 interface GoodsBlockProps {
   goods: Good[];
