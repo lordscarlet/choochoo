@@ -9,6 +9,12 @@ import { RegisterPage } from "../user/register";
 import { Layout } from "./layout";
 
 export function Router() {
+
+  // TODO: figure out why this re-renders like 6 times.
+  // useMemo(() => {
+  //   console.log('new render2');
+  // }, [1]);
+
   const router = useMemo(() => createBrowserRouter([
     {
       path: '/',
