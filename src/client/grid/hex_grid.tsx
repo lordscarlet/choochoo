@@ -1,8 +1,9 @@
-import { MouseEvent, useCallback, useMemo } from "react";
+import { MouseEvent, useMemo } from "react";
 import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
+import { useTypedCallback } from "../utils/hooks";
 import { Hex } from "./hex";
 import { coordinatesToCenter, getCorners, Point } from "./point";
 
@@ -42,6 +43,24 @@ interface HexGridProps {
   selectedGood?: { good: Good, coordinates: Coordinates };
 }
 
+function onClickCb(grid: Grid, offset: Point, size: number, onClick: (space: Space, good?: Good) => void) {
+  return (e: MouseEvent) => {
+    const canvas = e.currentTarget as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const coordinates = pixelToCoordinates({
+      x: e.clientX - rect.left - offset.x,
+      y: e.clientY - rect.top - offset.y,
+    }, size);
+
+    const space = grid.get(coordinates);
+    if (space == null) return;
+
+    const maybeGood = (e.target as HTMLElement).dataset.good;
+    if (maybeGood == null) return onClick(space);
+    onClick(space, parseInt(maybeGood) as Good);
+  };
+}
+
 export function HexGrid({ onClick, highlightedTrack, selectedGood, grid }: HexGridProps) {
   const size = 70;
   const padding = 20;
@@ -64,21 +83,7 @@ export function HexGrid({ onClick, highlightedTrack, selectedGood, grid }: HexGr
     };
   }, spaces);
 
-  const internalOnClick = useCallback((e: MouseEvent) => {
-    const canvas = e.currentTarget as HTMLCanvasElement;
-    const rect = canvas.getBoundingClientRect();
-    const coordinates = pixelToCoordinates({
-      x: e.clientX - rect.left - offset.x,
-      y: e.clientY - rect.top - offset.y,
-    }, size);
-
-    const space = grid.get(coordinates);
-    if (space == null) return;
-
-    const maybeGood = (e.target as HTMLElement).dataset.good;
-    if (maybeGood == null) return onClick(space);
-    onClick(space, parseInt(maybeGood) as Good);
-  }, [grid, offset, size]);
+  const internalOnClick = useTypedCallback(onClickCb, [grid, offset, size, onClick]);
 
   const mapSpaces = [];
 

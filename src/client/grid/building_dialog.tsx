@@ -15,10 +15,11 @@ import { calculateTrackInfo, Location, trackEquals } from "../../engine/map/loca
 import { Action } from "../../engine/state/action";
 import { AvailableCity } from '../../engine/state/available_city';
 import { LocationType } from '../../engine/state/location_type';
-import { ComplexTileType, Direction, SimpleTileType, TileData, TownTileType } from "../../engine/state/tile";
+import { allDirections, ComplexTileType, Direction, SimpleTileType, TileData, TownTileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { useAction } from '../services/game';
 import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/execution_context";
+import { useTypedMemo } from '../utils/hooks';
 import { HexGrid } from './hex_grid';
 
 
@@ -37,17 +38,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
   const [showReasons, setShowReasons] = useState(false);
   const [direction, rotate] = useReducer((prev: Direction, _: {}) => rotateDirectionClockwise(prev), Direction.TOP);
   const space = coordinates && (grid.lookup(coordinates) as Location);
-  const eligible = useMemo(() => {
-    if (coordinates == null) return [];
-    const builds = [...getEligibleBuilds(action, coordinates, direction, showReasons)];
-    return builds.filter((build1, index) => {
-      const tileInfo1 = calculateTrackInfo(build1.tile);
-      return !builds.slice(index + 1).some((build2) => {
-        const tileInfo2 = calculateTrackInfo(build2.tile);
-        return tileInfo1.every((track1) => tileInfo2.some((track2) => trackEquals(track1, track2)));
-      });
-    });
-  }, [direction, showReasons, action, coordinates?.q, coordinates?.r]);
+  const eligible = useTypedMemo(getEligibleBuilds, [action, coordinates, direction, showReasons]);
   const onSelect = useCallback((build: BuildData) => {
     cancelBuild();
     emitBuild(build);
@@ -88,62 +79,13 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
           {build.reason}
         </div>)}
         {curr.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
-          <ModifiedSpace key={city.onRoll[0].group * 10 + city.onRoll[0].onRoll} space={space!} asCity={city} onClick={() => selectAvailableCity(index)} />
+          <div key={city.onRoll[0].group * 10 + city.onRoll[0].onRoll}>
+            <ModifiedSpace space={space!} asCity={city} onClick={() => selectAvailableCity(index)} />
+          </div>
         )}
       </DialogContent>
     </Dialog>
   </>;
-
-  function* getEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates, direction: Direction, showReasons: boolean): Iterable<{ action: BuildData, tile: TileData, reason?: string }> {
-    // TODO: figure out a more efficient way. For now, just try every build in every orientation.
-    const tiles = [
-      SimpleTileType.STRAIGHT,
-      SimpleTileType.CURVE,
-      SimpleTileType.TIGHT,
-      ComplexTileType.X,
-      ComplexTileType.BOW_AND_ARROW,
-      ComplexTileType.CROSSING_CURVES,
-      ComplexTileType.STRAIGHT_TIGHT,
-      ComplexTileType.COEXISTING_CURVES,
-      ComplexTileType.CURVE_TIGHT_1,
-      ComplexTileType.CURVE_TIGHT_2,
-      TownTileType.LOLLYPOP,
-      TownTileType.STRAIGHT,
-      TownTileType.CURVE,
-      TownTileType.TIGHT,
-      TownTileType.THREE_WAY,
-      TownTileType.LEFT_LEANER,
-      TownTileType.RIGHT_LEANER,
-      TownTileType.TIGHT_THREE,
-      TownTileType.X,
-      TownTileType.CHICKEN_FOOT,
-      TownTileType.K,
-    ];
-
-    const orientations = showReasons ? [direction] : [
-      Direction.TOP_LEFT,
-      Direction.TOP,
-      Direction.TOP_RIGHT,
-      Direction.BOTTOM_RIGHT,
-      Direction.BOTTOM,
-      Direction.BOTTOM_LEFT,
-    ];
-
-    for (const tileType of tiles) {
-      for (const orientation of orientations) {
-        const action = { orientation, tileType, coordinates };
-        const tile = { orientation, tileType, owners: [] };
-        try {
-          actionProcessor.validate(action);
-          yield { action, tile };
-        } catch (e: unknown) {
-          if (showReasons) {
-            yield { action, tile, reason: (e as Error).message };
-          }
-        }
-      }
-    }
-  }
 }
 
 interface ModifiedSpaceProps {
@@ -169,7 +111,64 @@ export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpacePro
     } else {
       return new Location(space.coordinates, { ...space.data, tile });
     }
-  }, [space]);
+  }, [space, tile, asCity]);
   const grid = useMemo(() => Grid.fromSpaces([newSpace]), [newSpace]);
   return <HexGrid grid={grid} onClick={onClick} />
+}
+
+interface EligibleBuild {
+  action: BuildData;
+  tile: TileData;
+  reason?: string;
+}
+
+function getEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates | undefined, direction: Direction, showReasons: boolean): EligibleBuild[] {
+  if (coordinates == null) return [];
+  const builds = (showReasons ? [direction] : allDirections).flatMap((direction) =>
+    [...getAllEligibleBuilds(actionProcessor, coordinates, direction)].filter(({ reason }) => showReasons || reason == null));
+  return builds.filter((build1, index) => {
+    const tileInfo1 = calculateTrackInfo(build1.tile);
+    return !builds.slice(index + 1).some((build2) => {
+      const tileInfo2 = calculateTrackInfo(build2.tile);
+      return tileInfo1.length === tileInfo2.length && tileInfo1.every((track1) => tileInfo2.some((track2) => trackEquals(track1, track2)));
+    });
+  });
+}
+
+function* getAllEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates, orientation: Direction): Iterable<EligibleBuild> {
+  // TODO: figure out a more efficient way. For now, just try every build in every orientation.
+  const tiles = [
+    SimpleTileType.STRAIGHT,
+    SimpleTileType.CURVE,
+    SimpleTileType.TIGHT,
+    ComplexTileType.X,
+    ComplexTileType.BOW_AND_ARROW,
+    ComplexTileType.CROSSING_CURVES,
+    ComplexTileType.STRAIGHT_TIGHT,
+    ComplexTileType.COEXISTING_CURVES,
+    ComplexTileType.CURVE_TIGHT_1,
+    ComplexTileType.CURVE_TIGHT_2,
+    TownTileType.LOLLYPOP,
+    TownTileType.STRAIGHT,
+    TownTileType.CURVE,
+    TownTileType.TIGHT,
+    TownTileType.THREE_WAY,
+    TownTileType.LEFT_LEANER,
+    TownTileType.RIGHT_LEANER,
+    TownTileType.TIGHT_THREE,
+    TownTileType.X,
+    TownTileType.CHICKEN_FOOT,
+    TownTileType.K,
+  ];
+
+  for (const tileType of tiles) {
+    const action = { orientation, tileType, coordinates };
+    const tile = { orientation, tileType, owners: [] };
+    try {
+      actionProcessor.validate(action);
+      yield { action, tile };
+    } catch (e: unknown) {
+      yield { action, tile, reason: (e as Error).message };
+    }
+  }
 }

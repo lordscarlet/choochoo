@@ -169,7 +169,7 @@ export function useGameVersionState<T>(initialValue: T): [T, (t: T) => void] {
   const externalSetState = useCallback((state: T) => {
     ref.current = game.version;
     setState(state);
-  }, [setState, game]);
+  }, [setState, game.version]);
   return [externalState, externalSetState];
 }
 
