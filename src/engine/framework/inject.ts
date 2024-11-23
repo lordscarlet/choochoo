@@ -12,7 +12,7 @@ export class InjectionContext {
   private readonly dependencyStack: Array<Set<Constructor<unknown> | Key<unknown>>> = [];
 
   addDependency(dep: Key<unknown> | Constructor<unknown>): void {
-    peek(this.dependencyStack).add(dep);
+    peek(this.dependencyStack)?.add(dep);
   }
 
   startDependencyStack<T>(fn: () => T): [T, Set<Key<unknown> | Constructor<unknown>>] {

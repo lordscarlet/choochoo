@@ -23,6 +23,7 @@ export class StateStore {
   }
 
   private initContainerIfNotExists<T>(key: string): void {
+    if (this.state.has(key)) return;
     const container: StateContainer<T> = {
       state: undefined,
       listeners: new Set(),
@@ -125,7 +126,9 @@ export class StateStore {
     // TODO: Come up with a clever way to deserialize.
     // For now, use json.
     const serialized = [...this.state.entries()].reduce((obj, [key, val]) => {
-      obj[key] = serialize(val.state);
+      if (val.state != null) {
+        obj[key] = serialize(val.state.value);
+      }
       return obj;
     }, {} as { [key: string]: unknown });
     return JSON.stringify(serialized);
@@ -137,6 +140,7 @@ export class StateStore {
       .filter(([key, value]) => this.mergeValue(key, unserialize(value)))
       .map(([key]) => ({ key }));
     for (const change of changes) {
+      console.log('notifying listeners of ', change.key);
       this.notifyListeners(change.key);
     }
   }
