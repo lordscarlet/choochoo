@@ -1,4 +1,4 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Transaction } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { compare, hash } from 'bcrypt';
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
@@ -122,14 +122,14 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     return user;
   }
 
-  static async register(user: CreateUserApi): Promise<UserModel> {
+  static async register(user: CreateUserApi, transaction?: Transaction): Promise<UserModel> {
     const password = await UserModel.hashPassword(user.password);
     const newUser = await UserModel.create({
       username: user.username,
       email: user.email,
       password,
-      role: UserRole.enum.WAITLIST,
-    });
+      role: UserRole.enum.ACTIVATE_EMAIL,
+    }, { transaction });
     return newUser;
   }
 }

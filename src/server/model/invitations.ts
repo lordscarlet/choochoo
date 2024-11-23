@@ -1,11 +1,12 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Transaction } from '@sequelize/core';
 import { Attribute, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
+import { assert } from '../../utils/validate';
 
 @Table({ modelName: 'Invitation' })
 export class InvitationModel extends Model<InferAttributes<InvitationModel>, InferCreationAttributes<InvitationModel>> {
   @PrimaryKey
   @Attribute(DataTypes.STRING)
-  declare id: CreationOptional<string>;
+  declare id: string;
 
   @Attribute(DataTypes.INTEGER)
   @NotNull
@@ -29,4 +30,12 @@ export class InvitationModel extends Model<InferAttributes<InvitationModel>, Inf
 
   @DeletedAt
   declare deletedAt?: Date;
+
+  static async useInvitationCode(invitationCode: string, transaction?: Transaction): Promise<void> {
+    const invitation = await InvitationModel.findByPk(invitationCode);
+    assert(invitation != null, { invalidInput: 'Invitation code not found' });
+    assert(invitation.count > 0, { invalidInput: 'This code has expired' })
+    invitation.count--;
+    await invitation.save({ transaction });
+  }
 }

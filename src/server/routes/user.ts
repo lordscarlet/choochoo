@@ -46,7 +46,13 @@ const router = initServer().router(userContract, {
       for (const badword of badwords) {
         assert(!body.username.includes(badword), { invalidInput: 'cannot use bad words in username' });
       }
-      const user = await UserModel.register(body);
+      const user = await sequelize.transaction(async (transaction) => {
+        const [user] = await Promise.all([
+          UserModel.register(body, transaction),
+          InvitationModel.useInvitationCode(body.invitationCode, transaction),
+        ]);
+        return user;
+      });
       req.session.userId = user.id;
       return { status: 200, body: { user: user.toMyApi() } };
     } catch (e) {
@@ -98,26 +104,6 @@ const router = initServer().router(userContract, {
     await modifyUser.save();
     await modifyUser.updateCache();
     return { status: 200, body: { success: true } };
-  },
-
-  async useInvite({ body, req }) {
-    assert(req.session.userId != null, { unauthorized: true });
-    const user = await UserModel.findByPk(req.session.userId);
-    assert(user != null, { unauthorized: true });
-    assert(user.role == UserRole.Enum.WAITLIST, { permissionDenied: 'account already activated' })
-    const invitation = await InvitationModel.findByPk(body.code);
-    assert(invitation != null && invitation.count > 0, { notFound: 'code not found' });
-
-    await sequelize.transaction(async (transaction) => {
-      user.role = UserRole.enum.USER;
-      invitation.count--;
-      await Promise.all([
-        user.save({ transaction }),
-        invitation.save({ transaction }),
-      ]);
-    });
-    await user.updateCache();
-    return { status: 200, body: { user: user.toMyApi() } };
   },
 
   async logout({ req }) {

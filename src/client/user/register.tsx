@@ -1,14 +1,16 @@
 import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
-import { RouteObject, useNavigate } from "react-router-dom";
+import { RouteObject, useNavigate, useSearchParams } from "react-router-dom";
 import { useMe, useRegister } from "../services/me";
 import { useTextInputState } from "../utils/form_state";
 import { LoginPage } from "./login";
 
 export function RegisterPage() {
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useTextInputState('');
   const [username, setUsername] = useTextInputState('');
   const [password, setPassword] = useTextInputState('');
+  const [invitationCode, setInvitationCode] = useTextInputState(searchParams.has('invitationCode') ? searchParams.get('invitationCode')! : '');
   const { register, validationError, isPending } = useRegister();
   const navigate = useNavigate();
   const me = useMe();
@@ -20,7 +22,7 @@ export function RegisterPage() {
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    register({ username, email, password });
+    register({ username, email, password, invitationCode });
   }, [register, username, email, password]);
 
   return <Box
@@ -59,6 +61,17 @@ export function RegisterPage() {
         error={validationError?.password != null}
         helperText={validationError?.password}
         onChange={setPassword}
+      />
+    </FormControl>
+    <FormControl>
+      <TextField
+        required
+        label="Invite Code"
+        type="text"
+        value={invitationCode}
+        error={validationError?.invitationCode != null}
+        helperText={validationError?.invitationCode}
+        onChange={setInvitationCode}
       />
     </FormControl>
     <div>

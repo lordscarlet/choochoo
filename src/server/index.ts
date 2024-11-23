@@ -1,4 +1,4 @@
-import { BaseError, DatabaseError } from '@sequelize/core';
+import { DatabaseError } from '@sequelize/core';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
@@ -33,14 +33,14 @@ app.use(xsrfApp);
 app.use(express.json());
 app.use(waitForSequelize());
 
+if (environment.stage !== Stage.enum.production) {
+  app.use(devApp());
+}
+
 app.use('/api', userApp);
 app.use(enforceRoleMiddleware());
 app.use('/api', gameApp);
 app.use('/api', messageApp);
-
-if (environment.stage !== Stage.enum.production) {
-  app.use(devApp());
-}
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {

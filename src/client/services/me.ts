@@ -19,21 +19,6 @@ export function useMe(): MyUserApi | undefined {
   return data.body.user;
 }
 
-export function useInvitation() {
-  const tsrQueryClient = tsr.useQueryClient();
-  const navigate = useNavigate();
-  const { mutate, error, isPending } = tsr.users.useInvite.useMutation();
-  handleError(isPending, error);
-
-  const useInvitationCode = useCallback((body: InviteApi) => mutate({ body }, {
-    onSuccess: (data) => {
-      tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: data.body.user } }));
-      navigate('/');
-    },
-  }), []);
-  return { useInvitationCode, isPending };
-}
-
 export function useCreateInvitation() {
   const me = useMe();
   const notifications = useNotifications();

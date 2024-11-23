@@ -1,7 +1,7 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
-export const UserRole = z.enum(['WAITLIST', 'USER', 'ADMIN', 'BLOCKED']);
+export const UserRole = z.enum(['ACTIVATE_EMAIL', 'USER', 'ADMIN', 'BLOCKED']);
 export type UserRole = z.infer<typeof UserRole>;
 
 const Password = z.string().min(8).max(32);
@@ -10,6 +10,7 @@ export const CreateUserApi = z.object({
   email: z.string().email(),
   username: z.string().toLowerCase().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, letters and an underscore'),
   password: Password,
+  invitationCode: z.string(),
 });
 export type CreateUserApi = z.infer<typeof CreateUserApi>;
 
@@ -62,14 +63,6 @@ export const userContract = c.router({
     },
     method: 'POST',
     path: '/users/',
-  },
-  useInvite: {
-    body: InviteApi,
-    responses: {
-      200: z.object({ user: MyUserApi }),
-    },
-    method: 'POST',
-    path: '/users/use-invite',
   },
   createInvite: {
     body: CreateInviteApi,

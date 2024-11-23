@@ -4,7 +4,7 @@ import { UnauthorizedError } from "../../utils/error";
 import { UserModel } from "../model/user";
 
 export async function enforceRole(req: Request): Promise<void> {
-  if (req.method === 'GET' || req.method === 'OPTIONS') return;
+  if (!req.url.startsWith('/api') || req.url.startsWith('/api/users')) return;
   const userId = req.session.userId;
   if (userId == null) {
     throw new UnauthorizedError('please log in');
@@ -17,8 +17,8 @@ export async function enforceRole(req: Request): Promise<void> {
     throw new UnauthorizedError('please log in');
   }
 
-  if (user.role === UserRole.enum.WAITLIST) {
-    throw new UnauthorizedError('waitlisted users cannot perform actions');
+  if (user.role === UserRole.enum.ACTIVATE_EMAIL) {
+    throw new UnauthorizedError('activate your email');
   }
 }
 
