@@ -26,7 +26,7 @@ export function PlayerStats() {
     const user = playerUsers?.find(user => user.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
-  const columns: ColumnRenderer[] = useInject(() => [inject(BidRenderer)]);
+  const columns: ColumnRenderer[] = useInject(() => [inject(BidRenderer)], []);
   return <table>
     <thead>
       <tr>

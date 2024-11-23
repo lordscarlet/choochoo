@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { ExecutionContext, inject, setExecutionContextGetter } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
 import { PHASE } from "../../engine/game/phase";
@@ -28,28 +28,26 @@ export function useInjected<T extends Constructor<any>>(factory: T, ...args: NoI
   return useInject(() => {
     // Wrap in an object so the value changes every time (notifying react of the diff).
     return { value: inject(factory, ...args) };
-  }).value;
+  }, [factory]).value;
 }
 
-export function useInject<T>(fn: () => T): T {
+export function useInject<T>(fn: () => T, deps: unknown[]): T {
   const ctx = useExecutionContext();
-  const [initialValue, deps] = useMemo(() => {
+
+  const [_, incrValue] = useReducer((i) => i + 1, 1);
+
+  const [value, stateDeps] = useMemo(() => {
     setExecutionContextGetter(() => ctx);
     const [value, dependencies] = ctx.injectionContext.startDependencyStack(fn);
     setExecutionContextGetter();
     return [value, ctx.injectionContext.getStateDependencies(...dependencies)];
-  }, [ctx]);
-
-  const [value, setValue] = useState(initialValue);
+  }, [incrValue, ...deps]);
 
   useEffect(() => {
-    return ctx.gameState.listenAll(deps, () => {
-      setExecutionContextGetter(() => ctx);
-      const value = fn();
-      setExecutionContextGetter();
-      setValue(value);
+    return ctx.gameState.listenAll(stateDeps, () => {
+      incrValue();
     });
-  }, [ctx]);
+  }, [ctx, ...stateDeps]);
 
   return value;
 }
@@ -99,5 +97,5 @@ export function useCurrentPlayer(): PlayerData {
 }
 
 export function useGrid(): Grid {
-  return useInject(() => injectGrid()());
+  return useInject(() => injectGrid()(), []);
 }

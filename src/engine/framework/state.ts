@@ -140,7 +140,6 @@ export class StateStore {
       .filter(([key, value]) => this.mergeValue(key, unserialize(value)))
       .map(([key]) => ({ key }));
     for (const change of changes) {
-      console.log('notifying listeners of ', change.key);
       this.notifyListeners(change.key);
     }
   }

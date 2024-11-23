@@ -3,6 +3,7 @@ import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
+import { useTypedMemo } from "../utils/hooks";
 import { Hex } from "./hex";
 import { coordinatesToCenter, getCorners, Point } from "./point";
 
@@ -80,12 +81,33 @@ export function HexGrid({ onClick, highlightedTrack, selectedGood, grid }: HexGr
     onClick(space, parseInt(maybeGood) as Good);
   }, [grid, offset, size]);
 
+  const mapSpaces = [];
+
+  // There should be the same number of spaces, so useMemo should be safe here.
+  for (const space of spaces) {
+    mapSpaces.push(useTypedMemo(hexFactory, [space, selectedGood, highlightedTrack, offset, size]));
+  }
+
   return <svg xmlns="http://www.w3.org/2000/svg"
     width={viewBox.x}
     height={viewBox.y}
     fill="currentColor"
     className="bi bi-google"
     onClick={internalOnClick}>
-    {spaces.map(c => <Hex key={c.coordinates.serialize()} selectedGood={selectedGood} highlightedTrack={highlightedTrack} offset={offset} space={c} size={size} />)}
+    {mapSpaces}
   </svg>;
+}
+
+function hexFactory(
+  space: Space,
+  selectedGood: { good: Good, coordinates: Coordinates } | undefined,
+  highlightedTrack: Track[] | undefined,
+  offset: Point,
+  size: number) {
+  return <Hex key={space.coordinates.serialize()}
+    selectedGood={selectedGood}
+    highlightedTrack={highlightedTrack}
+    offset={offset}
+    space={space}
+    size={size} />
 }

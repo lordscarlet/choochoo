@@ -166,7 +166,7 @@ export function Build() {
     const helper = inject(BuilderHelper);
     if (!canEmit) return [undefined, undefined];
     return [helper.buildsRemaining(), helper.canUrbanize()];
-  });
+  }, [canEmit]);
 
   if (canEmitUsername == null) {
     return <></>;
