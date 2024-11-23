@@ -3,7 +3,6 @@ import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
-import { useTypedMemo } from "../utils/hooks";
 import { Hex } from "./hex";
 import { coordinatesToCenter, getCorners, Point } from "./point";
 
@@ -85,7 +84,13 @@ export function HexGrid({ onClick, highlightedTrack, selectedGood, grid }: HexGr
 
   // There should be the same number of spaces, so useMemo should be safe here.
   for (const space of spaces) {
-    mapSpaces.push(useTypedMemo(hexFactory, [space, selectedGood, highlightedTrack, offset, size]));
+    const highlightedTrackInSpace = useMemo(() =>
+      highlightedTrack?.filter((track) => track.coordinates.equals(space.coordinates))
+      , [highlightedTrack]);
+    const highlightedTrackSerialized = (highlightedTrackInSpace ?? []).map((track) => `${track.coordinates.serialize()}|${track.getExits().join(':')}`).join('?');
+    mapSpaces.push(useMemo(() =>
+      hexFactory(space, selectedGood, highlightedTrackInSpace, offset, size),
+      [space, selectedGood, highlightedTrackSerialized, offset.x, offset.y, size]));
   }
 
   return <svg xmlns="http://www.w3.org/2000/svg"

@@ -34,20 +34,20 @@ export function useInjected<T extends Constructor<any>>(factory: T, ...args: NoI
 export function useInject<T>(fn: () => T, deps: unknown[]): T {
   const ctx = useExecutionContext();
 
-  const [_, incrValue] = useReducer((i) => i + 1, 1);
+  const [incrementedValue, incrValue] = useReducer((i) => i + 1, 1);
 
   const [value, stateDeps] = useMemo(() => {
     setExecutionContextGetter(() => ctx);
     const [value, dependencies] = ctx.injectionContext.startDependencyStack(fn);
     setExecutionContextGetter();
     return [value, ctx.injectionContext.getStateDependencies(...dependencies)];
-  }, [incrValue, ...deps]);
+  }, [ctx, incrementedValue, ...deps]);
 
   useEffect(() => {
     return ctx.gameState.listenAll(stateDeps, () => {
       incrValue();
     });
-  }, [ctx, ...stateDeps]);
+  }, [ctx, incrValue, ...stateDeps]);
 
   return value;
 }

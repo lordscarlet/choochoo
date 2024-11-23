@@ -6,8 +6,8 @@ import { assertNever } from "../../utils/validate";
 
 export function movePointInDirection(point: Point, size: number, rad: number): Point {
   return {
-    x: point.x + Math.cos(rad) * size,
-    y: point.y + Math.sin(rad) * size,
+    x: Math.round(point.x + Math.cos(rad) * size),
+    y: Math.round(point.y + Math.sin(rad) * size),
   };
 }
 
