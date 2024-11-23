@@ -34,19 +34,16 @@ export function useInjected<T extends Constructor<any>>(factory: T, ...args: NoI
 export function useInject<T>(fn: () => T): T {
   const ctx = useExecutionContext();
   const [initialValue, deps] = useMemo(() => {
-    const stateDeps = new Set<Key<unknown>>();
-    ctx.gameState.startMonitoringStateDependencies(stateDeps);
     setExecutionContextGetter(() => ctx);
-    const value = fn();
+    const [value, dependencies] = ctx.injectionContext.startDependencyStack(fn);
     setExecutionContextGetter();
-    ctx.gameState.stopMonitoringStateDependencies(stateDeps);
-    return [value, stateDeps];
+    return [value, ctx.injectionContext.getStateDependencies(...dependencies)];
   }, [ctx]);
 
   const [value, setValue] = useState(initialValue);
 
   useEffect(() => {
-    ctx.gameState.listenAll(deps, () => {
+    return ctx.gameState.listenAll(deps, () => {
       setExecutionContextGetter(() => ctx);
       const value = fn();
       setExecutionContextGetter();
@@ -74,7 +71,10 @@ export function usePhaseState<T>(phase: Phase, key: Key<T>): Immutable<T> | unde
 
 function useOptionalInjectedState<T>(key: Key<T>, optionalCheck: boolean): Immutable<T> | undefined {
   const ctx = useExecutionContext();
-  const injectedState = ctx.gameState.injectState(key);
+  setExecutionContextGetter(() => ctx);
+  const [injectedState] = ctx.injectionContext.startDependencyStack(() =>
+    ctx.gameState.injectState(key));
+  setExecutionContextGetter();
   const [_, setValue] = useState<Immutable<T> | undefined>(() => optionalCheck ? injectedState() : undefined);
   useEffect(() => {
     if (!optionalCheck) return;

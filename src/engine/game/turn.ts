@@ -22,11 +22,9 @@ export class TurnEngine {
 
     const nextPlayer = this.delegator.get().findNextPlayer(player.color);
     if (nextPlayer != null) {
-      console.log(`starting next player ${nextPlayer}`);
       this.start(nextPlayer);
       return;
     }
-    console.log('Ending phase');
     this.phase.end();
   }
 }

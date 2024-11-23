@@ -9,7 +9,7 @@ import { InjectedState, KeyArray, StateStore } from "./state";
 
 export class ExecutionContext {
   readonly gameState = new StateStore();
-  readonly injectionContext = new InjectionContext(this.gameState);
+  readonly injectionContext = new InjectionContext();
 
   constructor(mapKey: string, gameState: string | undefined) {
     new MapRegistry().get(mapKey).registerOverrides(this.injectionContext);

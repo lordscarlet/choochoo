@@ -1,40 +1,61 @@
+import { peek } from "../../utils/functions";
 import { NestedMap } from "../../utils/nested_map";
 import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
 import { Key } from "./key";
-import { StateStore } from "./state";
 
 export class InjectionContext {
   private readonly overrides = new Map<Constructor<unknown>, unknown>();
   private readonly inConstruction = new Map<Constructor<unknown>, ProxyObject<unknown>>();
-  private readonly stateDependencies = new Map<Constructor<unknown>, Set<Key<unknown>>>();
+  private readonly dependencies = new Map<Constructor<unknown>, Set<Key<unknown> | Constructor<unknown>>>();
   private readonly injected = new NestedMap();
+  private readonly dependencyStack: Array<Set<Constructor<unknown> | Key<unknown>>> = [];
 
-  constructor(private readonly gameState: StateStore) { }
+  addDependency(dep: Key<unknown> | Constructor<unknown>): void {
+    peek(this.dependencyStack).add(dep);
+  }
+
+  startDependencyStack<T>(fn: () => T): [T, Set<Key<unknown> | Constructor<unknown>>] {
+    this.dependencyStack.push(new Set<Constructor<unknown> | Key<unknown>>());
+    return [fn(), this.dependencyStack.pop()!];
+  }
 
   get<R, T extends Constructor<R>>(factory: T, args: ConstructorParameters<T>): R {
     const overridden = this.overrides.get(factory) as T ?? factory;
     const mapArgs = [overridden, ...args];
+    this.addDependency(factory);
     return this.injected.get(mapArgs, () => {
       if (this.inConstruction.has(overridden)) {
         return this.inConstruction.get(overridden)!.proxy as R;
       }
-      const stateDependencies = new Set<Key<unknown>>();
-      this.gameState.startMonitoringStateDependencies(stateDependencies);
       const proxyObject = buildProxy(overridden);
       this.inConstruction.set(overridden, proxyObject);
-      const result = new overridden(...args);
+      const [result, dependencies] = this.startDependencyStack(() => {
+        return new overridden(...args);
+      });
       proxyObject.setInternalObject(result as ConstructorReturnType<T>);
       this.inConstruction.delete(overridden);
-      this.gameState.stopMonitoringStateDependencies(stateDependencies);
-      this.stateDependencies.set(overridden, stateDependencies);
+      this.dependencies.set(overridden, dependencies);
+
       return result;
     });
   }
 
-  getStateDependencies(ctor: Constructor<unknown>): Key<string>[] {
-    assert(this.stateDependencies.has(ctor));
-    return [...this.stateDependencies.get(ctor)!];
+  getStateDependencies(...dependencies: Array<Key<unknown> | Constructor<unknown>>): Set<Key<string>> {
+    const stateDependencies = new Set<Key<string>>();
+    const visited = new Set<Constructor<unknown>>();
+    for (let index = 0; index < dependencies.length; index++) {
+      const dependency = dependencies[index];
+      if (dependency instanceof Key) {
+        stateDependencies.add(dependency);
+        continue;
+      }
+      if (visited.has(dependency)) continue;
+      visited.add(dependency);
+      assert(this.dependencies.has(dependency));
+      dependencies.push(...this.dependencies.get(dependency)!);
+    }
+    return stateDependencies;
   }
 
   override<R, T extends Constructor<R>, S extends Constructor<R>>(factory: T, override: S): void {

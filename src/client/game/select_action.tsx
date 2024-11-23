@@ -1,5 +1,6 @@
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
+import { inject } from "../../engine/framework/execution_context";
 import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
 import { PassAction as ProductionPassAction } from "../../engine/goods_growth/pass";
 import { ProductionAction } from "../../engine/goods_growth/production";
@@ -19,7 +20,7 @@ import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { iterate } from "../../utils/functions";
 import { useAction, useEmptyAction, useGame } from "../services/game";
-import { useCurrentPlayer, useInjected, useInjectedState, usePhaseState } from "../utils/execution_context";
+import { useCurrentPlayer, useInject, useInjected, useInjectedState, usePhaseState } from "../utils/execution_context";
 import { LoginButton } from "./login_button";
 PassAction
 
@@ -161,7 +162,11 @@ export function TakeShares() {
 
 export function Build() {
   const { emit: emitPass, canEmit, canEmitUsername } = useEmptyAction(DoneAction);
-  const helper = useInjected(BuilderHelper);
+  const [buildsRemaining, canUrbanize] = useInject(() => {
+    const helper = inject(BuilderHelper);
+    if (!canEmit) return [undefined, undefined];
+    return [helper.buildsRemaining(), helper.canUrbanize()];
+  });
 
   if (canEmitUsername == null) {
     return <></>;
@@ -172,7 +177,7 @@ export function Build() {
   }
 
   return <div>
-    You can build {helper.buildsRemaining()} more track{helper.canUrbanize() && ' and urbanize'}.
+    You can build {buildsRemaining} more track{canUrbanize && ' and urbanize'}.
     <button onClick={emitPass}>Done Building</button>
   </div>;
 }
