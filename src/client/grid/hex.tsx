@@ -109,7 +109,7 @@ export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size,
     if (!selectedGood.coordinates.equals(coordinates)) return undefined;
     assert(space instanceof City);
     return space.getGoods().indexOf(selectedGood.good);
-  }, [space, selectedGood]);
+  }, [space, coordinates, selectedGood]);
 
   return <>
     <polygon data-coordinates={space.coordinates.toString()} points={corners} stroke="black" fill={hexColor} strokeWidth="1" />
