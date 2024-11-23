@@ -40,7 +40,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   @Attribute(DataTypes.STRING)
   declare password: string;
 
-  @Attribute(DataTypes.ENUM(UserRole.options))
+  @Attribute(DataTypes.STRING)
   declare role: UserRole;
 
   @Version

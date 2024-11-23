@@ -4,6 +4,7 @@ import { CreateGamePage } from "../game/create_page";
 import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
 import { LoginPage } from "../user/login";
+import { LoginRequired } from "../user/login_required";
 import { RegisterPage } from "../user/register";
 import { Layout } from "./layout";
 
@@ -21,7 +22,7 @@ export function Router() {
       children: [
         {
           path: '/',
-          element: <HomePage />,
+          element: <LoginRequired><HomePage /></LoginRequired>,
         },
         {
           path: '/app/users/login',
@@ -33,11 +34,11 @@ export function Router() {
         },
         {
           path: '/app/games/create',
-          element: <CreateGamePage />,
+          element: <LoginRequired><CreateGamePage /></LoginRequired>,
         },
         {
           path: '/app/games/:gameId',
-          element: <GamePage />
+          element: <LoginRequired><GamePage /></LoginRequired>,
         },
       ],
     },

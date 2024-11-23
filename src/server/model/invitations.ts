@@ -33,6 +33,8 @@ export class InvitationModel extends Model<InferAttributes<InvitationModel>, Inf
 
   static async useInvitationCode(invitationCode: string, transaction?: Transaction): Promise<void> {
     const invitation = await InvitationModel.findByPk(invitationCode);
+    console.log(invitation, invitationCode);
+    console.log((await InvitationModel.findAll()).map(({ id, count }) => console.log('id', id, count)));
     assert(invitation != null, { invalidInput: 'Invitation code not found' });
     assert(invitation.count > 0, { invalidInput: 'This code has expired' })
     invitation.count--;

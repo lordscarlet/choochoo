@@ -53,6 +53,8 @@ export function LoginPage() {
     <div>
       <Button type="submit" disabled={isPending}>Login</Button>
     </div>
-    <Link to="/app/users/register">Register</Link>
+    <p>
+      <Link to="/app/users/register">Register</Link>
+    </p>
   </Box>;
 }

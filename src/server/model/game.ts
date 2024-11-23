@@ -24,7 +24,7 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   @Attribute(DataTypes.TEXT)
   declare gameData?: string;
 
-  @Attribute(DataTypes.ENUM(GameStatus.options))
+  @Attribute(DataTypes.STRING)
   @NotNull
   declare status: GameStatus;
 

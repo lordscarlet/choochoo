@@ -1,9 +1,23 @@
 import { NextFunction, Request, Response } from "express";
+import { SessionData } from "express-session";
 import { UserRole } from "../../api/user";
 import { UnauthorizedError } from "../../utils/error";
+import { assert } from "../../utils/validate";
 import { UserModel } from "../model/user";
 
-export async function enforceRole(req: Request): Promise<void> {
+interface BaseRequest {
+  url: string;
+  session: SessionData;
+}
+
+const rolesInOrder = [
+  UserRole.enum.BLOCKED,
+  UserRole.enum.ACTIVATE_EMAIL,
+  UserRole.enum.USER,
+  UserRole.enum.ADMIN,
+];
+
+export async function enforceRole(req: BaseRequest, requiredRole: UserRole = UserRole.Values.USER): Promise<void> {
   if (!req.url.startsWith('/api') || req.url.startsWith('/api/users')) return;
   const userId = req.session.userId;
   if (userId == null) {
@@ -12,14 +26,11 @@ export async function enforceRole(req: Request): Promise<void> {
 
   const user = await UserModel.getUser(userId);
 
-  if (user == null || user.role === UserRole.enum.BLOCKED) {
-    req.session.userId = undefined;
+  if (user == null) {
     throw new UnauthorizedError('please log in');
   }
 
-  if (user.role === UserRole.enum.ACTIVATE_EMAIL) {
-    throw new UnauthorizedError('activate your email');
-  }
+  assert(rolesInOrder.indexOf(user.role) >= rolesInOrder.indexOf(requiredRole), { permissionDenied: true });
 }
 
 export function enforceRoleMiddleware() {

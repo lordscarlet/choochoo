@@ -11,6 +11,7 @@ import { environment } from './util/environment';
 export const sequelize = new Sequelize({
   dialect: PostgresDialect,
   url: environment.postgresUrl.toString(),
+  logging: console.log,
   models: [
     GameModel,
     UserModel,

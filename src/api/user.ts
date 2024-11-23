@@ -100,6 +100,14 @@ export const userContract = c.router({
     method: 'POST',
     path: '/users/:userId/login',
   },
+  subscribe: {
+    body: z.object({ email: z.string().email() }),
+    responses: {
+      200: z.object({ success: z.literal(true) }),
+    },
+    method: 'POST',
+    path: '/users/subscribe',
+  },
   logout: {
     body: z.object({}),
     responses: {

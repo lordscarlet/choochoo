@@ -1,7 +1,7 @@
 import { useNotifications } from "@toolpad/core";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreateInviteApi, CreateUserApi, InviteApi, LoginUserApi, MyUserApi } from "../../api/user";
+import { CreateInviteApi, CreateUserApi, LoginUserApi, MyUserApi } from "../../api/user";
 import { assert } from "../../utils/validate";
 import { tsr } from "./client";
 import { handleError } from "./network";
@@ -31,6 +31,19 @@ export function useCreateInvitation() {
     },
   }), [me]);
   return { createInvite, isPending };
+}
+
+export function useSubscribe() {
+  const { mutate, error, isPending } = tsr.users.subscribe.useMutation();
+  const validationError = handleError(isPending, error);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const subscribe = useCallback((email: string) => mutate({ body: { email } }, {
+    onSuccess: (data) => {
+      setIsSuccess(true);
+    },
+  }), []);
+  return { subscribe, isSuccess, validationError, isPending };
 }
 
 export function useLogin(shouldNavigate = false) {

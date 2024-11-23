@@ -8,6 +8,7 @@ import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
 import { badwords } from '../util/badwords';
+import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
 
 
@@ -28,14 +29,16 @@ const router = initServer().router(userContract, {
     return { status: 200, body: { user } };
   },
 
-  async list({ query }) {
+  async list({ req, query }) {
+    await enforceRole(req);
     const users = await UserModel.findAll({
       where: query,
     });
     return { status: 200, body: { users: users.map((user) => user.toApi()) } };
   },
 
-  async get({ params }) {
+  async get({ req, params }) {
+    await enforceRole(req);
     const user = await UserModel.getUser(params.userId);
     assert(user != null, { notFound: true });
     return { status: 200, body: { user: UserModel.toApi(user) } };
@@ -80,10 +83,7 @@ const router = initServer().router(userContract, {
   },
 
   async createInvite({ body, params, req }) {
-    assert(req.session.userId != null, { unauthorized: true });
-    const user = await UserModel.getUser(req.session.userId);
-    assert(user != null, { unauthorized: true });
-    assert(user.role === UserRole.Enum.ADMIN, { permissionDenied: 'not an admin' });
+    await enforceRole(req, UserRole.enum.ADMIN);
     assert((await UserModel.getUser(params.userId)) != null, { notFound: 'user not found' });
     await InvitationModel.create({
       id: body.code,
@@ -93,11 +93,13 @@ const router = initServer().router(userContract, {
     return { status: 200, body: { success: true } };
   },
 
+  async subscribe({ body }) {
+    console.log('subscription', body);
+    return { status: 200, body: { success: true } };
+  },
+
   async makeAdmin({ params, req }) {
-    assert(req.session.userId != null, { unauthorized: true });
-    const user = await UserModel.getUser(req.session.userId);
-    assert(user != null, { unauthorized: true });
-    assert(user.role === UserRole.Enum.ADMIN, { permissionDenied: 'not an admin' });
+    await enforceRole(req, UserRole.enum.ADMIN);
     const modifyUser = await UserModel.findByPk(params.userId);
     assert(modifyUser != null, { notFound: 'user not found' });
     modifyUser.role = UserRole.enum.ADMIN;

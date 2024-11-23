@@ -1,6 +1,6 @@
 import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
-import { RouteObject, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, RouteObject, useNavigate, useSearchParams } from "react-router-dom";
 import { useMe, useRegister } from "../services/me";
 import { useTextInputState } from "../utils/form_state";
 import { LoginPage } from "./login";
@@ -23,7 +23,7 @@ export function RegisterPage() {
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     register({ username, email, password, invitationCode });
-  }, [register, username, email, password]);
+  }, [register, username, email, password, invitationCode]);
 
   return <Box
     component="form"
@@ -77,6 +77,9 @@ export function RegisterPage() {
     <div>
       <Button type="submit" disabled={isPending}>Register</Button>
     </div>
+    <p>
+      <Link to="/">Get added to waitlist</Link>
+    </p>
   </Box>;
 }
 
