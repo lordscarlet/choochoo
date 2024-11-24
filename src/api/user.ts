@@ -16,6 +16,7 @@ export type CreateUserApi = z.infer<typeof CreateUserApi>;
 
 export const LoginUserApi = z.object({
   usernameOrEmail: z.string().min(1),
+  activationCode: z.string().optional(),
   password: Password,
 });
 export type LoginUserApi = z.infer<typeof LoginUserApi>;
@@ -90,6 +91,22 @@ export const userContract = c.router({
     },
     method: 'POST',
     path: '/users/login',
+  },
+  resendActivationCode: {
+    body: z.object({}),
+    responses: {
+      200: z.object({ success: z.literal(true) }),
+    },
+    method: 'POST',
+    path: '/users/resend-activation-code',
+  },
+  activateAccount: {
+    body: z.object({ activationCode: z.string() }),
+    responses: {
+      200: z.object({ user: MyUserApi }),
+    },
+    method: 'POST',
+    path: '/users/activate',
   },
   loginBypass: {
     body: z.object({}),

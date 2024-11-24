@@ -1,13 +1,15 @@
 import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLogin, useMe } from "../services/me";
 import { useTextInputState } from "../utils/form_state";
 
 export function LoginPage() {
+  const [searchParams] = useSearchParams();
+  const activationCode = searchParams.get('activationCode') ?? undefined;
   const [usernameOrEmail, setUsernameOrEmail] = useTextInputState('');
   const [password, setPassword] = useTextInputState('');
-  const { login, validationError, isPending } = useLogin(true);
+  const { login, validationError, isPending } = useLogin();
   const navigate = useNavigate();
   const me = useMe();
 
@@ -19,8 +21,8 @@ export function LoginPage() {
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    login({ usernameOrEmail, password });
-  }, [usernameOrEmail, password]);
+    login({ usernameOrEmail, password, activationCode });
+  }, [usernameOrEmail, password, activationCode]);
 
   return <Box
     component="form"

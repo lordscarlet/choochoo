@@ -8,6 +8,7 @@ import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
 import { badwords } from '../util/badwords';
+import { emailService } from '../util/email';
 import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
 
@@ -57,6 +58,8 @@ const router = initServer().router(userContract, {
         return user;
       });
       req.session.userId = user.id;
+      // Don't await this, just let it go.
+      emailService.sendActivationCode(user.email);
       return { status: 200, body: { user: user.toMyApi() } };
     } catch (e) {
       console.log('error', e);
@@ -67,9 +70,42 @@ const router = initServer().router(userContract, {
     }
   },
 
+  async activateAccount({ req, body }) {
+    assert(req.session.userId != null, { invalidInput: 'Sign in first' });
+    const user = await UserModel.findByPk(req.session.userId);
+
+    assert(user != null, { unauthorized: 'Sign in first' });
+    const email = emailService.getEmailFromActivationCode(body.activationCode);
+    assert(user.email == email, { invalidInput: 'Invalid activation code (1)' });
+    assert(
+      user.role == UserRole.enum.ACTIVATE_EMAIL,
+      { invalidInput: 'Already activated' });
+
+    user.role = UserRole.enum.USER;
+    await user.save();
+
+    return { status: 200, body: { user: user.toMyApi() } };
+  },
+
+  async resendActivationCode({ req }) {
+    assert(req.session.userId != null, { permissionDenied: true });
+    const user = await UserModel.findByPk(req.session.userId);
+    assert(user != null, { permissionDenied: true });
+    assert(user.role == UserRole.enum.ACTIVATE_EMAIL, { permissionDenied: true });
+    emailService.sendActivationCode(user.email);
+    return { status: 200, body: { success: true } };
+  },
+
   async login({ req, body }) {
     const user = await UserModel.login(body.usernameOrEmail, body.password);
     assert(user != null && user.role !== UserRole.enum.BLOCKED, { unauthorized: 'Invalid credentials' });
+    if (body.activationCode != null) {
+      const email = emailService.getEmailFromActivationCode(body.activationCode);
+      if (email == user.email && user.role == UserRole.enum.ACTIVATE_EMAIL) {
+        user.role = UserRole.enum.USER;
+        await user.save();
+      }
+    }
     req.session.userId = user.id;
     return { status: 200, body: { user: user.toMyApi() } };
   },
@@ -94,7 +130,7 @@ const router = initServer().router(userContract, {
   },
 
   async subscribe({ body }) {
-    console.log('subscription', body);
+    await emailService.subscribe(body.email);
     return { status: 200, body: { success: true } };
   },
 

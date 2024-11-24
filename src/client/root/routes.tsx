@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CreateGamePage } from "../game/create_page";
 import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
+import { ActivatePage } from "../user/activate";
 import { LoginPage } from "../user/login";
 import { LoginRequired } from "../user/login_required";
 import { RegisterPage } from "../user/register";
@@ -27,6 +28,10 @@ export function Router() {
         {
           path: '/app/users/login',
           element: <LoginPage />,
+        },
+        {
+          path: '/app/users/activate',
+          element: <ActivatePage />,
         },
         {
           path: '/app/users/register',

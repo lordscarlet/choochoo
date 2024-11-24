@@ -46,7 +46,8 @@ export function useSubscribe() {
   return { subscribe, isSuccess, validationError, isPending };
 }
 
-export function useLogin(shouldNavigate = false) {
+export function useLogin() {
+  const notifications = useNotifications();
   const tsrQueryClient = tsr.useQueryClient();
   const navigate = useNavigate();
   const { mutate, error, isPending } = tsr.users.login.useMutation();
@@ -55,9 +56,10 @@ export function useLogin(shouldNavigate = false) {
   const login = useCallback((body: LoginUserApi) => mutate({ body }, {
     onSuccess: (data) => {
       tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: data.body.user } }));
-      if (shouldNavigate) {
-        navigate('/');
+      if (body.activationCode) {
+        notifications.show('Welcome! CCMF!', { autoHideDuration: 2000 });
       }
+      navigate('/');
     },
   }), []);
   return { login, validationError, isPending };
@@ -108,4 +110,41 @@ export function useLogout() {
     });
   }, []);
   return { logout, isPending };
+}
+
+export function useResendActivationCode() {
+  const tsrQueryClient = tsr.useQueryClient();
+  const { mutate, error, isPending } = tsr.users.resendActivationCode.useMutation();
+  handleError(isPending, error);
+  const notifications = useNotifications();
+
+  const resend = useCallback(() => {
+    mutate({}, {
+      onSuccess({ status, body }) {
+        assert(status === 200 && body.success);
+        notifications.show('Activation code sent', { autoHideDuration: 2000 });
+      },
+    });
+  }, []);
+  return { resend, isPending };
+}
+
+export function useActivateAccount() {
+  const tsrQueryClient = tsr.useQueryClient();
+  const { mutate, error, isPending } = tsr.users.activateAccount.useMutation();
+  handleError(isPending, error);
+  const notifications = useNotifications();
+  const navigate = useNavigate();
+
+  const activate = useCallback((activationCode: string) => {
+    mutate({ body: { activationCode } }, {
+      onSuccess({ status, body }) {
+        assert(status === 200);
+        tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: body.user } }));
+        notifications.show('Success! CCMF!', { autoHideDuration: 2000 });
+        navigate('/');
+      },
+    });
+  }, []);
+  return { activate, isPending };
 }
