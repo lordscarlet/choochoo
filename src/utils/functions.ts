@@ -10,6 +10,10 @@ export function duplicate<T>(numCopies: number, value: T): T[] {
   return iterate(numCopies, (_) => value);
 }
 
+export function reverse<T>(arr: T[]): T[] {
+  return [...arr].reverse();
+}
+
 export function iterate<T>(iterations: number, factory: (i: number) => T): T[] {
   const results: T[] = [];
   for (let i = 0; i < iterations; i++) {

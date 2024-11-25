@@ -1,11 +1,13 @@
 
 
+import { useNotifications } from '@toolpad/core';
 import { useCallback, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { ListMessageResponse, MessageApi, PageCursor } from '../../api/message';
+import { MessageApi, PageCursor } from '../../api/message';
 import { ClientToServerEvents, ServerToClientEvents } from '../../api/socket';
 import { tsr } from './client';
 import { environment } from './environment';
+import { handleError } from './network';
 
 export const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
   io(environment.socketHost);
@@ -14,14 +16,21 @@ socket.on('connect', () => {
   console.log('got a connection');
 });
 
-const RESET = 'RESET';
+interface UseMessages {
+  messages: MessageApi[];
+  isLoading: boolean;
+  fetchNextPage: () => void;
+  hasNextPage: boolean;
+}
 
-export function useMessages(gameId?: number): MessageApi[] | undefined {
+const emptyMessages: MessageApi[] = [];
+
+export function useMessages(gameId?: number): UseMessages {
   useJoinRoom(gameId);
-
+  const notifications = useNotifications();
   const queryClient = tsr.useQueryClient();
   const queryKey = ['messages', gameId];
-  const { data, isLoading, isError, fetchNextPage, hasNextPage } = tsr.messages.list.useInfiniteQuery({
+  const { data, isLoading, error, fetchNextPage, hasNextPage } = tsr.messages.list.useInfiniteQuery({
     queryKey,
     queryData: ({ pageParam }) => ({
       query: { gameId, pageCursor: pageParam },
@@ -33,17 +42,31 @@ export function useMessages(gameId?: number): MessageApi[] | undefined {
     },
   });
 
+  const messages = data == null
+    ? emptyMessages
+    : data.pages.flatMap((page) => page.body.messages).sort((a, b) => a.id < b.id ? -1 : 1);
+
+  useEffect(() => {
+    if (error == null) return;
+    notifications.show('Failed to load', { autoHideDuration: 2000 });
+  }, [error]);
+
   const updateLogs = useCallback((updater: (logs: MessageApi[]) => MessageApi[]) => {
     // TODO: fix the typing of this particular method.
     queryClient.messages.list.setQueryData(queryKey, (r: any) => {
-      const messages = updater(r.pages.flatMap((page: { body: ListMessageResponse }) => page.body.messages));
-      const nextPageCursor = messages[0].id;
+      const newMessages = updater(messages);
+      const nextPageCursors = data == null ? [undefined] : data.pages.map(page => page.body.nextPageCursor);
+      const nextPageCursor = nextPageCursors.reduce((minNextPageCursor, nextPageCursor) => {
+        if (minNextPageCursor == null) return minNextPageCursor;
+        if (nextPageCursor == null) return nextPageCursor;
+        return Math.min(nextPageCursor, minNextPageCursor);
+      }, nextPageCursors[0]);
       return {
         pageParams: [undefined],
-        pages: [{ status: 200, headers: new Headers(), body: { messages, nextPageCursor } }],
+        pages: [{ status: 200, headers: new Headers(), body: { messages: newMessages, nextPageCursor } }],
       } as any;
     });
-  }, [queryClient, queryKey]);
+  }, [queryClient, queryKey, messages, data]);
 
   useEffect(() => {
     const listener = (messages: MessageApi[]) => {
@@ -61,7 +84,6 @@ export function useMessages(gameId?: number): MessageApi[] | undefined {
 
   useEffect(() => {
     const listener = ({ gameVersion }: { gameVersion: number }) => {
-      console.log('destroying logs');
       updateLogs((logs) => logs.filter((log) => log.gameVersion! <= gameVersion));
     };
     socket.on('destroyLogs', listener);
@@ -70,9 +92,7 @@ export function useMessages(gameId?: number): MessageApi[] | undefined {
     };
   }, [gameId, updateLogs]);
 
-  const messages = data?.pages.flatMap((page) => page.body.messages);
-
-  return messages;
+  return { messages, isLoading, fetchNextPage, hasNextPage };
 }
 
 export function useJoinRoom(gameId?: number) {
@@ -90,4 +110,15 @@ export function useJoinRoom(gameId?: number) {
       }
     };
   }, [gameId]);
+}
+
+export function useSendChat(gameId?: number) {
+  const { mutate, error, isPending } = tsr.messages.sendChat.useMutation();
+  handleError(isPending, error);
+
+  const sendChat = useCallback((message: string, onSuccess: () => void) => {
+    if (message == '') return;
+    mutate({ body: { message, gameId } }, { onSuccess });
+  }, [mutate]);
+  return { sendChat, isPending };
 }

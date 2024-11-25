@@ -20,7 +20,7 @@ export const MessageApi = z.object({
 
 export type MessageApi = z.infer<typeof MessageApi>;
 
-export const PageCursor = z.number();
+export const PageCursor = z.coerce.number();
 
 export type PageCursor = z.infer<typeof PageCursor>;
 

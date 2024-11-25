@@ -1,9 +1,11 @@
+import { useMemo } from "react";
 import { UserApi } from "../../api/user";
 import { tsr } from "./client";
 
 export function useUsers(userIds: number[]): UserApi[] {
+  const deduplicate = useMemo(() => [...new Set(userIds)], [userIds])
   const { data } = tsr.users.get.useSuspenseQueries({
-    queries: userIds.map((userId) => ({
+    queries: deduplicate.map((userId) => ({
       queryKey: ['users', userId],
       queryData: { params: { userId } },
     })),
@@ -14,5 +16,8 @@ export function useUsers(userIds: number[]): UserApi[] {
       }
     },
   });
-  return data.map((data) => data.body.user);
+  return useMemo(() => {
+    const users = data.map(({ body }) => body.user);
+    return userIds.map(userId => users.find(({ id }) => id === userId)!);
+  }, [userIds, data]);
 }
