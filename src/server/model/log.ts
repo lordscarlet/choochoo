@@ -15,19 +15,19 @@ export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttr
   declare message: string;
 
   @Attribute(DataTypes.INTEGER)
-  declare userId?: number;
+  declare userId?: number | null;
 
   @BelongsTo(() => UserModel, 'userId')
   declare user?: UserModel;
 
   @Attribute(DataTypes.INTEGER)
-  declare gameId?: number;
+  declare gameId?: number | null;
 
   @BelongsTo(() => GameModel, 'gameId')
   declare game?: GameModel;
 
   @Attribute(DataTypes.INTEGER)
-  declare gameVersion?: number;
+  declare gameVersion?: number | null;
 
   @Version
   @NotNull
@@ -42,16 +42,16 @@ export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttr
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date;
+  declare deletedAt?: Date | null;
 
   toApi(): MessageApi {
     return {
       id: this.id,
       message: this.message,
-      userId: this.userId,
-      gameId: this.gameId,
-      date: this.createdAt.toString(),
-      gameVersion: this.gameVersion,
+      userId: this.userId ?? undefined,
+      gameId: this.gameId ?? undefined,
+      date: this.createdAt,
+      gameVersion: this.gameVersion ?? undefined,
     };
   }
 }

@@ -14,6 +14,22 @@ export function reverse<T>(arr: T[]): T[] {
   return [...arr].reverse();
 }
 
+export function lpad(input: number | string, minLength: number, padWith: string): string {
+  let str = `${input}`;
+  while (str.length < minLength) {
+    str = padWith + str;
+  }
+  return str;
+}
+
+export function timeFormat(date: Date): string {
+  return [
+    date.getHours(),
+    date.getMinutes(),
+    Math.round(date.getMilliseconds() / 100),
+  ].map((value) => lpad(value, 2, '0')).join(':');
+}
+
 export function iterate<T>(iterations: number, factory: (i: number) => T): T[] {
   const results: T[] = [];
   for (let i = 0; i < iterations; i++) {

@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 // @ts-ignore-next
 import useStayScrolled from 'react-stay-scrolled';
-import { isNotNull } from "../../utils/functions";
+import { isNotNull, timeFormat } from "../../utils/functions";
 import { useMessages, useSendChat } from "../services/socket";
 import { useUsers } from "../services/user";
 import { useTextInputState } from "../utils/form_state";
@@ -46,16 +46,26 @@ export function GameLog({ gameId }: GameLogProps) {
     <div className={styles['log-container']}>
       <div className={styles['log-list']} ref={ref} onScroll={onScroll}>
         {hasNextPage && <button onClick={fetchNextPage} disabled={isLoading} style={{ width: '100%', textAlign: 'center' }}>Load More</button>}
-        {messages.map((log) =>
-          <p key={log.id}>[{log.date}] {log.userId != null ? usernames.get(log.userId) : 'System'}: {log.message}</p>
-        )}
+        {messages.map((log, index) => {
+          const isNewDay = index == 0 || log.date.toLocaleDateString() !== messages[index - 1].date.toLocaleDateString();
+          return <>
+            {isNewDay && <p>-- {log.date.toLocaleDateString()} --</p>}
+            <p key={log.id}>
+              <span className={styles['time']}>{timeFormat(log.date)}</span>
+              {' '}
+              <span className={styles['username']}>{log.userId != null ? usernames.get(log.userId) : 'System'}</span>:
+              {' '}
+              <span className={styles['message']}>{log.message}</span>
+            </p>
+          </>;
+        })}
       </div>
       {canScrollToBottom && <div className={styles['notify-new-container']}>
         <button className={styles['notify-new']} onClick={scrollBottom}>Scroll to bottom</button>
       </div>}
     </div>
     <form onSubmit={onSubmit} className={styles['submit-form']}>
-      <input type="text" maxLength={256} value={newMessage} onChange={setNewMessage} disabled={isPending} />
+      <input type="text" maxLength={256} placeholder="Send message" value={newMessage} onChange={setNewMessage} disabled={isPending} />
       <input type="submit" value="Send" disabled={isPending} />
     </form>
   </div>;

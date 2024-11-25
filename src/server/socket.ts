@@ -18,7 +18,7 @@ export const io = new Server<ClientToServerEvents, ServerToClientEvents>(args);
 
 const HOME_ROOM = 'HOME_ROOM';
 
-function roomName(gameId?: number) {
+function roomName(gameId?: number | null) {
   return gameId == undefined ? HOME_ROOM : 'gameId-' + gameId;
 }
 

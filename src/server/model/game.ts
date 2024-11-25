@@ -22,7 +22,7 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   declare name: string;
 
   @Attribute(DataTypes.TEXT)
-  declare gameData?: string;
+  declare gameData?: string | null;
 
   @Attribute(DataTypes.STRING)
   @NotNull
@@ -33,10 +33,10 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   declare playerIds: number[];
 
   @Attribute({ type: DataTypes.INTEGER, allowNull: true })
-  declare activePlayerId?: number;
+  declare activePlayerId?: number | null;
 
   @Attribute({ type: DataTypes.INTEGER, allowNull: true })
-  declare undoPlayerId?: number;
+  declare undoPlayerId?: number | null;
 
   @Version
   @NotNull
@@ -51,9 +51,19 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date;
+  declare deletedAt?: Date | null;
 
   toApi(): GameApi {
-    return this.dataValues;
+    return {
+      id: this.id,
+      version: this.version,
+      gameKey: this.gameKey,
+      name: this.name,
+      gameData: this.gameData ?? undefined,
+      status: this.status,
+      playerIds: this.playerIds,
+      activePlayerId: this.activePlayerId ?? undefined,
+      undoPlayerId: this.undoPlayerId ?? undefined,
+    };
   }
 }

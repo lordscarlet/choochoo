@@ -56,7 +56,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date;
+  declare deletedAt?: Date | null;
 
   // Helper methods
 

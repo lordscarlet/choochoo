@@ -29,7 +29,7 @@ export class InvitationModel extends Model<InferAttributes<InvitationModel>, Inf
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date;
+  declare deletedAt?: Date | null;
 
   static async useInvitationCode(invitationCode: string, transaction?: Transaction): Promise<void> {
     const invitation = await InvitationModel.findByPk(invitationCode);

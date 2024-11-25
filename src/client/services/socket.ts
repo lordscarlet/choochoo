@@ -1,7 +1,7 @@
 
 
 import { useNotifications } from '@toolpad/core';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { MessageApi, PageCursor } from '../../api/message';
 import { ClientToServerEvents, ServerToClientEvents } from '../../api/socket';
@@ -42,9 +42,10 @@ export function useMessages(gameId?: number): UseMessages {
     },
   });
 
-  const messages = data == null
+  const messages = useMemo(() => data == null
     ? emptyMessages
-    : data.pages.flatMap((page) => page.body.messages).sort((a, b) => a.id < b.id ? -1 : 1);
+    : data.pages.flatMap((page) => page.body.messages.map((m) => MessageApi.parse(m))).sort((a, b) => a.id < b.id ? -1 : 1)
+    , [data]);
 
   useEffect(() => {
     if (error == null) return;

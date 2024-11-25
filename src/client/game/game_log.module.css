@@ -27,3 +27,11 @@
 .submit-form input[type="text"] {
   flex: 1;
 }
+
+.time {
+  opacity: 0.7;
+}
+
+.username {
+  font-weight: bold;
+}

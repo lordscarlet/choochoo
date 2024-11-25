@@ -65,5 +65,5 @@ export class GameHistoryModel extends Model<InferAttributes<GameHistoryModel>, I
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date;
+  declare deletedAt?: Date | null;
 }
