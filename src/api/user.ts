@@ -8,7 +8,7 @@ const Password = z.string().min(8).max(32);
 
 export const CreateUserApi = z.object({
   email: z.string().email(),
-  username: z.string().toLowerCase().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, letters and an underscore'),
+  username: z.string().toLowerCase().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, lowercase letters, and underscores'),
   password: Password,
   invitationCode: z.string(),
 });
