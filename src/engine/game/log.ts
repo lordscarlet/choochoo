@@ -3,7 +3,7 @@ import { injectCurrentPlayer } from "./state";
 
 export class Log {
   private readonly currPlayerData = injectCurrentPlayer();
-  private readonly logs: string[] = [];
+  private logs: string[] = [];
 
   log(entry: string): void {
     this.logs.push(entry);
@@ -19,6 +19,8 @@ export class Log {
   }
 
   dump(): string[] {
-    return this.logs;
+    const logs = this.logs;
+    this.logs = [];
+    return logs;
   }
 }

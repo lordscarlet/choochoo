@@ -95,8 +95,6 @@ export class Validator {
       return 'new track cannot connect to another player\'s track';
     }
 
-    // TODO: cannot meet track owned by someone else.
-
     if (this.createsCircularLoop(grid, coordinates, newTileData)) {
       return 'cannot create a loop back to the same location';
     }

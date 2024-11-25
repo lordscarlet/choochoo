@@ -54,7 +54,6 @@ export class ExpensesPhase extends PhaseModule {
   protected removeFromTurnOrder(removeFromTurnOrder: Set<PlayerColor>): void {
     this.order.update((order) => {
       const newTurnOrder = [...removeFromTurnOrder].reduce((newTurnOrder, toRemove) => remove(newTurnOrder, toRemove), [...order]);
-      /// TODO: What to do when only one person is left.
       replaceAll(order, newTurnOrder);
     });
   }

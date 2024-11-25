@@ -122,7 +122,9 @@ const router = initServer().router(gameContract, {
 
       const engine = new Engine();
 
-      const reversible = true;
+      const { gameData, logs, activePlayerId, gameStatus, reversible } =
+        engine.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
+
       const gameHistory = GameHistoryModel.build({
         gameVersion: game.version,
         patch: '',
@@ -134,15 +136,11 @@ const router = initServer().router(gameContract, {
         userId,
       });
 
-      const { gameData, logs, activePlayerId, gameStatus } =
-        engine.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
-
       game.version = game.version + 1;
       game.gameData = gameData;
       game.activePlayerId = activePlayerId;
       game.status = gameStatus === GameEngineStatus.ENDED ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
       game.undoPlayerId = reversible ? userId : undefined;
-      // TODO: prevent undo of random actions
       const newGame = await game.save({ transaction });
       await gameHistory.save({ transaction });
       const createLogs = logs.map((message): CreateLogModel => ({
@@ -166,6 +164,7 @@ const router = initServer().router(gameContract, {
       const game = await GameModel.findByPk(gameId, { transaction });
       assert(game != null);
       assert(gameHistory != null);
+      assert(gameHistory.reversible, { invalidInput: 'cannot undo reversible action' });
       assert(game.version === gameHistory.gameVersion + 1, 'can only undo one step');
       assert(gameHistory.userId === req.session.userId, { permissionDenied: true });
 

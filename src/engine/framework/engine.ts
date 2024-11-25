@@ -2,6 +2,7 @@ import { MapRegistry } from "../../maps";
 import { assert } from "../../utils/validate";
 import { GAME_STATUS, GameEngine, GameStatus } from "../game/game";
 import { Log } from "../game/log";
+import { Random } from "../game/random";
 import { injectCurrentPlayer } from "../game/state";
 import { ExecutionContext, getExecutionContext, inject, injectState, setExecutionContextGetter } from "./execution_context";
 
@@ -13,6 +14,7 @@ interface GameState {
   activePlayerId?: number;
   gameStatus: GameStatus;
   gameData: string;
+  reversible: boolean;
   logs: string[];
 }
 
@@ -51,6 +53,7 @@ export class Engine {
         activePlayerId: gameStatus() === GameStatus.ENDED ? undefined : currentPlayer().playerId,
         gameStatus: gameStatus(),
         gameData: getExecutionContext().gameState.serialize(),
+        reversible: inject(Random).isReversible(),
         logs: inject(Log).dump(),
       };
     } finally {

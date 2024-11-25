@@ -1,6 +1,6 @@
 
 import { Map as ImmutableMap } from 'immutable';
-import { duplicate, shuffle } from '../../utils/functions';
+import { duplicate } from '../../utils/functions';
 import { assert } from '../../utils/validate';
 import { inject, injectState } from "../framework/execution_context";
 import { GridHelper } from "../map/grid_helper";
@@ -12,6 +12,7 @@ import { InitialMapGrid, SpaceSettingData } from '../state/map_settings';
 import { PlayerColor, PlayerData } from '../state/player';
 import { OnRoll } from '../state/roll';
 import { SpaceData } from '../state/space';
+import { Random } from './random';
 import { AVAILABLE_CITIES, BAG, GRID, PLAYERS, TURN_ORDER } from './state';
 
 export class GameStarter {
@@ -21,6 +22,7 @@ export class GameStarter {
   private readonly bag = injectState(BAG);
   private readonly availableCities = injectState(AVAILABLE_CITIES);
   private readonly gridHelper = inject(GridHelper);
+  private readonly random = inject(Random);
 
   startGame(playerIds: number[], startingMap: InitialMapGrid) {
     this.initializeStartingCubes();
@@ -30,7 +32,7 @@ export class GameStarter {
   }
 
   initializeStartingCubes() {
-    this.bag.initState(shuffle([
+    this.bag.initState(this.random.shuffle([
       ...duplicate(20, Good.RED),
       ...duplicate(20, Good.PURPLE),
       ...duplicate(20, Good.YELLOW),
@@ -58,12 +60,11 @@ export class GameStarter {
   }
 
   initializePlayers(playerIds: number[]) {
-    // TODO: figure out why sumwierdkid shows up twice in my player order.
-    const shuffledColors = shuffle(colors);
+    const shuffledColors = this.random.shuffle(colors);
     const players = playerIds.map((id, index) => buildPlayer(id, shuffledColors[index]));
 
     this.players.initState(players);
-    this.turnOrder.initState(shuffle(players).map((player) => player.color));
+    this.turnOrder.initState(this.random.shuffle(players).map((player) => player.color));
   }
 
   initializeAvailableCities() {

@@ -49,30 +49,6 @@ export function replaceAll<T>(array: T[], newArray: T[]): void {
   array.push(...newArray);
 }
 
-export function shuffle<T>(array: T[]): T[] {
-  const results: T[] = [];
-  const values = [...array];
-  while (values.length > 0) {
-    const index = random(values.length);
-    const value = [...values][index];
-    results.push(value);
-    values.splice(index, 1);
-  }
-  return results;
-}
-
-export function rollDie(): OnRoll {
-  return OnRoll.parse(random(6) + 1);
-}
-
-export function rollDice(numDice: number): OnRoll[] {
-  return iterate(numDice, rollDie);
-}
-
-export function random(number: number): number {
-  return Math.floor(Math.random() * number);
-}
-
 export function iterateHexGrid<T>(grid: Map<number, Map<number, T>>, fn: (value: T) => void) {
   for (const row of grid.values()) {
     for (const cell of row.values()) {

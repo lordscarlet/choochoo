@@ -136,7 +136,6 @@ function getEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinate
 }
 
 function* getAllEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates, orientation: Direction): Iterable<EligibleBuild> {
-  // TODO: figure out a more efficient way. For now, just try every build in every orientation.
   const tiles = [
     SimpleTileType.STRAIGHT,
     SimpleTileType.CURVE,

@@ -6,7 +6,7 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
-import { injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
+import { BAG, injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
@@ -40,6 +40,8 @@ export class MoveAction implements ActionProcessor<MoveData> {
   private readonly gridHelper = inject(GridHelper);
   private readonly grid = injectGrid();
   private readonly log = inject(Log);
+  private readonly bag = injectState(BAG);
+  private readonly players = injectState(PLAYERS);
 
   readonly assertInput = MoveData.parse;
   validate(action: MoveData): void {
@@ -114,7 +116,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
     this.log.currentPlayer(`moves a ${getGoodColor(action.good)} good from the city at ${action.startingCity} to the city at ${peek(action.path).endingStop}`)
 
-    injectState(PLAYERS).update((players) => {
+    this.players.update((players) => {
       for (const player of players) {
         assert(!player.outOfGame, 'unexpected out of game player still owns track');
         if (!partitioned.has(player.color)) continue;
@@ -123,6 +125,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
         player.income += incomeBonus;
       }
     });
+    this.bag.update(goods => goods.push(action.good));
     return true;
   }
 }
