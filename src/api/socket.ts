@@ -6,6 +6,7 @@ export const HOME_ROOM = 'homeroom';
 export interface ServerToClientEvents {
   gameUpdate(game: GameApi): void;
   newLogs(logs: MessageApi[]): void;
+  destroyLogs(data: { gameId: number, gameVersion: number }): void;
 }
 
 export interface ClientToServerEvents {

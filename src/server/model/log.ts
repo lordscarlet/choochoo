@@ -1,18 +1,11 @@
-import { CreationOptional, DataTypes, Model } from "@sequelize/core";
+import { CreationAttributes, CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "@sequelize/core";
 import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from "@sequelize/core/decorators-legacy";
 import { MessageApi } from "../../api/message";
 import { GameModel } from "./game";
 import { UserModel } from "./user";
 
-interface CreateLog {
-  message: string;
-  userId?: number;
-  gameId?: number;
-  version?: number;
-}
-
 @Table({ modelName: 'Log' })
-export class LogModel extends Model<LogModel, CreateLog> {
+export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttributes<LogModel>> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)
@@ -58,6 +51,9 @@ export class LogModel extends Model<LogModel, CreateLog> {
       userId: this.userId,
       gameId: this.gameId,
       date: this.createdAt.toString(),
+      gameVersion: this.gameVersion,
     };
   }
 }
+
+export type CreateLogModel = CreationAttributes<LogModel>;

@@ -1,6 +1,6 @@
 import { Server, ServerOptions } from "socket.io";
-import { GameApi } from "../api/game";
 import { ClientToServerEvents, ServerToClientEvents } from "../api/socket";
+import { GameModel } from "./model/game";
 import { LogModel } from "./model/log";
 import { environment } from "./util/environment";
 
@@ -22,11 +22,16 @@ function roomName(gameId?: number) {
   return gameId == undefined ? HOME_ROOM : 'gameId-' + gameId;
 }
 
-export function emitToRoom(logs: LogModel[], game?: GameApi): void {
+export function emitToRoom(logs: LogModel[], game?: GameModel): void {
   io.to(roomName(game?.id)).emit('newLogs', logs.map((l) => l.toApi()));
   if (game != null) {
-    io.to(roomName(game?.id)).emit('gameUpdate', game);
+    io.to(roomName(game?.id)).emit('gameUpdate', game.toApi());
   }
+}
+
+export function emitLogsDestroyToRoom(game: GameModel): void {
+  io.to(roomName(game.id)).emit('destroyLogs', { gameId: game.id, gameVersion: game.version });
+  io.to(roomName(game.id)).emit('gameUpdate', game.toApi());
 }
 
 io.on('connection', (socket) => {

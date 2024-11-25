@@ -1,8 +1,8 @@
 
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { MessageApi, PageCursor } from '../../api/message';
+import { ListMessageResponse, MessageApi, PageCursor } from '../../api/message';
 import { ClientToServerEvents, ServerToClientEvents } from '../../api/socket';
 import { tsr } from './client';
 import { environment } from './environment';
@@ -33,6 +33,17 @@ export function useMessages(gameId?: number): MessageApi[] | undefined {
     },
   });
 
+  const updateLogs = useCallback((updater: (logs: MessageApi[]) => MessageApi[]) => {
+    // TODO: fix the typing of this particular method.
+    queryClient.messages.list.setQueryData(queryKey, (r: any) => {
+      const messages = updater(r.pages.flatMap((page: { body: ListMessageResponse }) => page.body.messages));
+      const nextPageCursor = messages[0].id;
+      return {
+        pageParams: [undefined],
+        pages: [{ status: 200, headers: new Headers(), body: { messages, nextPageCursor } }],
+      } as any;
+    });
+  }, [queryClient, queryKey]);
 
   useEffect(() => {
     const listener = (messages: MessageApi[]) => {
@@ -40,20 +51,24 @@ export function useMessages(gameId?: number): MessageApi[] | undefined {
         console.warn('server sent emptty messages...');
         return;
       }
-      // TODO: fix the typing of this particular method.
-      queryClient.messages.list.setQueryData(queryKey, (r: any) => {
-        const nextPageCursor = messages[0].id;
-        return {
-          pageParams: r.pageParams.concat([undefined]),
-          pages: r.pages.concat({ status: 200, headers: new Headers(), body: { messages, nextPageCursor } }),
-        } as any;
-      });
+      updateLogs((logs) => logs.concat(messages));
     };
     socket.on('newLogs', listener);
     return () => {
       socket.off('newLogs', listener);
     };
-  }, [gameId]);
+  }, [gameId, updateLogs]);
+
+  useEffect(() => {
+    const listener = ({ gameVersion }: { gameVersion: number }) => {
+      console.log('destroying logs');
+      updateLogs((logs) => logs.filter((log) => log.gameVersion! <= gameVersion));
+    };
+    socket.on('destroyLogs', listener);
+    return () => {
+      socket.off('destroyLogs', listener);
+    };
+  }, [gameId, updateLogs]);
 
   const messages = data?.pages.flatMap((page) => page.body.messages);
 

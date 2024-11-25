@@ -10,10 +10,10 @@ import { Engine } from '../../engine/framework/engine';
 import { GameStatus as GameEngineStatus } from '../../engine/game/game';
 import { MapRegistry } from '../../maps';
 import { GameHistoryModel } from '../model/history';
-import { LogModel } from '../model/log';
+import { CreateLogModel, LogModel } from '../model/log';
 import { sequelize } from '../sequelize';
 import '../session';
-import { emitToRoom } from '../socket';
+import { emitLogsDestroyToRoom, emitToRoom } from '../socket';
 import { environment, Stage } from '../util/environment';
 
 export const gameApp = express();
@@ -142,16 +142,17 @@ const router = initServer().router(gameContract, {
       game.activePlayerId = activePlayerId;
       game.status = gameStatus === GameEngineStatus.ENDED ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
       game.undoPlayerId = reversible ? userId : undefined;
+      // TODO: prevent undo of random actions
       const newGame = await game.save({ transaction });
       await gameHistory.save({ transaction });
-      const newLogs = await LogModel.bulkCreate(logs.map((message) => ({
+      const createLogs = logs.map((message): CreateLogModel => ({
         gameId: game.id,
         message,
-        version: game.version,
-      })), { transaction });
+        gameVersion: game.version,
+      }));
+      const newLogs = await LogModel.bulkCreate(createLogs, { transaction });
 
       transaction.afterCommit(() => {
-        if (newLogs.length === 0) return;
         emitToRoom(newLogs, newGame);
       });
 
@@ -169,7 +170,7 @@ const router = initServer().router(gameContract, {
       assert(gameHistory.userId === req.session.userId, { permissionDenied: true });
 
       game.version = version;
-      game.gameData = gameHistory?.previousGameData;
+      game.gameData = gameHistory.previousGameData;
       game.activePlayerId = gameHistory.userId;
 
       const versionBefore = await GameHistoryModel.findOne({ where: { gameId, gameVersion: version - 1 }, transaction });
@@ -177,6 +178,11 @@ const router = initServer().router(gameContract, {
       const newGame = await game.save({ transaction });
       await GameHistoryModel.destroy({ where: { gameVersion: { [Op.gte]: version } }, transaction });
       await LogModel.destroy({ where: { gameVersion: { [Op.gte]: version } }, transaction });
+
+      transaction.afterCommit(() => {
+        emitLogsDestroyToRoom(newGame);
+      });
+
       return { status: 200, body: { game: newGame.toApi() } };
     });
   },
