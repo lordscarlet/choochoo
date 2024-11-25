@@ -222,7 +222,7 @@ export function useUndoAction(): UndoAction {
     },
   }), [game.id, game.version]);
 
-  const canUndo = game.undoPlayerId === me?.id;
+  const canUndo = game.undoPlayerId != null && game.undoPlayerId === me?.id;
 
   return { undo, canUndo };
 }
