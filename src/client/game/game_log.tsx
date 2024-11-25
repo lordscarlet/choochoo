@@ -1,6 +1,6 @@
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { Fab, Tooltip } from "@mui/material";
-import { FormEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, Fragment, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 // @ts-ignore-next
 import useStayScrolled from 'react-stay-scrolled';
 import { isNotNull, timeFormat } from "../../utils/functions";
@@ -49,17 +49,18 @@ export function GameLog({ gameId }: GameLogProps) {
       <div className={styles['log-list']} ref={ref} onScroll={onScroll}>
         {hasNextPage && <button onClick={fetchNextPage} disabled={isLoading} style={{ width: '100%', textAlign: 'center' }}>Load More</button>}
         {messages.map((log, index) => {
-          const isNewDay = index == 0 || log.date.toLocaleDateString() !== messages[index - 1].date.toLocaleDateString();
-          return <>
-            {isNewDay && <p>-- {log.date.toLocaleDateString()} --</p>}
-            <p key={log.id}>
+          const dateString = log.date.toLocaleDateString();
+          const isNewDay = index == 0 || dateString !== messages[index - 1].date.toLocaleDateString();
+          return <Fragment key={log.id}>
+            {isNewDay && <p>-- {dateString} --</p>}
+            <p>
               <span className={styles['time']}>{timeFormat(log.date)}</span>
               {' '}
               <span className={styles['username']}>{log.userId != null ? usernames.get(log.userId) : 'System'}</span>:
               {' '}
               <span className={styles['message']}>{log.message}</span>
             </p>
-          </>;
+          </Fragment>;
         })}
       </div>
       {canScrollToBottom && <div className={styles['scroll-to-bottom-container']}>
