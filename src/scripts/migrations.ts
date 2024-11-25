@@ -13,5 +13,5 @@ const umzug = new Umzug({
 export type Migration = typeof umzug._types.migration;
 
 if (require.main === module) {
-  umzug.runAsCLI()
+  umzug.runAsCLI().finally(process.exit);
 }
