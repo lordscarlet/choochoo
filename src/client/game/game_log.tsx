@@ -1,3 +1,5 @@
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import { Fab, Tooltip } from "@mui/material";
 import { FormEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 // @ts-ignore-next
 import useStayScrolled from 'react-stay-scrolled';
@@ -60,8 +62,12 @@ export function GameLog({ gameId }: GameLogProps) {
           </>;
         })}
       </div>
-      {canScrollToBottom && <div className={styles['notify-new-container']}>
-        <button className={styles['notify-new']} onClick={scrollBottom}>Scroll to bottom</button>
+      {canScrollToBottom && <div className={styles['scroll-to-bottom-container']}>
+        <Tooltip title="Scroll to bottom">
+          <Fab color="primary" size="small" className={styles['scroll-to-bottom']} onClick={scrollBottom}>
+            <ArrowDownwardIcon />
+          </Fab>
+        </Tooltip>
       </div>}
     </div>
     <form onSubmit={onSubmit} className={styles['submit-form']}>
