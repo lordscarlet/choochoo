@@ -93,6 +93,16 @@ export function useMessages(gameId?: number): UseMessages {
     };
   }, [gameId, updateLogs]);
 
+  useEffect(() => {
+    const listener = ({ startingGameVersion, newLogs }: { gameId: number, startingGameVersion: number, newLogs: MessageApi[] }) => {
+      updateLogs((logs) => logs.filter((log) => log.gameVersion! < startingGameVersion).concat(newLogs));
+    };
+    socket.on('replaceLogs', listener);
+    return () => {
+      socket.off('replaceLogs', listener);
+    };
+  }, [gameId, updateLogs]);
+
   return { messages, isLoading, fetchNextPage, hasNextPage };
 }
 

@@ -148,7 +148,7 @@ export const gameContract = c.router({
   retryLast: {
     method: 'POST',
     pathParams: z.object({ gameId: z.coerce.number() }),
-    path: '/games/:gameId/action',
+    path: '/games/:gameId/retry',
     body: z.union([z.object({ steps: z.number().gt(0) }), z.object({ startOver: z.literal(true) })]),
     responses: {
       200: z.object({ game: GameApi }),

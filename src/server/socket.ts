@@ -34,6 +34,12 @@ export function emitLogsDestroyToRoom(game: GameModel): void {
   io.to(roomName(game.id)).emit('gameUpdate', game.toApi());
 }
 
+export function emitLogsReplaceToRoom(game: GameModel, logs: LogModel[], startingGameVersion: number): void {
+  const newLogs = logs.map(l => l.toApi());
+  io.to(roomName(game.id)).emit('replaceLogs', { gameId: game.id, startingGameVersion, newLogs });
+  io.to(roomName(game.id)).emit('gameUpdate', game.toApi());
+}
+
 io.on('connection', (socket) => {
   const rooms = new Map<string, number>();
 

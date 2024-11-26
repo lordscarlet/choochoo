@@ -4,7 +4,7 @@ import { ROUND, RoundEngine } from "../../engine/game/round";
 import { MOVE_STATE } from "../../engine/move/state";
 import { getPhaseString, Phase } from "../../engine/state/phase";
 import { GameMap } from "../grid/game_map";
-import { useGame, useUndoAction } from "../services/game";
+import { useGame, useRetryAction, useUndoAction } from "../services/game";
 import { ExecutionContextProvider, useInjected, useInjectedState } from "../utils/execution_context";
 import { Editor } from "./editor";
 import { GameLog } from "./game_log";
@@ -34,6 +34,7 @@ function InternalActiveGame() {
     <Editor />
     <SelectAction />
     <UndoButton />
+    <RetryButton />
     <CurrentPhase />
     <PlayerStats />
     <GameMap />
@@ -63,4 +64,12 @@ export function UndoButton() {
     return <></>;
   }
   return <button onClick={undo}>Undo</button>;
+}
+
+export function RetryButton() {
+  const { retry, canRetry } = useRetryAction();
+  if (!canRetry) {
+    return <></>;
+  }
+  return <button onClick={retry}>Retry</button>;
 }

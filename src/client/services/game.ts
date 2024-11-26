@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { CreateGameApi, GameApi } from "../../api/game";
+import { UserRole } from "../../api/user";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { MapRegistry } from "../../maps";
@@ -225,4 +226,27 @@ export function useUndoAction(): UndoAction {
   const canUndo = game.undoPlayerId != null && game.undoPlayerId === me?.id;
 
   return { undo, canUndo };
+}
+
+export interface RetryAction {
+  retry(): void;
+  canRetry: boolean;
+}
+
+export function useRetryAction(): RetryAction {
+  const game = useGame();
+  const me = useMe();
+  const setGame = useSetGame();
+  const { mutate } = tsr.games.retryLast.useMutation();
+
+  const retry = useCallback(() => mutate({ params: { gameId: game.id }, body: game.version == 1 ? { startOver: true } : { steps: 1 } }, {
+    onSuccess: (data) => {
+      setGame(data.body.game);
+    },
+  }), [game.id, game.version]);
+
+  const canRetry = me?.role == UserRole.enum.ADMIN;
+  console.log('canRetry', me?.role);
+
+  return { retry, canRetry };
 }

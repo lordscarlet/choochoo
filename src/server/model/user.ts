@@ -4,11 +4,13 @@ import { compare, hash } from 'bcrypt';
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
 import { assert, isPositiveInteger } from '../../utils/validate';
 import { redisClient } from '../redis';
+import { environment, Stage } from '../util/environment';
 
 const saltRounds = 10;
 
 class UserCache {
   async get(id: number): Promise<MyUserApi | undefined> {
+    if (environment.stage == Stage.enum.development) return;
     const result = await redisClient.get(`users:${id}`);
     if (result == null) return undefined;
     return JSON.parse(result);
@@ -16,6 +18,7 @@ class UserCache {
 
   async set(user: MyUserApi | undefined): Promise<void> {
     if (user == null) return;
+    if (environment.stage == Stage.enum.development) return;
     await redisClient.set(`users:${user.id}`, JSON.stringify(user), { PX: 360000 });
   }
 }

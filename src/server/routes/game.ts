@@ -16,7 +16,7 @@ import { CreateLogModel, LogModel } from '../model/log';
 import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
-import { emitLogsDestroyToRoom, emitToRoom } from '../socket';
+import { emitLogsDestroyToRoom, emitLogsReplaceToRoom, emitToRoom } from '../socket';
 import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
 
@@ -165,7 +165,7 @@ const router = initServer().router(gameContract, {
       });
 
       return { status: 200, body: { game: newGame.toApi() } };
-    })
+    });
   },
 
   async undoAction({ req, params: { gameId }, body: { version } }) {
@@ -274,6 +274,8 @@ const router = initServer().router(gameContract, {
         ...allLogs.map(log => log.save({ transaction })),
       ]);
     });
+
+    emitLogsReplaceToRoom(game, allLogs, firstGameVersion);
 
     return { status: 200, body: { game: game.toApi() } };
   },
