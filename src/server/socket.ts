@@ -1,6 +1,8 @@
 import { Server, ServerOptions } from "socket.io";
+import { GameApi } from "../api/game";
 import { ClientToServerEvents, ServerToClientEvents } from "../api/socket";
-import { GameModel } from "./model/game";
+import { deepEquals } from "../utils/deep_equals";
+import { GameModel, toLiteApi } from "./model/game";
 import { LogModel } from "./model/log";
 import { environment } from "./util/environment";
 
@@ -22,22 +24,30 @@ function roomName(gameId?: number | null) {
   return gameId == undefined ? HOME_ROOM : 'gameId-' + gameId;
 }
 
-export function emitToRoom(logs: LogModel[], game?: GameModel): void {
-  io.to(roomName(logs[0].gameId)).emit('newLogs', logs.map((l) => l.toApi()));
-  if (game != null) {
-    io.to(roomName(game?.id)).emit('gameUpdate', game.toApi());
+export function emitGameUpdate(oldGame: GameApi | undefined, game: GameModel): void {
+  const gameApi = game.toApi();
+  const gameLiteApi = game.toLiteApi();
+  if (oldGame == null || !deepEquals(oldGame, gameApi)) {
+    io.to(roomName(game.id)).emit('gameUpdate', game.toApi());
   }
+  if (oldGame == null) {
+    io.to(roomName()).emit('newGame', game.toApi());
+  } else if (!deepEquals(toLiteApi(oldGame), gameLiteApi)) {
+    io.to(roomName()).emit('gameUpdateLite', game.toApi());
+  }
+}
+
+export function emitToRoom(logs: LogModel[]): void {
+  io.to(roomName(logs[0].gameId)).emit('newLogs', logs.map((l) => l.toApi()));
 }
 
 export function emitLogsDestroyToRoom(game: GameModel): void {
   io.to(roomName(game.id)).emit('destroyLogs', { gameId: game.id, gameVersion: game.version });
-  io.to(roomName(game.id)).emit('gameUpdate', game.toApi());
 }
 
 export function emitLogsReplaceToRoom(game: GameModel, logs: LogModel[], startingGameVersion: number): void {
   const newLogs = logs.map(l => l.toApi());
   io.to(roomName(game.id)).emit('replaceLogs', { gameId: game.id, startingGameVersion, newLogs });
-  io.to(roomName(game.id)).emit('gameUpdate', game.toApi());
 }
 
 io.on('connection', (socket) => {

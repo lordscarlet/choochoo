@@ -2,7 +2,7 @@ import { useNotifications } from "@toolpad/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
-import { CreateGameApi, GameApi } from "../../api/game";
+import { CreateGameApi, GameApi, GameLiteApi, ListGamesApi } from "../../api/game";
 import { UserRole } from "../../api/user";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
@@ -18,8 +18,9 @@ function getQueryKey(gameId: number | string): string[] {
   return ['games', `${gameId}`];
 }
 
-export function useGameList(): GameApi[] {
-  const { data } = tsr.games.list.useSuspenseQuery({ queryKey: getQueryKey('list') });
+export function useGameList(query: ListGamesApi): GameLiteApi[] {
+  const queryKey = Object.entries(query).sort((a, b) => a[0] > b[0] ? 1 : -1).map(([key, value]) => `${key}:${value}`).join(',');
+  const { data } = tsr.games.list.useSuspenseQuery({ queryData: { query }, queryKey: ['gameList', queryKey] });
   return data.body.games;
 }
 
@@ -246,7 +247,6 @@ export function useRetryAction(): RetryAction {
   }), [game.id, game.version]);
 
   const canRetry = me?.role == UserRole.enum.ADMIN;
-  console.log('canRetry', me?.role);
 
   return { retry, canRetry };
 }

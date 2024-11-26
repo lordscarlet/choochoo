@@ -1,20 +1,18 @@
 import { Button } from "@mui/material";
-import { useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { GameApi } from "../../api/game";
+import { Link } from "react-router-dom";
+import { ListGamesApi } from "../../api/game";
 import { useGameList } from "../services/game";
 
-export function GameList() {
-  const games = useGameList();
-  const navigate = useNavigate();
+interface GameListProps {
+  query: ListGamesApi;
+  title: string;
+}
 
-  const goToGame = useCallback((game: GameApi) => {
-    navigate(`/app/games/${game.id}`);
-  }, [navigate]);
+export function GameList({ query, title }: GameListProps) {
+  const games = useGameList(query);
 
   return <div>
-    <h2>Select game</h2>
-    <Button component={Link} to="/app/games/create">Create Game</Button>
+    <h2>{title}</h2>
     {games.map((game) => <div key={game.id}>
       {game.name}
       <Button component={Link} to={`/app/games/${game.id}`}>View</Button>

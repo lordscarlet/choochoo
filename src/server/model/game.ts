@@ -1,6 +1,6 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
-import { GameApi, GameStatus } from '../../api/game';
+import { GameApi, GameLiteApi, GameStatus } from '../../api/game';
 
 @Table({ modelName: 'Game' })
 export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAttributes<GameModel>> {
@@ -53,17 +53,27 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   @DeletedAt
   declare deletedAt?: Date | null;
 
+  toLiteApi(): GameLiteApi {
+    return toLiteApi(this);
+  }
+
   toApi(): GameApi {
     return {
-      id: this.id,
+      ...this.toLiteApi(),
       version: this.version,
-      gameKey: this.gameKey,
-      name: this.name,
       gameData: this.gameData ?? undefined,
-      status: this.status,
-      playerIds: this.playerIds,
-      activePlayerId: this.activePlayerId ?? undefined,
       undoPlayerId: this.undoPlayerId ?? undefined,
     };
   }
+}
+
+export function toLiteApi(game: GameApi | GameModel): GameLiteApi {
+  return {
+    id: game.id,
+    gameKey: game.gameKey,
+    name: game.name,
+    status: game.status,
+    playerIds: [...game.playerIds],
+    activePlayerId: game.activePlayerId ?? undefined,
+  };
 }

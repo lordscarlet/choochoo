@@ -5,7 +5,7 @@ import { gameContract, GameStatus } from '../../api/game';
 import { assert } from '../../utils/validate';
 import { GameModel } from '../model/game';
 
-import { Op } from '@sequelize/core';
+import { Op, WhereOptions } from '@sequelize/core';
 import { UserRole } from '../../api/user';
 import { Engine } from '../../engine/framework/engine';
 import { GameStatus as GameEngineStatus } from '../../engine/game/game';
@@ -16,7 +16,7 @@ import { CreateLogModel, LogModel } from '../model/log';
 import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
-import { emitLogsDestroyToRoom, emitLogsReplaceToRoom, emitToRoom } from '../socket';
+import { emitGameUpdate, emitLogsDestroyToRoom, emitLogsReplaceToRoom, emitToRoom } from '../socket';
 import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
 
@@ -26,13 +26,18 @@ const s = initServer();
 
 const router = initServer().router(gameContract, {
   async list({ query }) {
+    const { limit, order, userId, ...rest } = query;
+    const where: WhereOptions<GameModel> = rest;
+    if (userId != null) {
+      where.playerIds = { [Op.contains]: [userId] };
+    }
     const games = await GameModel.findAll({
-      attributes: ['id', 'gameKey', 'name', 'playerIds'],
-      where: query,
-      limit: 20,
-      order: ['id'],
+      attributes: ['id', 'gameKey', 'name', 'status', 'activePlayerId', 'playerIds'],
+      where,
+      limit: limit ?? 20,
+      order: order != null ? [order] : [['id', 'DESC']],
     });
-    return { status: 200, body: { games: games.map((g) => g.toApi()) } };
+    return { status: 200, body: { games: games.map((g) => g.toLiteApi()) } };
   },
 
   async get({ params }) {
@@ -56,6 +61,7 @@ const router = initServer().router(gameContract, {
       status: GameStatus.enum.LOBBY,
       playerIds,
     });
+    emitGameUpdate(undefined, game);
     return { status: 201, body: { game: game.toApi() } };
   },
 
@@ -67,8 +73,11 @@ const router = initServer().router(gameContract, {
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, 'cannot join started game');
     assert(!game.playerIds.includes(userId), { invalidInput: true });
+
+    const originalGame = game.toApi();
     game.playerIds = [...game.playerIds, userId];
     const newGame = await game.save();
+    emitGameUpdate(originalGame, newGame);
     return { status: 200, body: { game: newGame.toApi() } };
   },
 
@@ -85,8 +94,10 @@ const router = initServer().router(gameContract, {
     assert(index > 0, { invalidInput: 'the owner cannot leave the game' });
     assert(game.playerIds.length < new MapRegistry().get(game.gameKey)!.maxPlayers, 'game full');
 
+    const originalGame = game.toApi();
     game.playerIds = game.playerIds.slice(0, index).concat(game.playerIds.slice(index + 1));
     const newGame = await game.save();
+    emitGameUpdate(originalGame, newGame);
     return { status: 200, body: { game: newGame.toApi() } };
   },
 
@@ -99,6 +110,7 @@ const router = initServer().router(gameContract, {
     assert(game.status === GameStatus.enum.LOBBY, { invalidInput: 'cannot start a game that has already been started' });
     assert(game.playerIds[0] === userId, { invalidInput: 'only the owner can start the game' });
 
+    const originalGame = game.toApi();
     const engine = new Engine();
     const { gameData, logs, activePlayerId } = engine.start(game.playerIds, { mapKey: game.gameKey });
 
@@ -107,6 +119,7 @@ const router = initServer().router(gameContract, {
     game.status = GameStatus.enum.ACTIVE;
     game.activePlayerId = activePlayerId;
     const newGame = await game.save();
+    emitGameUpdate(originalGame, newGame);
     return { status: 200, body: { game: newGame.toApi() } };
   },
 
@@ -114,8 +127,10 @@ const router = initServer().router(gameContract, {
     assert(environment.stage === Stage.enum.development);
     const game = await GameModel.findByPk(params.gameId);
     assert(game != null, { notFound: true });
+    const originalGame = game.toApi();
     game.gameData = body.gameData;
     await game.save();
+    emitGameUpdate(originalGame, game);
     return { status: 200, body: { game: game.toApi() } };
   },
 
@@ -130,6 +145,7 @@ const router = initServer().router(gameContract, {
       assert(game.gameData != null);
       assert(game.activePlayerId === req.session.userId, { permissionDenied: true });
 
+      const originalGame = game.toApi();
       const engine = new Engine();
 
       const { gameData, logs, activePlayerId, gameStatus, reversible } =
@@ -161,7 +177,8 @@ const router = initServer().router(gameContract, {
       const newLogs = await LogModel.bulkCreate(createLogs, { transaction });
 
       transaction.afterCommit(() => {
-        emitToRoom(newLogs, newGame);
+        emitToRoom(newLogs);
+        emitGameUpdate(originalGame, newGame);
       });
 
       return { status: 200, body: { game: newGame.toApi() } };
@@ -178,6 +195,8 @@ const router = initServer().router(gameContract, {
       assert(game.version === gameHistory.gameVersion + 1, 'can only undo one step');
       assert(gameHistory.userId === req.session.userId, { permissionDenied: true });
 
+      const originalGame = game.toApi();
+
       game.version = version;
       game.gameData = gameHistory.previousGameData;
       game.activePlayerId = gameHistory.userId;
@@ -190,6 +209,7 @@ const router = initServer().router(gameContract, {
 
       transaction.afterCommit(() => {
         emitLogsDestroyToRoom(newGame);
+        emitGameUpdate(originalGame, newGame);
       });
 
       return { status: 200, body: { game: newGame.toApi() } };
@@ -207,6 +227,8 @@ const router = initServer().router(gameContract, {
     } else {
       assert(previousActions.length < limit, { invalidInput: 'Cannot start over if already twenty steps in' });
     }
+
+    const originalGame = game.toApi();
 
     const engine = new Engine();
 
@@ -276,6 +298,7 @@ const router = initServer().router(gameContract, {
     });
 
     emitLogsReplaceToRoom(game, allLogs, firstGameVersion);
+    emitGameUpdate(originalGame, game);
 
     return { status: 200, body: { game: game.toApi() } };
   },
