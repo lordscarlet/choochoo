@@ -59,7 +59,7 @@ export type GamePageCursor = z.infer<typeof GamePageCursor>;
 
 export const ListGamesApi = z.object({
   userId: z.coerce.number().optional(),
-  status: GameStatus.optional(),
+  status: z.array(GameStatus).optional(),
   pageCursor: GamePageCursor.optional(),
   gameKey: z.string().optional(),
   name: z.string().optional(),

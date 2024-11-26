@@ -27,8 +27,15 @@ const s = initServer();
 const router = initServer().router(gameContract, {
   async list({ query }) {
     const defaultQuery: ListGamesApi = { pageSize: 20, order: ['id', 'DESC'] };
-    const { pageSize, order, userId, pageCursor, ...rest } = { ...defaultQuery, ...query };
+    const { pageSize, order, userId, status, pageCursor, ...rest } = { ...defaultQuery, ...query };
     const where: WhereOptions<GameModel> = rest;
+    if (status != null) {
+      if (status.length === 1) {
+        where.status = status[0];
+      } else if (status.length > 1) {
+        where.status = { [Op.in]: status };
+      }
+    }
     if (userId != null) {
       where.playerIds = { [Op.contains]: [userId] };
     }
