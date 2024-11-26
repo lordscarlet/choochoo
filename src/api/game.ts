@@ -32,8 +32,6 @@ export const LogEntry = z.object({
   date: z.string(),
 });
 
-export const GamePageCursor = z.object({});
-
 export const GameLiteApi = z.object({
   id: z.number(),
   gameKey: z.string(),
@@ -56,12 +54,16 @@ export const OrderByOptions = z.union([
   z.literal('updatedAt'),
 ]);
 
+export const GamePageCursor = z.array(z.coerce.number());
+export type GamePageCursor = z.infer<typeof GamePageCursor>;
+
 export const ListGamesApi = z.object({
   userId: z.coerce.number().optional(),
   status: GameStatus.optional(),
+  pageCursor: GamePageCursor.optional(),
   gameKey: z.string().optional(),
   name: z.string().optional(),
-  limit: z.coerce.number().lte(20).optional(),
+  pageSize: z.coerce.number().lte(20).optional(),
   order: z.tuple([OrderByOptions, z.union([z.literal('DESC'), z.literal('ASC')])]).optional(),
 });
 
@@ -83,7 +85,7 @@ export const gameContract = c.router({
     method: 'GET',
     path: `/games`,
     responses: {
-      200: z.object({ games: z.array(GameLiteApi) }),
+      200: z.object({ nextPageCursor: GamePageCursor.optional(), games: z.array(GameLiteApi) }),
     },
     query: ListGamesApi,
     summary: 'Get a list of games',

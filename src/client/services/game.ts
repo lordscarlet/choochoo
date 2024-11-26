@@ -2,7 +2,7 @@ import { useNotifications } from "@toolpad/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
-import { CreateGameApi, GameApi, GameLiteApi, ListGamesApi } from "../../api/game";
+import { CreateGameApi, GameApi, GamePageCursor, ListGamesApi } from "../../api/game";
 import { UserRole } from "../../api/user";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
@@ -18,10 +18,46 @@ function getQueryKey(gameId: number | string): string[] {
   return ['games', `${gameId}`];
 }
 
-export function useGameList(query: ListGamesApi): GameLiteApi[] {
-  const queryKey = Object.entries(query).sort((a, b) => a[0] > b[0] ? 1 : -1).map(([key, value]) => `${key}:${value}`).join(',');
-  const { data } = tsr.games.list.useSuspenseQuery({ queryData: { query }, queryKey: ['gameList', queryKey] });
-  return data.body.games;
+export function useGameList(baseQuery: ListGamesApi) {
+  const queryWithLimit: ListGamesApi = { pageSize: 20, ...baseQuery };
+  const queryKeyFromFilter =
+    Object.entries(queryWithLimit)
+      .sort((a, b) => a[0] > b[0] ? 1 : -1).map(([key, value]) => `${key}:${value}`).join(',');
+  const queryKey = ['gameList', queryKeyFromFilter];
+  const { data, isLoading, error, fetchNextPage, hasNextPage } = tsr.games.list.useInfiniteQuery({
+    queryKey,
+    queryData: ({ pageParam }) => ({
+      query: { ...queryWithLimit, pageCursor: pageParam },
+    }),
+    initialPageParam: (undefined as (GamePageCursor | undefined)),
+    getNextPageParam: ({ status, body }): GamePageCursor | undefined => {
+      if (status !== 200) return undefined;
+      return body.nextPageCursor;
+    },
+  });
+
+  handleError(isLoading, error);
+
+  const [page, setPage] = useState(0);
+
+  const games = data?.pages[page]?.body.games;
+
+  const isOnLastPage = data != null && !hasNextPage && data.pages.length - 1 === page;
+  const nextPage = useCallback(() => {
+    if (isLoading || isOnLastPage) return;
+    setPage(page + 1);
+    if (data != null && hasNextPage && data.pages.length - 1 === page) {
+      fetchNextPage();
+    }
+  }, [isLoading, setPage, page, hasNextPage, data]);
+
+  const hasPrevPage = page > 0;
+  const prevPage = useCallback(() => {
+    if (!hasPrevPage) return;
+    setPage(page - 1);
+  }, [page, setPage, page]);
+
+  return { games, hasNextPage: !isOnLastPage, nextPage, hasPrevPage, prevPage, isLoading };
 }
 
 export function useGame(): GameApi {

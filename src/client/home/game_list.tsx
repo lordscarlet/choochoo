@@ -9,13 +9,15 @@ interface GameListProps {
 }
 
 export function GameList({ query, title }: GameListProps) {
-  const games = useGameList(query);
+  const { games, nextPage, prevPage, hasPrevPage, hasNextPage } = useGameList(query);
 
   return <div>
     <h2>{title}</h2>
-    {games.map((game) => <div key={game.id}>
+    {games?.map((game) => <div key={game.id}>
       {game.name}
       <Button component={Link} to={`/app/games/${game.id}`}>View</Button>
     </div>)}
+    {hasPrevPage && <Button onClick={prevPage} >Prev</Button>}
+    {hasNextPage && <Button onClick={nextPage} disabled={games == null}>Next</Button>}
   </div>;
 }

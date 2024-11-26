@@ -1,7 +1,7 @@
 
 import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
-import { gameContract, GameStatus } from '../../api/game';
+import { gameContract, GameStatus, ListGamesApi } from '../../api/game';
 import { assert } from '../../utils/validate';
 import { GameModel } from '../model/game';
 
@@ -26,18 +26,29 @@ const s = initServer();
 
 const router = initServer().router(gameContract, {
   async list({ query }) {
-    const { limit, order, userId, ...rest } = query;
+    const defaultQuery: ListGamesApi = { pageSize: 20, order: ['id', 'DESC'] };
+    const { pageSize, order, userId, pageCursor, ...rest } = { ...defaultQuery, ...query };
     const where: WhereOptions<GameModel> = rest;
     if (userId != null) {
       where.playerIds = { [Op.contains]: [userId] };
     }
+    if (pageCursor != null) {
+      where.id = { [Op.notIn]: pageCursor };
+    }
+    const limit = pageSize! + 1;
     const games = await GameModel.findAll({
       attributes: ['id', 'gameKey', 'name', 'status', 'activePlayerId', 'playerIds'],
       where,
-      limit: limit ?? 20,
+      limit: pageSize! + 1,
       order: order != null ? [order] : [['id', 'DESC']],
     });
-    return { status: 200, body: { games: games.map((g) => g.toLiteApi()) } };
+    if (games.length > pageSize!) {
+      const gamesApi = games.slice(0, pageSize).map((g) => g.toLiteApi());
+      const nextPageCursor = (pageCursor ?? []).concat(gamesApi.map(({ id }) => id));
+      return { status: 200, body: { nextPageCursor, games: gamesApi } };
+    } else {
+      return { status: 200, body: { games: games.map((g) => g.toLiteApi()) } };
+    }
   },
 
   async get({ params }) {
