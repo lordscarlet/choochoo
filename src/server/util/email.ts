@@ -3,25 +3,11 @@ import z from "zod";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
 
-export interface EmailService {
-  subscribe(email: string): Promise<void>;
-  sendActivationCode(email: string): Promise<void>;
-  getEmailFromActivationCode(code: string): string | undefined;
-}
+export abstract class EmailService {
+  abstract subscribe(email: string): Promise<void>;
+  abstract sendActivationCode(email: string): Promise<void>;
 
-const ActivationCode = z.object({
-  email: z.string(),
-  expires: z.number(),
-});
-type ActivationCode = z.infer<typeof ActivationCode>;
-
-class MailjetEmailService implements EmailService {
-  private readonly mailjet: Mailjet;
-  constructor(key: string, secret: string) {
-    this.mailjet = Mailjet.apiConnect(key, secret);
-  }
-
-  private makeActivationCode(email: string): string {
+  protected makeActivationCode(email: string): string {
     const expires = new Date();
     expires.setHours(expires.getMinutes() + 30);
     const code: ActivationCode = {
@@ -39,6 +25,20 @@ class MailjetEmailService implements EmailService {
     } catch (e) {
       return undefined;
     }
+  }
+}
+
+const ActivationCode = z.object({
+  email: z.string(),
+  expires: z.number(),
+});
+type ActivationCode = z.infer<typeof ActivationCode>;
+
+class MailjetEmailService extends EmailService {
+  private readonly mailjet: Mailjet;
+  constructor(key: string, secret: string) {
+    super();
+    this.mailjet = Mailjet.apiConnect(key, secret);
   }
 
 
@@ -98,11 +98,11 @@ class MailjetEmailService implements EmailService {
   }
 }
 
-class NoopEmailService implements EmailService {
+class NoopEmailService extends EmailService {
   async subscribe(_: string): Promise<void> { }
-  async sendActivationCode(_: string): Promise<void> { }
-  getEmailFromActivationCode(_: string): string | undefined {
-    return undefined;
+
+  async sendActivationCode(email: string): Promise<void> {
+    console.log('activation code', `/app/users/activate?activationCode=${this.makeActivationCode(email)}`);
   }
 }
 

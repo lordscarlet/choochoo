@@ -12,6 +12,7 @@ export const contract = c.router({
   messages: messageContract,
   users: userContract,
 }, {
+  validateResponse: true,
   commonResponses: {
     400: c.type<{ error: string }>(),
   },

@@ -28,6 +28,6 @@ export const MutableLocationData = z.object({
 export type MutableLocationData = z.infer<typeof MutableLocationData>;
 export type LocationData = Immutable<MutableLocationData>;
 
-export const MutableSpaceData = z.discriminatedUnion('type', [MutableCityData, MutableLocationData]);
+export const MutableSpaceData = z.union([MutableCityData, MutableLocationData]);
 export type MutableSpaceData = z.infer<typeof MutableSpaceData>;
 export type SpaceData = Immutable<MutableSpaceData>;

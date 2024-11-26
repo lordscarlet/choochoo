@@ -1,19 +1,21 @@
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { FormEvent, useCallback, useMemo } from "react";
 import { MapRegistry } from "../../maps";
+import { environment, Stage } from "../services/environment";
 import { useCreateGame } from "../services/game";
-import { useSelectState, useTextInputState } from "../utils/form_state";
+import { useCheckboxState, useSelectState, useTextInputState } from "../utils/form_state";
 
 export function CreateGamePage() {
   const maps = useMemo(() => [...new MapRegistry().values()], []);
   const [name, setName] = useTextInputState('');
   const [gameKey, setGameKey] = useSelectState(maps[0].key);
+  const [artificialStart, setArtificialStart] = useCheckboxState();
   const { createGame, validationError, isPending } = useCreateGame();
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createGame({ name, gameKey });
-  }, [name]);
+    createGame({ name, gameKey, artificialStart });
+  }, [name, gameKey, artificialStart, createGame]);
 
   return <Box
     component="form"
@@ -33,7 +35,7 @@ export function CreateGamePage() {
         onChange={setName}
       />
     </FormControl>
-    <FormControl sx={{ m: 1, minWidth: 80 }}>
+    <FormControl sx={{ m: 1, minWidth: 80 }} error={validationError?.gameKey != null}>
       <InputLabel>Map</InputLabel>
       <Select
         required
@@ -44,9 +46,22 @@ export function CreateGamePage() {
         autoWidth
         label="Map"
       >
-        {maps.map((m) => <MenuItem value={m.key}>{m.name}</MenuItem>)}
+        {maps.map((m) => <MenuItem key={m.key} value={m.key}>{m.name}</MenuItem>)}
       </Select>
+      {validationError?.gameKey && <FormHelperText>{validationError?.gameKey}</FormHelperText>}
     </FormControl>
+    {environment.stage == Stage.enum.development && <FormControl error={validationError?.artificialStart != null}>
+      <FormControlLabel sx={{ m: 1, minWidth: 80 }}
+        label="Artificial Start"
+        control={
+          <Checkbox
+            value={artificialStart}
+            disabled={isPending}
+            onChange={setArtificialStart}
+          />}
+      />
+      <FormHelperText>{validationError?.artificialStart}</FormHelperText>
+    </FormControl>}
     <div>
       <Button type="submit" disabled={isPending}>Create</Button>
     </div>

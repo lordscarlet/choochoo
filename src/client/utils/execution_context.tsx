@@ -19,7 +19,7 @@ export function useExecutionContext(): ExecutionContext {
 }
 
 interface ExecutionContextProps {
-  gameState: string;
+  gameData: string;
   gameKey: string;
   children: ReactNode;
 }
@@ -52,11 +52,11 @@ export function useInject<T>(fn: () => T, deps: unknown[]): T {
   return value;
 }
 
-export function ExecutionContextProvider({ gameState, gameKey, children }: ExecutionContextProps) {
-  const ctx = useMemo(() => new ExecutionContext(gameKey, gameState), [gameKey]);
+export function ExecutionContextProvider({ gameData, gameKey, children }: ExecutionContextProps) {
+  const ctx = useMemo(() => new ExecutionContext(gameKey, gameData), [gameKey]);
   useEffect(() => {
-    ctx.merge(gameState);
-  }, [ctx, gameState]);
+    ctx.merge(gameData);
+  }, [ctx, gameData]);
   return <ExecutionContextContext.Provider value={ctx}>
     {children}
   </ExecutionContextContext.Provider>;

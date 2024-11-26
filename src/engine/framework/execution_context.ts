@@ -11,15 +11,15 @@ export class ExecutionContext {
   readonly gameState = new StateStore();
   readonly injectionContext = new InjectionContext();
 
-  constructor(mapKey: string, gameState: string | undefined) {
+  constructor(mapKey: string, gameData?: string) {
     new MapRegistry().get(mapKey).registerOverrides(this.injectionContext);
-    if (gameState != null) {
-      this.merge(gameState);
+    if (gameData != null) {
+      this.merge(gameData);
     }
   }
 
-  merge(gameState: string) {
-    this.gameState.merge(gameState);
+  merge(gameData: string) {
+    this.gameState.merge(gameData);
   }
 }
 

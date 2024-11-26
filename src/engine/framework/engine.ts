@@ -37,14 +37,14 @@ export class Engine {
     });
   }
 
-  private beginInjectionModeAsync(mapKey: string, gameState: string | undefined): () => void {
-    const executionContext = new ExecutionContext(mapKey, gameState);
+  private beginInjectionModeAsync(mapKey: string, gameData: string | undefined): () => void {
+    const executionContext = new ExecutionContext(mapKey, gameData);
     setExecutionContextGetter(() => executionContext);
     return setExecutionContextGetter;
   }
 
-  private executeInExecutionContext(mapKey: string, gameState: string | undefined, process: () => void): GameState {
-    const endInjectionMode = this.beginInjectionModeAsync(mapKey, gameState);
+  private executeInExecutionContext(mapKey: string, gameData: string | undefined, process: () => void): GameState {
+    const endInjectionMode = this.beginInjectionModeAsync(mapKey, gameData);
     try {
       const currentPlayer = injectCurrentPlayer();
       const gameStatus = injectState(GAME_STATUS);

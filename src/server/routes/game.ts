@@ -6,14 +6,18 @@ import { assert } from '../../utils/validate';
 import { GameModel } from '../model/game';
 
 import { Op } from '@sequelize/core';
+import { UserRole } from '../../api/user';
 import { Engine } from '../../engine/framework/engine';
 import { GameStatus as GameEngineStatus } from '../../engine/game/game';
 import { MapRegistry } from '../../maps';
+import { peek } from '../../utils/functions';
 import { GameHistoryModel } from '../model/history';
 import { CreateLogModel, LogModel } from '../model/log';
+import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
 import { emitLogsDestroyToRoom, emitToRoom } from '../socket';
+import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
 
 export const gameApp = express();
@@ -40,12 +44,17 @@ const router = initServer().router(gameContract, {
   async create({ body, req }) {
     const userId = req.session.userId;
     assert(userId != null, { permissionDenied: true });
+    const playerIds = [userId];
+    if (body.artificialStart) {
+      const users = await UserModel.findAll({ where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER }, limit: 3 });
+      playerIds.push(...users.map(({ id }) => id));
+    }
     const game = await GameModel.create({
       version: 1,
       gameKey: body.gameKey,
       name: body.name,
       status: GameStatus.enum.LOBBY,
-      playerIds: [userId],
+      playerIds,
     });
     return { status: 201, body: { game: game.toApi() } };
   },
@@ -93,6 +102,7 @@ const router = initServer().router(gameContract, {
     const engine = new Engine();
     const { gameData, logs, activePlayerId } = engine.start(game.playerIds, { mapKey: game.gameKey });
 
+    // TODO: save the logs
     game.gameData = gameData;
     game.status = GameStatus.enum.ACTIVE;
     game.activePlayerId = activePlayerId;
@@ -184,6 +194,88 @@ const router = initServer().router(gameContract, {
 
       return { status: 200, body: { game: newGame.toApi() } };
     });
+  },
+
+  async retryLast({ req, body, params }) {
+    enforceRole(req, UserRole.enum.ADMIN);
+    const limit = 'steps' in body ? body.steps : 20;
+    const previousActions = await GameHistoryModel.findAll({ where: { gameId: params.gameId }, limit, order: [['id', 'DESC']] });
+    const game = await GameModel.findByPk(params.gameId);
+    assert(game != null, { notFound: true });
+    if ('steps' in body) {
+      assert(previousActions.length == body.steps, { invalidInput: 'There are not that many steps to retry' });
+    } else {
+      assert(previousActions.length < limit, { invalidInput: 'Cannot start over if already twenty steps in' });
+    }
+
+    const engine = new Engine();
+
+    let previousAction: GameHistoryModel | undefined;
+    let currentGameData: string | undefined;
+    let currentGameVersion: number | undefined;
+    let finalActivePlayerId: number | undefined;
+    let finalUndoPlayerId: number | undefined;
+    const allLogs: LogModel[] = [];
+    if ('startOver' in body && body.startOver) {
+      const { gameData, logs, activePlayerId } = engine.start(game.playerIds, { mapKey: game.gameKey });
+      currentGameData = gameData;
+      currentGameVersion = 1;
+      finalActivePlayerId = activePlayerId;
+      allLogs.push(...logs.map((message) => LogModel.build({
+        gameId: game.id,
+        message,
+        gameVersion: currentGameVersion,
+      })));
+    } else {
+      currentGameData = peek(previousActions).previousGameData;
+      currentGameVersion = peek(previousActions).gameVersion;
+    }
+    let firstGameVersion = currentGameVersion;
+    let finalGameStatus: GameEngineStatus | undefined;
+    const newHistory: GameHistoryModel[] = [];
+    while (previousAction = previousActions.pop()) {
+      const { gameData, logs, activePlayerId, gameStatus, reversible } =
+        engine.processAction(game.gameKey, currentGameData, previousAction.actionName, JSON.parse(previousAction.actionData));
+
+      newHistory.push(GameHistoryModel.build({
+        gameVersion: currentGameVersion,
+        patch: '',
+        previousGameData: currentGameData,
+        actionName: previousAction.actionName,
+        actionData: previousAction.actionData,
+        reversible,
+        gameId: game.id,
+        userId: previousAction.userId,
+      }));
+
+      currentGameVersion++;
+      currentGameData = gameData;
+      allLogs.push(...logs.map(message => LogModel.build({
+        gameId: game.id,
+        message,
+        gameVersion: currentGameVersion,
+      })));
+      finalGameStatus = gameStatus;
+      finalActivePlayerId = activePlayerId;
+      finalUndoPlayerId = reversible ? previousAction.userId : undefined;
+    }
+
+    game.version = currentGameVersion;
+    game.gameData = currentGameData;
+    game.activePlayerId = finalActivePlayerId;
+    game.status = finalGameStatus === GameEngineStatus.ENDED ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
+    game.undoPlayerId = finalUndoPlayerId;
+    await sequelize.transaction(async (transaction) => {
+      await Promise.all([
+        game.save({ transaction }),
+        LogModel.destroy({ where: { gameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
+        GameHistoryModel.destroy({ where: { gameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
+        ...newHistory.map((history) => history.save({ transaction })),
+        ...allLogs.map(log => log.save({ transaction })),
+      ]);
+    });
+
+    return { status: 200, body: { game: game.toApi() } };
   },
 });
 

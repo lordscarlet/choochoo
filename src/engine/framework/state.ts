@@ -1,10 +1,13 @@
 
 import { Map as ImmutableMap } from 'immutable';
+import z from 'zod';
+import { Coordinates, CoordinatesZod } from '../../utils/coordinates';
 import { deepCopy } from "../../utils/deep_copy";
 import { deepEquals } from "../../utils/deep_equals";
 import { freeze, Immutable } from "../../utils/immutable";
-import { serialize, unserialize } from "../../utils/serialize";
 import { assert } from '../../utils/validate';
+import { GRID } from '../game/state';
+import { MutableSpaceData, SpaceData } from '../state/space';
 import { getExecutionContext } from './execution_context';
 import { Key } from './key';
 
@@ -12,6 +15,16 @@ interface StateContainer<T> {
   state?: { value: Immutable<T> };
   listeners: Set<(t: Immutable<T>) => void>;
 }
+
+const SerializedGameDataV2 = z.object({
+  version: z.literal(2),
+  gameData: z.record(z.string(), z.unknown()),
+  gameMapData: z.array(z.tuple([CoordinatesZod, MutableSpaceData])),
+});
+type SerializedGameDataV2 = z.infer<typeof SerializedGameDataV2>;
+
+const SerializedGameData = SerializedGameDataV2;
+type SerializedGameData = z.infer<typeof SerializedGameData>;
 
 export class StateStore {
   private state = new Map<string, StateContainer<unknown>>();
@@ -125,21 +138,26 @@ export class StateStore {
   serialize(): string {
     // TODO: Come up with a clever way to deserialize.
     // For now, use json.
-    const serialized = [...this.state.entries()].reduce((obj, [key, val]) => {
-      if (val.state != null) {
-        obj[key] = serialize(val.state.value);
-      }
-      return obj;
-    }, {} as { [key: string]: unknown });
-    return JSON.stringify(serialized);
+    const gameData = Object.fromEntries(
+      [...this.state.entries()]
+        .filter(([key, value]) => key !== GRID.name && value.state != null)
+        .map(([key, value]) => [key, value.state!.value]));
+    const data: SerializedGameData = {
+      version: 2,
+      gameData,
+      gameMapData: [...this.getContainer(GRID)!.state!.value],
+    };
+    return JSON.stringify(data);
   }
 
-  merge(serializedState: string): void {
-    const map = JSON.parse(serializedState) as Map<string, unknown>;
-    const changes: ValueChange[] = Object.entries(map)
-      .filter(([key, value]) => this.mergeValue(key, unserialize(value)))
+  merge(gameDataStr: string): void {
+    const { gameData, gameMapData } = SerializedGameData.parse(JSON.parse(gameDataStr));
+    const changes: ValueChange[] = Object.entries(gameData)
+      .filter(([key, value]) => this.mergeValue(key, value))
       .map(([key]) => ({ key }));
-    for (const change of changes) {
+
+    const mapChanges = gameMapData.filter(([coordinates, value]) => this.mergeMapValue(coordinates, value)).length > 0;
+    for (const change of changes.concat(mapChanges ? [{ key: GRID.name }] : [])) {
       this.notifyListeners(change.key);
     }
   }
@@ -148,28 +166,23 @@ export class StateStore {
     this.initContainerIfNotExists(key);
     const container = this.getContainer<T>(key);
     const oldValue = this.state.get(key)?.state?.value;
-    if (oldValue == null) {
-      container.state = { value: freeze(newValue) };
-      return true;
-    }
-    if (deepEquals(newValue, oldValue)) {
+    if (oldValue != null && deepEquals(newValue, oldValue)) {
       return false;
     }
-    if (ImmutableMap.isMap(newValue)) {
-      return this.mergeMapValue(container as StateContainer<ImmutableMap<unknown, unknown>>, oldValue as typeof newValue, newValue);
-    } else {
-      container.state = { value: freeze(newValue) };
-      return true;
-    }
+    container.state = { value: freeze(newValue) };
+    return true;
   }
 
-  private mergeMapValue<R, S>(container: StateContainer<ImmutableMap<R, S>>, oldValue: ImmutableMap<R, S>, newValue: ImmutableMap<R, S>): boolean {
-    const [newNewValue, mapKeys] = mergeMap(newValue, oldValue);
-    if (newNewValue !== oldValue) {
-      container.state = { value: freeze(newNewValue) };
-      return true;
+  private mergeMapValue(coordinates: Coordinates, mapValue: SpaceData): boolean {
+    this.initContainerIfNotExists(GRID.name);
+    const container = this.getContainer(GRID);
+    const grid = this.state.get(GRID.name)?.state?.value ?? ImmutableMap<Coordinates, SpaceData>();
+    const oldValue = grid?.get(coordinates);
+    if (oldValue != null && deepEquals(oldValue, mapValue)) {
+      return false;
     }
-    return false;
+    container.state = { value: grid.set(coordinates, freeze(mapValue)) };
+    return true;
   }
 }
 

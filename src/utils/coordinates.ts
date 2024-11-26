@@ -36,6 +36,13 @@ export class Coordinates {
     return newCoordinates;
   }
 
+  static fromCartesianString(str: string): Coordinates {
+    const matches = str.match(/^\((\d+)\, (\d+)\)$/);
+    assert(matches != null);
+    const [_, q, r] = matches;
+    return Coordinates.unserialize(`${q}|${r}`);
+  }
+
   static unserialize(serialized: string): Coordinates {
     const [q, r] = serialized.split('|').map((num) => Number(num));
     return Coordinates.from({ q, r });

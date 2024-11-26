@@ -1,6 +1,6 @@
 
 export enum LocationType {
-  CITY,
+  CITY = 1,
   PLAIN,
   RIVER,
   MOUNTAIN,

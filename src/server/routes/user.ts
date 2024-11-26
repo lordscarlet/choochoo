@@ -83,6 +83,7 @@ const router = initServer().router(userContract, {
 
     user.role = UserRole.enum.USER;
     await user.save();
+    await user.updateCache();
 
     return { status: 200, body: { user: user.toMyApi() } };
   },
@@ -104,6 +105,7 @@ const router = initServer().router(userContract, {
       if (email == user.email && user.role == UserRole.enum.ACTIVATE_EMAIL) {
         user.role = UserRole.enum.USER;
         await user.save();
+        await user.updateCache();
       }
     }
     req.session.userId = user.id;

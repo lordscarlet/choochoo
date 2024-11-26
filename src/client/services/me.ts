@@ -131,7 +131,7 @@ export function useResendActivationCode() {
 
 export function useActivateAccount() {
   const tsrQueryClient = tsr.useQueryClient();
-  const { mutate, error, isPending } = tsr.users.activateAccount.useMutation();
+  const { mutate, error, isError, isPending } = tsr.users.activateAccount.useMutation();
   handleError(isPending, error);
   const notifications = useNotifications();
   const navigate = useNavigate();
@@ -146,5 +146,5 @@ export function useActivateAccount() {
       },
     });
   }, []);
-  return { activate, isPending };
+  return { activate, isPending, isError };
 }

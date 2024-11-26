@@ -22,6 +22,7 @@ export type ActionApi = z.infer<typeof ActionApi>;
 export const CreateGameApi = z.object({
   gameKey: z.string(),
   name: z.string().toLowerCase().min(1).max(32).regex(/^[a-zA-Z0-9_\- ]*$/, 'Can only use letters, numbers, spaces, _, and - characters'),
+  artificialStart: z.boolean(),
 });
 export type CreateGameApi = z.infer<typeof CreateGameApi>;
 
@@ -143,5 +144,15 @@ export const gameContract = c.router({
       200: z.object({ game: GameApi }),
     },
     summary: 'Undoes the previous action on a game',
+  },
+  retryLast: {
+    method: 'POST',
+    pathParams: z.object({ gameId: z.coerce.number() }),
+    path: '/games/:gameId/action',
+    body: z.union([z.object({ steps: z.number().gt(0) }), z.object({ startOver: z.literal(true) })]),
+    responses: {
+      200: z.object({ game: GameApi }),
+    },
+    summary: 'Retries the last couple of moves of the game',
   },
 });

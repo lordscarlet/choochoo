@@ -13,7 +13,7 @@ export function encrypt(message: string): string {
   const cipher = createCipheriv(
     algorithm, key, iv,
     { authTagLength });
-  let encryptedMessage = cipher.update(Buffer.from(message, 'utf8'));
+  const encryptedMessage = cipher.update(Buffer.from(message, 'utf8'));
   return Buffer.concat([iv, encryptedMessage, cipher.final(), cipher.getAuthTag()]).toString('hex');
 }
 

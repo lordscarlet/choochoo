@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { GameApi } from "../../api/game";
 import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
@@ -21,7 +20,7 @@ interface LoadedGameProps {
 
 export function ActiveGame() {
   const game = useGame();
-  return <ExecutionContextProvider gameKey={game.gameKey} gameState={game.gameData!}>
+  return <ExecutionContextProvider gameKey={game.gameKey} gameData={game.gameData!}>
     <InternalActiveGame />
   </ExecutionContextProvider>;
 }

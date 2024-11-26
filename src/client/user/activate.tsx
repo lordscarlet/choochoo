@@ -2,6 +2,7 @@ import { Button } from "@mui/material";
 import { useNotifications } from "@toolpad/core";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { UserRole } from "../../api/user";
 import { useActivateAccount, useMe, useResendActivationCode } from "../services/me";
 
 export function ActivatePage() {
@@ -11,8 +12,8 @@ export function ActivatePage() {
   const [searchParams] = useSearchParams();
   const activationCode = searchParams.get('activationCode');
   const { resend, isPending: isPendingResend } = useResendActivationCode();
-  const { activate, isPending } = useActivateAccount();
-  const [hasInitialized, sethasInitialized] = useState(false);
+  const { activate, isPending, isError } = useActivateAccount();
+  const [hasInitialized, setHasInitialized] = useState(false);
   const hasNavigated = useRef(false);
 
   useEffect(() => {
@@ -23,13 +24,18 @@ export function ActivatePage() {
       navigate('/app/users/login?activationCode=' + activationCode);
       return;
     }
-    sethasInitialized(true);
+    if (me.role == UserRole.enum.USER) {
+      navigate('/');
+      return;
+    }
+    setHasInitialized(true);
     if (activationCode == null || activationCode == '') {
       return;
     }
+    if (isPending || isError) return;
 
     activate(activationCode);
-  }, [me, activationCode]);
+  }, [me, activate, activationCode, isPending, navigate]);
 
   if (!hasInitialized || isPending) {
     return <div>Activating account...</div>;
