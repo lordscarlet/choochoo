@@ -1,7 +1,8 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { GameApi } from "../../api/game";
-import { inject, setInjectionContext } from "../../engine/framework/execution_context";
-import { InjectionContext, SimpleConstructor } from "../../engine/framework/inject";
+import { SimpleConstructor } from "../../engine/framework/dependency_stack";
+import { inject, injectState, setInjectionContext } from "../../engine/framework/execution_context";
+import { InjectionContext } from "../../engine/framework/inject";
 import { Key } from "../../engine/framework/key";
 import { StateStore } from "../../engine/framework/state";
 import { PHASE } from "../../engine/game/phase";
@@ -40,7 +41,7 @@ export function useInject<T>(fn: () => T, deps: unknown[]): T {
   const [value, stateDeps] = useMemo(() => {
     setInjectionContext(ctx);
     try {
-      const [value, dependencies] = ctx.startDependencyStack(fn);
+      const [value, dependencies] = ctx.runFunction(fn);
       setInjectionContext();
       return [value, ctx.getStateDependencies(...dependencies)];
     } finally {
@@ -60,8 +61,13 @@ export function useInject<T>(fn: () => T, deps: unknown[]): T {
 export function InjectionContextProvider({ game, children }: InjectionContextProps) {
   const ctx = useMemo(() => {
     const ctx = new InjectionContext(game.gameKey);
-    ctx.get(StateStore).merge(game.gameData!);
-    return ctx;
+    setInjectionContext(ctx);
+    try {
+      ctx.get(StateStore).merge(game.gameData!);
+      return ctx;
+    } finally {
+      setInjectionContext();
+    }
   }, [game.id]);
 
   useEffect(() => {
@@ -81,8 +87,7 @@ export function usePhaseState<T>(phase: Phase, key: Key<T>): Immutable<T> | unde
 function useOptionalInjectedState<T>(key: Key<T>, optionalCheck: boolean): Immutable<T> | undefined {
   const ctx = useInjectionContext();
   setInjectionContext(ctx);
-  const [injectedState] = ctx.startDependencyStack(() =>
-    ctx.get(StateStore).injectState(key));
+  const [injectedState] = ctx.runFunction(() => injectState(key));
   setInjectionContext();
 
   const [_, setValue] = useState<Immutable<T> | undefined>(() => optionalCheck ? injectedState() : undefined);

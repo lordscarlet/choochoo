@@ -1,6 +1,7 @@
 import { freeze, Immutable } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
-import { InjectionContext, SimpleConstructor } from "./inject";
+import { SimpleConstructor } from "./dependency_stack";
+import { InjectionContext } from "./inject";
 import { Key } from "./key";
 import { InjectedState, KeyArray, StateStore } from "./state";
 

@@ -1,40 +1,37 @@
 import { MapRegistry } from "../../maps";
-import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
+import { Dependency, DependencyStack, SimpleConstructor } from "./dependency_stack";
 import { Key } from "./key";
-
-export type SimpleConstructor<T> = new () => T;
 
 export class InjectionContext {
   private readonly overrides = new Map<SimpleConstructor<unknown>, unknown>();
   private readonly inConstruction = new Map<SimpleConstructor<unknown>, ProxyObject<unknown>>();
-  private readonly dependencies = new Map<SimpleConstructor<unknown>, Set<Key<unknown> | SimpleConstructor<unknown>>>();
+  private readonly dependencies = new Map<SimpleConstructor<unknown>, Set<Dependency>>();
   private readonly injected = new Map<SimpleConstructor<unknown>, unknown>();
-  private readonly dependencyStack: Array<Set<SimpleConstructor<unknown> | Key<unknown>>> = [];
+  private readonly dependencyStack = new DependencyStack();
 
   constructor(mapKey: string) {
     MapRegistry.singleton.get(mapKey).registerOverrides(this);
+
+    // Carve out a special path for DependencyStack
+    this.dependencies.set(DependencyStack, new Set<Dependency>());
+    this.injected.set(DependencyStack, this.dependencyStack);
   }
 
-  addDependency(dep: Key<unknown> | SimpleConstructor<unknown>): void {
-    peek(this.dependencyStack)?.add(dep);
-  }
-
-  startDependencyStack<T>(fn: () => T): [T, Set<Key<unknown> | SimpleConstructor<unknown>>] {
-    this.dependencyStack.push(new Set<SimpleConstructor<unknown> | Key<unknown>>());
-    return [fn(), this.dependencyStack.pop()!];
+  runFunction<T>(fn: () => T): [T, Set<Dependency>] {
+    return this.dependencyStack.startDependencyStack(fn);
   }
 
   get<R>(factory: SimpleConstructor<R>): R {
     const overridden = this.overrides.get(factory) as SimpleConstructor<R> ?? factory;
-    this.addDependency(factory);
+    this.dependencyStack.addDependency(factory);
     if (!this.injected.has(overridden)) {
       if (this.inConstruction.has(overridden)) {
         return this.inConstruction.get(overridden)!.proxy as R;
       }
       const proxyObject = buildProxy(overridden);
       this.inConstruction.set(overridden, proxyObject);
-      const [result, dependencies] = this.startDependencyStack(() => {
+      const [result, dependencies] = this.runFunction(() => {
         return new overridden();
       });
       proxyObject.setInternalObject(result as R);
@@ -46,8 +43,8 @@ export class InjectionContext {
     return this.injected.get(overridden) as R;
   }
 
-  getStateDependencies(...dependencies: Array<Key<unknown> | SimpleConstructor<unknown>>): Set<Key<string>> {
-    const stateDependencies = new Set<Key<string>>();
+  getStateDependencies(...dependencies: Array<Key<unknown> | SimpleConstructor<unknown>>): Set<Key<unknown>> {
+    const stateDependencies = new Set<Key<unknown>>();
     const visited = new Set<SimpleConstructor<unknown>>();
     for (let index = 0; index < dependencies.length; index++) {
       const dependency = dependencies[index];

@@ -8,7 +8,8 @@ import { freeze, Immutable } from "../../utils/immutable";
 import { assert } from '../../utils/validate';
 import { GRID } from '../game/state';
 import { MutableSpaceData, SpaceData } from '../state/space';
-import { getInjectionContext } from './execution_context';
+import { DependencyStack } from './dependency_stack';
+import { inject } from './execution_context';
 import { Key } from './key';
 
 interface StateContainer<T> {
@@ -27,6 +28,7 @@ const SerializedGameData = SerializedGameDataV2;
 type SerializedGameData = z.infer<typeof SerializedGameData>;
 
 export class StateStore {
+  private readonly dependencyStack = inject(DependencyStack);
   private state = new Map<string, StateContainer<unknown>>();
 
   reset(): void {
@@ -121,7 +123,7 @@ export class StateStore {
   }
 
   injectState<T>(key: Key<T>): InjectedState<T> {
-    getInjectionContext().addDependency(key);
+    this.dependencyStack.addDependency(key);
     const result = () => this.get(key);
     const ops: InjectedOps<T> = {
       initState: (state: T) => this.init(key, state),
