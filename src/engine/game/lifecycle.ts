@@ -1,107 +1,107 @@
-import { assert } from "../../utils/validate";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 
-export enum LifecycleStage {
-  startRound,
-  startPhase,
-  startTurn,
-  checkAutoAction,
-  waitForAction,
-  processAction,
-  endTurn,
-  endPhase,
-  endRound,
-}
 
-export class Lifecycle {
-  private round: number | undefined;
-  private phase: Phase | undefined;
-  private currentPlayer: PlayerColor | undefined;
-  private stage: LifecycleStage | undefined;
-  private shouldEndTurnAtEndOfAction = false;
+export class StartRound {
+  constructor(readonly round: number) { }
 
-  getRound(): number {
-    assert(this.round != null);
-    return this.round;
-  }
-
-  getPhase(): Phase {
-    assert(this.phase != null);
-    return this.phase;
-  }
-
-  getCurrentPlayer(): PlayerColor {
-    assert(this.currentPlayer != null);
-    return this.currentPlayer;
-  }
-
-  getStage(): LifecycleStage {
-    assert(this.stage != null);
-    return this.stage;
-  }
-
-  startGame(): void {
-    this.round = 1;
-    this.stage = LifecycleStage.startRound;
-  }
-
-  startProcessAction(round: number, phase: Phase, currentPlayer: PlayerColor): void {
-    this.round = round;
-    this.phase = phase;
-    this.currentPlayer = currentPlayer;
-    this.stage = LifecycleStage.processAction;
-  }
-
-  startNextRound(): void {
-    assert(this.round != null);
-    assert(this.stage === LifecycleStage.endRound);
-    this.round++;
-    this.stage = LifecycleStage.startRound;
-  }
-
-  endRound(): void {
-    assert(this.stage === LifecycleStage.endPhase);
-    this.stage = LifecycleStage.endRound;
-  }
-
-  startPhase(phase: Phase): void {
-    assert(this.stage === LifecycleStage.startRound || this.stage === LifecycleStage.endPhase);
-    this.phase = phase;
-    this.stage = LifecycleStage.startPhase;
-  }
-
-  startTurn(currentPlayer: PlayerColor): void {
-    assert(this.stage == LifecycleStage.startPhase || this.stage === LifecycleStage.endTurn);
-    this.currentPlayer = currentPlayer;
-    this.stage = LifecycleStage.startTurn;
-  }
-
-  endPhase(): void {
-    assert(this.stage == LifecycleStage.startPhase || this.stage === LifecycleStage.endTurn);
-    this.stage = LifecycleStage.endPhase;
-  }
-
-  checkAutoAction(): void {
-    assert(this.stage === LifecycleStage.startTurn);
-    this.stage = LifecycleStage.checkAutoAction;
-  }
-
-  waitForAction(): void {
-    assert(this.stage === LifecycleStage.checkAutoAction);
-    this.stage = LifecycleStage.waitForAction;
-  }
-
-  endTurnAtEndOfAction(): void {
-    this.shouldEndTurnAtEndOfAction = true;
-  }
-
-  endProcessAction(): void {
-    if (this.shouldEndTurnAtEndOfAction) {
-      this.stage = LifecycleStage.endTurn;
-    } else {
-      this.stage = LifecycleStage.checkAutoAction;
-    }
-    this.shouldEndTurnAtEndOfAction = false;
+  startPhase(phase: Phase): StartPhase {
+    return new StartPhase(this.round, phase);
   }
 }
+
+export class StartPhase {
+  constructor(readonly round: number, readonly phase: Phase) { }
+
+  startTurn(currentPlayer: PlayerColor): StartTurn {
+    return new StartTurn(this.round, this.phase, currentPlayer);
+  }
+
+  endPhase(): EndPhase {
+    return new EndPhase(this.round, this.phase);
+  }
+}
+
+export class StartTurn {
+  constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
+
+  checkAutoAction(): CheckAutoAction {
+    return new CheckAutoAction(this.round, this.phase, this.currentPlayer);
+  }
+}
+
+export class CheckAutoAction {
+  constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
+
+  processAction(actionName: string, data: unknown) {
+    return new ProcessAction(this.round, this.phase, this.currentPlayer, actionName, data);
+  }
+
+  waitForAction(): WaitForAction {
+    return new WaitForAction(this.round, this.phase, this.currentPlayer);
+  }
+}
+
+export class WaitForAction {
+  constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
+}
+
+export class ProcessAction {
+  constructor(
+    readonly round: number,
+    readonly phase: Phase,
+    readonly currentPlayer: PlayerColor,
+    readonly actionName: string,
+    readonly data: unknown) { }
+
+  endTurn() {
+    return new EndTurn(this.round, this.phase, this.currentPlayer);
+  }
+
+  checkAutoAction() {
+    return new CheckAutoAction(this.round, this.phase, this.currentPlayer);
+  }
+}
+
+export class EndTurn {
+  constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
+
+  startTurn(playerColor: PlayerColor) {
+    return new StartTurn(this.round, this.phase, playerColor);
+  }
+
+  endPhase() {
+    return new EndPhase(this.round, this.phase);
+  }
+}
+
+export class EndPhase {
+  constructor(readonly round: number, readonly phase: Phase) { }
+
+  startPhase(phase: Phase) {
+    return new StartPhase(this.round, phase);
+  }
+
+  endRound() {
+    return new EndRound(this.round);
+  }
+}
+
+export class EndRound {
+  constructor(readonly round: number) { }
+
+  startNextRound() {
+    return new StartRound(this.round + 1);
+  }
+}
+
+export type LifecycleStage =
+  StartRound |
+  StartPhase |
+  StartTurn |
+  CheckAutoAction |
+  ProcessAction |
+  WaitForAction |
+  EndTurn |
+  EndPhase |
+  EndRound;

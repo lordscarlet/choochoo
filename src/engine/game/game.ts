@@ -1,10 +1,10 @@
 
 import { infiniteLoopCheck } from "../../utils/functions";
-import { assert, assertNever, fail } from "../../utils/validate";
+import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Key } from "../framework/key";
 import { InitialMapGrid } from "../state/map_settings";
-import { Lifecycle, LifecycleStage } from "./lifecycle";
+import { CheckAutoAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
 import { Log } from "./log";
 import { PHASE, PhaseEngine } from "./phase";
 import { PhaseDelegator } from "./phase_delegator";
@@ -31,31 +31,20 @@ export class GameEngine {
   private readonly phase = injectState(PHASE);
   private readonly log = inject(Log);
   private readonly turn = inject(TurnEngine);
-  private readonly lifecycle = inject(Lifecycle);
+  private lifecycle: LifecycleStage | undefined;
   private readonly gameStatus = injectState(GAME_STATUS);
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
 
   start(playerIds: number[], startingMap: InitialMapGrid) {
     this.gameStatus.initState(GameStatus.PROGRESS);
     this.starter.startGame(playerIds, startingMap);
-    this.lifecycle.startGame();
+    this.lifecycle = new StartRound(1)
     this.runLifecycle();
   }
 
   processAction(actionName: string, data: unknown): void {
-    this.processActionInternal(actionName, data);
+    this.lifecycle = new ProcessAction(this.round(), this.phase(), this.currentPlayer(), actionName, data);
     this.runLifecycle();
-  }
-
-  private processActionInternal(actionName: string, data: unknown): void {
-    this.lifecycle.startProcessAction(this.round(), this.phase(), this.currentPlayer());
-    const endsTurn = this.delegator.get().processAction(actionName, data);
-    if (endsTurn) {
-      // TODO: Move this into the action itself
-      this.lifecycle.endTurnAtEndOfAction();
-    }
-
-    this.lifecycle.endProcessAction();
   }
 
   private isGameOverPrematurely(): boolean {
@@ -64,75 +53,75 @@ export class GameEngine {
 
   private runLifecycle(): void {
     const checkInfinite = infiniteLoopCheck(50);
-    while (this.gameStatus() !== GameStatus.ENDED && this.lifecycle.getStage() !== LifecycleStage.waitForAction) {
-      checkInfinite(`${this.lifecycle.getStage()}`);
+    while (this.gameStatus() !== GameStatus.ENDED && !(this.lifecycle instanceof WaitForAction)) {
+      checkInfinite(`${this.lifecycle!.constructor.name}`);
       this.stepLifecycle();
     }
   }
 
   private stepLifecycle(): void {
-    const stage = this.lifecycle.getStage();
     if (this.isGameOverPrematurely()) {
       this.end();
       return;
     }
-    assert(stage !== LifecycleStage.waitForAction);
-    switch (stage) {
-      case LifecycleStage.startRound:
-        this.roundEngine.start(this.lifecycle.getRound());
-        this.lifecycle.startPhase(this.phaseEngine.getFirstPhase());
+
+    assert(this.lifecycle != null);
+    assert(!(this.lifecycle instanceof WaitForAction));
+
+    if (this.lifecycle instanceof StartRound) {
+      this.roundEngine.start(this.lifecycle.round);
+      this.lifecycle = this.lifecycle.startPhase(this.phaseEngine.getFirstPhase());
+    } else if (this.lifecycle instanceof StartPhase) {
+      this.phaseEngine.start(this.lifecycle.phase);
+      const firstPlayer = this.delegator.get().getFirstPlayer();
+      if (firstPlayer != null) {
+        this.lifecycle = this.lifecycle.startTurn(firstPlayer);
         return;
-      case LifecycleStage.startPhase:
-        this.phaseEngine.start(this.lifecycle.getPhase());
-        const firstPlayer = this.delegator.get().getFirstPlayer();
-        if (firstPlayer != null) {
-          this.lifecycle.startTurn(firstPlayer);
-          return;
-        }
-        this.lifecycle.endPhase();
+      }
+      this.lifecycle = this.lifecycle.endPhase();
+    } else if (this.lifecycle instanceof StartTurn) {
+      this.turn.start(this.lifecycle.currentPlayer);
+      this.lifecycle = this.lifecycle.checkAutoAction();
+    } else if (this.lifecycle instanceof CheckAutoAction) {
+      const autoAction = this.delegator.get().autoAction();
+      if (autoAction != null) {
+        this.lifecycle = this.lifecycle.processAction(autoAction.action.action, autoAction.data);
         return;
-      case LifecycleStage.startTurn:
-        this.turn.start(this.lifecycle.getCurrentPlayer());
-        this.lifecycle.checkAutoAction();
+      }
+      this.lifecycle = this.lifecycle.waitForAction();
+    } else if (this.lifecycle instanceof ProcessAction) {
+      const endsTurn = this.delegator.get().processAction(this.lifecycle.actionName, this.lifecycle.data);
+      if (endsTurn) {
+        this.lifecycle = this.lifecycle.endTurn();
         return;
-      case LifecycleStage.checkAutoAction:
-        const autoAction = this.delegator.get().autoAction();
-        if (autoAction != null) {
-          this.processActionInternal(autoAction.action.action, autoAction.data);
-          return;
-        }
-        this.lifecycle.waitForAction();
+      }
+
+      this.lifecycle = this.lifecycle.checkAutoAction();
+    } else if (this.lifecycle instanceof EndTurn) {
+      this.turn.end();
+      const nextPlayer = this.delegator.get().findNextPlayer(this.lifecycle.currentPlayer);
+      if (nextPlayer != null) {
+        this.lifecycle = this.lifecycle.startTurn(nextPlayer);
         return;
-      case LifecycleStage.processAction:
-        fail('cannot process action in game engine');
-      case LifecycleStage.endTurn:
-        this.turn.end();
-        const nextPlayer = this.delegator.get().findNextPlayer(this.lifecycle.getCurrentPlayer());
-        if (nextPlayer != null) {
-          this.lifecycle.startTurn(nextPlayer);
-          return;
-        }
-        this.lifecycle.endPhase();
+      }
+      this.lifecycle = this.lifecycle.endPhase();
+    } else if (this.lifecycle instanceof EndPhase) {
+      this.phaseEngine.end();
+      const nextPhase = this.phaseEngine.findNextPhase(this.lifecycle.phase);
+      if (nextPhase != null) {
+        this.lifecycle = this.lifecycle.startPhase(nextPhase);
         return;
-      case LifecycleStage.endPhase:
-        this.phaseEngine.end();
-        const nextPhase = this.phaseEngine.findNextPhase(this.lifecycle.getPhase());
-        if (nextPhase != null) {
-          this.lifecycle.startPhase(nextPhase);
-          return;
-        }
-        this.lifecycle.endRound();
+      }
+      this.lifecycle = this.lifecycle.endRound();
+    } else if (this.lifecycle instanceof EndRound) {
+      this.roundEngine.end();
+      if (this.lifecycle.round >= this.roundEngine.maxRounds()) {
+        this.end();
         return;
-      case LifecycleStage.endRound:
-        this.roundEngine.end();
-        if (this.lifecycle.getRound() >= this.roundEngine.maxRounds()) {
-          this.end();
-          return;
-        }
-        this.lifecycle.startNextRound();
-        return;
-      default:
-        assertNever(stage);
+      }
+      this.lifecycle = this.lifecycle.startNextRound();
+    } else {
+      assertNever(this.lifecycle);
     }
   }
 
