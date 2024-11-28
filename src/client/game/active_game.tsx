@@ -1,11 +1,10 @@
-import { GameApi } from "../../api/game";
 import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
 import { MOVE_STATE } from "../../engine/move/state";
 import { getPhaseString, Phase } from "../../engine/state/phase";
 import { GameMap } from "../grid/game_map";
 import { useGame, useRetryAction, useUndoAction } from "../services/game";
-import { ExecutionContextProvider, useInjected, useInjectedState } from "../utils/execution_context";
+import { InjectionContextProvider, useInjected, useInjectedState } from "../utils/injection_context";
 import { Editor } from "./editor";
 import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
@@ -13,16 +12,11 @@ import { PlayerStats } from "./player_stats";
 import { SelectAction } from "./select_action";
 
 
-interface LoadedGameProps {
-  game: GameApi;
-  setGame: (game: GameApi) => void;
-}
-
 export function ActiveGame() {
   const game = useGame();
-  return <ExecutionContextProvider gameKey={game.gameKey} gameData={game.gameData!}>
+  return <InjectionContextProvider game={game}>
     <InternalActiveGame />
-  </ExecutionContextProvider>;
+  </InjectionContextProvider>;
 }
 
 function InternalActiveGame() {

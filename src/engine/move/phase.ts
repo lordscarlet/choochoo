@@ -12,7 +12,9 @@ import { MOVE_STATE } from "./state";
 
 export class MovePhase extends PhaseModule {
   static readonly phase = Phase.MOVING;
+
   private readonly moveState = injectState(MOVE_STATE);
+  private readonly players = injectState(PLAYERS);
 
   configureActions() {
     this.installAction(LocoAction);
@@ -42,7 +44,7 @@ export class MovePhase extends PhaseModule {
 
   getPlayerOrder(): PlayerColor[] {
     const playerOrder = super.getPlayerOrder();
-    const firstMove = injectState(PLAYERS)().find(player => player.selectedAction === Action.FIRST_MOVE);
+    const firstMove = this.players().find(player => player.selectedAction === Action.FIRST_MOVE);
     if (firstMove != null) {
       return [firstMove.color, ...remove(playerOrder, firstMove.color)];
     }

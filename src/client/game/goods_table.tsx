@@ -10,7 +10,7 @@ import { iterate } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GoodBlock } from "../grid/good";
 import { useAction } from "../services/game";
-import { useGrid, useInjectedState, usePhaseState } from "../utils/execution_context";
+import { useGrid, useInjectedState, usePhaseState } from "../utils/injection_context";
 
 
 export function GoodsTable() {

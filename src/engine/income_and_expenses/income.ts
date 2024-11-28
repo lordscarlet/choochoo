@@ -6,9 +6,10 @@ import { PlayerColor } from "../state/player";
 
 export class IncomePhase extends PhaseModule {
   static readonly phase = Phase.INCOME;
+  private readonly players = injectState(PLAYERS);
 
   onStart(): void {
-    injectState(PLAYERS).update((players) => {
+    this.players.update((players) => {
       for (const player of players) {
         if (player.outOfGame) continue;
         player.money += player.income;

@@ -13,8 +13,8 @@ import { Coordinates } from "../../utils/coordinates";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { useAction, useGameVersionState } from "../services/game";
-import { useCurrentPlayer, useGrid } from "../utils/execution_context";
 import { useTypedCallback, useTypedMemo } from "../utils/hooks";
+import { useCurrentPlayer, useGrid } from "../utils/injection_context";
 import { BuildingDialog } from "./building_dialog";
 import { HexGrid } from "./hex_grid";
 

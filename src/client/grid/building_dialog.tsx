@@ -18,8 +18,8 @@ import { LocationType } from '../../engine/state/location_type';
 import { allDirections, ComplexTileType, Direction, SimpleTileType, TileData, TownTileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { useAction } from '../services/game';
-import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/execution_context";
 import { useTypedMemo } from '../utils/hooks';
+import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/injection_context";
 import { HexGrid } from './hex_grid';
 
 

@@ -24,6 +24,7 @@ export class BuildPhase extends PhaseModule {
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly grid = injectGrid();
   private readonly log = inject(Log);
+  private readonly players = injectState(PLAYERS);
 
   configureActions() {
     this.installAction(BuildAction);
@@ -73,7 +74,7 @@ export class BuildPhase extends PhaseModule {
 
   getPlayerOrder(): PlayerColor[] {
     const playerOrder = super.getPlayerOrder();
-    const firstMove = injectState(PLAYERS)().find(player => player.selectedAction === Action.FIRST_BUILD);
+    const firstMove = this.players().find(player => player.selectedAction === Action.FIRST_BUILD);
     if (firstMove != null) {
       return [firstMove.color, ...remove(playerOrder, firstMove.color)];
     }

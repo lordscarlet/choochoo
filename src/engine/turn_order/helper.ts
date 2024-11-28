@@ -11,6 +11,7 @@ export class TurnOrderHelper {
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly playerHelper = inject(PlayerHelper);
+  private readonly log = inject(Log);
 
   getMinBid(): number {
     return Math.max(0, ...this.turnOrderState().previousBids.values()) + 1;
@@ -42,7 +43,6 @@ export class TurnOrderHelper {
   }
 
   pass(player: PlayerData): void {
-    const log = inject(Log);
     const previousState = this.turnOrderState();
     const previousBid = previousState.previousBids.get(player.color) ?? 0;
     const numPlayers = this.turnOrder().length;
@@ -51,7 +51,7 @@ export class TurnOrderHelper {
       playerOrder <= 2 ? 1 : 0.5;
     const cost = Math.ceil(previousBid * costMultiplier);
 
-    log.player(player.color, `pays ${cost} and becomes player ${playerOrder}`)
+    this.log.player(player.color, `pays ${cost} and becomes player ${playerOrder}`)
     this.turnOrderState.update((state) => {
       state.previousBids.delete(player.color);
       state.nextTurnOrder.unshift(player.color);

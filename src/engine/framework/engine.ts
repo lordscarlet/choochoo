@@ -4,7 +4,9 @@ import { GAME_STATUS, GameEngine, GameStatus } from "../game/game";
 import { Log } from "../game/log";
 import { Random } from "../game/random";
 import { injectCurrentPlayer } from "../game/state";
-import { ExecutionContext, getExecutionContext, inject, injectState, setExecutionContextGetter } from "./execution_context";
+import { inject, injectState, setInjectionContext } from "./execution_context";
+import { InjectionContext } from "./inject";
+import { StateStore } from "./state";
 
 interface MapConfig {
   mapKey: string;
@@ -18,59 +20,75 @@ interface GameState {
   logs: string[];
 }
 
-export class Engine {
-  static readonly singleton = new Engine();
-  private readonly settings = new Map();
+export class EngineDelegator {
+  static readonly singleton = new EngineDelegator();
+  private readonly engines = new Map<string, EngineProcessor>();
 
   private constructor() { }
 
-  private getExecutionContext(mapKey: string): ExecutionContext {
-    if (!this.settings.has(mapKey)) {
-      this.settings.set(mapKey, new ExecutionContext(MapRegistry.singleton.get(mapKey)));
+  private getEngine(mapKey: string): EngineProcessor {
+    if (!this.engines.has(mapKey)) {
+      try {
+        const injectionContext = new InjectionContext(mapKey);
+        
+        setInjectionContext(injectionContext);
+        this.engines.set(mapKey, injectionContext.get(EngineProcessor));
+      } finally {
+        setInjectionContext();
+      }
     }
-    return this.settings.get(mapKey)!;
+    return this.engines.get(mapKey)!;
   }
 
   start(playerIds: number[], mapConfig: MapConfig): GameState {
-    return this.executeInExecutionContext(mapConfig.mapKey, undefined, () => {
-      const mapSettings = MapRegistry.singleton.get(mapConfig.mapKey);
-      assert(playerIds.length >= mapSettings.minPlayers, { invalidInput: 'not enough players to start' });
-      const gameEngine = inject(GameEngine);
-      gameEngine.start(playerIds, mapSettings.startingGrid);
-    });
+    return this.getEngine(mapConfig.mapKey).start(playerIds, mapConfig);
   }
 
   processAction(mapKey: string, gameData: string, actionName: string, data: unknown): GameState {
-    return this.executeInExecutionContext(mapKey, gameData, () => {
-      const gameEngine = inject(GameEngine);
-      gameEngine.processAction(actionName, data);
+    return this.getEngine(mapKey).processAction(gameData, actionName, data);
+  }
+}
+
+export class EngineProcessor {
+  private readonly gameEngine = inject(GameEngine);
+  private readonly state = inject(StateStore);
+  private readonly random = inject(Random);
+  private readonly log = inject(Log);
+  private readonly gameStatus = injectState(GAME_STATUS);
+  private readonly currentPlayer = injectCurrentPlayer();
+
+  start(playerIds: number[], mapConfig: MapConfig): GameState {
+    return this.getNextGameState(undefined, () => {
+      const mapSettings = MapRegistry.singleton.get(mapConfig.mapKey);
+      assert(playerIds.length >= mapSettings.minPlayers, { invalidInput: 'not enough players to start' });
+      this.gameEngine.start(playerIds, mapSettings.startingGrid);
     });
   }
 
-  private beginInjectionModeAsync(mapKey: string, gameData: string | undefined): () => void {
-    const ctx = this.getExecutionContext(mapKey);
-    if (gameData != null) {
-      ctx.merge(gameData);
-    }
-    setExecutionContextGetter(() => ctx);
-    return setExecutionContextGetter;
+  processAction(gameData: string, actionName: string, data: unknown): GameState {
+    return this.getNextGameState(gameData, () => {
+      this.gameEngine.processAction(actionName, data);
+    });
   }
 
-  private executeInExecutionContext(mapKey: string, gameData: string | undefined, process: () => void): GameState {
-    const endInjectionMode = this.beginInjectionModeAsync(mapKey, gameData);
+  private getNextGameState(gameData: string | undefined, processFn: () => void): GameState {
+    if (gameData != null) {
+      this.state.merge(gameData);
+    }
     try {
-      const currentPlayer = injectCurrentPlayer();
-      const gameStatus = injectState(GAME_STATUS);
-      process();
+      processFn();
       return {
-        activePlayerId: gameStatus() === GameStatus.ENDED ? undefined : currentPlayer().playerId,
-        gameStatus: gameStatus(),
-        gameData: getExecutionContext().gameState.serialize(),
-        reversible: inject(Random).isReversible(),
-        logs: inject(Log).dump(),
+        activePlayerId: this.gameStatus() === GameStatus.ENDED ? undefined : this.currentPlayer().playerId,
+        gameStatus: this.gameStatus(),
+        gameData: this.state.serialize(),
+        reversible: this.random.isReversible(),
+        logs: this.log.dump(),
       };
-    } finally {
-      endInjectionMode();
+    } catch (e) {
+      this.log.reset();
+      this.random.reset();
+      this.state.reset();
+      throw e;
     }
   }
 }

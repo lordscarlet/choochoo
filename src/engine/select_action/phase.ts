@@ -7,13 +7,14 @@ import { SelectAction } from "./select";
 export class SelectActionPhase extends PhaseModule {
   static readonly phase = Phase.ACTION_SELECTION;
 
+  private readonly players = injectState(PLAYERS);
 
   configureActions() {
     this.installAction(SelectAction);
   }
 
   onStart(): void {
-    injectState(PLAYERS).update((players) => {
+    this.players.update((players) => {
       for (const player of players) {
         delete player.selectedAction;
       }

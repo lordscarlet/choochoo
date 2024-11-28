@@ -7,7 +7,7 @@ import { UserRole } from "../../api/user";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { MapRegistry } from "../../maps";
-import { useInjected } from "../utils/execution_context";
+import { useInjected } from "../utils/injection_context";
 import { tsr } from "./client";
 import { useMe } from "./me";
 import { handleError } from "./network";

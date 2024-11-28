@@ -19,13 +19,12 @@ export class TakeSharesAction implements ActionProcessor<TakeSharesData> {
 
   private readonly log = inject(Log);
   private readonly playerHelper = inject(PlayerHelper);
-
+  private readonly helper = inject(ShareHelper);
 
   validate(data: TakeSharesData) {
-    const helper = inject(ShareHelper);
     assert(
-      data.numShares <= helper.getSharesTheyCanTake(),
-      { invalidInput: `cannot take more than ${helper.getMaxShares()} shares` })
+      data.numShares <= this.helper.getSharesTheyCanTake(),
+      { invalidInput: `cannot take more than ${this.helper.getMaxShares()} shares` })
   }
 
   process({ numShares }: TakeSharesData): boolean {

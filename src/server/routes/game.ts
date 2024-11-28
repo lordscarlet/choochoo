@@ -7,7 +7,7 @@ import { GameModel } from '../model/game';
 
 import { Op, WhereOptions } from '@sequelize/core';
 import { UserRole } from '../../api/user';
-import { Engine } from '../../engine/framework/engine';
+import { EngineDelegator } from '../../engine/framework/engine';
 import { GameStatus as GameEngineStatus } from '../../engine/game/game';
 import { MapRegistry } from '../../maps';
 import { peek } from '../../utils/functions';
@@ -129,7 +129,7 @@ const router = initServer().router(gameContract, {
     assert(game.playerIds[0] === userId, { invalidInput: 'only the owner can start the game' });
 
     const originalGame = game.toApi();
-    const { gameData, logs, activePlayerId } = Engine.singleton.start(game.playerIds, { mapKey: game.gameKey });
+    const { gameData, logs, activePlayerId } = EngineDelegator.singleton.start(game.playerIds, { mapKey: game.gameKey });
 
     // TODO: save the logs
     game.gameData = gameData;
@@ -165,7 +165,7 @@ const router = initServer().router(gameContract, {
       const originalGame = game.toApi();
 
       const { gameData, logs, activePlayerId, gameStatus, reversible } =
-        Engine.singleton.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
+        EngineDelegator.singleton.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
 
       const gameHistory = GameHistoryModel.build({
         gameVersion: game.version,
@@ -253,7 +253,7 @@ const router = initServer().router(gameContract, {
     let finalUndoPlayerId: number | undefined;
     const allLogs: LogModel[] = [];
     if ('startOver' in body && body.startOver) {
-      const { gameData, logs, activePlayerId } = Engine.singleton.start(game.playerIds, { mapKey: game.gameKey });
+      const { gameData, logs, activePlayerId } = EngineDelegator.singleton.start(game.playerIds, { mapKey: game.gameKey });
       currentGameData = gameData;
       currentGameVersion = 1;
       finalActivePlayerId = activePlayerId;
@@ -271,7 +271,7 @@ const router = initServer().router(gameContract, {
     const newHistory: GameHistoryModel[] = [];
     while (previousAction = previousActions.pop()) {
       const { gameData, logs, activePlayerId, gameStatus, reversible } =
-        Engine.singleton.processAction(game.gameKey, currentGameData, previousAction.actionName, JSON.parse(previousAction.actionData));
+        EngineDelegator.singleton.processAction(game.gameKey, currentGameData, previousAction.actionName, JSON.parse(previousAction.actionData));
 
       newHistory.push(GameHistoryModel.build({
         gameVersion: currentGameVersion,

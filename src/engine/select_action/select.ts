@@ -18,10 +18,12 @@ export type SelectData = z.infer<typeof SelectData>;
 export class SelectAction implements ActionProcessor<SelectData> {
   static readonly action = 'select';
   private readonly helper = inject(PlayerHelper);
+  private readonly players = injectState(PLAYERS);
+  private readonly log = inject(Log);
 
   readonly assertInput = SelectData.parse;
   validate({ action }: SelectData): void {
-    for (const player of injectState(PLAYERS)()) {
+    for (const player of this.players()) {
       assert(player.selectedAction !== action, 'action already selected');
     }
   }
@@ -33,7 +35,7 @@ export class SelectAction implements ActionProcessor<SelectData> {
         player.locomotive++;
       }
     });
-    inject(Log).currentPlayer(`selected ${getSelectedActionString(action)}`);
+    this.log.currentPlayer(`selected ${getSelectedActionString(action)}`);
     return true;
   }
 }

@@ -38,6 +38,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
   private readonly costCalculator = inject(BuildCostCalculator);
   private readonly playerHelper = inject(PlayerHelper);
   private readonly validator = inject(Validator);
+  private readonly log = inject(Log);
 
   validate(data: BuildData): void {
     const coordinates: Coordinates = data.coordinates;
@@ -64,7 +65,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     const coordinates = data.coordinates;
     this.playerHelper.updateCurrentPlayer((player) => player.money -= this.costCalculator.costOf(coordinates, data.tileType));
     const newTile = this.newTile(data);
-    inject(Log).currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${data.coordinates}`);
+    this.log.currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${data.coordinates}`);
     this.gridHelper.update(coordinates, (hex) => {
       assert(hex.type !== LocationType.CITY);
       hex.tile = newTile;

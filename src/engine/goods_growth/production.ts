@@ -4,7 +4,6 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
-import { PlayerHelper } from "../game/player";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { CityGroup } from "../state/city_group";
@@ -31,7 +30,6 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
   private readonly grid = inject(GridHelper);
   private readonly log = inject(Log);
   private readonly helper = inject(GoodsHelper);
-  private readonly playerHelper = inject(PlayerHelper);
   private readonly turnState = injectState(GOODS_GROWTH_STATE);
 
   private findOnRoll(onRoll: OnRollData[], data: ProductionData): OnRollData | undefined {
@@ -68,7 +66,7 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
     });
 
     if (!this.helper.hasCityOpenings()) {
-      inject(Log).currentPlayer('has to forfeit remaining production due to no openings');
+      this.log.currentPlayer('has to forfeit remaining production due to no openings');
       return true;
     }
 

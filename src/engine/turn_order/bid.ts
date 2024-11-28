@@ -15,6 +15,7 @@ export class BidAction implements ActionProcessor<{}> {
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly helper = inject(TurnOrderHelper);
+  private readonly log = inject(Log);
 
   readonly assertInput = BidData.parse;
   validate({ bid }: BidData): void {
@@ -24,7 +25,7 @@ export class BidAction implements ActionProcessor<{}> {
   }
 
   process({ bid }: BidData): boolean {
-    inject(Log).currentPlayer(`bids ${bid}`);
+    this.log.currentPlayer(`bids ${bid}`);
     this.turnOrderState.update((prev) => {
       prev.previousBids.set(this.currentPlayer().color, bid);
     });

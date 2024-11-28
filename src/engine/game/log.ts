@@ -5,6 +5,10 @@ export class Log {
   private readonly currPlayerData = injectCurrentPlayer();
   private logs: string[] = [];
 
+  reset(): void {
+    this.logs = [];
+  }
+
   log(entry: string): void {
     this.logs.push(entry);
   }
@@ -19,8 +23,6 @@ export class Log {
   }
 
   dump(): string[] {
-    const logs = this.logs;
-    this.logs = [];
-    return logs;
+    return this.logs;
   }
 }

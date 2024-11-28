@@ -8,7 +8,7 @@ import { freeze, Immutable } from "../../utils/immutable";
 import { assert } from '../../utils/validate';
 import { GRID } from '../game/state';
 import { MutableSpaceData, SpaceData } from '../state/space';
-import { getExecutionContext } from './execution_context';
+import { getInjectionContext } from './execution_context';
 import { Key } from './key';
 
 interface StateContainer<T> {
@@ -28,6 +28,10 @@ type SerializedGameData = z.infer<typeof SerializedGameData>;
 
 export class StateStore {
   private state = new Map<string, StateContainer<unknown>>();
+
+  reset(): void {
+    this.state = new Map();
+  }
 
   init<T>(key: Key<T>, state: T): void {
     assert(!this.isInitialized(key), 'cannot call init on initialized key');
@@ -117,7 +121,7 @@ export class StateStore {
   }
 
   injectState<T>(key: Key<T>): InjectedState<T> {
-    getExecutionContext().injectionContext.addDependency(key);
+    getInjectionContext().addDependency(key);
     const result = () => this.get(key);
     const ops: InjectedOps<T> = {
       initState: (state: T) => this.init(key, state),

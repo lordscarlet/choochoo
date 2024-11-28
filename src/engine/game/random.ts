@@ -4,6 +4,10 @@ import { OnRoll } from "../state/roll";
 export class Random {
   private reversible = true;
 
+  reset(): void {
+    this.reversible = true;
+  }
+
   shuffle<T>(array: T[]): T[] {
     const results: T[] = [];
     const values = [...array];
@@ -30,8 +34,6 @@ export class Random {
   }
 
   isReversible(): boolean {
-    const { reversible } = this;
-    this.reversible = true;
-    return reversible;
+    return this.reversible;
   }
 }

@@ -1,3 +1,4 @@
+import { MapRegistry } from "../../maps";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { Key } from "./key";
@@ -10,6 +11,10 @@ export class InjectionContext {
   private readonly dependencies = new Map<SimpleConstructor<unknown>, Set<Key<unknown> | SimpleConstructor<unknown>>>();
   private readonly injected = new Map<SimpleConstructor<unknown>, unknown>();
   private readonly dependencyStack: Array<Set<SimpleConstructor<unknown> | Key<unknown>>> = [];
+
+  constructor(mapKey: string) {
+    MapRegistry.singleton.get(mapKey).registerOverrides(this);
+  }
 
   addDependency(dep: Key<unknown> | SimpleConstructor<unknown>): void {
     peek(this.dependencyStack)?.add(dep);

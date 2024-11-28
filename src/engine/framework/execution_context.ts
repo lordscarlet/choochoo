@@ -1,41 +1,27 @@
 import { freeze, Immutable } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
-import { MapSettings } from "../game/map_settings";
 import { InjectionContext, SimpleConstructor } from "./inject";
 import { Key } from "./key";
 import { InjectedState, KeyArray, StateStore } from "./state";
 
 
-export class ExecutionContext {
-  readonly gameState = new StateStore();
-  readonly injectionContext = new InjectionContext();
+let injectionContext: InjectionContext | undefined;
 
-  constructor(mapSettings: MapSettings) {
-    mapSettings.registerOverrides(this.injectionContext);
-  }
-
-  merge(gameData: string) {
-    this.gameState.merge(gameData);
-  }
+export function setInjectionContext(ctx?: InjectionContext) {
+  injectionContext = ctx;
 }
 
-let executionContextGetter: (() => ExecutionContext) | undefined;
-
-export function setExecutionContextGetter(getter?: () => ExecutionContext) {
-  executionContextGetter = getter;
-}
-
-export function getExecutionContext(): ExecutionContext {
-  assert(executionContextGetter != null);
-  return executionContextGetter();
+export function getInjectionContext(): InjectionContext {
+  assert(injectionContext != null);
+  return injectionContext;
 }
 
 export function inject<R>(factory: SimpleConstructor<R>): R {
-  return getExecutionContext().injectionContext.get(factory);
+  return getInjectionContext().get(factory);
 }
 
 export function injectState<T>(key: Key<T>): InjectedState<T> {
-  return getExecutionContext().gameState.injectState(key);
+  return inject(StateStore).injectState(key);
 }
 
 export function composeState<Args extends [...any[]], T extends (old: ReturnType<T> | undefined, ...args: Args) => any>(keys: NoInfer<KeyArray<Args>>, transformer: T): () => () => Immutable<ReturnType<T>> {
