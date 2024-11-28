@@ -1,8 +1,25 @@
 # Step 1: build
 npm run build-client
-# Step 2: deploy static files to S3
-aws s3 cp ./src/client/index.html s3://www.choochoo.games/index.html
-aws s3 cp ./dist/ s3://www.choochoo.games/dist/ --recursive
 
-echo "Invalidating cache"
+upload() {
+  file="$1"
+  newlocation="${2:-$file}"
+  gzfile="${3:-"${file/min/gz}"}"
+
+  # Step 2: gzip compress 
+  gzip -c -9 "$file" > "$gzfile"
+
+  # Step 3: deploy to s3
+  aws s3 cp --content-encoding 'gzip' "$gzfile" "s3://www.choochoo.games/$newlocation"
+}
+
+upload "src/client/index.html" index.html "dist/index.gz.html"
+upload "dist/index.min.js.map"
+upload "dist/index.min.js"
+upload "dist/index.min.css.map"
+upload "dist/index.min.css"
+
+# Step 3: Invalidate the cache
 aws cloudfront create-invalidation --distribution-id=E16V74AIRBU7V5 --paths "/*" > /dev/null
+
+echo "Done deploying client."
