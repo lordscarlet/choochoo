@@ -1,4 +1,5 @@
 
+import { Coordinates } from "../../utils/coordinates";
 import { remove } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
@@ -46,12 +47,12 @@ export class BuildPhase extends PhaseModule {
     const grid = this.grid();
     const newDanglers = grid.getDanglers(this.currentPlayer().color);
     const toRemoveIndividual = danglers.filter((dangler) => {
-      const newDangler = newDanglers.find((d) => d.coordinates.equals(dangler.coordinates) && d.immovableExit === dangler.immovableExit);
+      const newDangler = newDanglers.find((d) => Coordinates.from(d.coordinates).equals(Coordinates.from(dangler.coordinates)) && d.immovableExit === dangler.immovableExit);
       return newDangler != null && newDangler.length <= dangler.length;
     });
 
     const toRemoveAll = toRemoveIndividual.flatMap((removing) => {
-      const space = grid.get(removing.coordinates);
+      const space = grid.get(Coordinates.from(removing.coordinates));
       assert(space instanceof Location);
       const track = space.trackExiting(removing.immovableExit);
       return grid.getRoute(track!);

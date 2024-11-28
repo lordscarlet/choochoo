@@ -1,6 +1,6 @@
 import { Map as ImmutableMap } from 'immutable';
 import { z } from "zod";
-import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
+import { Coordinates, RawCoordinates } from "../../utils/coordinates";
 import { deepEquals } from '../../utils/deep_equals';
 import { isNotNull, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
@@ -198,7 +198,7 @@ export const DanglerInfo = z.object({
   // The exit leading to the city, or out of the town.
   immovableExit: z.nativeEnum(Direction),
   length: z.number(),
-  coordinates: CoordinatesZod,
+  coordinates: RawCoordinates,
 });
 
 export type DanglerInfo = z.infer<typeof DanglerInfo>;

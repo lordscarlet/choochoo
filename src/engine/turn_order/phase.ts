@@ -32,9 +32,10 @@ export class TurnOrderPhase extends PhaseModule {
 
   onStart(): void {
     super.onStart();
+    console.log('starting turn order phase');
     this.turnOrderState.initState({
       nextTurnOrder: [],
-      previousBids: new Map(),
+      previousBids: {},
       turnOrderPassUsed: false,
     });
   }
@@ -64,7 +65,7 @@ export class TurnOrderPhase extends PhaseModule {
       return undefined;
     }
 
-    const maxBidPlayer = this.helper.getMaxBidPlayer();
+    const maxBidPlayer = this.helper.getCurrentMaxBidPlayer();
 
     const infiniteLoop = infiniteLoopCheck(10);
     let nextPlayer = currentColor;

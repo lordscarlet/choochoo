@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { CoordinatesZod } from "../../utils/coordinates";
+import { RawCoordinates } from "../../utils/coordinates";
 import { Immutable } from "../../utils/immutable";
 import { Key } from "../framework/key";
 import { DanglerInfo } from "../map/grid";
 
 export const MutableBuildState = z.object({
-  previousBuilds: z.array(CoordinatesZod),
+  previousBuilds: z.array(RawCoordinates),
   hasUrbanized: z.boolean(),
   danglers: z.array(DanglerInfo),
 });

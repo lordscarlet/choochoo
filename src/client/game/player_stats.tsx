@@ -82,7 +82,7 @@ class BidRenderer {
     const state = this.turnOrderState();
     const turnOrder = state.nextTurnOrder.indexOf(player.color) + 1 + this.turnOrder().length - state.nextTurnOrder.length;
     return state.nextTurnOrder.includes(player.color) ? `Passed: ${turnOrder}` :
-      state.previousBids.has(player.color) ? `$${state.previousBids.get(player.color)}` : 'N/A';
+      state.previousBids[player.color] != null ? `$${state.previousBids[player.color]}` : 'N/A';
   }
 }
 

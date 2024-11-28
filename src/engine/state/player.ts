@@ -14,6 +14,12 @@ export enum PlayerColor {
   BROWN,
 }
 
+export const PlayerColorZod = z.nativeEnum(PlayerColor);
+
+export function stringToPlayerColor(str: string): PlayerColor {
+  return PlayerColorZod.parse(Number(str));
+}
+
 export const MutablePlayerData = z.object({
   playerId: z.number(),
   color: z.nativeEnum(PlayerColor),

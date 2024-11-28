@@ -38,6 +38,7 @@ export function emitGameUpdate(oldGame: GameApi | undefined, game: GameModel): v
 }
 
 export function emitToRoom(logs: LogModel[]): void {
+  if (logs.length === 0) return;
   io.to(roomName(logs[0].gameId)).emit('newLogs', logs.map((l) => l.toApi()));
 }
 

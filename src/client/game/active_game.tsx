@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
 import { MOVE_STATE } from "../../engine/move/state";
@@ -21,18 +22,20 @@ export function ActiveGame() {
 
 function InternalActiveGame() {
   const game = useGame();
+  const [searchParams] = useSearchParams();
+  const undoOnly = searchParams.get('undoOnly') != null;
   // TODO: show available urbanization cities
   return <div>
     <h2>{game.name}</h2>
     <GameLog gameId={game.id} />
     <Editor />
-    <SelectAction />
+    {!undoOnly && <SelectAction />}
     <UndoButton />
     <RetryButton />
-    <CurrentPhase />
-    <PlayerStats />
-    <GameMap />
-    <GoodsTable />
+    {!undoOnly && <CurrentPhase />}
+    {!undoOnly && <PlayerStats />}
+    {!undoOnly && <GameMap />}
+    {!undoOnly && <GoodsTable />}
   </div>;
 }
 

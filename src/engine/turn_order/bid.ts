@@ -27,7 +27,7 @@ export class BidAction implements ActionProcessor<{}> {
   process({ bid }: BidData): boolean {
     this.log.currentPlayer(`bids ${bid}`);
     this.turnOrderState.update((prev) => {
-      prev.previousBids.set(this.currentPlayer().color, bid);
+      prev.previousBids[this.currentPlayer().color] = bid;
     });
     return true;
   }

@@ -30,7 +30,7 @@ export class EngineDelegator {
     if (!this.engines.has(mapKey)) {
       try {
         const injectionContext = new InjectionContext(mapKey);
-        
+
         setInjectionContext(injectionContext);
         this.engines.set(mapKey, injectionContext.get(EngineProcessor));
       } finally {
@@ -84,11 +84,10 @@ export class EngineProcessor {
         reversible: this.random.isReversible(),
         logs: this.log.dump(),
       };
-    } catch (e) {
+    } finally {
       this.log.reset();
       this.random.reset();
       this.state.reset();
-      throw e;
     }
   }
 }

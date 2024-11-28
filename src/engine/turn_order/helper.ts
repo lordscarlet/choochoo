@@ -3,7 +3,7 @@ import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
 import { injectCurrentPlayer, TURN_ORDER } from "../game/state";
 import { Action } from "../state/action";
-import { PlayerColor, PlayerData } from "../state/player";
+import { PlayerColor, PlayerData, stringToPlayerColor } from "../state/player";
 import { TURN_ORDER_STATE } from "./state";
 
 export class TurnOrderHelper {
@@ -14,14 +14,19 @@ export class TurnOrderHelper {
   private readonly log = inject(Log);
 
   getMinBid(): number {
-    return Math.max(0, ...this.turnOrderState().previousBids.values()) + 1;
+    return this.getCurrentMaxBid() + 1;
   }
 
-  getMaxBidPlayer(): PlayerColor | undefined {
+  getCurrentMaxBid(): number {
+    return Math.max(0, ...Object.values(this.turnOrderState().previousBids));
+  }
+
+  getCurrentMaxBidPlayer(): PlayerColor | undefined {
     const { previousBids } = this.turnOrderState();
-    if (previousBids.size === 0) return undefined;
-    const maxBid = Math.max(0, ...previousBids.values());
-    return [...previousBids.keys()].find(p => previousBids.get(p) === maxBid)!;
+    if (Object.keys(previousBids).length === 0) return undefined;
+    const maxBid = this.getCurrentMaxBid();
+    const key = [...Object.keys(previousBids)].find(p => previousBids[p] === maxBid)!;
+    return stringToPlayerColor(key);
   }
 
   getMaxBid(): number {
@@ -44,7 +49,7 @@ export class TurnOrderHelper {
 
   pass(player: PlayerData): void {
     const previousState = this.turnOrderState();
-    const previousBid = previousState.previousBids.get(player.color) ?? 0;
+    const previousBid = previousState.previousBids[player.color] ?? 0;
     const numPlayers = this.turnOrder().length;
     const playerOrder = numPlayers - previousState.nextTurnOrder.length;
     const costMultiplier = playerOrder === numPlayers ? 0 :
@@ -53,7 +58,7 @@ export class TurnOrderHelper {
 
     this.log.player(player.color, `pays ${cost} and becomes player ${playerOrder}`)
     this.turnOrderState.update((state) => {
-      state.previousBids.delete(player.color);
+      delete state.previousBids[player.color];
       state.nextTurnOrder.unshift(player.color);
     });
     this.playerHelper.addMoney(player.color, -cost);

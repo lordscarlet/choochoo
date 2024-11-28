@@ -57,7 +57,9 @@ export class Coordinates {
   }
 }
 
-export const CoordinatesZod = z.object({ q: z.number(), r: z.number() }).transform(Coordinates.from);
+export const RawCoordinates = z.object({ q: z.number(), r: z.number() });
+
+export const CoordinatesZod = RawCoordinates.transform(Coordinates.from);
 
 interface Offset {
   q: number;

@@ -28,6 +28,11 @@ export function assert(check: boolean, msg: ErrorInput = 'failed assertion'): as
   }
 }
 
+export function fail(msg: ErrorInput = 'failed assertion'): never {
+  emitError(msg);
+}
+
+
 export function assertNever(val: never): never {
   throw Error('assumed never: ' + val);
 }

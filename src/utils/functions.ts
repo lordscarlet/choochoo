@@ -1,4 +1,3 @@
-import { OnRoll } from "../engine/state/roll";
 import { Primitive } from "./types";
 import { assert } from "./validate";
 
@@ -82,10 +81,15 @@ export function partition<R, T>(arr: R[], fn: (r: R) => T): Map<T, R[]> {
   return map;
 }
 
-export function infiniteLoopCheck(numChecks: number, data?: string): () => void {
+export function infiniteLoopCheck(numChecks: number, data?: string): (moreData?: string) => void {
   let numRuns = 0;
-  return () => {
-    assert(numRuns++ < numChecks, `found infinite loop w/ data: ${data}`);
+  let lastData = [];
+  return (moreData?: string) => {
+    lastData.push(moreData);
+    if (lastData.length > 5) {
+      lastData.shift();
+    }
+    assert(numRuns++ < numChecks, `found infinite loop w/ data: ${data} moreData=${lastData}`);
   };
 }
 

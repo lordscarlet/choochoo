@@ -121,7 +121,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
   protected hasBuiltHere(coordinates: Coordinates): boolean {
     // you can't build two tiles in the same location in one turn
     for (const previousCoordinates of this.buildState().previousBuilds) {
-      if (previousCoordinates.equals(coordinates)) {
+      if (Coordinates.from(previousCoordinates).equals(coordinates)) {
         return true;
       }
     }
