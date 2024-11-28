@@ -1,49 +1,49 @@
 import { peek } from "../../utils/functions";
-import { NestedMap } from "../../utils/nested_map";
-import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
 import { Key } from "./key";
 
-export class InjectionContext {
-  private readonly overrides = new Map<Constructor<unknown>, unknown>();
-  private readonly inConstruction = new Map<Constructor<unknown>, ProxyObject<unknown>>();
-  private readonly dependencies = new Map<Constructor<unknown>, Set<Key<unknown> | Constructor<unknown>>>();
-  private readonly injected = new NestedMap();
-  private readonly dependencyStack: Array<Set<Constructor<unknown> | Key<unknown>>> = [];
+export type SimpleConstructor<T> = new () => T;
 
-  addDependency(dep: Key<unknown> | Constructor<unknown>): void {
+export class InjectionContext {
+  private readonly overrides = new Map<SimpleConstructor<unknown>, unknown>();
+  private readonly inConstruction = new Map<SimpleConstructor<unknown>, ProxyObject<unknown>>();
+  private readonly dependencies = new Map<SimpleConstructor<unknown>, Set<Key<unknown> | SimpleConstructor<unknown>>>();
+  private readonly injected = new Map<SimpleConstructor<unknown>, unknown>();
+  private readonly dependencyStack: Array<Set<SimpleConstructor<unknown> | Key<unknown>>> = [];
+
+  addDependency(dep: Key<unknown> | SimpleConstructor<unknown>): void {
     peek(this.dependencyStack)?.add(dep);
   }
 
-  startDependencyStack<T>(fn: () => T): [T, Set<Key<unknown> | Constructor<unknown>>] {
-    this.dependencyStack.push(new Set<Constructor<unknown> | Key<unknown>>());
+  startDependencyStack<T>(fn: () => T): [T, Set<Key<unknown> | SimpleConstructor<unknown>>] {
+    this.dependencyStack.push(new Set<SimpleConstructor<unknown> | Key<unknown>>());
     return [fn(), this.dependencyStack.pop()!];
   }
 
-  get<R, T extends Constructor<R>>(factory: T, args: ConstructorParameters<T>): R {
-    const overridden = this.overrides.get(factory) as T ?? factory;
-    const mapArgs = [overridden, ...args];
+  get<R>(factory: SimpleConstructor<R>): R {
+    const overridden = this.overrides.get(factory) as SimpleConstructor<R> ?? factory;
     this.addDependency(factory);
-    return this.injected.get(mapArgs, () => {
+    if (!this.injected.has(overridden)) {
       if (this.inConstruction.has(overridden)) {
         return this.inConstruction.get(overridden)!.proxy as R;
       }
       const proxyObject = buildProxy(overridden);
       this.inConstruction.set(overridden, proxyObject);
       const [result, dependencies] = this.startDependencyStack(() => {
-        return new overridden(...args);
+        return new overridden();
       });
-      proxyObject.setInternalObject(result as ConstructorReturnType<T>);
+      proxyObject.setInternalObject(result as R);
       this.inConstruction.delete(overridden);
       this.dependencies.set(overridden, dependencies);
 
-      return result;
-    });
+      this.injected.set(overridden, result);
+    }
+    return this.injected.get(overridden) as R;
   }
 
-  getStateDependencies(...dependencies: Array<Key<unknown> | Constructor<unknown>>): Set<Key<string>> {
+  getStateDependencies(...dependencies: Array<Key<unknown> | SimpleConstructor<unknown>>): Set<Key<string>> {
     const stateDependencies = new Set<Key<string>>();
-    const visited = new Set<Constructor<unknown>>();
+    const visited = new Set<SimpleConstructor<unknown>>();
     for (let index = 0; index < dependencies.length; index++) {
       const dependency = dependencies[index];
       if (dependency instanceof Key) {
@@ -58,7 +58,7 @@ export class InjectionContext {
     return stateDependencies;
   }
 
-  override<R, T extends Constructor<R>, S extends Constructor<R>>(factory: T, override: S): void {
+  override<R>(factory: SimpleConstructor<R>, override: SimpleConstructor<R>): void {
     this.overrides.set(factory, override);
   }
 }
@@ -72,9 +72,9 @@ interface ProxyObject<T> {
   proxy: T;
 }
 
-function buildProxy<T extends Constructor<any>>(constructorFn: T): ProxyObject<ConstructorReturnType<T>> {
+function buildProxy<R>(constructorFn: SimpleConstructor<R>): ProxyObject<R> {
   //we don't care about the target, but compiler does not allow a null one, so let's pass an "empty object" {}
-  let initialized: Initialized<T> | undefined;
+  let initialized: Initialized<R> | undefined;
   const proxy = new Proxy({}, {
     get: function (_, property: string, __) {
       assert(initialized != null, 'called an uninitialized value');
@@ -99,7 +99,7 @@ function buildProxy<T extends Constructor<any>>(constructorFn: T): ProxyObject<C
   });
 
   return {
-    proxy: proxy as ConstructorReturnType<T>,
-    setInternalObject: (value: T) => initialized = { value },
+    proxy: proxy as R,
+    setInternalObject: (value: R) => initialized = { value },
   };
 }

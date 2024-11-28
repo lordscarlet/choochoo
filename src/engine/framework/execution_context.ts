@@ -1,8 +1,7 @@
 import { freeze, Immutable } from "../../utils/immutable";
-import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
 import { MapSettings } from "../game/map_settings";
-import { InjectionContext } from "./inject";
+import { InjectionContext, SimpleConstructor } from "./inject";
 import { Key } from "./key";
 import { InjectedState, KeyArray, StateStore } from "./state";
 
@@ -31,8 +30,8 @@ export function getExecutionContext(): ExecutionContext {
   return executionContextGetter();
 }
 
-export function inject<T extends Constructor<any>>(factory: T, ...args: NoInfer<ConstructorParameters<T>>): ConstructorReturnType<T> {
-  return getExecutionContext().injectionContext.get(factory, args);
+export function inject<R>(factory: SimpleConstructor<R>): R {
+  return getExecutionContext().injectionContext.get(factory);
 }
 
 export function injectState<T>(key: Key<T>): InjectedState<T> {

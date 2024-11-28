@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { ExecutionContext, inject, setExecutionContextGetter } from "../../engine/framework/execution_context";
+import { SimpleConstructor } from "../../engine/framework/inject";
 import { Key } from "../../engine/framework/key";
 import { PHASE } from "../../engine/game/phase";
 import { CURRENT_PLAYER, injectGrid, PLAYERS } from "../../engine/game/state";
@@ -8,7 +9,6 @@ import { Phase } from "../../engine/state/phase";
 import { PlayerData } from "../../engine/state/player";
 import { MapRegistry } from "../../maps";
 import { Immutable } from "../../utils/immutable";
-import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
 
 export const ExecutionContextContext = createContext<ExecutionContext | undefined>(undefined);
@@ -25,10 +25,10 @@ interface ExecutionContextProps {
   children: ReactNode;
 }
 
-export function useInjected<T extends Constructor<any>>(factory: T, ...args: NoInfer<ConstructorParameters<T>>): ConstructorReturnType<T> {
+export function useInjected<T>(factory: SimpleConstructor<T>): T {
   return useInject(() => {
     // Wrap in an object so the value changes every time (notifying react of the diff).
-    return { value: inject(factory, ...args) };
+    return { value: inject(factory) };
   }, [factory]).value;
 }
 
