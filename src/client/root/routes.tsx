@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { CreateInvitePage } from "../admin/create_invite";
+import { FeedbackPage } from "../admin/feedback";
+import { AdminPage } from "../admin/page";
 import { CreateGamePage } from "../game/create_page";
 import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
 import { ActivatePage } from "../user/activate";
-import { CreateInvitePage } from "../user/create_invite";
 import { LoginPage } from "../user/login";
 import { LoginRequired } from "../user/login_required";
 import { RegisterPage } from "../user/register";
@@ -31,7 +33,15 @@ export function Router() {
           element: <LoginPage />,
         },
         {
-          path: '/app/users/create-invite',
+          path: '/app/admin/create-invite',
+          element: <AdminPage />,
+        },
+        {
+          path: '/app/admin/feedback',
+          element: <FeedbackPage />,
+        },
+        {
+          path: '/app/admin/create-invite',
           element: <CreateInvitePage />,
         },
         {

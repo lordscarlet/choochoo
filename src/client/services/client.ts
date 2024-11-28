@@ -1,5 +1,6 @@
 import { ApiFetcherArgs, ClientArgs, initClient, initContract, tsRestFetchApi } from '@ts-rest/core';
 import { initTsrReactQuery } from '@ts-rest/react-query/v5';
+import { feedbackContract } from '../../api/feedback';
 import { gameContract } from '../../api/game';
 import { messageContract } from '../../api/message';
 import { userContract } from '../../api/user';
@@ -11,6 +12,7 @@ export const contract = c.router({
   games: gameContract,
   messages: messageContract,
   users: userContract,
+  feedback: feedbackContract,
 }, {
   validateResponse: true,
   commonResponses: {

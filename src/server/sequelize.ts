@@ -1,6 +1,7 @@
 import Sequelize from '@sequelize/core';
 import { PostgresDialect } from '@sequelize/postgres';
 import { NextFunction, Request, Response } from 'express';
+import { FeedbackModel } from './model/feedback';
 import { GameModel } from './model/game';
 import { GameHistoryModel } from './model/history';
 import { InvitationModel } from './model/invitations';
@@ -18,6 +19,7 @@ export const sequelize = new Sequelize({
     LogModel,
     GameHistoryModel,
     InvitationModel,
+    FeedbackModel,
   ],
 });
 
