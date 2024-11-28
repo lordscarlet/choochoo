@@ -46,7 +46,7 @@ export const InviteApi = z.object({
 export type InviteApi = z.infer<typeof InviteApi>;
 
 export const CreateInviteApi = z.object({
-  code: z.string().min(1),
+  code: z.string().min(1).regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, underscores and dashes are allowed'),
   count: z.number().gte(1),
 });
 export type CreateInviteApi = z.infer<typeof CreateInviteApi>;

@@ -23,14 +23,14 @@ export function useCreateInvitation() {
   const me = useMe();
   const notifications = useNotifications();
   const { mutate, error, isPending } = tsr.users.createInvite.useMutation();
-  handleError(isPending, error);
+  const validationError = handleError(isPending, error);
 
   const createInvite = useCallback((body: CreateInviteApi) => mutate({ params: { userId: me!.id }, body }, {
     onSuccess: (_) => {
       notifications.show('Code Created', { autoHideDuration: 2000 });
     },
   }), [me]);
-  return { createInvite, isPending };
+  return { createInvite, validationError, isPending };
 }
 
 export function useSubscribe() {

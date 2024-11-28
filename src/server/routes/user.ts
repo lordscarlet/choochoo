@@ -123,7 +123,7 @@ const router = initServer().router(userContract, {
   async createInvite({ body, params, req }) {
     await enforceRole(req, UserRole.enum.ADMIN);
     assert((await UserModel.getUser(params.userId)) != null, { notFound: 'user not found' });
-    await InvitationModel.create({
+    await InvitationModel.upsert({
       id: body.code,
       count: body.count,
       userId: params.userId,

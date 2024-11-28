@@ -1,6 +1,7 @@
 
 import { AppBar, Box, Button, styled, Toolbar, Typography } from "@mui/material";
 import { Link, Outlet } from "react-router-dom";
+import { UserRole } from "../../api/user";
 import { useLogout, useMe } from "../services/me";
 import { Banner } from "./banner";
 import { main } from './layout.module.css';
@@ -17,6 +18,8 @@ export function Layout() {
           <Typography color="white" style={{ textDecoration: 'none' }} variant="h6" sx={{ flexGrow: 1 }} component={Link} to="/">
             Choo Choo Games
           </Typography>
+          {me != null && me.role == UserRole.enum.ADMIN &&
+            <Button color="inherit" component={Link} to="/app/users/create-invite">Create invites</Button>}
           {me == null ?
             <Button color="inherit" component={Link} to="/app/users/login">Login</Button> :
             <Button color="inherit" onClick={logout} disabled={isPending}>Logout</Button>}
