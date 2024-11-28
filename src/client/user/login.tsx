@@ -1,7 +1,5 @@
-import { default as Box } from "@mui/material/Box";
-import { default as Button } from "@mui/material/Button";
-import { default as FormControl } from "@mui/material/FormControl";
-import { default as TextField } from "@mui/material/TextField";
+
+import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLogin, useMe } from "../services/me";

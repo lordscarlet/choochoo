@@ -1,4 +1,4 @@
-import Button from "@mui/material/Button";
+import { Button } from "@mui/material";
 import { ChangeEvent, useCallback, useMemo, useState } from "react";
 import { UserRole } from "../../api/user";
 import { environment, Stage } from "../services/environment";

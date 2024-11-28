@@ -1,4 +1,4 @@
-import Button from "@mui/material/Button";
+import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { GameStatus } from "../../api/game";
 import { GameLog } from "../game/game_log";

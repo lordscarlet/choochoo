@@ -1,4 +1,4 @@
-import { default as Button } from "@mui/material/Button";
+import { Button } from "@mui/material";
 import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { DialogsProvider, NotificationsProvider } from "@toolpad/core";
 import { Suspense, useMemo } from "react";

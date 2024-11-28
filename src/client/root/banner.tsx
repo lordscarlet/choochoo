@@ -1,4 +1,4 @@
-import { default as Button } from "@mui/material/Button";
+import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { banner } from "./banner.module.css";
 

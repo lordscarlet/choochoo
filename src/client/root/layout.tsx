@@ -1,9 +1,5 @@
-import { default as AppBar } from "@mui/material/AppBar";
-import { default as Box } from "@mui/material/Box";
-import { default as Button } from "@mui/material/Button";
-import { styled } from '@mui/material/styles';
-import { default as Toolbar } from "@mui/material/Toolbar";
-import { default as Typography } from "@mui/material/Typography";
+
+import { AppBar, Box, Button, styled, Toolbar, Typography } from "@mui/material";
 import { Link, Outlet } from "react-router-dom";
 import { useLogout, useMe } from "../services/me";
 import { Banner } from "./banner";

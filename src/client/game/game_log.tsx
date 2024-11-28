@@ -1,15 +1,14 @@
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import Fab from "@mui/material/Fab";
-import Tooltip from "@mui/material/Tooltip";
+import { Fab, Tooltip } from '@mui/material';
 import { FormEvent, Fragment, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
-// @ts-ignore-next
-import useStayScrolled from 'react-stay-scrolled';
 import { isNotNull, timeFormat } from "../../utils/functions";
 import { useMessages, useSendChat } from "../services/socket";
 import { useUsers } from "../services/user";
 import { useTextInputState } from "../utils/form_state";
 import * as styles from "./game_log.module.css";
 
+// @ts-ignore-next
+import useStayScrolled from 'react-stay-scrolled';
 
 interface GameLogProps {
   gameId?: number;
