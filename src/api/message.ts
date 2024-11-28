@@ -14,7 +14,7 @@ export const MessageApi = z.object({
   message: z.string(),
   userId: z.number().optional(),
   gameId: z.number().optional(),
-  gameVersion: z.number().optional(),
+  previousGameVersion: z.number().optional(),
   date: z.coerce.date(),
 });
 

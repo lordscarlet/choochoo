@@ -26,8 +26,8 @@ export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttr
   @BelongsTo(() => GameModel, 'gameId')
   declare game?: GameModel;
 
-  @Attribute(DataTypes.INTEGER)
-  declare gameVersion?: number | null;
+  @Attribute({ columnName: 'gameVersion', type: DataTypes.INTEGER })
+  declare previousGameVersion?: number | null;
 
   @Version
   @NotNull
@@ -51,7 +51,7 @@ export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttr
       userId: this.userId ?? undefined,
       gameId: this.gameId ?? undefined,
       date: this.createdAt,
-      gameVersion: this.gameVersion ?? undefined,
+      previousGameVersion: this.previousGameVersion ?? undefined,
     };
   }
 }

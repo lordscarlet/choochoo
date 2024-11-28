@@ -13,9 +13,9 @@ export class GameHistoryModel extends Model<InferAttributes<GameHistoryModel>, I
   declare id: CreationOptional<number>;
 
   @Index(gameVersionIndex)
-  @Attribute(DataTypes.INTEGER)
+  @Attribute({ type: DataTypes.INTEGER, columnName: 'gameVersion' })
   @NotNull
-  declare gameVersion: number;
+  declare previousGameVersion: number;
 
   @Attribute(DataTypes.TEXT)
   @NotNull

@@ -254,7 +254,7 @@ export function useUndoAction(): UndoAction {
   const setGame = useSetGame();
   const { mutate } = tsr.games.undoAction.useMutation();
 
-  const undo = useCallback(() => mutate({ params: { gameId: game.id }, body: { version: game.version - 1 } }, {
+  const undo = useCallback(() => mutate({ params: { gameId: game.id }, body: { backToVersion: game.version - 1 } }, {
     onSuccess: (data) => {
       setGame(data.body.game);
     },

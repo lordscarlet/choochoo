@@ -153,7 +153,7 @@ export const gameContract = c.router({
     method: 'POST',
     pathParams: z.object({ gameId: z.coerce.number() }),
     path: '/games/:gameId/undo',
-    body: z.object({ version: z.number() }),
+    body: z.object({ backToVersion: z.number() }),
     responses: {
       200: z.object({ game: GameApi }),
     },

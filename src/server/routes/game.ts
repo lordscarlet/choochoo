@@ -168,7 +168,7 @@ const router = initServer().router(gameContract, {
         EngineDelegator.singleton.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
 
       const gameHistory = GameHistoryModel.build({
-        gameVersion: game.version,
+        previousGameVersion: game.version,
         patch: '',
         previousGameData: game.gameData,
         actionName: body.actionName,
@@ -188,7 +188,7 @@ const router = initServer().router(gameContract, {
       const createLogs = logs.map((message): CreateLogModel => ({
         gameId: game.id,
         message,
-        gameVersion: game.version,
+        previousGameVersion: game.version - 1,
       }));
       const newLogs = await LogModel.bulkCreate(createLogs, { transaction });
 
@@ -201,30 +201,30 @@ const router = initServer().router(gameContract, {
     });
   },
 
-  async undoAction({ req, params: { gameId }, body: { version } }) {
+  async undoAction({ req, params: { gameId }, body: { backToVersion } }) {
     return await sequelize.transaction(async transaction => {
-      const gameHistory = await GameHistoryModel.findOne({ where: { gameId, gameVersion: version }, transaction });
+      const gameHistory = await GameHistoryModel.findOne({ where: { gameId, previousGameVersion: backToVersion }, transaction });
       const game = await GameModel.findByPk(gameId, { transaction });
       assert(game != null);
       assert(gameHistory != null);
       assert(gameHistory.reversible, { invalidInput: 'cannot undo reversible action' });
-      assert(game.version === gameHistory.gameVersion + 1, 'can only undo one step');
+      assert(game.version === gameHistory.previousGameVersion + 1, 'can only undo one step');
       assert(gameHistory.userId === req.session.userId, { permissionDenied: true });
 
       const originalGame = game.toApi();
 
-      game.version = version;
+      game.version = backToVersion;
       game.gameData = gameHistory.previousGameData;
       game.activePlayerId = gameHistory.userId;
 
-      const versionBefore = await GameHistoryModel.findOne({ where: { gameId, gameVersion: version - 1 }, transaction });
+      const versionBefore = await GameHistoryModel.findOne({ where: { gameId, previousGameVersion: backToVersion - 1 }, transaction });
       game.undoPlayerId = versionBefore != null && versionBefore.reversible ? versionBefore.userId : undefined;
       const newGame = await game.save({ transaction });
-      await GameHistoryModel.destroy({ where: { gameVersion: { [Op.gte]: version } }, transaction });
-      await LogModel.destroy({ where: { gameVersion: { [Op.gte]: version } }, transaction });
+      await GameHistoryModel.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
+      await LogModel.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
 
       transaction.afterCommit(() => {
-        emitLogsDestroyToRoom(newGame);
+        emitLogsDestroyToRoom(game.id, backToVersion);
         emitGameUpdate(originalGame, newGame);
       });
 
@@ -260,11 +260,11 @@ const router = initServer().router(gameContract, {
       allLogs.push(...logs.map((message) => LogModel.build({
         gameId: game.id,
         message,
-        gameVersion: currentGameVersion,
+        previousGameVersion: 0,
       })));
     } else {
       currentGameData = peek(previousActions).previousGameData;
-      currentGameVersion = peek(previousActions).gameVersion;
+      currentGameVersion = peek(previousActions).previousGameVersion;
     }
     let firstGameVersion = currentGameVersion;
     let finalGameStatus: GameEngineStatus | undefined;
@@ -274,7 +274,7 @@ const router = initServer().router(gameContract, {
         EngineDelegator.singleton.processAction(game.gameKey, currentGameData, previousAction.actionName, JSON.parse(previousAction.actionData));
 
       newHistory.push(GameHistoryModel.build({
-        gameVersion: currentGameVersion,
+        previousGameVersion: currentGameVersion,
         patch: '',
         previousGameData: currentGameData,
         actionName: previousAction.actionName,
@@ -284,13 +284,14 @@ const router = initServer().router(gameContract, {
         userId: previousAction.userId,
       }));
 
-      currentGameVersion++;
-      currentGameData = gameData;
       allLogs.push(...logs.map(message => LogModel.build({
         gameId: game.id,
         message,
-        gameVersion: currentGameVersion,
+        previousGameVersion: currentGameVersion,
       })));
+
+      currentGameVersion++;
+      currentGameData = gameData;
       finalGameStatus = gameStatus;
       finalActivePlayerId = activePlayerId;
       finalUndoPlayerId = reversible ? previousAction.userId : undefined;
@@ -304,8 +305,8 @@ const router = initServer().router(gameContract, {
     await sequelize.transaction(async (transaction) => {
       await Promise.all([
         game.save({ transaction }),
-        LogModel.destroy({ where: { gameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
-        GameHistoryModel.destroy({ where: { gameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
+        LogModel.destroy({ where: { previousGameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
+        GameHistoryModel.destroy({ where: { previousGameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
         ...newHistory.map((history) => history.save({ transaction })),
         ...allLogs.map(log => log.save({ transaction })),
       ]);

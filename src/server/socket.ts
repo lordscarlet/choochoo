@@ -42,13 +42,13 @@ export function emitToRoom(logs: LogModel[]): void {
   io.to(roomName(logs[0].gameId)).emit('newLogs', logs.map((l) => l.toApi()));
 }
 
-export function emitLogsDestroyToRoom(game: GameModel): void {
-  io.to(roomName(game.id)).emit('destroyLogs', { gameId: game.id, gameVersion: game.version });
+export function emitLogsDestroyToRoom(gameId: number, gteGameVersion: number): void {
+  io.to(roomName(gameId)).emit('destroyLogs', { gameId, gteGameVersion });
 }
 
-export function emitLogsReplaceToRoom(game: GameModel, logs: LogModel[], startingGameVersion: number): void {
+export function emitLogsReplaceToRoom(game: GameModel, logs: LogModel[], gteGameVersion: number): void {
   const newLogs = logs.map(l => l.toApi());
-  io.to(roomName(game.id)).emit('replaceLogs', { gameId: game.id, startingGameVersion, newLogs });
+  io.to(roomName(game.id)).emit('replaceLogs', { gameId: game.id, gteGameVersion, newLogs });
 }
 
 io.on('connection', (socket) => {

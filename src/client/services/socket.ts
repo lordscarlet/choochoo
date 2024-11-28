@@ -84,8 +84,8 @@ export function useMessages(gameId?: number): UseMessages {
   }, [gameId, updateLogs]);
 
   useEffect(() => {
-    const listener = ({ gameVersion }: { gameVersion: number }) => {
-      updateLogs((logs) => logs.filter((log) => log.gameVersion! <= gameVersion));
+    const listener = ({ gteGameVersion }: { gteGameVersion: number }) => {
+      updateLogs((logs) => logs.filter((log) => log.previousGameVersion == null || log.previousGameVersion < gteGameVersion));
     };
     socket.on('destroyLogs', listener);
     return () => {
@@ -94,8 +94,8 @@ export function useMessages(gameId?: number): UseMessages {
   }, [gameId, updateLogs]);
 
   useEffect(() => {
-    const listener = ({ startingGameVersion, newLogs }: { gameId: number, startingGameVersion: number, newLogs: MessageApi[] }) => {
-      updateLogs((logs) => logs.filter((log) => log.gameVersion! < startingGameVersion).concat(newLogs));
+    const listener = ({ gteGameVersion, newLogs }: { gameId: number, gteGameVersion: number, newLogs: MessageApi[] }) => {
+      updateLogs((logs) => logs.filter((log) => log.previousGameVersion == null || log.previousGameVersion < gteGameVersion).concat(newLogs));
     };
     socket.on('replaceLogs', listener);
     return () => {
