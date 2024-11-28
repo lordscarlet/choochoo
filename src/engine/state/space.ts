@@ -23,6 +23,7 @@ export const MutableLocationData = z.object({
   townName: z.string().optional(),
   tile: MutableTileData.optional(),
   terrainCost: z.number().optional(),
+  goods: z.array(z.number()).optional(),
 });
 
 export type MutableLocationData = z.infer<typeof MutableLocationData>;

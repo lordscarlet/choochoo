@@ -1,5 +1,6 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assertNever } from "../../utils/validate";
+import { Good } from "../state/good";
 import { LocationType } from "../state/location_type";
 import { LocationData } from "../state/space";
 import { ComplexTileType, Direction, SimpleTileType, TileData, TileType, TownTileType } from "../state/tile";
@@ -43,6 +44,10 @@ export class Location {
 
   getTownName(): string | undefined {
     return this.data.townName;
+  }
+
+  getGoods(): Good[] {
+    return this.data.goods ?? [];
   }
 
   getLocationType(): LocationType.MOUNTAIN | LocationType.RIVER | LocationType.PLAIN | LocationType.SWAMP {

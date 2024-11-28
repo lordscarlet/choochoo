@@ -16,13 +16,13 @@ import { Random } from './random';
 import { AVAILABLE_CITIES, BAG, GRID, PLAYERS, TURN_ORDER } from './state';
 
 export class GameStarter {
-  private readonly grid = injectState(GRID);
-  private readonly turnOrder = injectState(TURN_ORDER);
-  private readonly players = injectState(PLAYERS);
-  private readonly bag = injectState(BAG);
-  private readonly availableCities = injectState(AVAILABLE_CITIES);
-  private readonly gridHelper = inject(GridHelper);
-  private readonly random = inject(Random);
+  protected readonly grid = injectState(GRID);
+  protected readonly turnOrder = injectState(TURN_ORDER);
+  protected readonly players = injectState(PLAYERS);
+  protected readonly bag = injectState(BAG);
+  protected readonly availableCities = injectState(AVAILABLE_CITIES);
+  protected readonly gridHelper = inject(GridHelper);
+  protected readonly random = inject(Random);
 
   startGame(playerIds: number[], startingMap: InitialMapGrid) {
     this.initializeStartingCubes();
@@ -50,7 +50,7 @@ export class GameStarter {
     this.bag.set(bag);
   }
 
-  private drawCubesFor(bag: Good[], location: SpaceSettingData): SpaceData {
+  protected drawCubesFor(bag: Good[], location: SpaceSettingData): SpaceData {
     if (location.type !== LocationType.CITY) return location;
     return {
       ...location,
@@ -61,7 +61,7 @@ export class GameStarter {
 
   initializePlayers(playerIds: number[]) {
     const shuffledColors = this.random.shuffle(colors);
-    const players = playerIds.map((id, index) => buildPlayer(id, shuffledColors[index]));
+    const players = playerIds.map((id, index) => this.buildPlayer(id, shuffledColors[index]));
 
     this.players.initState(players);
     this.turnOrder.initState(this.random.shuffle(players).map((player) => player.color));
@@ -83,10 +83,21 @@ export class GameStarter {
     this.availableCities.initState(availableCities);
     this.bag.set(bag);
   }
+
+  protected buildPlayer(playerId: number, color: PlayerColor): PlayerData {
+    return {
+      playerId,
+      color,
+      income: 0,
+      shares: 2,
+      money: 10,
+      locomotive: 1,
+    };
+  }
 }
 
 
-function draw<T>(num: number, arr: T[]): T[] {
+export function draw<T>(num: number, arr: T[]): T[] {
   assert(arr.length > num, 'drew too many!');
   return duplicate(num, arr[0]).map((_) => arr.pop()!);
 }
@@ -100,14 +111,3 @@ const colors = [
   PlayerColor.BLUE,
   PlayerColor.BROWN,
 ];
-
-function buildPlayer(playerId: number, color: PlayerColor): PlayerData {
-  return {
-    playerId,
-    color,
-    income: 0,
-    shares: 2,
-    money: 10,
-    locomotive: 1,
-  };
-}

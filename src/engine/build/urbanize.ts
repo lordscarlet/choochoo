@@ -28,13 +28,13 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
   static readonly action = 'urbanize';
   readonly assertInput = UrbanizeData.parse;
 
-  private readonly currentPlayer = injectCurrentPlayer();
-  private readonly helper = inject(BuilderHelper);
-  private readonly gridHelper = inject(GridHelper);
-  private readonly grid = injectGrid();
-  private readonly buildState = injectState(BUILD_STATE);
-  private readonly availableCities = injectState(AVAILABLE_CITIES);
-  private readonly log = inject(Log);
+  protected readonly currentPlayer = injectCurrentPlayer();
+  protected readonly helper = inject(BuilderHelper);
+  protected readonly gridHelper = inject(GridHelper);
+  protected readonly grid = injectGrid();
+  protected readonly buildState = injectState(BUILD_STATE);
+  protected readonly availableCities = injectState(AVAILABLE_CITIES);
+  protected readonly log = inject(Log);
 
   validate(data: UrbanizeData): void {
     const player = this.currentPlayer();

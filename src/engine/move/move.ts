@@ -11,7 +11,6 @@ import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
 import { getGoodColor, Good } from "../state/good";
-import { LocationType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
 
@@ -55,7 +54,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
     }
 
     const startingCity = grid.get(action.startingCity);
-    assert(startingCity instanceof City);
+    assert(startingCity != null);
     assert(startingCity.getGoods().includes(action.good), `${action.good} good not found at the indicated location`);
 
     const endingLocation = grid.get(peek(action.path).endingStop);
@@ -107,9 +106,9 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
   process(action: MoveData): boolean {
     const coordinates = Coordinates.from(action.startingCity);
-    this.gridHelper.update(coordinates, (city) => {
-      assert(city.type === LocationType.CITY);
-      city.goods.splice(city.goods.indexOf(action.good), 1);
+    this.gridHelper.update(coordinates, (location) => {
+      assert(location.goods != null);
+      location.goods.splice(location.goods.indexOf(action.good), 1);
     });
 
     const partitioned = partition(action.path, (step) => step.owner);
