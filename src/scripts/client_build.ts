@@ -1,4 +1,5 @@
 import type { BuildResult, Plugin } from 'esbuild';
+import { writeFile } from 'fs/promises';
 import { resolve } from 'path';
 
 export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<void> {
@@ -9,7 +10,7 @@ export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<voi
     'API_HOST',
     'SOCKET_HOST',
   ];
-  const plugins = production ? [] : rebuildPlugins();
+  const plugins = [...rebuildPlugins()];
 
   const ctx = await context({
     entryPoints: ["src/client/main.tsx"],
@@ -17,10 +18,12 @@ export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<voi
     minify: production,
     platform: 'browser',
     jsx: 'automatic',
+    metafile: true,
     outfile: production ? 'dist/index.min.js' : 'dist/index.dev.js',
     treeShaking: true,
     sourcemap: true,
-    define: Object.fromEntries(environmentVariables.map(v => [`process.env.${v}`, process.env[v] != null ? `"${process.env[v]}"` : 'undefined'])),
+    define: Object.fromEntries(environmentVariables.map(v =>
+      [`process.env.${v}`, process.env[v] != null ? `"${process.env[v]}"` : 'undefined'])),
     plugins,
   });
 
@@ -44,7 +47,7 @@ function rebuildPlugins(): Plugin[] {
   }];
 }
 
-function logErrors(result: BuildResult) {
+async function logErrors(result: BuildResult) {
   console.log(`build ended with ${result.errors.length} errors`);
   for (const error of result.errors) {
     console.log('===================');
@@ -52,6 +55,7 @@ function logErrors(result: BuildResult) {
     console.log('Detail: ', error.detail);
     console.log('location: ', error.location);
   }
+  await writeFile(`buildmeta.${process.env.NODE_ENV}.json`, JSON.stringify(result.metafile));
 }
 
 console.log();
