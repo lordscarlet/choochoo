@@ -19,12 +19,13 @@ export class RoundEngine {
   }
 
   start(round: number) {
+    this.currentRound.initState(round);
     this.log.log(`Start round #${this.currentRound()}`);
-    this.currentRound.set(round);
   }
 
   end(): void {
     this.log.log(`End round #${this.currentRound()}`);
+    this.currentRound.delete();
   }
 
   maxRounds(): number {
