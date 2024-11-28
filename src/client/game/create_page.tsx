@@ -6,7 +6,7 @@ import { useCreateGame } from "../services/game";
 import { useCheckboxState, useSelectState, useTextInputState } from "../utils/form_state";
 
 export function CreateGamePage() {
-  const maps = useMemo(() => [...new MapRegistry().values()], []);
+  const maps = useMemo(() => [...MapRegistry.singleton.values()], []);
   const [name, setName] = useTextInputState('');
   const [gameKey, setGameKey] = useSelectState(maps[0].key);
   const [artificialStart, setArtificialStart] = useCheckboxState();

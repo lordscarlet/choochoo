@@ -120,7 +120,7 @@ export function useJoinGame(): GameAction {
   }), [game.id]);
 
   const mapSettings = useMemo(() => {
-    return new MapRegistry().get(game.gameKey);
+    return MapRegistry.singleton.get(game.gameKey);
   }, [game.gameKey]);
 
   const canPerform = me != null && !game.playerIds.includes(me.id) && game.playerIds.length < mapSettings.maxPlayers;
@@ -176,7 +176,7 @@ export function useStartGame(): GameAction {
   }), [game.id]);
 
   const mapSettings = useMemo(() => {
-    return new MapRegistry().get(game.gameKey);
+    return MapRegistry.singleton.get(game.gameKey);
   }, [game.gameKey]);
 
   const canPerform = me != null && game.playerIds[0] === me.id && game.playerIds.length >= mapSettings.minPlayers;

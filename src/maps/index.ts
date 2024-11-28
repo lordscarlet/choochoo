@@ -5,9 +5,10 @@ import { RustBeltMapSettings } from './rust_belt/settings';
 
 
 export class MapRegistry {
+  static readonly singleton = new MapRegistry();
   private readonly maps = new Map<string, MapSettings>();
 
-  constructor() {
+  private constructor() {
     this.add(new RustBeltMapSettings());
   }
 

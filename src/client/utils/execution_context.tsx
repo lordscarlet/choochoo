@@ -6,6 +6,7 @@ import { CURRENT_PLAYER, injectGrid, PLAYERS } from "../../engine/game/state";
 import { Grid } from "../../engine/map/grid";
 import { Phase } from "../../engine/state/phase";
 import { PlayerData } from "../../engine/state/player";
+import { MapRegistry } from "../../maps";
 import { Immutable } from "../../utils/immutable";
 import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
@@ -53,7 +54,11 @@ export function useInject<T>(fn: () => T, deps: unknown[]): T {
 }
 
 export function ExecutionContextProvider({ gameData, gameKey, children }: ExecutionContextProps) {
-  const ctx = useMemo(() => new ExecutionContext(gameKey, gameData), [gameKey]);
+  const ctx = useMemo(() => {
+    const ctx = new ExecutionContext(MapRegistry.singleton.get(gameKey));
+    ctx.merge(gameData);
+    return ctx;
+  }, [gameKey]);
   useEffect(() => {
     ctx.merge(gameData);
   }, [ctx, gameData]);

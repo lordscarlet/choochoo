@@ -1,7 +1,7 @@
-import { MapRegistry } from "../../maps";
 import { freeze, Immutable } from "../../utils/immutable";
 import { Constructor, ConstructorReturnType } from "../../utils/types";
 import { assert } from "../../utils/validate";
+import { MapSettings } from "../game/map_settings";
 import { InjectionContext } from "./inject";
 import { Key } from "./key";
 import { InjectedState, KeyArray, StateStore } from "./state";
@@ -11,11 +11,8 @@ export class ExecutionContext {
   readonly gameState = new StateStore();
   readonly injectionContext = new InjectionContext();
 
-  constructor(mapKey: string, gameData?: string) {
-    new MapRegistry().get(mapKey).registerOverrides(this.injectionContext);
-    if (gameData != null) {
-      this.merge(gameData);
-    }
+  constructor(mapSettings: MapSettings) {
+    mapSettings.registerOverrides(this.injectionContext);
   }
 
   merge(gameData: string) {

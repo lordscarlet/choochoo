@@ -110,7 +110,7 @@ const router = initServer().router(gameContract, {
     assert(index >= 0, { invalidInput: 'cannot leave game you are not in' });
     // Figure out what to do if the owner wants to leave
     assert(index > 0, { invalidInput: 'the owner cannot leave the game' });
-    assert(game.playerIds.length < new MapRegistry().get(game.gameKey)!.maxPlayers, 'game full');
+    assert(game.playerIds.length < MapRegistry.singleton.get(game.gameKey)!.maxPlayers, 'game full');
 
     const originalGame = game.toApi();
     game.playerIds = game.playerIds.slice(0, index).concat(game.playerIds.slice(index + 1));
@@ -129,8 +129,7 @@ const router = initServer().router(gameContract, {
     assert(game.playerIds[0] === userId, { invalidInput: 'only the owner can start the game' });
 
     const originalGame = game.toApi();
-    const engine = new Engine();
-    const { gameData, logs, activePlayerId } = engine.start(game.playerIds, { mapKey: game.gameKey });
+    const { gameData, logs, activePlayerId } = Engine.singleton.start(game.playerIds, { mapKey: game.gameKey });
 
     // TODO: save the logs
     game.gameData = gameData;
@@ -164,10 +163,9 @@ const router = initServer().router(gameContract, {
       assert(game.activePlayerId === req.session.userId, { permissionDenied: true });
 
       const originalGame = game.toApi();
-      const engine = new Engine();
 
       const { gameData, logs, activePlayerId, gameStatus, reversible } =
-        engine.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
+        Engine.singleton.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
 
       const gameHistory = GameHistoryModel.build({
         gameVersion: game.version,
@@ -248,8 +246,6 @@ const router = initServer().router(gameContract, {
 
     const originalGame = game.toApi();
 
-    const engine = new Engine();
-
     let previousAction: GameHistoryModel | undefined;
     let currentGameData: string | undefined;
     let currentGameVersion: number | undefined;
@@ -257,7 +253,7 @@ const router = initServer().router(gameContract, {
     let finalUndoPlayerId: number | undefined;
     const allLogs: LogModel[] = [];
     if ('startOver' in body && body.startOver) {
-      const { gameData, logs, activePlayerId } = engine.start(game.playerIds, { mapKey: game.gameKey });
+      const { gameData, logs, activePlayerId } = Engine.singleton.start(game.playerIds, { mapKey: game.gameKey });
       currentGameData = gameData;
       currentGameVersion = 1;
       finalActivePlayerId = activePlayerId;
@@ -275,7 +271,7 @@ const router = initServer().router(gameContract, {
     const newHistory: GameHistoryModel[] = [];
     while (previousAction = previousActions.pop()) {
       const { gameData, logs, activePlayerId, gameStatus, reversible } =
-        engine.processAction(game.gameKey, currentGameData, previousAction.actionName, JSON.parse(previousAction.actionData));
+        Engine.singleton.processAction(game.gameKey, currentGameData, previousAction.actionName, JSON.parse(previousAction.actionData));
 
       newHistory.push(GameHistoryModel.build({
         gameVersion: currentGameVersion,

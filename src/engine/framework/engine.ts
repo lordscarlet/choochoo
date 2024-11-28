@@ -19,11 +19,21 @@ interface GameState {
 }
 
 export class Engine {
-  private readonly registry = new MapRegistry();
+  static readonly singleton = new Engine();
+  private readonly settings = new Map();
+
+  private constructor() { }
+
+  private getExecutionContext(mapKey: string): ExecutionContext {
+    if (!this.settings.has(mapKey)) {
+      this.settings.set(mapKey, new ExecutionContext(MapRegistry.singleton.get(mapKey)));
+    }
+    return this.settings.get(mapKey)!;
+  }
 
   start(playerIds: number[], mapConfig: MapConfig): GameState {
     return this.executeInExecutionContext(mapConfig.mapKey, undefined, () => {
-      const mapSettings = this.registry.get(mapConfig.mapKey);
+      const mapSettings = MapRegistry.singleton.get(mapConfig.mapKey);
       assert(playerIds.length >= mapSettings.minPlayers, { invalidInput: 'not enough players to start' });
       const gameEngine = inject(GameEngine);
       gameEngine.start(playerIds, mapSettings.startingGrid);
@@ -38,8 +48,11 @@ export class Engine {
   }
 
   private beginInjectionModeAsync(mapKey: string, gameData: string | undefined): () => void {
-    const executionContext = new ExecutionContext(mapKey, gameData);
-    setExecutionContextGetter(() => executionContext);
+    const ctx = this.getExecutionContext(mapKey);
+    if (gameData != null) {
+      ctx.merge(gameData);
+    }
+    setExecutionContextGetter(() => ctx);
     return setExecutionContextGetter;
   }
 
