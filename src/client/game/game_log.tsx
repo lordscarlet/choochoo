@@ -1,5 +1,6 @@
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import { Fab, Tooltip } from "@mui/material";
+import Fab from "@mui/material/Fab";
+import Tooltip from "@mui/material/Tooltip";
 import { FormEvent, Fragment, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 // @ts-ignore-next
 import useStayScrolled from 'react-stay-scrolled';

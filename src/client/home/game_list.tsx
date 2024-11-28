@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
 import { Link } from "react-router-dom";
 import { ListGamesApi } from "../../api/game";
 import { useGameList } from "../services/game";

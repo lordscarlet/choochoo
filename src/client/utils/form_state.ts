@@ -1,4 +1,4 @@
-import { SelectChangeEvent } from "@mui/material";
+import { SelectChangeEvent } from "@mui/material/Select";
 import { ChangeEvent, useCallback, useState } from "react";
 
 export function useCheckboxState(initialValue = false): [boolean, (e: ChangeEvent<HTMLInputElement>) => void] {

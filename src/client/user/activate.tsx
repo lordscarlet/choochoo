@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { default as Button } from "@mui/material/Button";
 import { useNotifications } from "@toolpad/core";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
