@@ -11,4 +11,4 @@ export const TurnOrderState = z.object({
 
 export type TurnOrderState = z.infer<typeof TurnOrderState>;
 
-export const TURN_ORDER_STATE = new Key<TurnOrderState>('TurnOrderState');
+export const TURN_ORDER_STATE = new Key('TurnOrderState', { parse: TurnOrderState.parse });

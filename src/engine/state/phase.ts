@@ -1,3 +1,4 @@
+import z from "zod";
 import { assertNever } from "../../utils/validate";
 
 
@@ -13,6 +14,8 @@ export enum Phase {
   GOODS_GROWTH,
   END_GAME,
 };
+
+export const PhaseZod = z.nativeEnum(Phase);
 
 export function getPhaseString(phase: Phase): string {
   switch (phase) {

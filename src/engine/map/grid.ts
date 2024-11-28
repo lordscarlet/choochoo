@@ -1,6 +1,6 @@
 import { Map as ImmutableMap } from 'immutable';
 import { z } from "zod";
-import { Coordinates, RawCoordinates } from "../../utils/coordinates";
+import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
 import { deepEquals } from '../../utils/deep_equals';
 import { isNotNull, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
@@ -16,8 +16,7 @@ import { Exit, TOWN, Track, tupleMap } from "./track";
 export type Space = City | Location;
 
 export class Grid {
-  private constructor(private readonly grid: ImmutableMap<Coordinates, Space>) {
-  }
+  private constructor(readonly grid: ImmutableMap<Coordinates, Space>) { }
 
   get(coordinates: Coordinates): Space | undefined {
     return this.grid.get(coordinates);
@@ -198,7 +197,7 @@ export const DanglerInfo = z.object({
   // The exit leading to the city, or out of the town.
   immovableExit: z.nativeEnum(Direction),
   length: z.number(),
-  coordinates: RawCoordinates,
+  coordinates: CoordinatesZod,
 });
 
 export type DanglerInfo = z.infer<typeof DanglerInfo>;

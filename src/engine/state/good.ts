@@ -1,3 +1,4 @@
+import z from "zod";
 import { assertNever } from "../../utils/validate";
 
 
@@ -8,6 +9,8 @@ export enum Good {
   PURPLE,
   YELLOW,
 }
+
+export const GoodZod = z.nativeEnum(Good);
 
 export function getGoodColor(good: Good): string {
   switch (good) {

@@ -1,10 +1,11 @@
+import z from "zod";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Key } from "../framework/key";
 import { Log } from "./log";
 import { PLAYERS } from "./state";
 
-export const ROUND = new Key<number>('roundNumber');
+export const ROUND = new Key('roundNumber', { parse: z.number().parse });
 
 export class RoundEngine {
   private readonly log = inject(Log);

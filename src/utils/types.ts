@@ -7,3 +7,6 @@ export type Primitive = number | string | boolean;
 export type PromiseOr<T> = Promise<T> | T;
 
 export type UrlParameters = { [key: string]: Primitive };
+
+export type SomePartial<T, OptionalProps extends keyof T> =
+  Partial<Pick<T, OptionalProps>> & Required<Omit<T, OptionalProps>>;

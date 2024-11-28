@@ -1,4 +1,5 @@
 
+import z from "zod";
 import { infiniteLoopCheck } from "../../utils/functions";
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
@@ -19,7 +20,9 @@ export enum GameStatus {
   ENDED,
 }
 
-export const GAME_STATUS = new Key<GameStatus>('gameStatus');
+export const GameStatusZod = z.nativeEnum(GameStatus);
+
+export const GAME_STATUS = new Key('gameStatus', { parse: GameStatusZod.parse });
 
 export class GameEngine {
   private readonly playerHelper = inject(PlayerHelper);

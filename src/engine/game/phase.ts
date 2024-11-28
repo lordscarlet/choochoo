@@ -1,11 +1,11 @@
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Key } from "../framework/key";
-import { getPhaseString, Phase } from "../state/phase";
+import { getPhaseString, Phase, PhaseZod } from "../state/phase";
 import { Log } from "./log";
 import { PhaseDelegator } from "./phase_delegator";
 
-export const PHASE = new Key<Phase>('currentPhase');
+export const PHASE = new Key('currentPhase', { parse: PhaseZod.parse });
 
 export class PhaseEngine {
   private readonly log = inject(Log);

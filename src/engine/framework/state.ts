@@ -1,13 +1,10 @@
 
 import { Map as ImmutableMap } from 'immutable';
 import z from 'zod';
-import { Coordinates, CoordinatesZod } from '../../utils/coordinates';
 import { deepCopy } from "../../utils/deep_copy";
 import { deepEquals } from "../../utils/deep_equals";
 import { freeze, Immutable } from "../../utils/immutable";
 import { assert } from '../../utils/validate';
-import { GRID } from '../game/state';
-import { MutableSpaceData, SpaceData } from '../state/space';
 import { DependencyStack } from './dependency_stack';
 import { inject } from './execution_context';
 import { Key } from './key';
@@ -17,19 +14,28 @@ interface StateContainer<T> {
   listeners: Set<(t: Immutable<T>) => void>;
 }
 
-const SerializedGameDataV2 = z.object({
-  version: z.literal(2),
+const SerializedGameDataV3 = z.object({
+  version: z.literal(3),
   gameData: z.record(z.string(), z.unknown()),
-  gameMapData: z.array(z.tuple([CoordinatesZod, MutableSpaceData])),
 });
-type SerializedGameDataV2 = z.infer<typeof SerializedGameDataV2>;
+type SerializedGameDataV3 = z.infer<typeof SerializedGameDataV3>;
 
-const SerializedGameData = SerializedGameDataV2;
+const SerializedGameData = SerializedGameDataV3;
 type SerializedGameData = z.infer<typeof SerializedGameData>;
+
+type TypedEntry<T> = [Key<T>, StateContainer<T>];
+
+interface TypedMap {
+  entries(): Iterable<TypedEntry<unknown>>;
+  has<T>(key: Key<T>): boolean;
+  delete<T>(key: Key<T>): void;
+  get<T>(key: Key<T>): StateContainer<T>;
+  set<T>(key: Key<T>, value: StateContainer<T>): void;
+}
 
 export class StateStore {
   private readonly dependencyStack = inject(DependencyStack);
-  private state = new Map<string, StateContainer<unknown>>();
+  private state: TypedMap = new Map() as TypedMap;
 
   reset(): void {
     this.state = new Map();
@@ -37,17 +43,17 @@ export class StateStore {
 
   init<T>(key: Key<T>, state: T): void {
     assert(!this.isInitialized(key), 'cannot call init on initialized key');
-    this.initContainerIfNotExists(key.name);
+    this.initContainerIfNotExists(key);
     this.internalSet(key, state);
   }
 
-  private initContainerIfNotExists<T>(key: string): void {
+  private initContainerIfNotExists<T>(key: Key<T>): void {
     if (this.state.has(key)) return;
     const container: StateContainer<T> = {
       state: undefined,
       listeners: new Set(),
     };
-    this.state.set(key, container as unknown as StateContainer<unknown>);
+    this.state.set(key, container);
   }
 
   set<T>(key: Key<T>, state: T): void {
@@ -58,10 +64,10 @@ export class StateStore {
   private internalSet<T>(key: Key<T>, state: T): void {
     const container = this.getContainer(key);
     container.state = { value: freeze(state) };
-    this.notifyListeners(key.name);
+    this.notifyListeners(key);
   }
 
-  private notifyListeners(key: string) {
+  private notifyListeners<T>(key: Key<T>) {
     const container = this.getContainer(key);
     for (const listener of container.listeners) {
       listener(container.state!.value);
@@ -69,7 +75,7 @@ export class StateStore {
   }
 
   isInitialized<T>(key: Key<T>): boolean {
-    return this.state.has(key.name) && this.getContainer(key.name).state != null;
+    return this.state.has(key) && this.getContainer(key).state != null;
   }
 
   get<T>(key: Key<T>): Immutable<T> {
@@ -77,12 +83,11 @@ export class StateStore {
     return this.getContainer(key).state!.value;
   }
 
-  private getContainer<T>(key: Key<T> | string): StateContainer<T> {
-    const keyName = typeof key === 'string' ? key : key.name;
-    if (!this.state.has(keyName)) {
-      throw new Error(`state ${keyName} not found`);
+  private getContainer<T>(key: Key<T>): StateContainer<T> {
+    if (!this.state.has(key)) {
+      throw new Error(`state ${key.name} not found`);
     }
-    return this.state.get(keyName) as unknown as StateContainer<T>;
+    return this.state.get(key);
   }
 
   listenAll(keys: Set<Key<unknown>>, listenerFn: () => void): () => void {
@@ -98,7 +103,7 @@ export class StateStore {
   }
 
   listen<T>(key: Key<T>, listenerFn: (v: Immutable<T>) => void): () => void {
-    this.initContainerIfNotExists(key.name);
+    this.initContainerIfNotExists(key);
     const container = this.getContainer(key);
     container.listeners.add(listenerFn);
     return () => {
@@ -110,15 +115,15 @@ export class StateStore {
   delete<T>(key: Key<T>): void {
     assert(this.isInitialized(key), 'cannot call delete on uninitialized key');
     this.getContainer(key).state = undefined;
-    this.notifyListeners(key.name);
+    this.notifyListeners(key);
     this.maybeDeleteKey(key);
   }
 
   private maybeDeleteKey<T>(key: Key<T>): void {
-    const container = this.state.get(key.name);
+    const container = this.state.get(key);
     if (container == null) return;
     if (container.state == null && container.listeners.size == 0) {
-      this.state.delete(key.name);
+      this.state.delete(key);
     }
   }
 
@@ -146,55 +151,44 @@ export class StateStore {
     // For now, use json.
     const gameData = Object.fromEntries(
       [...this.state.entries()]
-        .filter(([key, value]) => key !== GRID.name && value.state != null)
-        .map(([key, value]) => [key, value.state!.value]));
+        .filter(([_, value]) => value.state != null)
+        .map(([key, value]) => [key.name, key.serialize(value.state!.value)]));
     const data: SerializedGameData = {
-      version: 2,
+      version: 3,
       gameData,
-      gameMapData: [...this.getContainer(GRID)!.state!.value],
     };
     return JSON.stringify(data);
   }
 
   merge(gameDataStr: string): void {
-    const { gameData, gameMapData } = SerializedGameData.parse(JSON.parse(gameDataStr));
-    const changes: ValueChange[] = Object.entries(gameData)
-      .filter(([key, value]) => this.mergeValue(key, value))
+    const { gameData, ...rest } = SerializedGameData.parse(JSON.parse(gameDataStr));
+    let changes: ValueChange[] = Object.entries(gameData)
+      .filter(([key, value]) => this.mergeValue(Key.fromString(key), value))
       .map(([key]) => ({ key }));
 
-    const mapChanges = gameMapData.filter(([coordinates, value]) => this.mergeMapValue(coordinates, value)).length > 0;
-    for (const change of changes.concat(mapChanges ? [{ key: GRID.name }] : [])) {
-      this.notifyListeners(change.key);
+    for (const change of changes) {
+      this.notifyListeners(Key.fromString(change.key));
     }
   }
 
-  private mergeValue<T>(key: string, newValue: T): boolean {
+  private mergeValue<T>(key: Key<T>, unparsedValue: unknown): boolean {
     this.initContainerIfNotExists(key);
     const container = this.getContainer<T>(key);
-    const oldValue = this.state.get(key)?.state?.value;
-    if (oldValue != null && deepEquals(newValue, oldValue)) {
-      return false;
+    const newValue = freeze(key.parse(unparsedValue));
+    if (container.state == null) {
+      container.state = { value: newValue };
+      return true;
+    } else {
+      const oldValue = container.state.value;
+      const mergedValue = key.merge(oldValue, newValue);
+      container.state = { value: mergedValue };
+      return mergedValue !== oldValue;
     }
-    container.state = { value: freeze(newValue) };
-    return true;
-  }
-
-  private mergeMapValue(coordinates: Coordinates, mapValue: SpaceData): boolean {
-    this.initContainerIfNotExists(GRID.name);
-    const container = this.getContainer(GRID);
-    const grid = this.state.get(GRID.name)?.state?.value ?? ImmutableMap<Coordinates, SpaceData>();
-    const oldValue = grid?.get(coordinates);
-    if (oldValue != null && deepEquals(oldValue, mapValue)) {
-      return false;
-    }
-    container.state = { value: grid.set(coordinates, freeze(mapValue)) };
-    return true;
   }
 }
 
 export interface ValueChange {
   key: string;
-  mapKeys?: unknown[];
 }
 
 function mergeMap<R, S>(newMap: ImmutableMap<R, S>, oldMap: ImmutableMap<R, S>): [ImmutableMap<R, S>, R[]] {
