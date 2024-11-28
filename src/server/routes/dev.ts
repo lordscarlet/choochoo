@@ -26,7 +26,7 @@ export function devApp() {
       return;
     }
     res.setHeader("content-type", "text/html");
-    fs.createReadStream(join(__dirname, "../../client/index.html")).pipe(res);
+    fs.createReadStream(join(__dirname, "../../client/index.dev.html")).pipe(res);
   });
 
   return devApp;

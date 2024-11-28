@@ -17,7 +17,7 @@ export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<voi
     minify: production,
     platform: 'browser',
     jsx: 'automatic',
-    outfile: "dist/index.js",
+    outfile: production ? 'dist/index.min.js' : 'dist/index.dev.js',
     treeShaking: true,
     sourcemap: true,
     define: Object.fromEntries(environmentVariables.map(v => [`process.env.${v}`, process.env[v] != null ? `"${process.env[v]}"` : 'undefined'])),
