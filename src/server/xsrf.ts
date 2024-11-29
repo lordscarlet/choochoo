@@ -1,19 +1,21 @@
 
 import { randomBytes } from 'crypto';
 import express, { NextFunction, Request, Response } from 'express';
+import { InvalidXsrfToken } from '../utils/error';
 import './session';
 
 export const xsrfApp = express();
 
-xsrfApp.use((req: Request, res: Response, next: NextFunction) => {
+xsrfApp.use(async (req: Request, res: Response, next: NextFunction) => {
   if (req.method === 'GET' || req.method === 'OPTIONS') return next();
-  if (req.headers['xsrf-token'] !== req.session.xsrfToken) {
-    return next(new Error('invalid xsrf token'));
+  const xsrfToken = await getXsrfToken(req);
+  if (req.headers['xsrf-token'] !== xsrfToken) {
+    return next(new InvalidXsrfToken());
   }
   next();
 });
 
-async function getXsrfToken(req: Request) {
+async function getXsrfToken(req: Request): Promise<string> {
   if (req.session.xsrfToken == null) {
     const buffer = await randomBytes(32);
     req.session.xsrfToken = buffer.toString('hex');

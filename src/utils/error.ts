@@ -1,6 +1,7 @@
+import { ErrorCode } from "./error_code";
 
 export class UserError extends Error {
-  constructor(readonly statusCode: number, msg: string) {
+  constructor(readonly statusCode: number, msg: string, readonly errorCode?: ErrorCode) {
     super(msg);
   }
 
@@ -12,6 +13,12 @@ export class UserError extends Error {
 export class InvalidInputError extends UserError {
   constructor(msg: string) {
     super(400, msg);
+  }
+}
+
+export class InvalidXsrfToken extends UserError {
+  constructor() {
+    super(400, 'Invalid XSRF token', ErrorCode.INVALID_XSRF_TOKEN);
   }
 }
 

@@ -51,7 +51,7 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   }
   if (err instanceof UserError) {
     res.status(err.statusCode);
-    res.json({ success: false, error: err.message });
+    res.json({ success: false, error: err.message, code: err.errorCode });
   } else {
     if (err instanceof DatabaseError) {
       console.log('database error', err.parameters, err.cause);

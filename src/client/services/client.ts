@@ -4,7 +4,9 @@ import { feedbackContract } from '../../api/feedback';
 import { gameContract } from '../../api/game';
 import { messageContract } from '../../api/message';
 import { userContract } from '../../api/user';
+import { ErrorCode } from '../../utils/error_code';
 import { environment } from './environment';
+import { isErrorBody, isNetworkError } from './network';
 
 const c = initContract();
 
@@ -20,7 +22,13 @@ export const contract = c.router({
   },
 });
 
-const xsrfToken = fetch(`${environment.apiHost}/api/xsrf`, { credentials: 'include' }).then((r) => r.json()).then(({ xsrfToken }) => xsrfToken);
+let xsrfToken = generateXsrfToken();
+
+async function generateXsrfToken(): Promise<string> {
+  const result = await fetch(`${environment.apiHost}/api/xsrf`, { credentials: 'include' });
+  const response = await result.json();
+  return response.xsrfToken;
+}
 
 export const clientArgs: ClientArgs = {
   baseUrl: `${environment.apiHost}/api`,
@@ -29,10 +37,20 @@ export const clientArgs: ClientArgs = {
   },
   credentials: 'include',
   async api(args: ApiFetcherArgs) {
-    args.headers['xsrf-token'] = await xsrfToken;
-    return tsRestFetchApi(args);
+    const response = await attemptApi(args);
+    if (!isNetworkError(response)) return response;
+    if (!isErrorBody(response.body)) return response;
+    if (response.body.code !== ErrorCode.INVALID_XSRF_TOKEN) return response;
+
+    xsrfToken = generateXsrfToken();
+    return attemptApi(args);
   }
 };
+
+async function attemptApi(args: ApiFetcherArgs): Promise<ReturnType<typeof tsRestFetchApi>> {
+  args.headers['xsrf-token'] = await xsrfToken;
+  return tsRestFetchApi(args);
+}
 
 export const networkClient = initClient(contract, clientArgs);
 
