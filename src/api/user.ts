@@ -7,7 +7,7 @@ export type UserRole = z.infer<typeof UserRole>;
 const Password = z.string().min(8).max(32);
 
 export const CreateUserApi = z.object({
-  email: z.string().toLowerCase().email(),
+  email: z.string().trim().toLowerCase().email(),
   username: z.string().toLowerCase().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, lowercase letters, and underscores'),
   password: Password,
   invitationCode: z.string(),
@@ -15,7 +15,7 @@ export const CreateUserApi = z.object({
 export type CreateUserApi = z.infer<typeof CreateUserApi>;
 
 export const LoginUserApi = z.object({
-  usernameOrEmail: z.string().toLowerCase().min(1),
+  usernameOrEmail: z.string().trim().toLowerCase().min(1),
   activationCode: z.string().optional(),
   password: Password,
 });
