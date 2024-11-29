@@ -1,9 +1,11 @@
 import Mailjet from "node-mailjet";
 import z from "zod";
+import { GameApi } from "../../api/game";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
 
 export abstract class EmailService {
+  abstract sendTurnReminder(email: string, game: GameApi): Promise<void>;
   abstract sendForgotPasswordMessage(email: string): Promise<void>;
   abstract subscribe(email: string): Promise<void>;
   abstract sendActivationCode(email: string): Promise<void>;
@@ -60,6 +62,25 @@ class MailjetEmailService extends EmailService {
       }
       throw e;
     }
+  }
+
+  async sendTurnReminder(email: string, game: GameApi): Promise<void> {
+    const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
+    await this.sendEmail({
+      email,
+      subject: `It's your turn!`,
+      text: `
+It's your turn to play!
+Everyone in the "${game.name}" game is waiting for you.
+Copy and paste the following link to take your turn: ${gameLink}.
+- Nathan`,
+      html: `
+<h3>It's your turn to play!</h3>
+<p>Everyone in the <a href="${gameLink}">"${game.name}" game</a> is waiting for you.</p>
+<p>Click or copy and paste the following link to take your turn.</p>
+<p><a href="${gameLink}">Take your turn</a></p>
+<p>-Nathan</p>`,
+    });
   }
 
   async sendForgotPasswordMessage(email: string): Promise<void> {
@@ -132,6 +153,10 @@ interface SendEmailProps {
 }
 
 class NoopEmailService extends EmailService {
+  async sendTurnReminder(email: string, game: GameApi): Promise<void> {
+    console.log(`sending turn reminder for ${email} to ${game.name}`);
+  }
+
   async sendForgotPasswordMessage(email: string): Promise<void> {
     console.log('forgot password', `/app/users/update-password?code=${this.makeEmailVerificationCode(email)}`);
   }

@@ -17,6 +17,7 @@ import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
 import { emitGameUpdate, emitLogsDestroyToRoom, emitLogsReplaceToRoom, emitToRoom } from '../socket';
+import { emailService } from '../util/email';
 import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
 
@@ -178,6 +179,8 @@ const router = initServer().router(gameContract, {
         userId,
       });
 
+      const playerChanged = game.activePlayerId === activePlayerId;
+
       game.version = game.version + 1;
       game.gameData = gameData;
       game.activePlayerId = activePlayerId;
@@ -192,9 +195,16 @@ const router = initServer().router(gameContract, {
       }));
       const newLogs = await LogModel.bulkCreate(createLogs, { transaction });
 
-      transaction.afterCommit(() => {
+      transaction.afterCommit(async () => {
         emitToRoom(newLogs);
         emitGameUpdate(originalGame, newGame);
+
+        if (playerChanged && game.activePlayerId !== null) {
+          const user = await UserModel.getUser(game.activePlayerId!);
+          if (user == null) return;
+          emailService.sendTurnReminder(user.email, game.toApi());
+        }
+        // TODO: send an email letting everyone know that the game has ended.
       });
 
       return { status: 200, body: { game: newGame.toApi() } };
