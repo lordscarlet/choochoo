@@ -12,6 +12,11 @@ interface ErrorBody {
   error: string;
 }
 
+export function isNetworkError(error: unknown): error is NetworkError {
+  return error != null && typeof error === 'object' && 'status' in error && typeof error.status === 'number' &&
+    'body' in error;
+}
+
 function isErrorBody(t: unknown): t is ErrorBody {
   return t != null && typeof t === 'object' && 'error' in t;
 }

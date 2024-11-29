@@ -30,6 +30,7 @@ function Loading() {
 }
 
 function ResetError({ resetErrorBoundary }: { resetErrorBoundary(): void }) {
+  console.log('rendering error');
   return <div>
     There was an error!
     <Button onClick={resetErrorBoundary}>Try again</Button>

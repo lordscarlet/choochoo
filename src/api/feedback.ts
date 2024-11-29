@@ -8,7 +8,7 @@ function limit(msg: string): string {
 
 export const CreateErrorReportApi = z.object({
   errorMessage: z.string().min(1).transform(limit),
-  stack: z.string().min(1).transform(limit),
+  stack: z.string().min(1).transform(limit).optional(),
   url: z.string(),
 });
 export type CreateErrorReportApi = z.infer<typeof CreateErrorReportApi>;
