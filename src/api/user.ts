@@ -4,6 +4,12 @@ import { z } from 'zod';
 export const UserRole = z.enum(['ACTIVATE_EMAIL', 'USER', 'ADMIN', 'BLOCKED']);
 export type UserRole = z.infer<typeof UserRole>;
 
+export const NotificationSettings = z.object({
+  turnNotifications: z.boolean().optional(),
+  unsubscribedFromAll: z.boolean().optional(),
+});
+export type NotificationSettings = z.infer<typeof NotificationSettings>;
+
 const Password = z.string().min(8).max(32);
 
 export const CreateUserApi = z.object({
@@ -31,6 +37,7 @@ export const MyUserApi = z.object({
   id: z.number(),
   email: z.string(),
   username: z.string(),
+  notificationSettings: NotificationSettings,
   role: UserRole,
 });
 export type MyUserApi = z.infer<typeof MyUserApi>;

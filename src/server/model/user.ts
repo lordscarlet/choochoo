@@ -1,7 +1,7 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Transaction } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { compare, hash } from 'bcrypt';
-import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
+import { CreateUserApi, MyUserApi, NotificationSettings, UserApi, UserRole } from '../../api/user';
 import { assert, isPositiveInteger } from '../../utils/validate';
 import { redisClient } from '../redis';
 import { environment, Stage } from '../util/environment';
@@ -45,6 +45,9 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
 
   @Attribute(DataTypes.STRING)
   declare role: UserRole;
+
+  @Attribute(DataTypes.JSON)
+  declare notificationSettings: NotificationSettings;
 
   @Version
   @NotNull
@@ -95,6 +98,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
       ...this.toApi(),
       email: this.email,
       role: this.role,
+      notificationSettings: this.notificationSettings,
     };
   }
 
@@ -132,6 +136,10 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
       email: user.email,
       password,
       role: UserRole.enum.ACTIVATE_EMAIL,
+      notificationSettings: {
+        turnNotifications: true,
+        unsubscribedFromAll: false,
+      },
     }, { transaction });
     return newUser;
   }
