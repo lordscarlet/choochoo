@@ -10,6 +10,7 @@ interface NetworkError {
 
 interface ErrorBody {
   error: string;
+  code?: number;
 }
 
 export function isNetworkError(error: unknown): error is NetworkError {
@@ -17,7 +18,7 @@ export function isNetworkError(error: unknown): error is NetworkError {
     'body' in error;
 }
 
-function isErrorBody(t: unknown): t is ErrorBody {
+export function isErrorBody(t: unknown): t is ErrorBody {
   return t != null && typeof t === 'object' && 'error' in t;
 }
 
