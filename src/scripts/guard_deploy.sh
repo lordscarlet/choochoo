@@ -13,4 +13,9 @@ if [ "$branch" != "prod" ]; then
   exit 1
 fi
 
+if [ -n "$(git diff HEAD)" ]; then
+  echo "Cannot deploy when there are uncommitted changes"
+  exit 1
+fi
+
 # TODO: run unit tests.
