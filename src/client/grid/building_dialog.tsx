@@ -1,5 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
-import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import { Button, Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import { useCallback, useMemo, useReducer, useState } from "react";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
@@ -70,7 +70,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
       </IconButton>
       <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
         <p><input type="checkbox" checked={showReasons} onChange={e => setShowReasons(e.target.checked)} />Show failure reasons</p>
-        {showReasons && <button onClick={rotate}>Rotate</button>}
+        {showReasons && <Button onClick={rotate}>Rotate</Button>}
         {eligible.map((build, index) => <div key={index}>
           <ModifiedSpace space={space!} tile={build.tile} onClick={() => build.reason == null && onSelect(build.action)} />
           {build.reason}

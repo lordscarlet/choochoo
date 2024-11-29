@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
@@ -60,7 +61,7 @@ export function UndoButton() {
   if (!canUndo) {
     return <></>;
   }
-  return <button onClick={undo}>Undo</button>;
+  return <Button onClick={undo}>Undo</Button>;
 }
 
 export function RetryButton() {
@@ -68,5 +69,5 @@ export function RetryButton() {
   if (!canRetry) {
     return <></>;
   }
-  return <button onClick={retry}>Retry</button>;
+  return <Button onClick={retry}>Retry</Button>;
 }

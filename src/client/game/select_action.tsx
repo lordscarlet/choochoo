@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
@@ -55,7 +56,7 @@ export function PlaceGood() {
   return <div>
     <p>{canEmit ? 'You' : canEmitUsername} drew {state!.goods.map(getGoodColor).join(', ')}</p>
     <p>Select where to place {getGoodColor(state!.goods[0])}</p>
-    <button onClick={emitPass}>Pass</button>
+    <Button onClick={emitPass}>Pass</Button>
   </div>;
 }
 
@@ -74,8 +75,8 @@ export function MoveGoods() {
   }
 
   return <div>
-    {!state!.locomotive.includes(player.color) && <button onClick={emitLoco}>Locomotive</button>}
-    <button onClick={emitPass}>Pass</button>
+    {!state!.locomotive.includes(player.color) && <Button onClick={emitLoco}>Locomotive</Button>}
+    <Button onClick={emitPass}>Pass</Button>
   </div>
 }
 
@@ -94,7 +95,7 @@ export function SpecialActionSelector() {
   const actions = allActions.filter((action) => !players.some(({ selectedAction }) => selectedAction === action));
   return <div>
     You must select an action.
-    {actions.map((action) => <button key={action} onClick={() => emit({ action })}>{getSelectedActionString(action)}</button>)}
+    {actions.map((action) => <Button key={action} onClick={() => emit({ action })}>{getSelectedActionString(action)}</Button>)}
   </div>;
 }
 
@@ -117,9 +118,9 @@ export function Bid() {
   const bids = iterate(maxBid - minBid + 1, (i) => i + minBid);
   return <div>
     You must bid.
-    <button onClick={emitPass}>Pass</button>
-    {helper.canUseTurnOrderPass() && <button onClick={emitTurnOrderPass}>Use Turn Order Pass</button>}
-    {bids.map(bid => <button key={bid} onClick={() => emitBid({ bid })}>{bid}</button>)}
+    <Button onClick={emitPass}>Pass</Button>
+    {helper.canUseTurnOrderPass() && <Button onClick={emitTurnOrderPass}>Use Turn Order Pass</Button>}
+    {bids.map(bid => <Button key={bid} onClick={() => emitBid({ bid })}>{bid}</Button>)}
   </div>;
 }
 
@@ -144,7 +145,7 @@ export function GenericMessage({ children }: { children: string | string[] }) {
 export function TakeShares() {
   const { canEmit, canEmitUsername, emit } = useAction(TakeSharesAction);
   const numShares = useInjected(ShareHelper).getSharesTheyCanTake();
-  const options = iterate(numShares, (numShares) => <button key={numShares} onClick={() => emit({ numShares })}>{numShares}</button>);
+  const options = iterate(numShares, (numShares) => <Button key={numShares} onClick={() => emit({ numShares })}>{numShares}</Button>);
 
   if (canEmitUsername == null) {
     return <></>;
@@ -178,6 +179,6 @@ export function Build() {
 
   return <div>
     You can build {buildsRemaining} more track{canUrbanize && ' and urbanize'}.
-    <button onClick={emitPass}>Done Building</button>
+    <Button onClick={emitPass}>Done Building</Button>
   </div>;
 }

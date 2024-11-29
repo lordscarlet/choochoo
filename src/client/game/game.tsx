@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import { useGame, useJoinGame, useLeaveGame, useStartGame } from "../services/game";
 import { useMe } from "../services/me";
 import { useUsers } from "../services/user";
@@ -23,7 +24,7 @@ export function LeaveButton() {
     return <></>;
   }
 
-  return <button disabled={isPending} onClick={perform}>Leave</button>;
+  return <Button disabled={isPending} onClick={perform}>Leave</Button>;
 }
 
 export function JoinButton() {
@@ -32,7 +33,7 @@ export function JoinButton() {
     return <></>;
   }
 
-  return <button disabled={isPending} onClick={perform}>Join</button>;
+  return <Button disabled={isPending} onClick={perform}>Join</Button>;
 }
 
 export function StartButton() {
@@ -41,5 +42,5 @@ export function StartButton() {
     return <></>;
   }
 
-  return <button disabled={isPending} onClick={perform}>Start</button>;
+  return <Button disabled={isPending} onClick={perform}>Start</Button>;
 }
