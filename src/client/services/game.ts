@@ -191,7 +191,11 @@ interface ActionHandler<T> {
   canEmitUsername?: string;
 }
 
-export function useEmptyAction(action: ActionConstructor<Record<string, never>>): ActionHandler<unknown> {
+type EmptyActionHandler = Omit<ActionHandler<unknown>, 'emit'> & {
+  emit(): void,
+};
+
+export function useEmptyAction(action: ActionConstructor<Record<string, never>>): EmptyActionHandler {
   const { emit: oldEmit, canEmit, canEmitUsername, isPending } = useAction(action);
   const emit = useCallback(() => {
     oldEmit({});
