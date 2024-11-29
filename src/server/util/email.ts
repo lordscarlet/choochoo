@@ -63,45 +63,41 @@ class MailjetEmailService extends EmailService {
   }
 
   async sendForgotPasswordMessage(email: string): Promise<void> {
-    try {
-      const code = this.makeEmailVerificationCode(email);
-      const result = await this.mailjet.post("send", { 'version': 'v3.1' })
-        .request({
-          "Messages": [
-            {
-              "From": {
-                "Email": "support@choochoo.games",
-                "Name": "Choo Choo Games"
-              },
-              "To": [
-                {
-                  "Email": email,
-                  "Name": email,
-                }
-              ],
-              "Subject": "Forgot password",
-              "TextPart": 'Let\'s get you back on the train! Copy and paste the following link into your browser window to update your password: https://www.choochoo.games/app/users/update-password?code=' + code,
-              "HTMLPart": `
+    const code = this.makeEmailVerificationCode(email);
+    const updatePasswordLink = `https://www.choochoo.games/app/users/update-password?code=${code}`;
+    await this.sendEmail({
+      email,
+      subject: 'Forgotten password request',
+      text: `Let's get you back on the train! Copy and paste the following link into your browser window to update your password: ${updatePasswordLink}`,
+      html: `
 <h3>Let's get you back on the train!</h3>
 <p>Click the following link to update your password.</p>
-<p><a href="https://www.choochoo.games/app/users/update-password?code=${code}">Update password</a></p>
+<p><a href="${updatePasswordLink}">Update password</a></p>
 <p>Good luck! CCMF!</p>
 <p>-Nathan</p>`,
-            },
-          ],
-        });
-      console.log('mailjet', email, (result.body as any).Messages);
-    } catch (e) {
-      console.log('failed to send an email');
-      console.error(e);
-    }
+    });
   }
 
   async sendActivationCode(email: string): Promise<void> {
+    await emailService.subscribe(email);
+    const activationCode = this.makeEmailVerificationCode(email);
+    const activationLink = `https://www.choochoo.games/app/users/activate?activationCode=${activationCode}`;
+    await this.sendEmail({
+      email,
+      subject: 'Activate your account',
+      text: `Welcome to Choo Cho Games! Copy and paste the following link into your browser window to activate: ${activationLink}`,
+      html: `
+<h3>Welcome to Choo Choo Games!</h3>
+<p>Click the following link to activate your account.</p>
+<p><a href="${activationLink}">Activate</a></p>
+<p>I hope you enjoy the games! CCMF!</p>
+<p>-Nathan</p>`,
+    });
+  }
+
+  async sendEmail({ email, subject, text, html }: SendEmailProps): Promise<void> {
     try {
-      await emailService.subscribe(email);
-      const activationCode = this.makeEmailVerificationCode(email);
-      const result = await this.mailjet.post("send", { 'version': 'v3.1' })
+      await this.mailjet.post("send", { 'version': 'v3.1' })
         .request({
           "Messages": [
             {
@@ -115,23 +111,24 @@ class MailjetEmailService extends EmailService {
                   "Name": email,
                 }
               ],
-              "Subject": "Activate your account",
-              "TextPart": 'Welcome to Choo Cho Games! Copy and paste the following link into your browser window to activate: https://www.choochoo.games/app/users/activate?activationCode=' + activationCode,
-              "HTMLPart": `
-<h3>Welcome to Choo Choo Games!</h3>
-<p>Click the following link to activate your account.</p>
-<p><a href="https://www.choochoo.games/app/users/activate?activationCode=${activationCode}">Activate</a></p>
-<p>I hope you enjoy the games! CCMF!</p>
-<p>-Nathan</p>`,
+              "Subject": subject,
+              "TextPart": text,
+              "HTMLPart": html,
             },
           ],
         });
-      console.log('mailjet', email, (result.body as any).Messages);
     } catch (e) {
       console.log('failed to send an email');
       console.error(e);
     }
   }
+}
+
+interface SendEmailProps {
+  email: string;
+  subject: string;
+  text: string;
+  html: string;
 }
 
 class NoopEmailService extends EmailService {
