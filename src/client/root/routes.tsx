@@ -8,9 +8,11 @@ import { CreateGamePage } from "../game/create_page";
 import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
 import { ActivatePage } from "../user/activate";
+import { ForgotPassword } from "../user/forgot_password";
 import { LoginPage } from "../user/login";
 import { LoginRequired } from "../user/login_required";
 import { RegisterPage } from "../user/register";
+import { UpdatePassword } from "../user/update_password";
 import { Layout } from "./layout";
 
 export function Router() {
@@ -56,6 +58,14 @@ export function Router() {
         {
           path: '/app/users/register',
           element: <RegisterPage />,
+        },
+        {
+          path: '/app/users/forgot-password',
+          element: <ForgotPassword />,
+        },
+        {
+          path: '/app/users/update-password',
+          element: <UpdatePassword />
         },
         {
           path: '/app/games/create',

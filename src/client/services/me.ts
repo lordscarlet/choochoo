@@ -1,7 +1,7 @@
 import { useNotifications } from "@toolpad/core";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreateInviteApi, CreateUserApi, LoginUserApi, MyUserApi, ResendActivationCodeRequest } from "../../api/user";
+import { CreateInviteApi, CreateUserApi, ForgotPasswordRequest, LoginUserApi, MyUserApi, ResendActivationCodeRequest, UpdatePasswordRequest } from "../../api/user";
 import { assert } from "../../utils/validate";
 import { tsr } from "./client";
 import { handleError } from "./network";
@@ -92,6 +92,30 @@ export function useRegister() {
   }), []);
 
   return { register, validationError, isPending };
+}
+
+export function useForgotPassword() {
+  const { mutate, error, isSuccess, isPending } = tsr.users.forgotPassword.useMutation();
+  const validationError = handleError(isPending, error);
+
+  const forgotPassword = useCallback((body: ForgotPasswordRequest) => mutate({ body }), []);
+
+  return { forgotPassword, validationError, isSuccess, isPending };
+}
+
+export function useUpdatePassword() {
+  const { mutate, error, isPending } = tsr.users.updatePassword.useMutation();
+  const notifications = useNotifications();
+  const validationError = handleError(isPending, error);
+
+  const updatePassword = useCallback((body: UpdatePasswordRequest, onSuccess?: () => void) => mutate({ body }, {
+    onSuccess: (data) => {
+      notifications.show('Update succeeded!', { autoHideDuration: 2000 });
+      onSuccess?.();
+    },
+  }), []);
+
+  return { updatePassword, validationError, isPending };
 }
 
 export function useLogout() {

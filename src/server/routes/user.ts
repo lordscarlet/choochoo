@@ -47,9 +47,9 @@ const router = initServer().router(userContract, {
       assert(await user.comparePassword(body.oldPassword), { permissionDenied: 'Invalid credentials' });
     } else if (body.updateCode != null) {
       const email = emailService.getEmailFromActivationCode(body.updateCode);
-      assert(email != null, { invalidInput: 'Invalid activation code (1)' });
+      assert(email != null, { invalidInput: 'Expired activation code (1)' });
       user = await UserModel.findByUsernameOrEmail(email);
-      assert(user != null, { invalidInput: 'Invalid activation code (2)' });
+      assert(user != null, { invalidInput: 'Expired activation code (2)' });
     } else {
       fail({ invalidInput: true });
     }

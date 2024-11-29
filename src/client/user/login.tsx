@@ -57,6 +57,9 @@ export function LoginPage() {
       <Button type="submit" disabled={isPending}>Login</Button>
     </div>
     <p>
+      <Link to="/app/users/forgot-password">Forgot password?</Link>
+    </p>
+    <p>
       <Link to="/app/users/register">Register</Link>
     </p>
   </Box>;

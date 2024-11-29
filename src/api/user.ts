@@ -7,7 +7,7 @@ export type UserRole = z.infer<typeof UserRole>;
 const Password = z.string().min(8).max(32);
 
 export const CreateUserApi = z.object({
-  email: z.string().email(),
+  email: z.string().toLowerCase().email(),
   username: z.string().toLowerCase().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, lowercase letters, and underscores'),
   password: Password,
   invitationCode: z.string(),
@@ -70,7 +70,7 @@ export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequest>;
 
 export const UpdatePasswordRequest = z.object({
   oldPassword: z.string().optional(),
-  newPassword: z.string(),
+  newPassword: Password,
   updateCode: z.string().optional(),
 });
 export type UpdatePasswordRequest = z.infer<typeof UpdatePasswordRequest>;
