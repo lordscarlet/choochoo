@@ -31,7 +31,7 @@ const router = initServer().router(userContract, {
   },
 
   async list({ req, query }) {
-    await enforceRole(req);
+    await enforceRole(req, UserRole.enum.ADMIN);
     const where: WhereOptions<UserModel> = {};
     if (query.pageCursor != null) {
       where.id = { [Op.notIn]: query.pageCursor };
