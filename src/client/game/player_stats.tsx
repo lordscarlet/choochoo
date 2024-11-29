@@ -1,15 +1,11 @@
 import { useMemo } from "react";
 import { UserApi } from "../../api/user";
-import { inject, injectState } from "../../engine/framework/execution_context";
-import { PHASE } from "../../engine/game/phase";
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
 import { getSelectedActionString } from "../../engine/state/action";
-import { Phase } from "../../engine/state/phase";
 import { getPlayerColor, PlayerData } from "../../engine/state/player";
-import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { useUsers } from "../services/user";
-import { useInject, useInjected, useInjectedState } from "../utils/injection_context";
+import { useInjected, useInjectedState } from "../utils/injection_context";
 import * as styles from './active_game.module.css';
 import { LoginButton } from "./login_button";
 
@@ -26,7 +22,6 @@ export function PlayerStats() {
     const user = playerUsers?.find(user => user.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
-  const columns: ColumnRenderer[] = useInject(() => [inject(BidRenderer)], []);
   return <table>
     <thead>
       <tr>
@@ -38,7 +33,6 @@ export function PlayerStats() {
         <th>Income</th>
         <th>Shares</th>
         <th>Locomotive</th>
-        {columns.filter(c => c.isEnabled()).map((c) => <th key={c.title}>{c.title}</th>)}
         <th>Score</th>
         <th></th>
       </tr>
@@ -54,36 +48,11 @@ export function PlayerStats() {
           <td>${player.income}</td>
           <td>{player.shares}</td>
           <td>{player.locomotive}</td>
-          {columns.filter(c => c.isEnabled()).map((c) => <td key={c.title}>{c.calculator(player)}</td>)}
           <td>{helper.getScore(player)}</td>
           <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
         </tr>)}
     </tbody>
   </table>;
-}
-
-interface ColumnRenderer {
-  readonly title: string;
-  isEnabled(): boolean;
-  calculator(player: PlayerData): string;
-}
-
-class BidRenderer {
-  readonly title = 'Bid';
-  private readonly phase = injectState(PHASE);
-  private readonly turnOrderState = injectState(TURN_ORDER_STATE);
-  private readonly turnOrder = injectState(TURN_ORDER);
-
-  isEnabled(): boolean {
-    return this.phase() === Phase.TURN_ORDER;
-  }
-
-  calculator(player: PlayerData): string {
-    const state = this.turnOrderState();
-    const turnOrder = state.nextTurnOrder.indexOf(player.color) + 1 + this.turnOrder().length - state.nextTurnOrder.length;
-    return state.nextTurnOrder.includes(player.color) ? `Passed: ${turnOrder}` :
-      state.previousBids[player.color] != null ? `$${state.previousBids[player.color]}` : 'N/A';
-  }
 }
 
 
