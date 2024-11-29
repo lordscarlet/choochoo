@@ -70,7 +70,7 @@ class MailjetEmailService extends EmailService {
           "Messages": [
             {
               "From": {
-                "Email": "choochoo@mail.choochoo.games",
+                "Email": "support@choochoo.games",
                 "Name": "Choo Choo Games"
               },
               "To": [
@@ -106,7 +106,7 @@ class MailjetEmailService extends EmailService {
           "Messages": [
             {
               "From": {
-                "Email": "choochoo@mail.choochoo.games",
+                "Email": "support@choochoo.games",
                 "Name": "Choo Choo Games"
               },
               "To": [
