@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ignore="$1"
 
 if [ "$ignore" = "ignore-guard" ]; then
