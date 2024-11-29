@@ -15,7 +15,7 @@ export const CreateUserApi = z.object({
 export type CreateUserApi = z.infer<typeof CreateUserApi>;
 
 export const LoginUserApi = z.object({
-  usernameOrEmail: z.string().min(1),
+  usernameOrEmail: z.string().toLowerCase().min(1),
   activationCode: z.string().optional(),
   password: Password,
 });
