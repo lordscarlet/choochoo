@@ -80,11 +80,11 @@ class MailjetEmailService extends EmailService {
                 }
               ],
               "Subject": "Forgot password",
-              "TextPart": 'Let\'s get you back on the train! Copy and paste the following link into your browser window to update your password: https://www.choochoo.games/app/users/forgot-password?code=' + code,
+              "TextPart": 'Let\'s get you back on the train! Copy and paste the following link into your browser window to update your password: https://www.choochoo.games/app/users/update-password?code=' + code,
               "HTMLPart": `
 <h3>Let's get you back on the train!</h3>
 <p>Click the following link to update your password.</p>
-<p><a href="https://www.choochoo.games/app/users/forgot-password?code=${code}">Update password</a></p>
+<p><a href="https://www.choochoo.games/app/users/update-password?code=${code}">Update password</a></p>
 <p>Good luck! CCMF!</p>
 <p>-Nathan</p>`,
             },
