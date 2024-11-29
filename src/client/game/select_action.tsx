@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
@@ -100,10 +100,12 @@ export function SpecialActionSelector() {
 }
 
 export function Bid() {
-  const { emit: emitBid, canEmit, canEmitUsername } = useAction(BidAction);
-  const { emit: emitTurnOrderPass } = useEmptyAction(TurnOrderPassAction);
-  const { emit: emitPass } = useEmptyAction(PassAction);
+  const { emit: emitBid, canEmit, canEmitUsername, isPending: isBidPending } = useAction(BidAction);
+  const { emit: emitTurnOrderPass, isPending: isTurnOrderPending } = useEmptyAction(TurnOrderPassAction);
+  const { emit: emitPass, isPending: isPassPending } = useEmptyAction(PassAction);
   const helper = useInjected(TurnOrderHelper);
+
+  const isPending = isBidPending || isTurnOrderPending || isPassPending;
 
   if (canEmitUsername == null) {
     return <></>;
@@ -117,10 +119,26 @@ export function Bid() {
   const maxBid = helper.getMaxBid();
   const bids = iterate(maxBid - minBid + 1, (i) => i + minBid);
   return <div>
-    You must bid.
-    <Button onClick={emitPass}>Pass</Button>
-    {helper.canUseTurnOrderPass() && <Button onClick={emitTurnOrderPass}>Use Turn Order Pass</Button>}
-    {bids.map(bid => <Button key={bid} onClick={() => emitBid({ bid })}>{bid}</Button>)}
+    <p>You must bid.</p>
+    <FormControl sx={{ m: 1, minWidth: 250 }}>
+      <InputLabel>Select bid</InputLabel>
+      <Select
+        value={undefined}
+        disabled={isPending}
+        onChange={(e) => e.target.value != null && emitBid({ bid: parseInt(e.target.value) })}
+        autoWidth
+        label="Select bid"
+        placeholder="Select bid"
+      >
+        {bids.map(bid => <MenuItem key={bid} value={bid}>{bid}</MenuItem>)}
+      </Select>
+    </FormControl>
+    {helper.canUseTurnOrderPass() && <p>
+      <Button onClick={emitTurnOrderPass} disabled={isPending}>Use Turn Order Pass</Button>
+    </p>}
+    <p>
+      <Button onClick={emitPass} disabled={isPending}>Pass</Button>
+    </p>
   </div>;
 }
 
