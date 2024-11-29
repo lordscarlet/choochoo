@@ -2,7 +2,7 @@ import { Op, ValidationError, WhereOptions } from '@sequelize/core';
 import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
 import { userContract, UserRole } from '../../api/user';
-import { assert } from '../../utils/validate';
+import { assert, fail } from '../../utils/validate';
 import { InvitationModel } from '../model/invitations';
 import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
@@ -28,6 +28,34 @@ const router = initServer().router(userContract, {
 
     assert(user != null);
     return { status: 200, body: { user } };
+  },
+
+  async forgotPassword({ body }) {
+    const user = await UserModel.findByUsernameOrEmail(body.usernameOrEmail);
+    if (user != null) {
+      emailService.sendForgotPasswordMessage(user.email);
+    }
+    return { status: 200, body: { success: true } };
+  },
+
+  async updatePassword({ body, req }) {
+    let user: UserModel | null;
+    if (body.oldPassword != null) {
+      assert(req.session.userId != null, { unauthorized: true });
+      user = await UserModel.findByPk(req.session.userId);
+      assert(user != null);
+      assert(await user.comparePassword(body.oldPassword), { permissionDenied: 'Invalid credentials' });
+    } else if (body.updateCode != null) {
+      const email = emailService.getEmailFromActivationCode(body.updateCode);
+      assert(email != null, { invalidInput: 'Invalid activation code (1)' });
+      user = await UserModel.findByUsernameOrEmail(email);
+      assert(user != null, { invalidInput: 'Invalid activation code (2)' });
+    } else {
+      fail({ invalidInput: true });
+    }
+    user.password = await UserModel.hashPassword(body.newPassword);
+    await user.save();
+    return { status: 200, body: { success: true } };
   },
 
   async list({ req, query }) {

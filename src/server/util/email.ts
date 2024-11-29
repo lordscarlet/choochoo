@@ -4,13 +4,14 @@ import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
 
 export abstract class EmailService {
+  abstract sendForgotPasswordMessage(email: string): Promise<void>;
   abstract subscribe(email: string): Promise<void>;
   abstract sendActivationCode(email: string): Promise<void>;
 
-  protected makeActivationCode(email: string): string {
+  protected makeEmailVerificationCode(email: string): string {
     const expires = new Date();
     expires.setHours(expires.getMinutes() + 30);
-    const code: ActivationCode = {
+    const code: EmailVerificationCode = {
       email,
       expires: expires.getTime(),
     };
@@ -19,7 +20,7 @@ export abstract class EmailService {
 
   getEmailFromActivationCode(code: string): string | undefined {
     try {
-      const decrypted = ActivationCode.parse(JSON.parse(decrypt(code)));
+      const decrypted = EmailVerificationCode.parse(JSON.parse(decrypt(code)));
       if (Date.now() > decrypted.expires) return undefined;
       return decrypted.email;
     } catch (e) {
@@ -28,11 +29,11 @@ export abstract class EmailService {
   }
 }
 
-const ActivationCode = z.object({
+const EmailVerificationCode = z.object({
   email: z.string(),
   expires: z.number(),
 });
-type ActivationCode = z.infer<typeof ActivationCode>;
+type EmailVerificationCode = z.infer<typeof EmailVerificationCode>;
 
 class MailjetEmailService extends EmailService {
   private readonly mailjet: Mailjet;
@@ -61,10 +62,45 @@ class MailjetEmailService extends EmailService {
     }
   }
 
+  async sendForgotPasswordMessage(email: string): Promise<void> {
+    try {
+      const code = this.makeEmailVerificationCode(email);
+      const result = await this.mailjet.post("send", { 'version': 'v3.1' })
+        .request({
+          "Messages": [
+            {
+              "From": {
+                "Email": "choochoo@mail.choochoo.games",
+                "Name": "Choo Choo Games"
+              },
+              "To": [
+                {
+                  "Email": email,
+                  "Name": email,
+                }
+              ],
+              "Subject": "Forgot password",
+              "TextPart": 'Let\'s get you back on the train! Copy and paste the following link into your browser window to update your password: https://www.choochoo.games/app/users/forgot-password?code=' + code,
+              "HTMLPart": `
+<h3>Let's get you back on the train!</h3>
+<p>Click the following link to update your password.</p>
+<p><a href="https://www.choochoo.games/app/users/forgot-password?code=${code}">Update password</a></p>
+<p>Good luck! CCMF!</p>
+<p>-Nathan</p>`,
+            },
+          ],
+        });
+      console.log('mailjet', email, (result.body as any).Messages);
+    } catch (e) {
+      console.log('failed to send an email');
+      console.error(e);
+    }
+  }
+
   async sendActivationCode(email: string): Promise<void> {
     try {
       await emailService.subscribe(email);
-      const activationCode = this.makeActivationCode(email);
+      const activationCode = this.makeEmailVerificationCode(email);
       const result = await this.mailjet.post("send", { 'version': 'v3.1' })
         .request({
           "Messages": [
@@ -99,10 +135,14 @@ class MailjetEmailService extends EmailService {
 }
 
 class NoopEmailService extends EmailService {
+  async sendForgotPasswordMessage(email: string): Promise<void> {
+    console.log('forgot password', `/app/users/update-password?code=${this.makeEmailVerificationCode(email)}`);
+  }
+
   async subscribe(_: string): Promise<void> { }
 
   async sendActivationCode(email: string): Promise<void> {
-    console.log('activation code', `/app/users/activate?activationCode=${this.makeActivationCode(email)}`);
+    console.log('activation code', `/app/users/activate?activationCode=${this.makeEmailVerificationCode(email)}`);
   }
 }
 

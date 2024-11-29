@@ -63,6 +63,20 @@ export const ResendActivationCodeRequest = z.object({
 });
 export type ResendActivationCodeRequest = z.infer<typeof ResendActivationCodeRequest>;
 
+export const ForgotPasswordRequest = z.object({
+  usernameOrEmail: z.string(),
+});
+export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequest>;
+
+export const UpdatePasswordRequest = z.object({
+  oldPassword: z.string().optional(),
+  newPassword: z.string(),
+  updateCode: z.string().optional(),
+});
+export type UpdatePasswordRequest = z.infer<typeof UpdatePasswordRequest>;
+
+
+
 const c = initContract();
 
 export const userContract = c.router({
@@ -73,6 +87,22 @@ export const userContract = c.router({
     },
     method: 'POST',
     path: '/users/',
+  },
+  forgotPassword: {
+    body: ForgotPasswordRequest,
+    responses: {
+      200: z.object({ success: z.literal(true) }),
+    },
+    method: 'POST',
+    path: '/users/forgot-password',
+  },
+  updatePassword: {
+    body: UpdatePasswordRequest,
+    responses: {
+      200: z.object({ success: z.literal(true) }),
+    },
+    method: 'POST',
+    path: '/users/update-password',
   },
   createInvite: {
     body: CreateInviteApi,
