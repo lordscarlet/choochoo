@@ -33,7 +33,7 @@ export function Router() {
           element: <LoginPage />,
         },
         {
-          path: '/app/admin/create-invite',
+          path: '/app/admin',
           element: <AdminPage />,
         },
         {
