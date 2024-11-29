@@ -465,10 +465,8 @@ heeb
 hell
 hentai
 heshe
-ho
 hoar
 hoare
-hoe
 hoer
 homo
 homoerotic
@@ -951,7 +949,6 @@ willy
 wrapping men
 wrinkled starfish
 xrated
-xx
 xxx
 yaoi
 yellow showers
