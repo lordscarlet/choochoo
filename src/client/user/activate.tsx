@@ -11,7 +11,7 @@ export function ActivatePage() {
   const me = useMe();
   const [searchParams] = useSearchParams();
   const activationCode = searchParams.get('activationCode');
-  const { resend, isPending: isPendingResend } = useResendActivationCode();
+  const { resendNoArgs, isPending: isPendingResend } = useResendActivationCode();
   const { activate, isPending, isError } = useActivateAccount();
   const [hasInitialized, setHasInitialized] = useState(false);
   const hasNavigated = useRef(false);
@@ -43,6 +43,6 @@ export function ActivatePage() {
 
   return <div>
     Failed to activate your account. Please try again.
-    <Button onClick={resend} disabled={isPendingResend}>Resend activation code</Button>
+    <Button onClick={resendNoArgs} disabled={isPendingResend}>Resend activation code</Button>
   </div>;
 }

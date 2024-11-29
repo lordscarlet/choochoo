@@ -150,7 +150,8 @@ export function useResendActivationCode() {
       },
     });
   }, []);
-  return { resend, isPending };
+  const resendNoArgs = useCallback(() => resend(), [resend]);
+  return { resend, resendNoArgs, isPending };
 }
 
 export function useActivateAccount() {

@@ -21,10 +21,10 @@ export function LoginRequired({ children }: LoginRequiredParams) {
 
 function ActivateEmailPage() {
   const { logout, isPending } = useLogout();
-  const { resend, isPending: isPendingResend } = useResendActivationCode();
+  const { resendNoArgs, isPending: isPendingResend } = useResendActivationCode();
   return <div>
     You must activate your email. Please check your inbox (and spam folder).
-    <Button onClick={resend} disabled={isPendingResend}>Resend Activation Code</Button>
+    <Button onClick={resendNoArgs} disabled={isPendingResend}>Resend Activation Code</Button>
     <Button onClick={logout} disabled={isPending}>Logout</Button>
   </div>;
 }
