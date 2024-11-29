@@ -1,7 +1,7 @@
 import { useNotifications } from "@toolpad/core";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreateInviteApi, CreateUserApi, LoginUserApi, MyUserApi } from "../../api/user";
+import { CreateInviteApi, CreateUserApi, LoginUserApi, MyUserApi, ResendActivationCodeRequest } from "../../api/user";
 import { assert } from "../../utils/validate";
 import { tsr } from "./client";
 import { handleError } from "./network";
@@ -118,8 +118,8 @@ export function useResendActivationCode() {
   handleError(isPending, error);
   const notifications = useNotifications();
 
-  const resend = useCallback(() => {
-    mutate({}, {
+  const resend = useCallback((body: ResendActivationCodeRequest = {}) => {
+    mutate({ body }, {
       onSuccess({ status, body }) {
         assert(status === 200 && body.success);
         notifications.show('Activation code sent', { autoHideDuration: 2000 });

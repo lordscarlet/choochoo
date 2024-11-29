@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CreateInvitePage } from "../admin/create_invite";
 import { FeedbackPage } from "../admin/feedback";
 import { AdminPage } from "../admin/page";
+import { UserList } from "../admin/user_list";
 import { CreateGamePage } from "../game/create_page";
 import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
@@ -39,6 +40,10 @@ export function Router() {
         {
           path: '/app/admin/feedback',
           element: <FeedbackPage />,
+        },
+        {
+          path: '/app/admin/users',
+          element: <UserList />,
         },
         {
           path: '/app/admin/create-invite',

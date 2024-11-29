@@ -42,7 +42,6 @@ const router = initServer().router(gameContract, {
     if (pageCursor != null) {
       where.id = { [Op.notIn]: pageCursor };
     }
-    const limit = pageSize! + 1;
     const games = await GameModel.findAll({
       attributes: ['id', 'gameKey', 'name', 'status', 'activePlayerId', 'playerIds'],
       where,

@@ -1,4 +1,4 @@
-import { ValidationError } from '@sequelize/core';
+import { Op, ValidationError, WhereOptions } from '@sequelize/core';
 import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
 import { userContract, UserRole } from '../../api/user';
@@ -32,10 +32,19 @@ const router = initServer().router(userContract, {
 
   async list({ req, query }) {
     await enforceRole(req);
-    const users = await UserModel.findAll({
-      where: query,
+    const where: WhereOptions<UserModel> = {};
+    if (query.pageCursor != null) {
+      where.id = { [Op.notIn]: query.pageCursor };
+    }
+    const pageSize = query.pageSize ?? 20;
+    const allUsers = await UserModel.findAll({
+      order: [['id', 'DESC']],
+      limit: pageSize + 1,
+      where,
     });
-    return { status: 200, body: { users: users.map((user) => user.toApi()) } };
+    const users = allUsers.length > pageSize ? allUsers.slice(0, pageSize) : allUsers;
+    const nextPageCursor = allUsers.length > pageSize ? (query.pageCursor ?? []).concat(users.map((user) => user.id)) : undefined;
+    return { status: 200, body: { users: users.map((user) => user.toMyApi()), nextPageCursor } };
   },
 
   async get({ req, params }) {
@@ -88,9 +97,12 @@ const router = initServer().router(userContract, {
     return { status: 200, body: { user: user.toMyApi() } };
   },
 
-  async resendActivationCode({ req }) {
+  async resendActivationCode({ req, body }) {
     assert(req.session.userId != null, { permissionDenied: true });
-    const user = await UserModel.findByPk(req.session.userId);
+    if (body.userId != null) {
+      enforceRole(req, UserRole.enum.ADMIN);
+    }
+    const user = await UserModel.findByPk(body.userId ?? req.session.userId);
     assert(user != null, { permissionDenied: true });
     assert(user.role == UserRole.enum.ACTIVATE_EMAIL, { permissionDenied: true });
     emailService.sendActivationCode(user.email);

@@ -35,10 +35,14 @@ export const MyUserApi = z.object({
 });
 export type MyUserApi = z.infer<typeof MyUserApi>;
 
-export const ListQueryApi = z.object({
-  id: z.array(z.coerce.number()).nonempty(),
+export const UserPageCursor = z.array(z.coerce.number());
+export type UserPageCursor = z.infer<typeof UserPageCursor>;
+
+export const ListUsersApi = z.object({
+  pageSize: z.coerce.number().optional(),
+  pageCursor: UserPageCursor.optional(),
 });
-export type ListQueryApi = z.infer<typeof ListQueryApi>;
+export type ListUsersApi = z.infer<typeof ListUsersApi>;
 
 export const InviteApi = z.object({
   code: z.string().min(1),
@@ -53,6 +57,11 @@ export type CreateInviteApi = z.infer<typeof CreateInviteApi>;
 
 export const UserParams = z.object({ userId: z.coerce.number() });
 export type UserParams = z.infer<typeof UserParams>;
+
+export const ResendActivationCodeRequest = z.object({
+  userId: z.number().optional(),
+});
+export type ResendActivationCodeRequest = z.infer<typeof ResendActivationCodeRequest>;
 
 const c = initContract();
 
@@ -93,7 +102,7 @@ export const userContract = c.router({
     path: '/users/login',
   },
   resendActivationCode: {
-    body: z.object({}),
+    body: ResendActivationCodeRequest,
     responses: {
       200: z.object({ success: z.literal(true) }),
     },
@@ -150,9 +159,9 @@ export const userContract = c.router({
   },
   list: {
     responses: {
-      200: z.object({ users: z.array(UserApi) }),
+      200: z.object({ users: z.array(MyUserApi), nextPageCursor: UserPageCursor.optional() }),
     },
-    query: ListQueryApi,
+    query: ListUsersApi,
     method: 'GET',
     path: '/users/',
   }
