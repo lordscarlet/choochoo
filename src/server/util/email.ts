@@ -1,7 +1,6 @@
 import Mailjet from "node-mailjet";
 import z from "zod";
 import { GameApi } from "../../api/game";
-import { NotificationFrequency, NotificationMethod } from "../../api/notifications";
 import { UserModel } from "../model/user";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
@@ -41,6 +40,8 @@ export abstract class EmailService {
 
 
   async sendTurnReminder(user: UserModel, game: GameApi): Promise<void> {
+    // TODO: investigate why this doesn't work.
+    if (1 === 1) return;
     const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
     await this.sendEmail({
       email: user.email,
