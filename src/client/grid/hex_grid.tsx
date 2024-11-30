@@ -1,7 +1,7 @@
 import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
 import { Fab, Tooltip } from "@mui/material";
-import { MouseEvent, useCallback, useMemo } from "react";
+import { MouseEvent, useCallback, useMemo, useState } from "react";
 import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
@@ -9,7 +9,7 @@ import { Coordinates } from "../../utils/coordinates";
 import { useTypedCallback } from "../utils/hooks";
 import { ClickTarget } from "./click_target";
 import { Hex } from "./hex";
-import { fabs, hexGrid, hexGridContainer } from './hex_grid.module.css';
+import { fabs, floatingFabs, hexGrid, hexGridContainer } from './hex_grid.module.css';
 import { coordinatesToCenter, getCorners, Point } from "./point";
 
 
@@ -49,7 +49,7 @@ interface HexGridProps {
   clickTargets: Set<ClickTarget>;
 }
 
-function onClickCb(grid: Grid, offset: Point, size: number, onClick: (space: Space, good?: Good) => void) {
+function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClick: (space: Space, good?: Good) => void) {
   return (e: MouseEvent) => {
     const canvas = e.currentTarget as HTMLCanvasElement;
     const rect = canvas.getBoundingClientRect();
@@ -68,6 +68,7 @@ function onClickCb(grid: Grid, offset: Point, size: number, onClick: (space: Spa
 }
 
 export function HexGrid({ onClick, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
+  const [zoom, setZoom] = useState(1);
   const size = 70;
   const padding = 20;
 
@@ -89,15 +90,19 @@ export function HexGrid({ onClick, highlightedTrack, selectedGood, grid, clickTa
     };
   }, [size, padding, ...spaces]);
 
-  const internalOnClick = useTypedCallback(onClickCb, [grid, offset, size, onClick]);
+  const internalOnClick = useTypedCallback(onClickCb, [grid, zoom, offset, size, onClick]);
 
   const zoomIn = useCallback(() => {
-    // setSize(size + 5);
-  }, [size]);
+    setZoom(zoom + 0.05);
+  }, [zoom, setZoom]);
 
   const zoomOut = useCallback(() => {
-    // setSize(size - 5);
-  }, [size]);
+    setZoom(zoom - 0.05);
+  }, [zoom, setZoom]);
+
+  const normalizeZoom = useCallback(() => {
+    setZoom(1)
+  }, [zoom, setZoom]);
 
   const mapSpaces = [];
 
@@ -112,23 +117,34 @@ export function HexGrid({ onClick, highlightedTrack, selectedGood, grid, clickTa
       [space, selectedGood, highlightedTrackSerialized, offset.x, offset.y, size, clickTargets]));
   }
 
+  const mapBox = useMemo(() => ({
+    width: viewBox.x * zoom,
+    height: viewBox.y * zoom,
+  }), [zoom, viewBox]);
+
   return <>
-    <div className={fabs}>
+    <div className={`${fabs} ${zoom > 0.4 ? floatingFabs : ''}`}>
       <Tooltip title="Zoom out">
-        <Fab color="primary" size="small" onClick={zoomOut}>
+        <Fab color="primary" size="small" onClick={zoomOut} disabled={zoom <= 0.2}>
           <RemoveCircleOutline />
         </Fab>
       </Tooltip>
+      <Tooltip title="Back to 0">
+        <Fab color="primary" size="small" onClick={normalizeZoom}>
+          0
+        </Fab>
+      </Tooltip>
       <Tooltip title="Zoom in">
-        <Fab color="primary" size="small" onClick={zoomIn}>
+        <Fab color="primary" size="small" onClick={zoomIn} disabled={zoom > 3}>
           <AddCircleOutline />
         </Fab>
       </Tooltip>
     </div>
     <div className={hexGridContainer}>
       <svg xmlns="http://www.w3.org/2000/svg"
-        width={viewBox.x}
-        height={viewBox.y}
+        viewBox={`0 0 ${viewBox.x} ${viewBox.y}`}
+        width={mapBox.width}
+        height={mapBox.height}
         fill="currentColor"
         className={`bi bi-google ${hexGrid}`}
         onClick={internalOnClick}>

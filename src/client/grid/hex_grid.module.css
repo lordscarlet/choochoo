@@ -18,7 +18,10 @@
 }
 
 .fabs {
-  position: absolute;
   display: flex;
   gap: 4px;
+}
+
+.floatingFabs {
+  position: absolute;
 }
