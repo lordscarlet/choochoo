@@ -47,6 +47,7 @@ interface HexGridProps {
   highlightedTrack?: Track[];
   selectedGood?: { good: Good, coordinates: Coordinates };
   clickTargets: Set<ClickTarget>;
+  allowZoom?: boolean;
 }
 
 function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClick: (space: Space, good?: Good) => void) {
@@ -54,9 +55,9 @@ function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClic
     const canvas = e.currentTarget as HTMLCanvasElement;
     const rect = canvas.getBoundingClientRect();
     const coordinates = pixelToCoordinates({
-      x: e.clientX - rect.left - offset.x,
-      y: e.clientY - rect.top - offset.y,
-    }, size);
+      x: e.clientX - rect.left - (offset.x * zoom),
+      y: e.clientY - rect.top - (offset.y * zoom),
+    }, size * zoom);
 
     const space = grid.get(coordinates);
     if (space == null) return;
@@ -67,7 +68,7 @@ function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClic
   };
 }
 
-export function HexGrid({ onClick, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
+export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
   const [zoom, setZoom] = useState(1);
   const size = 70;
   const padding = 20;
@@ -123,7 +124,7 @@ export function HexGrid({ onClick, highlightedTrack, selectedGood, grid, clickTa
   }), [zoom, viewBox]);
 
   return <>
-    <div className={`${fabs} ${zoom > 0.4 ? floatingFabs : ''}`}>
+    {allowZoom && <div className={`${fabs} ${zoom > 0.4 ? floatingFabs : ''}`}>
       <Tooltip title="Zoom out">
         <Fab color="primary" size="small" onClick={zoomOut} disabled={zoom <= 0.2}>
           <RemoveCircleOutline />
@@ -139,7 +140,7 @@ export function HexGrid({ onClick, highlightedTrack, selectedGood, grid, clickTa
           <AddCircleOutline />
         </Fab>
       </Tooltip>
-    </div>
+    </div>}
     <div className={hexGridContainer}>
       <svg xmlns="http://www.w3.org/2000/svg"
         viewBox={`0 0 ${viewBox.x} ${viewBox.y}`}
