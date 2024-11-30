@@ -5,9 +5,6 @@ import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
 import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
-import { PassAction as ProductionPassAction } from "../../engine/goods_growth/pass";
-import { ProductionAction } from "../../engine/goods_growth/production";
-import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { LocoAction } from "../../engine/move/loco";
 import { MovePassAction } from "../../engine/move/pass";
 import { MOVE_STATE } from "../../engine/move/state";
@@ -15,7 +12,6 @@ import { SelectAction as ActionSelectionSelectAction } from "../../engine/select
 import { ShareHelper } from "../../engine/shares/share_helper";
 import { TakeSharesAction } from "../../engine/shares/take_shares";
 import { allActions, getSelectedActionString } from "../../engine/state/action";
-import { getGoodColor } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
@@ -34,29 +30,8 @@ export function SelectAction() {
     <Bid />
     <SpecialActionSelector />
     <MoveGoods />
-    <PlaceGood />
     <SwitchToActive />
     <SwitchToUndo />
-  </div>;
-}
-
-export function PlaceGood() {
-  const { canEmit, canEmitUsername } = useAction(ProductionAction);
-  const { emit: emitPass } = useEmptyAction(ProductionPassAction);
-  const state = usePhaseState(Phase.GOODS_GROWTH, GOODS_GROWTH_STATE);
-  if (canEmitUsername == null) {
-    return <></>;
-  }
-
-  if (!canEmit) {
-    return <GenericMessage>{canEmitUsername} must perform their production.</GenericMessage>;
-  }
-
-  // TODO: choose a different order to place.
-  return <div>
-    <p>{canEmit ? 'You' : canEmitUsername} drew {state!.goods.map(getGoodColor).join(', ')}</p>
-    <p>Select where to place {getGoodColor(state!.goods[0])}</p>
-    <Button onClick={emitPass}>Pass</Button>
   </div>;
 }
 

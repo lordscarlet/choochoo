@@ -5,7 +5,7 @@ import { ROUND, RoundEngine } from "../../engine/game/round";
 import { MOVE_STATE } from "../../engine/move/state";
 import { getPhaseString, Phase } from "../../engine/state/phase";
 import { GameMap } from "../grid/game_map";
-import { useGame, useRetryAction, useUndoAction } from "../services/game";
+import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
 import { InjectionContextProvider, useInjected, useInjectedState } from "../utils/injection_context";
 import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
@@ -13,6 +13,7 @@ import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
 import { PlayerStats } from "./player_stats";
 import { SelectAction } from "./select_action";
+import { ProductionAction } from "../../engine/goods_growth/production";
 
 
 export function ActiveGame() {
@@ -23,6 +24,7 @@ export function ActiveGame() {
 }
 
 function InternalActiveGame() {
+  const {canEmit} = useAction(ProductionAction);
   const game = useGame();
   const [searchParams] = useSearchParams();
   const undoOnly = searchParams.get('undoOnly') != null;
@@ -33,12 +35,13 @@ function InternalActiveGame() {
     <Editor />
     <UndoButton />
     {!undoOnly && <SelectAction />}
+    {!undoOnly && canEmit && <GoodsTable />}
     {!undoOnly && <BiddingInfo />}
     <RetryButton />
     {!undoOnly && <CurrentPhase />}
     {!undoOnly && <PlayerStats />}
     {!undoOnly && <GameMap />}
-    {!undoOnly && <GoodsTable />}
+    {!undoOnly && !canEmit && <GoodsTable />}
   </div>;
 }
 

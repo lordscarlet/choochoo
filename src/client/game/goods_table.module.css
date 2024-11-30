@@ -1,5 +1,5 @@
 .goodsContainer {
-  max-width: 1000px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   padding-bottom: 16px;
