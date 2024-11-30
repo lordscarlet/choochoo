@@ -65,6 +65,7 @@ function PlayerCircle({ color, bid, underlined, caption }: PlayerCircleProps) {
   };
   const style = {
     backgroundColor: getPlayerColor(color),
+    text: color === PlayerColor.YELLOW ? 'black' : 'white',
   };
   return <div className={playerCircleContainer} style={containerStyle}>
     <div className={playerCircle} style={style}>{bid && `$${bid}`}</div>
