@@ -11,6 +11,8 @@ interface GameListProps {
 export function GameList({ query, title }: GameListProps) {
   const { games, nextPage, prevPage, hasPrevPage, hasNextPage } = useGameList(query);
 
+  if (games == null || games.length === 0) return <></>;
+
   return <div>
     <h2>{title}</h2>
     {games?.map((game) => <div key={game.id}>
