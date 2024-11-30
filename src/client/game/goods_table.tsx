@@ -70,9 +70,9 @@ export function GoodsTable() {
           const letter = i < 2 || i >= 10 ? '' : numberToLetter(i - 2);
           return <div className={styles.column}>
             <div>{onRoll}</div>
-            {iterate(3, goodIndex => <GoodBlock key={goodIndex} good={city?.[2 - goodIndex]} onClick={() => onClick(false, cityGroup, onRoll)} />)}
+            {iterate(3, goodIndex => <GoodBlock key={goodIndex} good={city?.[2 - goodIndex]} clickable={canEmit} onClick={() => onClick(false, cityGroup, onRoll)} />)}
             <div>{urbanizedCity && letter}</div>
-            {iterate(2, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[1 - goodIndex]} onClick={() => onClick(true, cityGroup, onRoll)} />)}
+            {iterate(2, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[1 - goodIndex]} clickable={canEmit && urbanizedCity != null} onClick={() => onClick(true, cityGroup, onRoll)} />)}
           </div>;
         })}
       </div>
@@ -101,13 +101,15 @@ export function PlaceGood({ good, toggleSelectedGood }: { good?: Good, toggleSel
 interface GoodBlockProps {
   onClick(): void;
   good?: Good;
+  clickable?: boolean;
 }
 
-function GoodBlock({ onClick, good }: GoodBlockProps) {
+function GoodBlock({ onClick, good, clickable }: GoodBlockProps) {
   const classNames = [
     styles.goodPlace,
     good != null ? styles.good : '',
     goodStyle(good),
+    clickable ? styles.clickableGood : '',
   ]
   return <div onClick={onClick} className={classNames.join(' ')} />;
 }
