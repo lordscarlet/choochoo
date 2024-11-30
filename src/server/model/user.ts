@@ -158,6 +158,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
       turnNotifications: [],
       marketing: false,
     }
+    await user;
   }
 }
 
