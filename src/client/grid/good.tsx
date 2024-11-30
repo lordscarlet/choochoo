@@ -1,19 +1,6 @@
 import { Good } from "../../engine/state/good";
-import { goodStyle } from "./hex";
-import * as styles from "./hex_grid.module.css";
-
-interface GoodsBlockProps {
-  goods: Good[];
-  onClick(good: Good): void;
-}
-
-export function GoodsBlock({ goods, onClick }: GoodsBlockProps) {
-  return <div className={styles['good-block']}>
-    {goods.map((good, index) =>
-      <GoodBlock key={index} good={good} onClick={() => onClick(good)} />
-    )}
-  </div>;
-}
+import { assertNever } from "../../utils/validate";
+import * as styles from "./good.module.css";
 
 interface GoodBlockProps {
   good?: Good;
@@ -21,5 +8,23 @@ interface GoodBlockProps {
 }
 
 export function GoodBlock({ onClick, good }: GoodBlockProps) {
-  return <div onClick={onClick} className={[styles['good'], good != null ? goodStyle(good) : ''].join(' ')}></div>;
+  return <div onClick={onClick} className={[styles.good, good != null ? goodStyle(good) : ''].join(' ')}></div>;
+}
+
+
+export function goodStyle(good: Good): string {
+  switch (good) {
+    case Good.BLACK:
+      return styles.black;
+    case Good.BLUE:
+      return styles.blue;
+    case Good.PURPLE:
+      return styles.purple;
+    case Good.RED:
+      return styles.red;
+    case Good.YELLOW:
+      return styles.yellow;
+    default:
+      assertNever(good);
+  }
 }

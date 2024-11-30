@@ -1,0 +1,26 @@
+.good {
+  width: 28px;
+  height: 28px;
+  background-color: var(--color);
+  border: solid 2px grey;
+}
+
+.red {
+  --color: red;
+}
+
+.blue {
+  --color: blue;
+}
+
+.purple {
+  --color: purple;
+}
+
+.yellow {
+  --color: yellow;
+}
+
+.black {
+  --color: black;
+}

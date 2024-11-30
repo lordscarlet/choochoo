@@ -15,23 +15,6 @@ import { OnRoll } from "./on_roll";
 import { coordinatesToCenter, getCorners, offsetPoint, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
-export function goodStyle(good: Good): string {
-  switch (good) {
-    case Good.BLACK:
-      return styles.black;
-    case Good.BLUE:
-      return styles.blue;
-    case Good.PURPLE:
-      return styles.purple;
-    case Good.RED:
-      return styles.red;
-    case Good.YELLOW:
-      return styles.yellow;
-    default:
-      assertNever(good);
-  }
-}
-
 export function goodColor(good: Good): string {
   switch (good) {
     case Good.BLACK:
