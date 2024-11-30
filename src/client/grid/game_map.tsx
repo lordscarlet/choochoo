@@ -130,8 +130,9 @@ function getSelectedGood(moveActionProgress: MoveData | undefined): { good: Good
   };
 }
 
-function onClickCb(canEmitBuild: boolean, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Location) => void, onMoveToSpace: (space: Space) => void) {
+function onClickCb(isPending: boolean, canEmitBuild: boolean, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Location) => void, onMoveToSpace: (space: Space) => void) {
   return (space: Space, good: Good) => {
+    if (isPending) return;
     if (canEmitMove) {
       if (good != null) {
         assert(space instanceof City);
@@ -167,11 +168,13 @@ function maybeConfirmDeliveryCb(dialogs: DialogHook, grid: Grid, emitMove: (move
 }
 
 export function GameMap() {
-  const { canEmit: canEmitBuild } = useAction(BuildAction);
-  const { canEmit: canEmitMove, emit: emitMove } = useAction(MoveAction);
+  const { canEmit: canEmitBuild, isPending: isBuildPending } = useAction(BuildAction);
+  const { canEmit: canEmitMove, emit: emitMove, isPending: isMovePending } = useAction(MoveAction);
   const player = useCurrentPlayer();
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Location | undefined>(undefined);
+
+  const isPending = isBuildPending || isMovePending;
 
   const dialogs = useDialogs();
 
@@ -187,9 +190,10 @@ export function GameMap() {
 
   const selectedGood = useTypedMemo(getSelectedGood, [moveActionProgress]);
 
-  const onClick = useTypedCallback(onClickCb, [canEmitBuild, canEmitMove, onSelectGood, setBuildingSpace, onMoveToSpace]);
+  const onClick = useTypedCallback(onClickCb, [isPending, canEmitBuild, canEmitMove, onSelectGood, setBuildingSpace, onMoveToSpace]);
 
-  const clickTargets = useMemo(() => {
+  const clickTargets: Set<ClickTarget> = useMemo(() => {
+    if (isPending) return new Set();
     // TODO: canEmitMove can either be a good, or travelling, but not both.
     if (canEmitMove) {
       return new Set([ClickTarget.GOOD, ClickTarget.TOWN, ClickTarget.CITY]);
@@ -197,8 +201,8 @@ export function GameMap() {
     if (canEmitBuild) {
       return new Set([ClickTarget.LOCATION]);
     }
-    return new Set<ClickTarget>();
-  }, [canEmitMove, canEmitBuild]);
+    return new Set();
+  }, [canEmitMove, canEmitBuild, isPending]);
 
   return <div style={{ overflowX: 'auto', width: '100%' }}>
     <HexGrid onClick={onClick} highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
