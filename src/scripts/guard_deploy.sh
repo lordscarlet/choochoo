@@ -10,14 +10,22 @@ fi
 
 branch="$(git rev-parse --abbrev-ref HEAD)"
 
-if [ "$branch" != "prod" ]; then
-  echo "You can only deploy from the prod branch, on $branch"
-  exit 1
-fi
-
 if [ -n "$(git diff HEAD)" ]; then
   echo "Cannot deploy when there are uncommitted changes"
   exit 1
+fi
+
+if [ "$branch" != "prod" ]; then
+  read -p "Merge current branch into prod? [Y/n]: " result
+
+  if [ "$result" = "Y" || -z "$result" ]; then
+    echo "You can only deploy from the prod branch, on $branch"
+    exit 1
+  fi
+
+  git checkout prod
+  git merge "$branch"
+  git push
 fi
 
 # TODO: run unit tests.
