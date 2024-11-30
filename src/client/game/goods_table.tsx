@@ -8,7 +8,7 @@ import { Phase } from "../../engine/state/phase";
 import { OnRoll } from "../../engine/state/roll";
 import { iterate } from "../../utils/functions";
 import { assert } from "../../utils/validate";
-import { GoodBlock } from "../grid/good";
+import { GoodBlock } from "./good";
 import { useAction } from "../services/game";
 import { useGrid, useInjectedState, usePhaseState } from "../utils/injection_context";
 
