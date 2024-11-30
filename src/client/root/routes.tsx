@@ -14,6 +14,7 @@ import { LoginRequired } from "../user/login_required";
 import { RegisterPage } from "../user/register";
 import { UpdatePassword } from "../user/update_password";
 import { Layout } from "./layout";
+import { Unsubscribe } from "../user/unsubscribe";
 
 export function Router() {
 
@@ -62,6 +63,10 @@ export function Router() {
         {
           path: '/app/users/forgot-password',
           element: <ForgotPassword />,
+        },
+        {
+          path: '/app/unsubscribe',
+          element: <Unsubscribe />,
         },
         {
           path: '/app/users/update-password',

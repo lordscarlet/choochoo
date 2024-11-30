@@ -6,6 +6,7 @@ import { assert } from '../../utils/validate';
 import { GameModel } from '../model/game';
 
 import { Op, WhereOptions } from '@sequelize/core';
+import { NotificationFrequency, NotificationMethod } from '../../api/notifications';
 import { UserRole } from '../../api/user';
 import { EngineDelegator } from '../../engine/framework/engine';
 import { GameStatus as GameEngineStatus } from '../../engine/game/game';
@@ -179,7 +180,7 @@ const router = initServer().router(gameContract, {
         userId,
       });
 
-      const playerChanged = game.activePlayerId === activePlayerId;
+      const playerChanged = game.activePlayerId !== activePlayerId;
 
       game.version = game.version + 1;
       game.gameData = gameData;
@@ -195,16 +196,27 @@ const router = initServer().router(gameContract, {
       }));
       const newLogs = await LogModel.bulkCreate(createLogs, { transaction });
 
-      transaction.afterCommit(async () => {
-        emitToRoom(newLogs);
-        emitGameUpdate(originalGame, newGame);
+      transaction.afterCommit(() => {
+        processAsync().catch(e => {
+          console.log('Failed during processAsync');
+          console.error(e);
+        });
 
-        if (playerChanged && game.activePlayerId !== null) {
-          const user = await UserModel.findByPk(game.activePlayerId!);
-          if (user == null) return;
-          emailService.sendTurnReminder(user, game.toApi());
-        }
         // TODO: send an email letting everyone know that the game has ended.
+        async function processAsync() {
+          emitToRoom(newLogs);
+          emitGameUpdate(originalGame, newGame);
+
+          if (playerChanged && newGame.activePlayerId !== null) {
+            const user = await UserModel.findByPk(newGame.activePlayerId!, { transaction: null });
+            if (user == null) return;
+            const method = user.getTurnNotificationMethod(NotificationFrequency.IMMEDIATELY);
+            if (method !== NotificationMethod.EMAIL) {
+              return;
+            }
+            emailService.sendTurnReminder(user, newGame.toApi());
+          }
+        }
       });
 
       return { status: 200, body: { game: newGame.toApi() } };

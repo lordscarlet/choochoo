@@ -47,7 +47,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   @Attribute(DataTypes.STRING)
   declare role: UserRole;
 
-  @Attribute(DataTypes.JSON)
+  @Attribute(DataTypes.JSONB)
   declare notificationPreferences: NotificationPreferences;
 
   @Version
@@ -77,6 +77,10 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     const asApi = user.toMyApi();
     await userCache.set(asApi);
     return asApi;
+  }
+
+  getTurnNotificationMethod(frequency: NotificationFrequency): NotificationMethod | undefined {
+    return this.notificationPreferences.turnNotifications.find((preference) => preference.frequency === frequency)?.method;
   }
 
   updateCache() {

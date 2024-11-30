@@ -7,13 +7,12 @@ import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
 
 export abstract class EmailService {
-  abstract sendForgotPasswordMessage(email: string): Promise<void>;
+  protected abstract sendEmail(email: SendEmailProps): Promise<void>;
   abstract subscribe(email: string): Promise<void>;
-  abstract sendActivationCode(email: string): Promise<void>;
   abstract unsubscribe(email: string): Promise<void>;
 
   protected makeUnsubscribeLink(email: string): string {
-    return `https://www.choochoo.games/unsubscribe?code=${encrypt(email)}`;
+    return `https://www.choochoo.games/app/unsubscribe?code=${encrypt(email)}`;
   }
 
   decryptUnsubscribeCode(code: string): string | undefined {
@@ -39,52 +38,9 @@ export abstract class EmailService {
       return undefined;
     }
   }
-}
 
-const EmailVerificationCode = z.object({
-  email: z.string(),
-  expires: z.number(),
-});
-type EmailVerificationCode = z.infer<typeof EmailVerificationCode>;
-
-class MailjetEmailService extends EmailService {
-  private readonly mailjet: Mailjet;
-  constructor(key: string, secret: string) {
-    super();
-    this.mailjet = Mailjet.apiConnect(key, secret);
-  }
-
-  async subscribe(email: string): Promise<void> {
-    try {
-      await this.mailjet.post("contact", { 'version': 'v3' })
-        .request({ "Email": email, "Name": email });
-      await this.mailjet
-        .post("listrecipient", { 'version': 'v3' })
-        .request({
-          "IsUnsubscribed": "false",
-          "ContactAlt": email,
-          "ListID": "10484665",
-        })
-    } catch (e: any) {
-      if (e.ErrorMessage?.includes('already exists')) {
-        return;
-      }
-      throw e;
-    }
-  }
-
-  async unsubscribe(email: string): Promise<void> {
-    await this.mailjet.put("contact")
-      .id(email)
-      .request({
-        "IsExcludedFromCampaigns": "true"
-      });
-  }
 
   async sendTurnReminder(user: UserModel, game: GameApi): Promise<void> {
-    if (user.notificationPreferences.turnNotifications.some((not) => not.method === NotificationMethod.EMAIL && not.frequency === NotificationFrequency.IMMEDIATELY)) {
-      return;
-    }
     const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
     await this.sendEmail({
       email: user.email,
@@ -175,6 +131,47 @@ ${this.makeUnsubscribeLink(email)}
 </p>`,
     });
   }
+}
+
+const EmailVerificationCode = z.object({
+  email: z.string(),
+  expires: z.number(),
+});
+type EmailVerificationCode = z.infer<typeof EmailVerificationCode>;
+
+class MailjetEmailService extends EmailService {
+  private readonly mailjet: Mailjet;
+  constructor(key: string, secret: string) {
+    super();
+    this.mailjet = Mailjet.apiConnect(key, secret);
+  }
+
+  async subscribe(email: string): Promise<void> {
+    try {
+      await this.mailjet.post("contact", { 'version': 'v3' })
+        .request({ "Email": email, "Name": email });
+      await this.mailjet
+        .post("listrecipient", { 'version': 'v3' })
+        .request({
+          "IsUnsubscribed": "false",
+          "ContactAlt": email,
+          "ListID": "10484665",
+        })
+    } catch (e: any) {
+      if (e.ErrorMessage?.includes('already exists')) {
+        return;
+      }
+      throw e;
+    }
+  }
+
+  async unsubscribe(email: string): Promise<void> {
+    await this.mailjet.put("contact")
+      .id(email)
+      .request({
+        "IsExcludedFromCampaigns": "true"
+      });
+  }
 
   async sendEmail({ email, subject, text, html }: SendEmailProps): Promise<void> {
     try {
@@ -217,19 +214,14 @@ class NoopEmailService extends EmailService {
     console.log('unsubscribing', email);
   }
 
-  async sendTurnReminder(user: UserModel, game: GameApi): Promise<void> {
-    console.log('reminder of turn', user.email, game.name);
+  async subscribe(email: string): Promise<void> {
+    console.log('subscribing', email);
   }
 
-  async sendForgotPasswordMessage(email: string): Promise<void> {
-    console.log('forgot password', `/app/users/update-password?code=${this.makeEmailVerificationCode(email)}`);
+  protected async sendEmail(email: SendEmailProps): Promise<void> {
+    console.log('sending email', email);
   }
 
-  async subscribe(_: string): Promise<void> { }
-
-  async sendActivationCode(email: string): Promise<void> {
-    console.log('activation code', `/app/users/activate?activationCode=${this.makeEmailVerificationCode(email)}`);
-  }
 }
 
 export const emailService =
