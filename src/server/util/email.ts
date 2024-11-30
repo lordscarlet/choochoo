@@ -1,5 +1,6 @@
 import Mailjet from "node-mailjet";
 import z from "zod";
+import { GameApi } from "../../api/game";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
 
@@ -76,6 +77,34 @@ class MailjetEmailService extends EmailService {
       .request({
         "IsExcludedFromCampaigns": "true"
       });
+  }
+
+  async sendTurnReminder(email: string, game: GameApi): Promise<void> {
+    const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
+    await this.sendEmail({
+      email,
+      subject: `It's your turn!`,
+      text: `
+It's your turn to play!
+Everyone in the "${game.name}" game is waiting for you.
+Copy and paste the following link to take your turn: ${gameLink}.
+- Nathan
+
+This email was sent by Choo Choo games. You can unsubscribe here:
+${this.makeUnsubscribeLink(email)}
+`,
+      html: `
+<h3>It's your turn to play!</h3>
+<p>Everyone in the <a href="${gameLink}">"${game.name}" game</a> is waiting for you.</p>
+<p>Click or copy and paste the following link to take your turn.</p>
+<p><a href="${gameLink}">Take your turn</a></p>
+<p>-Nathan</p>
+<p></p>
+<p>
+  This email was sent by Choo Choo games. You can unsubscribe here:
+  <a href="${this.makeUnsubscribeLink(email)}">Unsubscribe</a>
+</p>`,
+    });
   }
 
   async sendForgotPasswordMessage(email: string): Promise<void> {
@@ -181,6 +210,10 @@ interface SendEmailProps {
 class NoopEmailService extends EmailService {
   async unsubscribe(email: string): Promise<void> {
     console.log('unsubscribing', email);
+  }
+
+  async sendTurnReminder(email: string, game: GameApi): Promise<void> {
+    console.log('reminder of turn', email, game.id);
   }
 
   async sendForgotPasswordMessage(email: string): Promise<void> {
