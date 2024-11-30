@@ -1,6 +1,8 @@
 import Mailjet from "node-mailjet";
 import z from "zod";
 import { GameApi } from "../../api/game";
+import { NotificationFrequency, NotificationMethod } from "../../api/notifications";
+import { UserModel } from "../model/user";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
 
@@ -79,10 +81,13 @@ class MailjetEmailService extends EmailService {
       });
   }
 
-  async sendTurnReminder(email: string, game: GameApi): Promise<void> {
+  async sendTurnReminder(user: UserModel, game: GameApi): Promise<void> {
+    if (user.notificationPreferences.turnNotifications.some((not) => not.method === NotificationMethod.EMAIL && not.frequency === NotificationFrequency.IMMEDIATELY)) {
+      return;
+    }
     const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
     await this.sendEmail({
-      email,
+      email: user.email,
       subject: `It's your turn!`,
       text: `
 It's your turn to play!
@@ -91,7 +96,7 @@ Copy and paste the following link to take your turn: ${gameLink}.
 - Nathan
 
 This email was sent by Choo Choo games. You can unsubscribe here:
-${this.makeUnsubscribeLink(email)}
+${this.makeUnsubscribeLink(user.email)}
 `,
       html: `
 <h3>It's your turn to play!</h3>
@@ -102,7 +107,7 @@ ${this.makeUnsubscribeLink(email)}
 <p></p>
 <p>
   This email was sent by Choo Choo games. You can unsubscribe here:
-  <a href="${this.makeUnsubscribeLink(email)}">Unsubscribe</a>
+  <a href="${this.makeUnsubscribeLink(user.email)}">Unsubscribe</a>
 </p>`,
     });
   }
@@ -212,8 +217,8 @@ class NoopEmailService extends EmailService {
     console.log('unsubscribing', email);
   }
 
-  async sendTurnReminder(email: string, game: GameApi): Promise<void> {
-    console.log('reminder of turn', email, game.id);
+  async sendTurnReminder(user: UserModel, game: GameApi): Promise<void> {
+    console.log('reminder of turn', user.email, game.name);
   }
 
   async sendForgotPasswordMessage(email: string): Promise<void> {

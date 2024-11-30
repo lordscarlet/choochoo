@@ -200,9 +200,9 @@ const router = initServer().router(gameContract, {
         emitGameUpdate(originalGame, newGame);
 
         if (playerChanged && game.activePlayerId !== null) {
-          const user = await UserModel.getUser(game.activePlayerId!);
+          const user = await UserModel.findByPk(game.activePlayerId!);
           if (user == null) return;
-          emailService.sendTurnReminder(user.email, game.toApi());
+          emailService.sendTurnReminder(user, game.toApi());
         }
         // TODO: send an email letting everyone know that the game has ended.
       });
