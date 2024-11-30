@@ -1,0 +1,16 @@
+.buildingDialogContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.dialogContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.buildingOption {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+}
