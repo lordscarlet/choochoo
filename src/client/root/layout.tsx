@@ -1,10 +1,11 @@
 
 import CloseIcon from '@mui/icons-material/Close';
 import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, styled, Toolbar, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
 import { UserRole } from "../../api/user";
+import { Loading } from '../components/loading';
 import { FeedbackForm } from "../services/feedback/form";
 import { useReportError } from '../services/feedback/report_error';
 import { useLogout, useMe } from "../services/me";
@@ -24,7 +25,7 @@ export function Layout() {
   const closeFeedback = useCallback(() => {
     setIsFeedbackOpen(false);
   }, [setIsFeedbackOpen]);
-  return <div>
+  return <>
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed">
         <Toolbar>
@@ -44,12 +45,14 @@ export function Layout() {
     <Offset />
     <Banner />
     <main className={main}>
-      <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
-        <Outlet />
-      </ErrorBoundary>
+      <Suspense fallback={<Loading />}>
+        <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
+          <Outlet />
+        </ErrorBoundary>
+      </Suspense>
     </main>
     <FeedbackDialog isOpen={isFeedbackOpen} close={closeFeedback} />
-  </div>;
+  </>;
 }
 
 function ResetError({ error, resetErrorBoundary }: { error: unknown, resetErrorBoundary(): void }) {

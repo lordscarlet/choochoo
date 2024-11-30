@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@t
 import { DialogsProvider, NotificationsProvider } from "@toolpad/core";
 import { Suspense, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { Loading } from "../components/loading";
 import { tsr } from '../services/client';
 import { Router } from "./routes";
 
@@ -23,10 +24,6 @@ export function App() {
       </NotificationsProvider>
     </DialogsProvider>
   </Suspense>;
-}
-
-function Loading() {
-  return <div>Loading...</div>;
 }
 
 function ResetError({ resetErrorBoundary }: { resetErrorBoundary(): void }) {

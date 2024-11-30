@@ -77,8 +77,6 @@ const router = initServer().router(userContract, {
 
   async get({ req, params }) {
     await enforceRole(req);
-    console.log('getting user');
-    await new Promise((resolve) => setTimeout(resolve, 2000));
     const user = await UserModel.getUser(params.userId);
     assert(user != null, { notFound: true });
     return { status: 200, body: { user: UserModel.toApi(user) } };
