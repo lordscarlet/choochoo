@@ -173,8 +173,8 @@ class MailjetEmailService extends EmailService {
         .request({
           "IsExcludedFromCampaigns": "true"
         });
-    } catch (e) {
-      console.log('unsubscribe error');
+    } catch (e: any) {
+      console.log('unsubscribe error', e.statusCode, e.statusText == 'Content not changed');
       console.error(e);
     }
   }
