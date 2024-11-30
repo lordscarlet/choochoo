@@ -204,8 +204,8 @@ export function GameMap() {
     return new Set();
   }, [canEmitMove, canEmitBuild, isPending]);
 
-  return <div style={{ overflowX: 'auto', width: '100%' }}>
+  return <>
     <HexGrid onClick={onClick} highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
     <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
-  </div>;
+  </>;
 }

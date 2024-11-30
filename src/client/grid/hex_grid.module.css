@@ -10,3 +10,15 @@
     opacity: 0.8;
   }
 }
+
+.hexGridContainer {
+  position: relative;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.fabs {
+  position: absolute;
+  display: flex;
+  gap: 4px;
+}
