@@ -109,7 +109,7 @@ function GoodBlock({ onClick, good, canSelect }: GoodBlockProps) {
     styles.goodPlace,
     good != null ? styles.good : '',
     goodStyle(good),
-    canSelect && good == null ? styles.canSelectGood : '',
+    canSelect && good == null ? styles.clickableGood : '',
   ]
   return <div onClick={canSelect ? onClick : undefined} className={classNames.join(' ')} />;
 }
