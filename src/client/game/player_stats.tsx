@@ -1,3 +1,5 @@
+import { default as ArrowCircleRight } from '@mui/icons-material/ArrowCircleRight';
+import Circle from '@mui/icons-material/Circle';
 import { useMemo } from "react";
 import { UserApi } from "../../api/user";
 import { PlayerHelper } from "../../engine/game/player";
@@ -27,7 +29,6 @@ export function PlayerStats() {
       <thead>
         <tr className={styles.tableRow}>
           <th></th>
-          <th></th>
           <th>Player</th>
           <th className={styles.collapsed}>Stats</th>
           <th className={styles.collapsed}></th>
@@ -43,9 +44,14 @@ export function PlayerStats() {
       <tbody>
         {players.map(({ player, user }) =>
           <tr key={player.playerId} className={styles.tableRow}>
-            <td>{player.color === currentPlayer ? '→' : ''}</td>
-            <td><div className={[styles.user, styles[getPlayerColor(player.color)]].join(' ')}></div></td>
-            <td>{user?.username}</td>
+            <td className={[styles.user, styles[getPlayerColor(player.color)]].join(' ')}>
+              {player.color === currentPlayer ?
+                <ArrowCircleRight /> :
+                <Circle />}
+            </td>
+            <td>
+              {user?.username}
+            </td>
             <td className={styles.collapsed}>
               Action:<br />
               Money:<br />

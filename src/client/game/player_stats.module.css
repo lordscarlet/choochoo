@@ -24,36 +24,30 @@
   }
 }
 
-.user {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+.user.red svg {
+  fill: red;
 }
 
-.user.red {
-  background-color: red;
+.user.blue svg {
+  fill: blue;
 }
 
-.user.blue {
-  background-color: blue;
+.user.green svg {
+  fill: green;
 }
 
-.user.green {
-  background-color: green;
+.user.purple svg {
+  fill: purple;
 }
 
-.user.purple {
-  background-color: purple;
+.user.yellow svg {
+  fill: yellow;
 }
 
-.user.yellow {
-  background-color: yellow;
+.user.black svg {
+  fill: black;
 }
 
-.user.black {
-  background-color: black;
-}
-
-.user.brown {
-  background-color: brown;
+.user.brown svg {
+  fill: brown;
 }
