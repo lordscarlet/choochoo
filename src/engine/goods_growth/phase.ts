@@ -8,7 +8,7 @@ import { BAG, PLAYERS } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
-import { Good } from "../state/good";
+import { getGoodColor, Good } from "../state/good";
 import { LocationType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
@@ -43,6 +43,8 @@ export class GoodsGrowthPhase extends PhaseModule {
         goods.push(...bag.splice(index, 1));
       });
     });
+    const asColors = goods.map((good) => getGoodColor(good));
+    this.log.currentPlayer(`draws ${asColors.join(', ')}`);
     this.turnState.initState({ goods });
   }
 
