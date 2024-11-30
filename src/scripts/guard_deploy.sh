@@ -18,7 +18,7 @@ fi
 if [ "$branch" != "prod" ]; then
   read -p "Merge current branch into prod? [Y/n]: " result
 
-  if [ "$result" = "Y" || -z "$result" ]; then
+  if [ "$result" = "Y" ] || [ -z "$result" ]; then
     echo "You can only deploy from the prod branch, on $branch"
     exit 1
   fi
