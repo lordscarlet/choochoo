@@ -3,6 +3,7 @@ import { initTsrReactQuery } from '@ts-rest/react-query/v5';
 import { feedbackContract } from '../../api/feedback';
 import { gameContract } from '../../api/game';
 import { messageContract } from '../../api/message';
+import { notificationsContract } from '../../api/notifications';
 import { userContract } from '../../api/user';
 import { ErrorCode } from '../../utils/error_code';
 import { environment } from './environment';
@@ -15,6 +16,7 @@ export const contract = c.router({
   messages: messageContract,
   users: userContract,
   feedback: feedbackContract,
+  notifications: notificationsContract,
 }, {
   validateResponse: true,
   commonResponses: {
