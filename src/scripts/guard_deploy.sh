@@ -16,6 +16,11 @@ if [ -n "$(git diff HEAD)" ]; then
 fi
 
 if [ "$branch" != "prod" ]; then
+  if [ -n "$(gid diff prod)" ]; then
+    git checkout prod
+    exit
+  fi
+
   read -p "Merge current branch into prod? [Y/n]: " result
 
   echo "read $result"

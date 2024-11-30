@@ -2,7 +2,9 @@
 
 set -e
 
-$(dirname "$0")/guard_deploy.sh "$1"
+ignoreGuard="$1"
+
+$(dirname "$0")/guard_deploy.sh "$ignoreGuard"
 
 # Step 1: build
 npm run build-client
@@ -29,3 +31,7 @@ upload "dist/index.min.css"
 aws cloudfront create-invalidation --distribution-id=E16V74AIRBU7V5 --paths "/*" > /dev/null
 
 echo "Done deploying client."
+
+if [ "$ignoreGuard" != "ignore-guard" ]; then
+  git checkout main
+fi

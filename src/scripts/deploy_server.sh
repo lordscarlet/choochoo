@@ -2,7 +2,9 @@
 
 set -e
 
-$(dirname "$0")/guard_deploy.sh "$1"
+ignoreGuard="$1"
+
+$(dirname "$0")/guard_deploy.sh "$ignoreGuard"
 
 # Step 1: build
 npm run build-server
@@ -20,3 +22,7 @@ ssh -i ~/Documents/choochoo.pem ec2-user@api.choochoo.games << EOF
   npm run migrate
   pm2 start index
 EOF
+
+if [ "$ignoreGuard" != "ignore-guard" ]; then
+  git checkout main
+fi
