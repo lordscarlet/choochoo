@@ -1,0 +1,59 @@
+.playerStats {
+  overflow-y: auto;
+}
+
+.tableRow td,
+.tableRow th {
+  padding: 8px;
+  white-space: nowrap;
+  text-align: left;
+  vertical-align: top;
+}
+
+.collapsed {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .collapsed {
+    display: table-cell;
+  }
+
+  .expanded {
+    display: none;
+  }
+}
+
+.user {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.user.red {
+  background-color: red;
+}
+
+.user.blue {
+  background-color: blue;
+}
+
+.user.green {
+  background-color: green;
+}
+
+.user.purple {
+  background-color: purple;
+}
+
+.user.yellow {
+  background-color: yellow;
+}
+
+.user.black {
+  background-color: black;
+}
+
+.user.brown {
+  background-color: brown;
+}

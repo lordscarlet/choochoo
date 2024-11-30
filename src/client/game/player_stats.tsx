@@ -6,8 +6,8 @@ import { getSelectedActionString } from "../../engine/state/action";
 import { getPlayerColor, PlayerData } from "../../engine/state/player";
 import { useUsers } from "../services/user";
 import { useInjected, useInjectedState } from "../utils/injection_context";
-import * as styles from './active_game.module.css';
 import { LoginButton } from "./login_button";
+import * as styles from './player_stats.module.css';
 
 
 export function PlayerStats() {
@@ -22,37 +22,57 @@ export function PlayerStats() {
     const user = playerUsers?.find(user => user.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
-  return <table>
-    <thead>
-      <tr>
-        <th></th>
-        <th></th>
-        <th>Player</th>
-        <th>Selected Action</th>
-        <th>Money</th>
-        <th>Income</th>
-        <th>Shares</th>
-        <th>Locomotive</th>
-        <th>Score</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {players.map(({ player, user }) =>
-        <tr key={player.playerId}>
-          <td>{player.color === currentPlayer ? '→' : ''}</td>
-          <td className={[styles.user, styles[getPlayerColor(player.color)]].join(' ')}></td>
-          <td>{user?.username}</td>
-          <td>{getSelectedActionString(player.selectedAction)}</td>
-          <td>${player.money} ({toNet(player.income - player.shares - player.locomotive)})</td>
-          <td>${player.income}</td>
-          <td>{player.shares}</td>
-          <td>{player.locomotive}</td>
-          <td>{helper.getScore(player)}</td>
-          <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
-        </tr>)}
-    </tbody>
-  </table>;
+  return <div className={styles.playerStats}>
+    <table>
+      <thead>
+        <tr className={styles.tableRow}>
+          <th></th>
+          <th></th>
+          <th>Player</th>
+          <th className={styles.collapsed}>Stats</th>
+          <th className={styles.collapsed}></th>
+          <th className={styles.expanded}>Selected Action</th>
+          <th className={styles.expanded}>Money</th>
+          <th className={styles.expanded}>Income</th>
+          <th className={styles.expanded}>Shares</th>
+          <th className={styles.expanded}>Locomotive</th>
+          <th className={styles.expanded}>Score</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {players.map(({ player, user }) =>
+          <tr key={player.playerId} className={styles.tableRow}>
+            <td>{player.color === currentPlayer ? '→' : ''}</td>
+            <td><div className={[styles.user, styles[getPlayerColor(player.color)]].join(' ')}></div></td>
+            <td>{user?.username}</td>
+            <td className={styles.collapsed}>
+              Action:<br />
+              Money:<br />
+              Income:<br />
+              Shares:<br />
+              Loco:<br />
+              Score:<br />
+            </td>
+            <td className={styles.collapsed}>
+              {getSelectedActionString(player.selectedAction)}<br />
+              ${player.money} ({toNet(player.income - player.shares - player.locomotive)})<br />
+              ${player.income}<br />
+              {player.shares}<br />
+              {player.locomotive}<br />
+              {helper.getScore(player)}<br />
+            </td>
+            <td className={styles.expanded}>{getSelectedActionString(player.selectedAction)}</td>
+            <td className={styles.expanded}>${player.money} ({toNet(player.income - player.shares - player.locomotive)})</td>
+            <td className={styles.expanded}>${player.income}</td>
+            <td className={styles.expanded}>{player.shares}</td>
+            <td className={styles.expanded}>{player.locomotive}</td>
+            <td className={styles.expanded}>{helper.getScore(player)}</td>
+            <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
+          </tr>)}
+      </tbody>
+    </table>
+  </div>;
 }
 
 
