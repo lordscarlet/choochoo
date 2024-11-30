@@ -10,7 +10,7 @@ export enum Action {
   PRODUCTION,
 }
 
-export const allActions =  [
+export const allActions = [
   Action.LOCOMOTIVE,
   Action.FIRST_BUILD,
   Action.FIRST_MOVE,
@@ -24,10 +24,10 @@ export function getSelectedActionString(action?: Action) {
   switch (action) {
     case undefined: return '';
     case Action.LOCOMOTIVE: return 'Locomotive';
-    case Action.FIRST_BUILD: return 'First_Build';
-    case Action.FIRST_MOVE: return 'First_Move';
+    case Action.FIRST_BUILD: return 'First Build';
+    case Action.FIRST_MOVE: return 'First Move';
     case Action.ENGINEER: return 'Engineer';
-    case Action.TURN_ORDER_PASS: return 'Turn_Order_Pass';
+    case Action.TURN_ORDER_PASS: return 'Turn Order Pass';
     case Action.URBANIZATION: return 'Urbanization';
     case Action.PRODUCTION: return 'Production';
     default:
