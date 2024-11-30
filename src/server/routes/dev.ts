@@ -15,6 +15,12 @@ export function devApp() {
     }).catch(next);
   });
 
+  devApp.get('/favicon.ico', (_: Request, res: Response) => {
+    res.setHeader("content-type", "image/x-icon");
+    res.setHeader('content-encoding', 'gzip');
+    fs.createReadStream(join(__dirname, "../../../favicon.ico")).pipe(res);
+  });
+
   devApp.use('/dist', express.static(join(__dirname, '../../../dist')));
 
   const otherApps = ['/dist', '/js', '/api', '/favicon'];
