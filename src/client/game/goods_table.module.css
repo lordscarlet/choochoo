@@ -1,0 +1,55 @@
+.goodsContainer {
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 16px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.row>*,
+.column>* {
+  flex: 1;
+  text-align: center;
+}
+
+.goodPlace {
+  aspect-ratio: 1 / 1;
+  background-color: var(--color);
+}
+
+.good {
+  border: solid 1px black;
+}
+
+.red {
+  --color: red;
+}
+
+.blue {
+  --color: blue;
+}
+
+.purple {
+  --color: purple;
+}
+
+.yellow {
+  --color: yellow;
+}
+
+.black {
+  --color: black;
+}

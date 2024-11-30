@@ -7,10 +7,10 @@ import { Good } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { OnRoll } from "../../engine/state/roll";
 import { iterate } from "../../utils/functions";
-import { assert } from "../../utils/validate";
-import { GoodBlock } from "./good";
+import { assert, assertNever } from "../../utils/validate";
 import { useAction } from "../services/game";
 import { useGrid, useInjectedState, usePhaseState } from "../utils/injection_context";
+import * as styles from './goods_table.module.css';
 
 
 export function GoodsTable() {
@@ -48,40 +48,60 @@ export function GoodsTable() {
     emit({ urbanized, onRoll, cityGroup, good });
   }, [canEmit, emit, good]);
 
-  return <table>
-    <thead>
-      <tr>
-        <th colSpan={6}>White</th>
-        <th colSpan={6}>Black</th>
-      </tr>
-      <tr>
-        {iterate(12, (i) => <th key={i}>{i % 6 + 1}</th>)}
-      </tr>
-    </thead>
-    <tbody>
-      {iterate(3, (i) => <tr key={i}>
-        {iterate(12, (i2) => {
-          const cityGroup = i2 < 6 ? CityGroup.WHITE : CityGroup.BLACK;
-          const onRoll = OnRoll.parse((i2 % 6) + 1);
-          const city = cities.regularCities.get(cityGroup)?.[onRoll];
-          const good = city?.[2 - i];
-          return <td key={i2}><GoodBlock good={good} onClick={() => onClick(false, cityGroup, onRoll)} /></td>;
-        })}
-      </tr>)}
-      <tr>
-        {iterate(12, (i) => <td key={i}>{i < 2 || i >= 10 ? '' : numberToLetter(i - 2)}</td>)}
-      </tr>
-      {iterate(2, (i) => <tr key={i}>
-        {iterate(12, (i2) => {
-          const cityGroup = i2 < 6 ? CityGroup.WHITE : CityGroup.BLACK;
-          const onRoll = OnRoll.parse((i2 % 6) + 1);
-          const city = cities.urbanizedCities.get(cityGroup)?.[onRoll];
-          const good = city?.[1 - i];
-          return <td key={i2}><GoodBlock good={good} onClick={() => onClick(true, cityGroup, onRoll)} /></td>;
-        })}
-      </tr>)}
-    </tbody>
-  </table>;
+  return <div className={styles.goodsContainer}>
+    <div className={styles.row}>
+      <div>White</div>
+      <div>Black</div>
+    </div>
+    <div className={styles.row}>
+      {iterate(12, i => {
+        const cityGroup = i < 6 ? CityGroup.WHITE : CityGroup.BLACK;
+        const onRoll = OnRoll.parse((i % 6) + 1);
+        const city = cities.regularCities.get(cityGroup)?.[onRoll];
+        const urbanizedCity = cities.urbanizedCities.get(cityGroup)?.[onRoll];
+        const letter = i < 2 || i >= 10 ? '' : numberToLetter(i - 2);
+        return <div className={styles.column}>
+          <div>{onRoll}</div>
+          {iterate(3, goodIndex => <GoodBlock key={goodIndex} good={city?.[2 - goodIndex]} onClick={() => onClick(false, cityGroup, onRoll)} />)}
+          <div>{urbanizedCity && letter}</div>
+          {iterate(2, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[1 - goodIndex]} onClick={() => onClick(true, cityGroup, onRoll)} />)}
+        </div>;
+      })}
+    </div>
+  </div>;
+}
+
+interface GoodBlockProps {
+  onClick(): void;
+  good?: Good;
+}
+
+function GoodBlock({ onClick, good }: GoodBlockProps) {
+  const classNames = [
+    styles.goodPlace,
+    good != null ? styles.good : '',
+    goodStyle(good),
+  ]
+  return <div onClick={onClick} className={classNames.join(' ')} />;
+}
+
+export function goodStyle(good?: Good): string {
+  switch (good) {
+    case Good.BLACK:
+      return styles.black;
+    case Good.BLUE:
+      return styles.blue;
+    case Good.PURPLE:
+      return styles.purple;
+    case Good.RED:
+      return styles.red;
+    case Good.YELLOW:
+      return styles.yellow;
+    case undefined:
+      return '';
+    default:
+      assertNever(good);
+  }
 }
 
 function numberToLetter(i: number) {
