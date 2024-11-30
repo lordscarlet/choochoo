@@ -1,3 +1,9 @@
+#!/bin/bash
+
+set -e
+
+$(dirname "$0")/guard_deploy.sh "$1"
+
 # Step 1: build
 npm run build-server
 cp ./src/scripts/*.sh ./bin/scripts/

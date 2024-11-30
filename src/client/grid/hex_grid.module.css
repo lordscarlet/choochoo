@@ -125,3 +125,16 @@
   width: 100%;
   height: 100%;
 }
+
+.hexGrid * {
+  pointer-events: none;
+}
+
+.hexGrid .clickable {
+  pointer-events: inherit;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

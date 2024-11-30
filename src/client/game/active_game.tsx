@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
@@ -6,6 +7,7 @@ import { getPhaseString, Phase } from "../../engine/state/phase";
 import { GameMap } from "../grid/game_map";
 import { useGame, useRetryAction, useUndoAction } from "../services/game";
 import { InjectionContextProvider, useInjected, useInjectedState } from "../utils/injection_context";
+import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
 import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
@@ -29,8 +31,9 @@ function InternalActiveGame() {
     <h2>{game.name}</h2>
     <GameLog gameId={game.id} />
     <Editor />
-    {!undoOnly && <SelectAction />}
     <UndoButton />
+    {!undoOnly && <SelectAction />}
+    {!undoOnly && <BiddingInfo />}
     <RetryButton />
     {!undoOnly && <CurrentPhase />}
     {!undoOnly && <PlayerStats />}
@@ -60,7 +63,7 @@ export function UndoButton() {
   if (!canUndo) {
     return <></>;
   }
-  return <button onClick={undo}>Undo</button>;
+  return <Button onClick={undo}>Undo</Button>;
 }
 
 export function RetryButton() {
@@ -68,5 +71,5 @@ export function RetryButton() {
   if (!canRetry) {
     return <></>;
   }
-  return <button onClick={retry}>Retry</button>;
+  return <Button onClick={retry}>Retry</Button>;
 }

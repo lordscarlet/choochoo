@@ -1,0 +1,32 @@
+.colorListContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.colorList {
+  display: flex;
+  flex-direction: row;
+}
+
+.colorList:first-of-type {
+  margin-bottom: 8px;
+}
+
+.playerCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: inline-block;
+  color: white;
+  text-align: center;
+  line-height: 64px;
+}
+
+.playerCircleContainer {
+  margin: 4px;
+  width: 64px;
+}
+
+.captionContainer {
+  text-align: center;
+}

@@ -187,15 +187,20 @@ export function useStartGame(): GameAction {
 interface ActionHandler<T> {
   emit(data: T): void;
   canEmit: boolean;
+  isPending: boolean;
   canEmitUsername?: string;
 }
 
-export function useEmptyAction(action: ActionConstructor<Record<string, never>>): ActionHandler<unknown> {
-  const { emit: oldEmit, canEmit, canEmitUsername } = useAction(action);
+type EmptyActionHandler = Omit<ActionHandler<unknown>, 'emit'> & {
+  emit(): void,
+};
+
+export function useEmptyAction(action: ActionConstructor<Record<string, never>>): EmptyActionHandler {
+  const { emit: oldEmit, canEmit, canEmitUsername, isPending } = useAction(action);
   const emit = useCallback(() => {
     oldEmit({});
   }, [oldEmit]);
-  return { emit, canEmit, canEmitUsername };
+  return { emit, canEmit, canEmitUsername, isPending };
 }
 
 /** Like `useState` but it resets when the game version changes. */
@@ -240,7 +245,7 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
   const canEmitUsername = actionCanBeEmitted ? users![0].username : undefined;
   const canEmit = me?.id === game.activePlayerId && actionCanBeEmitted;
 
-  return { emit, canEmit, canEmitUsername };
+  return { emit, canEmit, canEmitUsername, isPending };
 }
 
 export interface UndoAction {

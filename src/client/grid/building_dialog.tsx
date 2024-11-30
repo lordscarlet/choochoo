@@ -1,6 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
-import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { Button, Checkbox, Dialog, DialogContent, DialogTitle, FormControlLabel, IconButton } from "@mui/material";
+import { useNotifications } from '@toolpad/core';
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
@@ -9,6 +10,7 @@ import { rotateDirectionClockwise } from "../../engine/map/direction";
 import { Grid, Space } from '../../engine/map/grid';
 import { GridHelper } from "../../engine/map/grid_helper";
 import { calculateTrackInfo, Location, trackEquals } from "../../engine/map/location";
+import { isTownTile } from '../../engine/map/tile';
 import { Action } from "../../engine/state/action";
 import { AvailableCity } from '../../engine/state/available_city';
 import { LocationType } from '../../engine/state/location_type';
@@ -17,6 +19,8 @@ import { Coordinates } from "../../utils/coordinates";
 import { useAction } from '../services/game';
 import { useTypedMemo } from '../utils/hooks';
 import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/injection_context";
+import { buildingDialogContainer, buildingOption, dialogContent } from './building_dialog.module.css';
+import { ClickTarget } from './click_target';
 import { HexGrid } from './hex_grid';
 
 
@@ -46,9 +50,26 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
     emitUrbanize({ cityIndex, coordinates: space!.coordinates });
   }, [space, emitUrbanize]);
 
+  const canUrbanize = curr.selectedAction === Action.URBANIZATION &&
+    space != null &&
+    space.hasTown() &&
+    availableCities.length > 0;
+  const hasBuildingOptions = canUrbanize || eligible.length > 0;
+
+  const isOpen = coordinates != null && hasBuildingOptions;
+
+  const notifications = useNotifications();
+
+  useEffect(() => {
+    if (coordinates != null && !hasBuildingOptions) {
+      cancelBuild();
+      notifications.show('No eligible building options', { autoHideDuration: 2000 })
+    }
+  }, [coordinates, hasBuildingOptions, cancelBuild]);
+
   return <>
     <Dialog
-      open={coordinates != null}
+      open={isOpen}
       onClose={cancelBuild}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
@@ -68,18 +89,24 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
       >
         <CloseIcon />
       </IconButton>
-      <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
-        <p><input type="checkbox" checked={showReasons} onChange={e => setShowReasons(e.target.checked)} />Show failure reasons</p>
-        {showReasons && <button onClick={rotate}>Rotate</button>}
-        {eligible.map((build, index) => <div key={index}>
-          <ModifiedSpace space={space!} tile={build.tile} onClick={() => build.reason == null && onSelect(build.action)} />
-          {build.reason}
-        </div>)}
-        {curr.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
-          <div key={city.onRoll[0].group * 10 + city.onRoll[0].onRoll}>
-            <ModifiedSpace space={space!} asCity={city} onClick={() => selectAvailableCity(index)} />
-          </div>
-        )}
+      <DialogContent className={dialogContent} >
+        <p>
+          <FormControlLabel
+            control={<Checkbox checked={showReasons} onChange={e => setShowReasons(e.target.checked)} />}
+            label="Show failure reasons" />
+        </p>
+        {showReasons && <Button onClick={rotate}>Rotate</Button>}
+        <div className={buildingDialogContainer}>
+          {curr.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
+            <div key={city.onRoll[0].group * 10 + city.onRoll[0].onRoll} className={buildingOption}>
+              <ModifiedSpace space={space!} asCity={city} onClick={() => selectAvailableCity(index)} />
+            </div>
+          )}
+          {eligible.map((build, index) => <div key={index} className={buildingOption}>
+            <ModifiedSpace space={space!} tile={build.tile} onClick={() => build.reason == null && onSelect(build.action)} />
+            {build.reason}
+          </div>)}
+        </div>
       </DialogContent>
     </Dialog>
   </>;
@@ -106,11 +133,17 @@ export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpacePro
         onRoll: asCity.onRoll,
       });
     } else {
-      return new Location(space.coordinates, { ...space.data, tile });
+      const newLocationData = {
+        ...space.data,
+        townName: tile == null || isTownTile(tile.tileType) ? space.data.townName : undefined,
+        tile,
+      };
+      return new Location(space.coordinates, newLocationData);
     }
   }, [space, tile, asCity]);
   const grid = useMemo(() => Grid.fromSpaces([newSpace]), [newSpace]);
-  return <HexGrid grid={grid} onClick={onClick} />
+  const clickTargets = useMemo(() => new Set([ClickTarget.TOWN, ClickTarget.LOCATION, ClickTarget.CITY]), []);
+  return <HexGrid grid={grid} onClick={onClick} clickTargets={clickTargets} />
 }
 
 interface EligibleBuild {
@@ -121,8 +154,9 @@ interface EligibleBuild {
 
 function getEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates | undefined, direction: Direction, showReasons: boolean): EligibleBuild[] {
   if (coordinates == null) return [];
-  const builds = (showReasons ? [direction] : allDirections).flatMap((direction) =>
-    [...getAllEligibleBuilds(actionProcessor, coordinates, direction)].filter(({ reason }) => showReasons || reason == null));
+  const builds =
+    [...getAllEligibleBuilds(actionProcessor, coordinates, showReasons ? [direction] : allDirections)]
+      .filter(({ reason }) => showReasons || reason == null);
   return builds.filter((build1, index) => {
     const tileInfo1 = calculateTrackInfo(build1.tile);
     return !builds.slice(index + 1).some((build2) => {
@@ -132,39 +166,41 @@ function getEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinate
   });
 }
 
-function* getAllEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates, orientation: Direction): Iterable<EligibleBuild> {
+function* getAllEligibleBuilds(actionProcessor: BuildAction, coordinates: Coordinates, directions: Direction[]): Iterable<EligibleBuild> {
   const tiles = [
-    SimpleTileType.STRAIGHT,
-    SimpleTileType.CURVE,
-    SimpleTileType.TIGHT,
-    ComplexTileType.X,
-    ComplexTileType.BOW_AND_ARROW,
-    ComplexTileType.CROSSING_CURVES,
-    ComplexTileType.STRAIGHT_TIGHT,
-    ComplexTileType.COEXISTING_CURVES,
-    ComplexTileType.CURVE_TIGHT_1,
-    ComplexTileType.CURVE_TIGHT_2,
     TownTileType.LOLLYPOP,
+    SimpleTileType.STRAIGHT,
     TownTileType.STRAIGHT,
+    SimpleTileType.CURVE,
     TownTileType.CURVE,
+    SimpleTileType.TIGHT,
     TownTileType.TIGHT,
     TownTileType.THREE_WAY,
     TownTileType.LEFT_LEANER,
     TownTileType.RIGHT_LEANER,
     TownTileType.TIGHT_THREE,
     TownTileType.X,
+    ComplexTileType.X,
     TownTileType.CHICKEN_FOOT,
+    ComplexTileType.BOW_AND_ARROW,
+    ComplexTileType.CROSSING_CURVES,
     TownTileType.K,
+    ComplexTileType.STRAIGHT_TIGHT,
+    ComplexTileType.COEXISTING_CURVES,
+    ComplexTileType.CURVE_TIGHT_1,
+    ComplexTileType.CURVE_TIGHT_2,
   ];
 
   for (const tileType of tiles) {
-    const action = { orientation, tileType, coordinates };
-    const tile = { orientation, tileType, owners: [] };
-    try {
-      actionProcessor.validate(action);
-      yield { action, tile };
-    } catch (e: unknown) {
-      yield { action, tile, reason: (e as Error).message };
+    for (const orientation of directions) {
+      const action = { orientation, tileType, coordinates };
+      const tile = { orientation, tileType, owners: [] };
+      try {
+        actionProcessor.validate(action);
+        yield { action, tile };
+      } catch (e: unknown) {
+        yield { action, tile, reason: (e as Error).message };
+      }
     }
   }
 }

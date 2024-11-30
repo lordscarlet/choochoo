@@ -4,7 +4,9 @@ import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
 import { useTypedCallback } from "../utils/hooks";
+import { ClickTarget } from "./click_target";
 import { Hex } from "./hex";
+import { hexGrid } from './hex_grid.module.css';
 import { coordinatesToCenter, getCorners, Point } from "./point";
 
 
@@ -41,6 +43,7 @@ interface HexGridProps {
   onClick(space: Space, good?: Good): void;
   highlightedTrack?: Track[];
   selectedGood?: { good: Good, coordinates: Coordinates };
+  clickTargets: Set<ClickTarget>;
 }
 
 function onClickCb(grid: Grid, offset: Point, size: number, onClick: (space: Space, good?: Good) => void) {
@@ -61,7 +64,7 @@ function onClickCb(grid: Grid, offset: Point, size: number, onClick: (space: Spa
   };
 }
 
-export function HexGrid({ onClick, highlightedTrack, selectedGood, grid }: HexGridProps) {
+export function HexGrid({ onClick, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
   const size = 70;
   const padding = 20;
 
@@ -94,15 +97,15 @@ export function HexGrid({ onClick, highlightedTrack, selectedGood, grid }: HexGr
       , [highlightedTrack]);
     const highlightedTrackSerialized = (highlightedTrackInSpace ?? []).map((track) => `${track.coordinates.serialize()}|${track.getExits().join(':')}`).join('?');
     mapSpaces.push(useMemo(() =>
-      hexFactory(space, selectedGood, highlightedTrackInSpace, offset, size),
-      [space, selectedGood, highlightedTrackSerialized, offset.x, offset.y, size]));
+      hexFactory(space, selectedGood, highlightedTrackInSpace, offset, size, clickTargets),
+      [space, selectedGood, highlightedTrackSerialized, offset.x, offset.y, size, clickTargets]));
   }
 
   return <svg xmlns="http://www.w3.org/2000/svg"
     width={viewBox.x}
     height={viewBox.y}
     fill="currentColor"
-    className="bi bi-google"
+    className={`bi bi-google ${hexGrid}`}
     onClick={internalOnClick}>
     {mapSpaces}
   </svg>;
@@ -113,11 +116,13 @@ function hexFactory(
   selectedGood: { good: Good, coordinates: Coordinates } | undefined,
   highlightedTrack: Track[] | undefined,
   offset: Point,
-  size: number) {
+  size: number,
+  clickTargets: Set<ClickTarget>) {
   return <Hex key={space.coordinates.serialize()}
     selectedGood={selectedGood}
     highlightedTrack={highlightedTrack}
     offset={offset}
     space={space}
-    size={size} />
+    size={size}
+    clickTargets={clickTargets} />
 }
