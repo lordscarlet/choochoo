@@ -13,6 +13,7 @@ import { devApp } from './routes/dev';
 import { feedbackApp } from './routes/feedback';
 import { gameApp } from './routes/game';
 import { messageApp } from './routes/message';
+import { notificationApp } from './routes/notification';
 import { userApp } from './routes/user';
 import { waitForSequelize } from './sequelize';
 import { io } from './socket';
@@ -39,6 +40,7 @@ if (environment.stage !== Stage.enum.production) {
 }
 
 app.use('/api', userApp);
+app.use('/api', notificationApp);
 app.use(enforceRoleMiddleware());
 app.use('/api', gameApp);
 app.use('/api', messageApp);

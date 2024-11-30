@@ -137,14 +137,23 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
       password,
       role: UserRole.enum.ACTIVATE_EMAIL,
       notificationPreferences: {
-        turnNotifications: {
+        turnNotifications: [{
           method: NotificationMethod.EMAIL,
           frequency: NotificationFrequency.IMMEDIATELY,
-        },
+        }],
         marketing: true,
       },
     }, { transaction });
     return newUser;
+  }
+
+  static async unsubscribe(email: string) {
+    const user = await UserModel.findByUsernameOrEmail(email);
+    assert(user != null, { invalidInput: true });
+    user.notificationPreferences = {
+      turnNotifications: [],
+      marketing: false,
+    }
   }
 }
 

@@ -16,26 +16,19 @@ export const IndividualSetting = z.object({
 export type IndividualSetting = z.infer<typeof IndividualSetting>;
 
 export const NotificationPreferences = z.object({
-  turnNotifications: IndividualSetting,
+  turnNotifications: z.array(IndividualSetting),
   // Mailjet is the source of truth for this field.
   marketing: z.boolean(),
 });
 export type NotificationPreferences = z.infer<typeof NotificationPreferences>;
 
 export const notificationsContract = initContract().router({
-  get: {
+  unsubscribe: {
+    body: z.object({ unsubscribeCode: z.string() }),
     responses: {
-      200: z.object({ preferences: NotificationPreferences }),
+      200: z.object({ success: z.literal(true) }),
     },
-    method: 'GET',
-    path: '/email-preferences',
-  },
-  set: {
-    body: NotificationPreferences,
-    responses: {
-      200: z.object({ unsubscribeCode: z.string().optional(), preferences: NotificationPreferences }),
-    },
-    method: 'PUT',
-    path: '/email-preferences',
+    method: 'POST',
+    path: '/notification-preferences/unsubscribe',
   },
 });
