@@ -21,7 +21,7 @@ export function PlayerStats() {
   const outOfGamePlayers = playerData.filter((p) => p.outOfGame).map((p) => p.color);
   const players = useMemo<Array<{ player: PlayerData, user?: UserApi }>>(() => playerOrder.concat(outOfGamePlayers).map(color => {
     const player = playerData.find((player) => player.color === color)!;
-    const user = playerUsers?.find(user => user.id === player.playerId);
+    const user = playerUsers.find(user => user?.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
   return <div className={styles.playerStats}>

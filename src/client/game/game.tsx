@@ -1,4 +1,5 @@
 import { Button } from "@mui/material";
+import { isNotNull } from "../../utils/functions";
 import { useGame, useJoinGame, useLeaveGame, useStartGame } from "../services/game";
 import { useMe } from "../services/me";
 import { useUsers } from "../services/user";
@@ -10,7 +11,7 @@ export function Lobby() {
   return <div>
     <h2>{game.name}</h2>
     <p>
-      Players: {players && players.map((player) => player.username).join(', ')}
+      Players: {players && players.filter(isNotNull).map((player) => player.username).join(', ')}
       <LeaveButton />
       <JoinButton />
       <StartButton />

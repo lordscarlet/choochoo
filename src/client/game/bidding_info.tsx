@@ -1,26 +1,17 @@
 import { useMemo } from "react";
-import { UserApi } from "../../api/user";
-import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
+import { CURRENT_PLAYER, TURN_ORDER } from "../../engine/game/state";
 import { Phase } from "../../engine/state/phase";
-import { getPlayerColor, PlayerColor, PlayerData } from "../../engine/state/player";
+import { getPlayerColor, PlayerColor } from "../../engine/state/player";
 import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { duplicate } from "../../utils/functions";
-import { useUsers } from "../services/user";
 import { useInjectedState, usePhaseState } from "../utils/injection_context";
 import { captionContainer, colorList, colorListContainer, playerCircle, playerCircleContainer } from './bidding_info.module.css';
 
 
 export function BiddingInfo() {
-  const playerData = useInjectedState(PLAYERS);
   const playerOrder = useInjectedState(TURN_ORDER);
   const currentPlayer = useInjectedState(CURRENT_PLAYER);
   const turnOrderState = usePhaseState(Phase.TURN_ORDER, TURN_ORDER_STATE);
-  const playerUsers = useUsers(playerData.map((player) => player.playerId));
-  const players = useMemo<Array<{ player: PlayerData, user?: UserApi }>>(() => playerOrder.map(color => {
-    const player = playerData.find((player) => player.color === color)!;
-    const user = playerUsers?.find(user => user.id === player.playerId);
-    return { player, user };
-  }), [playerOrder, playerData, playerUsers]);
 
   const biddingPlayers = useMemo(() =>
     playerOrder.map((color) => turnOrderState != null && !turnOrderState.nextTurnOrder.includes(color) ? ({
@@ -28,11 +19,11 @@ export function BiddingInfo() {
       bid: turnOrderState?.previousBids[color],
       underlined: color === currentPlayer,
     }) : {})
-    , [currentPlayer, turnOrderState, players]);
+    , [currentPlayer, turnOrderState]);
   const passedPlayers = useMemo(() =>
     duplicate<PlayerColor | undefined>(playerOrder.length - (turnOrderState?.nextTurnOrder.length ?? 0), undefined).concat(
       turnOrderState?.nextTurnOrder ?? []).map((color, index) => ({ color, caption: getCaption(index + 1, playerOrder.length) }))
-    , [biddingPlayers, players]);
+    , [biddingPlayers]);
 
   if (turnOrderState == null) return <></>;
 

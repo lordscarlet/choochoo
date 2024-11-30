@@ -242,7 +242,7 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
 
   const actionCanBeEmitted = phaseDelegator.get().canEmit(action);;
 
-  const canEmitUsername = actionCanBeEmitted ? users![0].username : undefined;
+  const canEmitUsername = actionCanBeEmitted ? users?.[0]?.username : undefined;
   const canEmit = me?.id === game.activePlayerId && actionCanBeEmitted;
 
   return { emit, canEmit, canEmitUsername, isPending };
