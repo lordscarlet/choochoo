@@ -1,7 +1,7 @@
 import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
 import { Fab, Tooltip } from "@mui/material";
-import { MouseEvent, useCallback, useMemo, useState } from "react";
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
@@ -68,8 +68,21 @@ function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClic
   };
 }
 
+function useZoom() {
+  const key = 'choo:preferredZoom';
+  const [internalZoom, setZoom] = useState(() => parseFloat(localStorage.getItem(key) ?? '1'));
+
+  const zoom = Math.max(Math.min(internalZoom, 3), 0.2);
+
+  useEffect(() => {
+    localStorage.setItem(key, `${zoom}`);
+  }, [zoom]);
+
+  return [zoom, setZoom] as const;
+}
+
 export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useZoom();
   const size = 70;
   const padding = 20;
 
