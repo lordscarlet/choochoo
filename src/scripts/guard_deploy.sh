@@ -16,7 +16,7 @@ if [ -n "$(git diff HEAD)" ]; then
 fi
 
 if [ "$branch" != "prod" ]; then
-  if [ -n "$(gid diff prod)" ]; then
+  if [ -n "$(git diff prod)" ]; then
     git checkout prod
     exit
   fi
