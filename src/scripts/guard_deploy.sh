@@ -18,11 +18,12 @@ fi
 if [ "$branch" != "prod" ]; then
   read -p "Merge current branch into prod? [Y/n]: " result
 
-  if [ "$result" = "Y" ] || [ -z "$result" ]; then
+  echo "read $result"
+  result="$(echo "$result" | tr '[:upper:]' '[:lower:]')"
+  if [ "$result" != "y" ] && [ -n "$result" ]; then
     echo "You can only deploy from the prod branch, on $branch"
     exit 1
   fi
-
   git checkout prod
   git merge "$branch"
   git push
