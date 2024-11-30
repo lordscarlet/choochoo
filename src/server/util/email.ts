@@ -167,11 +167,16 @@ class MailjetEmailService extends EmailService {
   }
 
   async unsubscribe(email: string): Promise<void> {
-    await this.mailjet.put("contact")
-      .id(email)
-      .request({
-        "IsExcludedFromCampaigns": "true"
-      });
+    try {
+      await this.mailjet.put("contact")
+        .id(email)
+        .request({
+          "IsExcludedFromCampaigns": "true"
+        });
+    } catch (e) {
+      console.log('unsubscribe error');
+      console.error(e);
+    }
   }
 
   async sendEmail({ email, subject, text, html }: SendEmailProps): Promise<void> {
