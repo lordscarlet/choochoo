@@ -1,6 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Button, Checkbox, Dialog, DialogContent, DialogTitle, FormControlLabel, IconButton } from "@mui/material";
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useNotifications } from '@toolpad/core';
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
@@ -19,6 +20,7 @@ import { useAction } from '../services/game';
 import { useTypedMemo } from '../utils/hooks';
 import { useCurrentPlayer, useInjected, useInjectedState } from "../utils/injection_context";
 import { buildingDialogContainer, buildingOption, dialogContent } from './building_dialog.module.css';
+import { ClickTarget } from './click_target';
 import { HexGrid } from './hex_grid';
 
 
@@ -48,9 +50,26 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
     emitUrbanize({ cityIndex, coordinates: space!.coordinates });
   }, [space, emitUrbanize]);
 
+  const canUrbanize = curr.selectedAction === Action.URBANIZATION &&
+    space != null &&
+    space.hasTown() &&
+    availableCities.length > 0;
+  const hasBuildingOptions = canUrbanize || eligible.length > 0;
+
+  const isOpen = coordinates != null && hasBuildingOptions;
+
+  const notifications = useNotifications();
+
+  useEffect(() => {
+    if (coordinates != null && !hasBuildingOptions) {
+      cancelBuild();
+      notifications.show('No eligible building options', { autoHideDuration: 2000 })
+    }
+  }, [coordinates, hasBuildingOptions, cancelBuild]);
+
   return <>
     <Dialog
-      open={coordinates != null}
+      open={isOpen}
       onClose={cancelBuild}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
@@ -123,7 +142,8 @@ export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpacePro
     }
   }, [space, tile, asCity]);
   const grid = useMemo(() => Grid.fromSpaces([newSpace]), [newSpace]);
-  return <HexGrid grid={grid} onClick={onClick} />
+  const clickTargets = useMemo(() => new Set([ClickTarget.TOWN, ClickTarget.LOCATION, ClickTarget.CITY]), []);
+  return <HexGrid grid={grid} onClick={onClick} clickTargets={clickTargets} />
 }
 
 interface EligibleBuild {

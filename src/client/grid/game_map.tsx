@@ -1,4 +1,5 @@
 import { DialogHook, useDialogs } from "@toolpad/core";
+import { useMemo } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
@@ -16,6 +17,7 @@ import { useAction, useGameVersionState } from "../services/game";
 import { useTypedCallback, useTypedMemo } from "../utils/hooks";
 import { useCurrentPlayer, useGrid } from "../utils/injection_context";
 import { BuildingDialog } from "./building_dialog";
+import { ClickTarget } from "./click_target";
 import { HexGrid } from "./hex_grid";
 
 function buildPaths(grid: Grid, startingStop: Coordinates, endingStop: Coordinates): Path[] {
@@ -187,8 +189,19 @@ export function GameMap() {
 
   const onClick = useTypedCallback(onClickCb, [canEmitBuild, canEmitMove, onSelectGood, setBuildingSpace, onMoveToSpace]);
 
+  const clickTargets = useMemo(() => {
+    // TODO: canEmitMove can either be a good, or travelling, but not both.
+    if (canEmitMove) {
+      return new Set([ClickTarget.GOOD, ClickTarget.TOWN, ClickTarget.CITY]);
+    }
+    if (canEmitBuild) {
+      return new Set([ClickTarget.LOCATION]);
+    }
+    return new Set<ClickTarget>();
+  }, [canEmitMove, canEmitBuild]);
+
   return <div style={{ overflowX: 'auto', width: '100%' }}>
-    <HexGrid onClick={onClick} highlightedTrack={highlightedTrack} selectedGood={selectedGood} grid={grid} />
+    <HexGrid onClick={onClick} highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
     <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
   </div>;
 }
