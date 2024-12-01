@@ -2,3 +2,8 @@
   height: 100%;
   padding: 16px;
 }
+
+.darkMode {
+  background-color: black;
+  color: white;
+}

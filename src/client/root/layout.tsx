@@ -1,8 +1,12 @@
 
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
+import { default as DarkMode } from '@mui/icons-material/DarkMode';
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
+import FeedbackOutlined from '@mui/icons-material/FeedbackOutlined';
+import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
-import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Menu, MenuItem, styled, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
@@ -13,11 +17,12 @@ import { useReportError } from '../services/feedback/report_error';
 import { useLogout, useMe } from "../services/me";
 import { isNetworkError } from '../services/network';
 import { Banner } from "./banner";
-import { main } from './layout.module.css';
+import { darkMode, main } from './layout.module.css';
 
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
 export function Layout() {
+  const { mode, setMode } = useColorScheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const [adminAnchorEl, setAdminAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const me = useMe();
@@ -51,6 +56,11 @@ export function Layout() {
     setIsFeedbackOpen(true);
     closeMenu();
   }, [setIsFeedbackOpen]);
+
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
+  const darkModeEnabled = mode === 'dark' ||
+    (prefersDarkMode && mode === 'system');
 
   return <>
     <Box sx={{ flexGrow: 1 }}>
@@ -118,15 +128,33 @@ export function Layout() {
             open={Boolean(anchorEl)}
             onClose={closeMenu}
           >
-            <MenuItem onClick={openFeedback}>Submit feedback</MenuItem>
-            <MenuItem onClick={logoutClick}>Logout</MenuItem>
+            <MenuList>
+              <MenuItem onClick={() => setMode(darkModeEnabled ? 'light' : 'dark')}>
+                <ListItemIcon>
+                  {darkModeEnabled ? <DarkMode fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
+                </ListItemIcon>
+                Dark Mode
+              </MenuItem>
+              <MenuItem onClick={openFeedback}>
+                <ListItemIcon>
+                  <FeedbackOutlined fontSize="small" />
+                </ListItemIcon>
+                Submit feedback
+              </MenuItem>
+              <MenuItem onClick={logoutClick}>
+                <ListItemIcon>
+                  <LogoutOutlined fontSize="small" />
+                </ListItemIcon>
+                Logout
+              </MenuItem>
+            </MenuList>
           </Menu>
         </Toolbar>
       </AppBar>
     </Box>
     <Offset />
     <Banner />
-    <main className={main}>
+    <main className={`${main} ${darkModeEnabled && darkMode}`}>
       <Suspense fallback={<Loading />}>
         <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
           <Outlet />
