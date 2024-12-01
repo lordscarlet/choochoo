@@ -102,7 +102,7 @@ export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size,
     (clickTargets.has(ClickTarget.TOWN) && space instanceof Location && space.hasTown());
 
   return <>
-    <polygon className={`${space instanceof City ? styles.city : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
+    <polygon className={`${space instanceof City ? '' : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Location && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
