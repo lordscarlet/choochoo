@@ -68,7 +68,7 @@ export function GoodsTable() {
           const city = cities.regularCities.get(cityGroup)?.[onRoll];
           const urbanizedCity = cities.urbanizedCities.get(cityGroup)?.[onRoll];
           const letter = i < 2 || i >= 10 ? '' : numberToLetter(i - 2);
-          return <div className={styles.column}>
+          return <div className={styles.column} key={i}>
             <div>{onRoll}</div>
             {iterate(3, goodIndex => <GoodBlock key={goodIndex} good={city?.[2 - goodIndex]} canSelect={canEmit} onClick={() => onClick(false, cityGroup, onRoll)} />)}
             <div>{urbanizedCity && letter}</div>
