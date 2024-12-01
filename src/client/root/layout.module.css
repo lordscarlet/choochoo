@@ -1,11 +1,9 @@
 .main {
   min-height: 100%;
   padding: 16px;
-  background-color: white;
-  color: black;
 }
 
-.main.darkMode {
+:global(.dark-mode) {
   background-color: black;
   color: white;
 }

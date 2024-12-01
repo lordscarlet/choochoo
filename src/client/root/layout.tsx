@@ -16,7 +16,6 @@ import { FeedbackForm } from "../services/feedback/form";
 import { useReportError } from '../services/feedback/report_error';
 import { useLogout, useMe } from "../services/me";
 import { isNetworkError } from '../services/network';
-import { useDarkModeEnabled } from '../utils/hooks';
 import { Banner } from "./banner";
 import * as styles from './layout.module.css';
 
@@ -59,7 +58,9 @@ export function Layout() {
   }, [setIsFeedbackOpen]);
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const darkModeEnabled = useDarkModeEnabled();
+
+  const darkModeEnabled = mode === 'dark' ||
+    (prefersDarkMode && mode === 'system');
 
   return <>
     <Box sx={{ flexGrow: 1 }}>
@@ -156,7 +157,7 @@ export function Layout() {
     </Box>
     <Offset />
     <Banner />
-    <main className={`${styles.main} ${darkModeEnabled ? styles.darkMode : ''}`}>
+    <main className={`${styles.main} ${darkModeEnabled ? 'dark-mode' : ''}`}>
       <Suspense fallback={<Loading />}>
         <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
           <Outlet />

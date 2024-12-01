@@ -7,51 +7,51 @@ import { Good } from "../../engine/state/good";
 import { LocationType } from "../../engine/state/location_type";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
-import { useDarkModeEnabled } from "../utils/hooks";
 import { ClickTarget } from "./click_target";
 import { GoodBlock } from "./good_block";
-import * as styles from './hex_grid.module.css';
+import * as styles from './hex.module.css';
+import * as gridStyles from './hex_grid.module.css';
 import { HexName } from "./hex_name";
 import { OnRoll } from "./on_roll";
 import { coordinatesToCenter, getCorners, offsetPoint, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
-export function goodColor(good: Good): string {
+export function cityColor(good: Good): string {
   switch (good) {
     case Good.BLACK:
-      return 'black';
+      return styles.black;
     case Good.BLUE:
-      return 'blue';
+      return styles.blue;
     case Good.PURPLE:
-      return 'purple';
+      return styles.purple;
     case Good.RED:
-      return 'red';
+      return styles.red;
     case Good.YELLOW:
-      return 'yellow';
+      return styles.yellow;
     default:
       assertNever(good);
   }
 }
 
-function color(space: City | Location | undefined, darkMode: boolean): string {
+function color(space: City | Location | undefined): string {
   if (space instanceof City) {
-    return goodColor(space.goodColor());
+    return cityColor(space.goodColor());
   } else if (space instanceof Location) {
     const type = space.getLocationType();
     switch (type) {
       case LocationType.PLAIN:
-        return darkMode ? 'darkgreen' : 'lightgreen';
+        return styles.plain;
       case LocationType.RIVER:
-        return darkMode ? 'darkblue' : 'lightblue';
+        return styles.river;
       case LocationType.MOUNTAIN:
-        return darkMode ? '#654321' : '#9D8771';
+        return styles.mountain;
       case LocationType.SWAMP:
-        return 'green';
+        return styles.swamp;
       default:
         assertNever(type);
     }
   } else {
-    return 'lightgrey';
+    return styles.unpassable;
   }
 }
 
@@ -72,12 +72,11 @@ export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size,
   const coordinates = space.coordinates;
   const center = useMemo(() => offsetPoint(coordinatesToCenter(coordinates, size), offset), [coordinates, offset, size]);
 
-  const darkModeEnabled = useDarkModeEnabled();
   const corners = useMemo(() =>
     polygon(getCorners(center, size))
     , [center, size]);
 
-  const hexColor = asCity ? goodColor(asCity) : color(space, darkModeEnabled);
+  const hexColor = asCity ? cityColor(asCity) : color(space);
 
   const trackInfo = useMemo(() => {
     const tileData = tile != null ? tile : space instanceof Location ? space.getTileData() : undefined;
@@ -103,7 +102,7 @@ export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size,
     (clickTargets.has(ClickTarget.TOWN) && space instanceof Location && space.hasTown());
 
   return <>
-    <polygon className={clickable ? styles.clickable : undefined} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" fill={hexColor} strokeWidth="1" />
+    <polygon className={`${space instanceof City ? styles.city : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Location && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}

@@ -1,5 +1,5 @@
 import { Good } from "../../engine/state/good";
-import { goodColor } from "./hex";
+import { cityColor } from "./hex";
 import * as styles from './hex_grid.module.css';
 import { Point } from "./point";
 
@@ -22,5 +22,5 @@ export function GoodBlock({ center, size, offset, good, highlighted, clickable }
   const x = center.x - (1.7 * goodSize) + (goodSize * xOffset / 2);
   const y = center.y + (yOffset * goodSize);
   const stroke = highlighted ? (good === Good.YELLOW ? 'lightgreen' : 'yellow') : (good === Good.BLACK ? 'grey' : 'black');
-  return <rect className={clickable ? styles.clickable : undefined} data-good={good} width={goodSize} height={goodSize} x={x} y={y} fill={goodColor(good)} strokeWidth={1} stroke={stroke} />;
+  return <rect className={`${clickable ? styles.clickable : ''} ${cityColor(good)}`} data-good={good} width={goodSize} height={goodSize} x={x} y={y} strokeWidth={1} stroke={stroke} />;
 }
