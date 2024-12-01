@@ -31,11 +31,16 @@
 }
 
 .good {
-  border: solid 1px black;
+  border: solid 1px grey;
+  --color: grey:
 }
 
 .clickableGood {
   cursor: pointer;
+}
+
+.gapRight {
+  margin-right: 8px;
 }
 
 .red {

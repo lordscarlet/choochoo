@@ -68,11 +68,11 @@ export function GoodsTable() {
           const city = cities.regularCities.get(cityGroup)?.[onRoll];
           const urbanizedCity = cities.urbanizedCities.get(cityGroup)?.[onRoll];
           const letter = i < 2 || i >= 10 ? '' : numberToLetter(i - 2);
-          return <div className={styles.column} key={i}>
+          return <div className={`${styles.column} ${i === 5 ? styles.gapRight : ''}`} key={i}>
             <div>{onRoll}</div>
             {iterate(3, goodIndex => <GoodBlock key={goodIndex} good={city?.[2 - goodIndex]} canSelect={canEmit} onClick={() => onClick(false, cityGroup, onRoll)} />)}
             <div>{urbanizedCity && letter}</div>
-            {iterate(2, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[1 - goodIndex]} canSelect={canEmit && urbanizedCity != null} onClick={() => onClick(true, cityGroup, onRoll)} />)}
+            {iterate(2, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[1 - goodIndex]} canSelect={canEmit} emptySpace={urbanizedCity == null} onClick={() => onClick(true, cityGroup, onRoll)} />)}
           </div>;
         })}
       </div>
@@ -102,14 +102,15 @@ interface GoodBlockProps {
   onClick(): void;
   good?: Good;
   canSelect?: boolean;
+  emptySpace?: boolean;
 }
 
-function GoodBlock({ onClick, good, canSelect }: GoodBlockProps) {
+function GoodBlock({ onClick, good, canSelect, emptySpace }: GoodBlockProps) {
   const classNames = [
     styles.goodPlace,
-    good != null ? styles.good : '',
+    !emptySpace ? styles.good : '',
     goodStyle(good),
-    canSelect && good == null ? styles.clickableGood : '',
+    canSelect && !emptySpace && good == null ? styles.clickableGood : '',
   ]
   return <div onClick={canSelect ? onClick : undefined} className={classNames.join(' ')} />;
 }
