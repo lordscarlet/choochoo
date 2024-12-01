@@ -6,7 +6,7 @@ import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import FeedbackOutlined from '@mui/icons-material/FeedbackOutlined';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
-import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme } from "@mui/material";
+import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
@@ -23,7 +23,7 @@ import { darkMode, main } from './layout.module.css';
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
 export function Layout() {
-  const { setMode } = useColorScheme();
+  const { mode, setMode } = useColorScheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const [adminAnchorEl, setAdminAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const me = useMe();
@@ -58,6 +58,7 @@ export function Layout() {
     closeMenu();
   }, [setIsFeedbackOpen]);
 
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const darkModeEnabled = useDarkModeEnabled();
 
   return <>
@@ -96,6 +97,9 @@ export function Layout() {
             open={Boolean(adminAnchorEl)}
             onClose={closeAdminMenu}
           >
+            <MenuItem>Dark mode: {mode ?? 'undefined'}</MenuItem>
+            <MenuItem>Prefers dark mode: {prefersDarkMode ? 'true' : 'false'}</MenuItem>
+            <MenuItem>Dark mode enabled: {darkModeEnabled ? 'true' : 'false'}</MenuItem>
             <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">Create Invitation</MenuItem>
             <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">View Feedback</MenuItem>
             <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">View users</MenuItem>
