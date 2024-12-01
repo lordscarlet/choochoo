@@ -1,6 +1,8 @@
 
+import AccountCircle from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, styled, Toolbar, Typography } from "@mui/material";
+import ManageAccounts from '@mui/icons-material/ManageAccounts';
+import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Menu, MenuItem, styled, Toolbar, Typography } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
@@ -16,15 +18,40 @@ import { main } from './layout.module.css';
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
 export function Layout() {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>(undefined);
+  const [adminAnchorEl, setAdminAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const me = useMe();
   const { logout, isPending } = useLogout();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const openFeedback = useCallback(() => {
-    setIsFeedbackOpen(true);
-  }, [setIsFeedbackOpen]);
   const closeFeedback = useCallback(() => {
     setIsFeedbackOpen(false);
   }, [setIsFeedbackOpen]);
+
+  const openMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  }, [setAnchorEl]);
+
+  const closeMenu = useCallback(() => {
+    setAnchorEl(undefined);
+  }, [setAnchorEl]);
+
+  const openAdminMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    setAdminAnchorEl(event.currentTarget);
+  }, [setAdminAnchorEl]);
+
+  const closeAdminMenu = useCallback(() => {
+    setAdminAnchorEl(undefined);
+  }, [setAdminAnchorEl]);
+
+  const logoutClick = useCallback(() => {
+    logout();
+    closeMenu();
+  }, [logout, closeMenu]);
+  const openFeedback = useCallback(() => {
+    setIsFeedbackOpen(true);
+    closeMenu();
+  }, [setIsFeedbackOpen]);
+
   return <>
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed">
@@ -32,13 +59,68 @@ export function Layout() {
           <Typography color="white" style={{ textDecoration: 'none' }} variant="h6" sx={{ flexGrow: 1 }} component={Link} to="/">
             Choo Choo Games
           </Typography>
-          {me != null && me.role == UserRole.enum.ADMIN &&
-            <Button color="inherit" component={Link} to="/app/admin">Admin</Button>}
-          {me != null &&
-            <Button color="inherit" onClick={openFeedback}>Submit Feedback</Button>}
-          {me == null ?
-            <Button color="inherit" component={Link} to="/app/users/login">Login</Button> :
-            <Button color="inherit" onClick={logout} disabled={isPending}>Logout</Button>}
+          {me == null &&
+            <Button color="inherit" component={Link} to="/app/users/login">Login</Button>}
+
+          {me?.role == UserRole.enum.ADMIN && <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={openAdminMenu}
+            color="inherit"
+          >
+            <ManageAccounts />
+          </IconButton>}
+
+          <Menu
+            id="menu-appbar"
+            anchorEl={adminAnchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(adminAnchorEl)}
+            onClose={closeAdminMenu}
+          >
+            <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">Create Invitation</MenuItem>
+            <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">View Feedback</MenuItem>
+            <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">View users</MenuItem>
+          </Menu>
+
+          {me != null && <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={openMenu}
+            color="inherit"
+          >
+            <AccountCircle />
+          </IconButton>}
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorEl)}
+            onClose={closeMenu}
+          >
+            <MenuItem onClick={openFeedback}>Submit feedback</MenuItem>
+            <MenuItem onClick={logoutClick}>Logout</MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
     </Box>

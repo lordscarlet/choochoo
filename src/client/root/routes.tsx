@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CreateInvitePage } from "../admin/create_invite";
 import { FeedbackPage } from "../admin/feedback";
-import { AdminPage } from "../admin/page";
 import { UserList } from "../admin/user_list";
 import { CreateGamePage } from "../game/create_page";
 import { GamePage } from "../game/page";
@@ -12,9 +11,9 @@ import { ForgotPassword } from "../user/forgot_password";
 import { LoginPage } from "../user/login";
 import { LoginRequired } from "../user/login_required";
 import { RegisterPage } from "../user/register";
+import { Unsubscribe } from "../user/unsubscribe";
 import { UpdatePassword } from "../user/update_password";
 import { Layout } from "./layout";
-import { Unsubscribe } from "../user/unsubscribe";
 
 export function Router() {
 
@@ -35,10 +34,6 @@ export function Router() {
         {
           path: '/app/users/login',
           element: <LoginPage />,
-        },
-        {
-          path: '/app/admin',
-          element: <AdminPage />,
         },
         {
           path: '/app/admin/feedback',
