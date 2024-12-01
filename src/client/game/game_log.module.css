@@ -10,12 +10,23 @@
   padding: 8px;
 }
 
+.darkMode .log-list,
+.darkMode input {
+  background-color: darkgrey;
+  color: black;
+}
+
 .scroll-to-bottom-container {
   position: absolute;
   width: 100%;
   bottom: 8px;
   left: 8px;
   display: flex;
+}
+
+.loadMoreButton {
+  width: 100%;
+  text-align: center;
 }
 
 .scroll-to-bottom {}

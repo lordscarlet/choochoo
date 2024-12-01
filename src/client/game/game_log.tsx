@@ -9,6 +9,7 @@ import * as styles from "./game_log.module.css";
 
 // @ts-ignore-next
 import useStayScrolled from 'react-stay-scrolled';
+import { useDarkModeEnabled } from '../utils/hooks';
 
 interface GameLogProps {
   gameId?: number;
@@ -44,10 +45,12 @@ export function GameLog({ gameId }: GameLogProps) {
     sendChat(newMessage, () => setNewMessageRaw(''));
   }, [newMessage]);
 
-  return <div>
+  const darkModeEnabled = useDarkModeEnabled();
+
+  return <div className={darkModeEnabled ? styles.darkMode : ''}>
     <div className={styles['log-container']}>
       <div className={styles['log-list']} ref={ref} onScroll={onScroll}>
-        {hasNextPage && <button onClick={fetchNextPage} disabled={isLoading} style={{ width: '100%', textAlign: 'center' }}>Load More</button>}
+        {hasNextPage && <button onClick={fetchNextPage} disabled={isLoading} className={styles.loadMoreButton}>Load More</button>}
         {messages.map((log, index) => {
           const dateString = log.date.toLocaleDateString();
           const isNewDay = index == 0 || dateString !== messages[index - 1].date.toLocaleDateString();
