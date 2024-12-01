@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { CURRENT_PLAYER, TURN_ORDER } from "../../engine/game/state";
 import { Phase } from "../../engine/state/phase";
-import { getPlayerColor, PlayerColor } from "../../engine/state/player";
+import { getPlayerColorCss, PlayerColor } from "../../engine/state/player";
 import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { duplicate } from "../../utils/functions";
 import { useInjectedState, usePhaseState } from "../utils/injection_context";
@@ -55,7 +55,7 @@ function PlayerCircle({ color, bid, underlined, caption }: PlayerCircleProps) {
     borderBottom: underlined ? 'solid 1px black' : undefined,
   };
   const style = {
-    backgroundColor: getPlayerColor(color),
+    backgroundColor: getPlayerColorCss(color),
     text: color === PlayerColor.YELLOW ? 'black' : 'white',
   };
   return <div className={playerCircleContainer} style={containerStyle}>

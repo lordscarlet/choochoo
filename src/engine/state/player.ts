@@ -56,3 +56,20 @@ export function getPlayerColor(playerColor?: PlayerColor): 'red' | 'yellow' | 'g
       assertNever(playerColor);
   }
 }
+
+export function getPlayerColorCss(playerColor?: PlayerColor): string {
+  switch (playerColor) {
+    case PlayerColor.BLACK:
+      return '#303030';
+    case PlayerColor.RED:
+    case PlayerColor.YELLOW:
+    case PlayerColor.GREEN:
+    case PlayerColor.PURPLE:
+    case PlayerColor.BLUE:
+    case PlayerColor.BROWN:
+    case undefined:
+      return getPlayerColor(playerColor);
+    default:
+      assertNever(playerColor);
+  }
+}
