@@ -1,6 +1,6 @@
 
 import { InjectionContext } from '../../engine/framework/inject';
-import { MapSettings } from '../../engine/game/map_settings';
+import { MapSettings, ReleaseStage } from '../../engine/game/map_settings';
 import { map } from './grid';
 
 
@@ -10,6 +10,7 @@ export class RustBeltMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
   readonly startingGrid = map;
+  readonly stage = ReleaseStage.DEPRECATED;
 
   registerOverrides(_: InjectionContext): void { }
 }
