@@ -3,7 +3,7 @@
   padding: 16px;
 }
 
-.darkMode {
+:global(.dark-mode) {
   background-color: black;
   color: white;
 }

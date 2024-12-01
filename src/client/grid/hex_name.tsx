@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { useDarkModeEnabled } from "../utils/hooks";
 import * as styles from './hex_name.module.css';
 import { Point, movePointInDirection, pointBetween } from "./point";
 
@@ -20,9 +19,8 @@ export function HexName({ name, center, size }: { name: string; center: Point; s
   ].map((p) => [p.x, p.y].join(' ')).join(','),
     [center, size]);
 
-  const enabled = useDarkModeEnabled();
   return <>
-    <polygon points={townCorners} className={`${styles.hexNameContainer} ${enabled ? styles.darkMode : ''}`} strokeWidth="1" />
+    <polygon points={townCorners} className={styles.hexNameContainer} strokeWidth="1" />
     <text x={center.x} y={center.y} dominantBaseline="middle" textAnchor="middle">{name}</text>
   </>;
 } export const hexNameDiff = 0.25;

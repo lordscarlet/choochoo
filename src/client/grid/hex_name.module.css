@@ -3,7 +3,7 @@
   fill: white;
 }
 
-.hexNameContainer.darkMode {
+:global(.dark-mode) .hexNameContainer {
   stroke: black;
   fill: black;
 }

@@ -10,8 +10,8 @@
   padding: 8px;
 }
 
-.darkMode .log-list,
-.darkMode input {
+:global(.dark-mode) .log-list,
+:global(.dark-mode) input {
   background-color: darkgrey;
   color: black;
 }

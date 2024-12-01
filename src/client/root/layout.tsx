@@ -17,7 +17,7 @@ import { useReportError } from '../services/feedback/report_error';
 import { useLogout, useMe } from "../services/me";
 import { isNetworkError } from '../services/network';
 import { Banner } from "./banner";
-import { darkMode, main } from './layout.module.css';
+import * as styles from './layout.module.css';
 
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
@@ -26,7 +26,7 @@ export function Layout() {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const [adminAnchorEl, setAdminAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const me = useMe();
-  const { logout, isPending } = useLogout();
+  const { logout, isPending: isLogoutPending } = useLogout();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const closeFeedback = useCallback(() => {
     setIsFeedbackOpen(false);
@@ -98,6 +98,9 @@ export function Layout() {
             open={Boolean(adminAnchorEl)}
             onClose={closeAdminMenu}
           >
+            <MenuItem>Dark mode: {mode ?? 'undefined'}</MenuItem>
+            <MenuItem>Prefers dark mode: {prefersDarkMode ? 'true' : 'false'}</MenuItem>
+            <MenuItem>Dark mode enabled: {darkModeEnabled ? 'true' : 'false'}</MenuItem>
             <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">Create Invitation</MenuItem>
             <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">View Feedback</MenuItem>
             <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">View users</MenuItem>
@@ -141,7 +144,7 @@ export function Layout() {
                 </ListItemIcon>
                 Submit feedback
               </MenuItem>
-              <MenuItem onClick={logoutClick}>
+              <MenuItem onClick={logoutClick} disabled={isLogoutPending}>
                 <ListItemIcon>
                   <LogoutOutlined fontSize="small" />
                 </ListItemIcon>
@@ -154,7 +157,7 @@ export function Layout() {
     </Box>
     <Offset />
     <Banner />
-    <main className={`${main} ${darkModeEnabled && darkMode}`}>
+    <main className={`${styles.main} ${darkModeEnabled ? 'dark-mode' : ''}`}>
       <Suspense fallback={<Loading />}>
         <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
           <Outlet />

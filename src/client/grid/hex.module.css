@@ -1,0 +1,51 @@
+.black {
+  fill: black;
+}
+
+.blue {
+  fill: blue;
+}
+
+.purple {
+  fill: purple;
+}
+
+.red {
+  fill: red;
+}
+
+.yellow {
+  fill: yellow;
+}
+
+.location.plain {
+  fill: lightgreen;
+}
+
+:global(.dark-mode) .location.plain {
+  fill: darkgreen;
+}
+
+.location.river {
+  fill: lightblue;
+}
+
+:global(.dark-mode) .location.river {
+  fill: darkblue;
+}
+
+.location.mountain {
+  fill: #9D8771;
+}
+
+:global(.dark-mode) .location.mountain {
+  fill: #654321;
+}
+
+.location.swamp {
+  fill: green;
+}
+
+.location.unpassable {
+  fill: lightgrey;
+}
