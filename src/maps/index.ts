@@ -1,6 +1,7 @@
 
 import { MapSettings } from '../engine/game/map_settings';
 import { assert } from '../utils/validate';
+import { ReversteamMapSettings } from './reversteam/settings';
 import { RustBeltMapSettings } from './rust_belt/settings';
 
 
@@ -10,6 +11,7 @@ export class MapRegistry {
 
   private constructor() {
     this.add(new RustBeltMapSettings());
+    this.add(new ReversteamMapSettings());
   }
 
   values(): Iterable<MapSettings> {
