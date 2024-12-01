@@ -1,13 +1,14 @@
 
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { FormEvent, useCallback, useMemo } from "react";
+import { ReleaseStage } from "../../engine/game/map_settings";
 import { MapRegistry } from "../../maps";
 import { environment, Stage } from "../services/environment";
 import { useCreateGame } from "../services/game";
 import { useCheckboxState, useSelectState, useTextInputState } from "../utils/form_state";
 
 export function CreateGamePage() {
-  const maps = useMemo(() => [...MapRegistry.singleton.values()], []);
+  const maps = useMemo(() => [...MapRegistry.singleton.values()].filter((map) => map.stage !== ReleaseStage.DEPRECATED), []);
   const [name, setName] = useTextInputState('');
   const [gameKey, setGameKey] = useSelectState(maps[0].key);
   const [artificialStart, setArtificialStart] = useCheckboxState();
