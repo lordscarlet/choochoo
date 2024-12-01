@@ -6,7 +6,7 @@ import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import FeedbackOutlined from '@mui/icons-material/FeedbackOutlined';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
-import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
+import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
@@ -16,17 +16,18 @@ import { FeedbackForm } from "../services/feedback/form";
 import { useReportError } from '../services/feedback/report_error';
 import { useLogout, useMe } from "../services/me";
 import { isNetworkError } from '../services/network';
+import { useDarkModeEnabled } from '../utils/hooks';
 import { Banner } from "./banner";
 import { darkMode, main } from './layout.module.css';
 
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
 export function Layout() {
-  const { mode, setMode } = useColorScheme();
+  const { setMode } = useColorScheme();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const [adminAnchorEl, setAdminAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const me = useMe();
-  const { logout, isPending } = useLogout();
+  const { logout, isPending: isLogoutPending } = useLogout();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const closeFeedback = useCallback(() => {
     setIsFeedbackOpen(false);
@@ -57,10 +58,7 @@ export function Layout() {
     closeMenu();
   }, [setIsFeedbackOpen]);
 
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-
-  const darkModeEnabled = mode === 'dark' ||
-    (prefersDarkMode && mode === 'system');
+  const darkModeEnabled = useDarkModeEnabled();
 
   return <>
     <Box sx={{ flexGrow: 1 }}>
@@ -141,7 +139,7 @@ export function Layout() {
                 </ListItemIcon>
                 Submit feedback
               </MenuItem>
-              <MenuItem onClick={logoutClick}>
+              <MenuItem onClick={logoutClick} disabled={isLogoutPending}>
                 <ListItemIcon>
                   <LogoutOutlined fontSize="small" />
                 </ListItemIcon>
@@ -154,7 +152,7 @@ export function Layout() {
     </Box>
     <Offset />
     <Banner />
-    <main className={`${main} ${darkModeEnabled && darkMode}`}>
+    <main className={`${main} ${darkModeEnabled ? darkMode : ''}`}>
       <Suspense fallback={<Loading />}>
         <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
           <Outlet />
