@@ -1,0 +1,9 @@
+.hexNameContainer {
+  stroke: white;
+  fill: white;
+}
+
+.hexNameContainer.darkMode {
+  stroke: black;
+  fill: black;
+}

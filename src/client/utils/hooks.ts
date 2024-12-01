@@ -1,3 +1,4 @@
+import { useColorScheme, useMediaQuery } from "@mui/material";
 import { useCallback, useEffect, useMemo } from "react";
 
 export function useTypedCallback<Args extends [...any], Deps extends [...any], T>(cb: (...deps: Deps) => (...args: Args) => T, deps: NoInfer<Deps>): (...args: Args) => T {
@@ -10,4 +11,14 @@ export function useTypedMemo<Deps extends [...any], T>(cb: (...deps: Deps) => T,
 
 export function useTypedEffect<Deps extends [...any]>(cb: (...deps: Deps) => (() => void) | void, deps: NoInfer<Deps>): void {
   return useEffect(() => cb(...deps), deps);
+}
+
+export function useDarkModeEnabled(): boolean {
+  const { mode } = useColorScheme();
+
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
+  return mode === 'dark' ||
+    (prefersDarkMode && mode === 'system');
+
 }

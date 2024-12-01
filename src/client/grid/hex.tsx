@@ -7,6 +7,7 @@ import { Good } from "../../engine/state/good";
 import { LocationType } from "../../engine/state/location_type";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
+import { useDarkModeEnabled } from "../utils/hooks";
 import { ClickTarget } from "./click_target";
 import { GoodBlock } from "./good_block";
 import * as styles from './hex_grid.module.css';
@@ -32,18 +33,18 @@ export function goodColor(good: Good): string {
   }
 }
 
-function color(space: City | Location | undefined): string {
+function color(space: City | Location | undefined, darkMode: boolean): string {
   if (space instanceof City) {
     return goodColor(space.goodColor());
   } else if (space instanceof Location) {
     const type = space.getLocationType();
     switch (type) {
       case LocationType.PLAIN:
-        return 'lightgreen';
+        return darkMode ? 'darkgreen' : 'lightgreen';
       case LocationType.RIVER:
-        return 'lightblue';
+        return darkMode ? 'darkblue' : 'lightblue';
       case LocationType.MOUNTAIN:
-        return 'brown';
+        return darkMode ? '#654321' : '#9D8771';
       case LocationType.SWAMP:
         return 'green';
       default:
@@ -71,11 +72,12 @@ export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size,
   const coordinates = space.coordinates;
   const center = useMemo(() => offsetPoint(coordinatesToCenter(coordinates, size), offset), [coordinates, offset, size]);
 
+  const darkModeEnabled = useDarkModeEnabled();
   const corners = useMemo(() =>
     polygon(getCorners(center, size))
     , [center, size]);
 
-  const hexColor = asCity ? goodColor(asCity) : color(space);
+  const hexColor = asCity ? goodColor(asCity) : color(space, darkModeEnabled);
 
   const trackInfo = useMemo(() => {
     const tileData = tile != null ? tile : space instanceof Location ? space.getTileData() : undefined;
