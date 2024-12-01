@@ -98,7 +98,7 @@ export function Layout() {
             onClose={closeAdminMenu}
           >
             <MenuItem>Dark mode: {mode ?? 'undefined'}</MenuItem>
-            <MenuItem>Prefers darrk mode: {prefersDarkMode ? 'true' : 'false'}</MenuItem>
+            <MenuItem>Prefers dark mode: {prefersDarkMode ? 'true' : 'false'}</MenuItem>
             <MenuItem>Dark mode enabled: {darkModeEnabled ? 'true' : 'false'}</MenuItem>
             <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">Create Invitation</MenuItem>
             <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">View Feedback</MenuItem>
@@ -156,7 +156,7 @@ export function Layout() {
     </Box>
     <Offset />
     <Banner />
-    <main className={`${styles.main}`}>
+    <main className={`${styles.main} ${darkModeEnabled ? styles.darkMode : ''}`}>
       <Suspense fallback={<Loading />}>
         <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
           <Outlet />
