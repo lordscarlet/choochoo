@@ -18,7 +18,7 @@ import { useLogout, useMe } from "../services/me";
 import { isNetworkError } from '../services/network';
 import { useDarkModeEnabled } from '../utils/hooks';
 import { Banner } from "./banner";
-import { darkMode, main } from './layout.module.css';
+import * as styles from './layout.module.css';
 
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
@@ -156,7 +156,7 @@ export function Layout() {
     </Box>
     <Offset />
     <Banner />
-    <main className={`${main} ${darkModeEnabled ? darkMode : ''}`}>
+    <main className={`${styles.main} ${darkModeEnabled ? styles.darkMode : ''}`}>
       <Suspense fallback={<Loading />}>
         <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
           <Outlet />
