@@ -131,7 +131,7 @@ function getSelectedGood(moveActionProgress: MoveData | undefined): { good: Good
 }
 
 function onClickCb(isPending: boolean, canEmitBuild: boolean, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Location) => void, onMoveToSpace: (space: Space) => void) {
-  return (space: Space, good: Good) => {
+  return (space: Space, good?: Good) => {
     if (isPending) return;
     if (canEmitMove) {
       if (good != null) {
