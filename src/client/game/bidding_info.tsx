@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import { CURRENT_PLAYER, TURN_ORDER } from "../../engine/game/state";
 import { Phase } from "../../engine/state/phase";
-import { getPlayerColorCss, PlayerColor } from "../../engine/state/player";
+import { PlayerColor } from "../../engine/state/player";
 import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { duplicate } from "../../utils/functions";
+import { getPlayerColorCss } from "../components/player_color";
 import { useInjectedState, usePhaseState } from "../utils/injection_context";
-import { captionContainer, colorList, colorListContainer, playerCircle, playerCircleContainer } from './bidding_info.module.css';
+import * as styles from './bidding_info.module.css';
 
 
 export function BiddingInfo() {
@@ -27,9 +28,9 @@ export function BiddingInfo() {
 
   if (turnOrderState == null) return <></>;
 
-  return <div className={colorListContainer}>
-    <div className={colorList}>{biddingPlayers.map((props, index) => <PlayerCircle key={index} {...props} />)}</div>
-    <div className={colorList}>{passedPlayers.map((props, index) => <PlayerCircle key={index} {...props} />)}</div>
+  return <div className={styles.colorListContainer}>
+    <div className={styles.colorList}>{biddingPlayers.map((props, index) => <PlayerCircle key={index} {...props} />)}</div>
+    <div className={styles.colorList}>{passedPlayers.map((props, index) => <PlayerCircle key={index} {...props} />)}</div>
   </div>;
 }
 
@@ -51,15 +52,8 @@ interface PlayerCircleProps {
 }
 
 function PlayerCircle({ color, bid, underlined, caption }: PlayerCircleProps) {
-  const containerStyle = {
-    borderBottom: underlined ? 'solid 1px black' : undefined,
-  };
-  const style = {
-    backgroundColor: getPlayerColorCss(color),
-    text: color === PlayerColor.YELLOW ? 'black' : 'white',
-  };
-  return <div className={playerCircleContainer} style={containerStyle}>
-    <div className={playerCircle} style={style}>{bid && `$${bid}`}</div>
-    <div className={captionContainer}>{caption}</div>
+  return <div className={`${styles.playerCircleContainer} ${underlined ? styles.underlined : ''}`}>
+    <div className={`${styles.playerCircle}  ${getPlayerColorCss(color)}`}>{bid && `$${bid}`}</div>
+    <div className={styles.captionContainer}>{caption}</div>
   </div>;
 }

@@ -62,6 +62,10 @@ export function Layout() {
   const darkModeEnabled = mode === 'dark' ||
     (prefersDarkMode && mode === 'system');
 
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', darkModeEnabled);
+  }, [darkModeEnabled]);
+
   return <>
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed">
@@ -157,7 +161,7 @@ export function Layout() {
     </Box>
     <Offset />
     <Banner />
-    <main className={`${styles.main} ${darkModeEnabled ? 'dark-mode' : ''}`}>
+    <main className={`${styles.main}`}>
       <Suspense fallback={<Loading />}>
         <ErrorBoundary fallbackRender={({ resetErrorBoundary, error }) => <ResetError error={error} resetErrorBoundary={resetErrorBoundary} />}>
           <Outlet />

@@ -24,30 +24,8 @@
   }
 }
 
-.user.red svg {
-  fill: red;
-}
-
-.user.blue svg {
-  fill: blue;
-}
-
-.user.green svg {
-  fill: green;
-}
-
-.user.purple svg {
-  fill: purple;
-}
-
-.user.yellow svg {
-  fill: yellow;
-}
-
-.user.black svg {
-  fill: #252525;
-}
-
-.user.brown svg {
-  fill: brown;
+.user svg {
+  fill: var(--player-color);
+  /* background-color: var(--player-color-text);
+  border-radius: 50%; */
 }

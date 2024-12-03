@@ -1,0 +1,39 @@
+.black {
+  --player-color: #303030;
+  --player-color-text: white;
+}
+
+.red {
+  --player-color: red;
+  --player-color-text: white;
+}
+
+.yellow {
+  --player-color: #daad0c;
+  --player-color-text: white;
+}
+
+.green {
+  --player-color: green;
+  --player-color-text: white;
+}
+
+.purple {
+  --player-color: purple;
+  --player-color-text: white;
+}
+
+.blue {
+  --player-color-text: white;
+  --player-color: blue;
+}
+
+.brown {
+  --player-color-text: white;
+  --player-color: rgb(151, 75, 54);
+}
+
+.unowned {
+  --player-color-text: white;
+  --player-color: grey;
+}

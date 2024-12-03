@@ -1,11 +1,12 @@
-import { default as ArrowCircleRight } from '@mui/icons-material/ArrowCircleRight';
+import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRightTwoTone';
 import Circle from '@mui/icons-material/Circle';
 import { useMemo } from "react";
 import { UserApi } from "../../api/user";
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
 import { getSelectedActionString } from "../../engine/state/action";
-import { getPlayerColor, PlayerData } from "../../engine/state/player";
+import { PlayerData } from "../../engine/state/player";
+import { getPlayerColorCss } from '../components/player_color';
 import { useUsers } from "../services/user";
 import { useInjected, useInjectedState } from "../utils/injection_context";
 import { LoginButton } from "./login_button";
@@ -44,10 +45,10 @@ export function PlayerStats() {
       <tbody>
         {players.map(({ player, user }) =>
           <tr key={player.playerId} className={styles.tableRow}>
-            <td className={[styles.user, styles[getPlayerColor(player.color)]].join(' ')}>
+            <td className={`${styles.user} ${getPlayerColorCss(player.color)}`}>
               {player.color === currentPlayer ?
-                <ArrowCircleRight /> :
-                <Circle />}
+                <ArrowCircleRightIcon fontSize="large" /> :
+                <Circle fontSize="large" />}
             </td>
             <td>
               {user?.username}

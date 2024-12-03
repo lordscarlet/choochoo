@@ -17,9 +17,14 @@
   height: 64px;
   border-radius: 50%;
   display: inline-block;
-  color: white;
   text-align: center;
   line-height: 64px;
+  background-color: var(--player-color);
+  color: var(--player-color-text);
+}
+
+.underlined {
+  border-bottom: solid 1px black;
 }
 
 .playerCircleContainer {
