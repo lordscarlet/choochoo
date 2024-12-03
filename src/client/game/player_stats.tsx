@@ -5,7 +5,7 @@ import { UserApi } from "../../api/user";
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
 import { getSelectedActionString } from "../../engine/state/action";
-import { PlayerData } from "../../engine/state/player";
+import { PlayerColor, PlayerData } from "../../engine/state/player";
 import { getPlayerColorCss } from '../components/player_color';
 import { useUsers } from "../services/user";
 import { useInjected, useInjectedState } from "../utils/injection_context";
@@ -45,10 +45,8 @@ export function PlayerStats() {
       <tbody>
         {players.map(({ player, user }) =>
           <tr key={player.playerId} className={styles.tableRow}>
-            <td className={`${styles.user} ${getPlayerColorCss(player.color)}`}>
-              {player.color === currentPlayer ?
-                <ArrowCircleRightIcon fontSize="large" /> :
-                <Circle fontSize="large" />}
+            <td>
+              <PlayerColorIndicator playerColor={player.color} currentTurn={player.color === currentPlayer} />
             </td>
             <td>
               {user?.username}
@@ -82,6 +80,17 @@ export function PlayerStats() {
   </div>;
 }
 
+interface PlayerColorIndicatorProps {
+  playerColor?: PlayerColor;
+  currentTurn: boolean;
+}
+
+export function PlayerColorIndicator({ playerColor, currentTurn }: PlayerColorIndicatorProps) {
+  const className = `${styles.user} ${getPlayerColorCss(playerColor)}`;
+  return currentTurn ?
+    <ArrowCircleRightIcon fontSize="large" className={className} /> :
+    <Circle fontSize="large" className={className} />;
+}
 
 function toNet(number: number): string {
   return number >= 0 ? `+$${number}` : `-$${-number}`;

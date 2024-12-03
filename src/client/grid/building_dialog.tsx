@@ -116,7 +116,7 @@ interface ModifiedSpaceProps {
   space: Space;
   tile?: TileData;
   asCity?: AvailableCity;
-  onClick(space: Space): void;
+  onClick?: (space: Space) => void;
 }
 
 export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpaceProps) {

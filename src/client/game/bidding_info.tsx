@@ -51,7 +51,7 @@ interface PlayerCircleProps {
   caption?: string;
 }
 
-function PlayerCircle({ color, bid, underlined, caption }: PlayerCircleProps) {
+export function PlayerCircle({ color, bid, underlined, caption }: PlayerCircleProps) {
   return <div className={`${styles.playerCircleContainer} ${underlined ? styles.underlined : ''}`}>
     <div className={`${styles.playerCircle}  ${getPlayerColorCss(color)}`}>{bid && `$${bid}`}</div>
     <div className={styles.captionContainer}>{caption}</div>

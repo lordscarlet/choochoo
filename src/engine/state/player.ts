@@ -56,3 +56,13 @@ export function getPlayerColor(playerColor?: PlayerColor): 'red' | 'yellow' | 'g
       assertNever(playerColor);
   }
 }
+
+export const allPlayerColors = [
+  PlayerColor.RED,
+  PlayerColor.YELLOW,
+  PlayerColor.GREEN,
+  PlayerColor.PURPLE,
+  PlayerColor.BLACK,
+  PlayerColor.BLUE,
+  PlayerColor.BROWN,
+];

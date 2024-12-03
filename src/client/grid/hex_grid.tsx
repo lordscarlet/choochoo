@@ -43,15 +43,16 @@ function pixelToCoordinates(point: Point, size: number): Coordinates {
 
 interface HexGridProps {
   grid: Grid;
-  onClick(space: Space, good?: Good): void;
+  onClick?: (space: Space, good?: Good) => void;
   highlightedTrack?: Track[];
   selectedGood?: { good: Good, coordinates: Coordinates };
   clickTargets: Set<ClickTarget>;
   allowZoom?: boolean;
 }
 
-function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClick: (space: Space, good?: Good) => void) {
+function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClick?: (space: Space, good?: Good) => void) {
   return (e: MouseEvent) => {
+    if (onClick == null) return;
     const canvas = e.currentTarget as HTMLCanvasElement;
     const rect = canvas.getBoundingClientRect();
     const coordinates = pixelToCoordinates({

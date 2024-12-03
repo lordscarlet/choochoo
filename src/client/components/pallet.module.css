@@ -1,0 +1,15 @@
+.column {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
+:global(.dark-mode).column {
+  background-color: black;
+  color: white;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}

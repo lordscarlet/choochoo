@@ -9,7 +9,7 @@ import { CityGroup } from '../state/city_group';
 import { Good } from '../state/good';
 import { LocationType } from '../state/location_type';
 import { InitialMapGrid, SpaceSettingData } from '../state/map_settings';
-import { PlayerColor, PlayerData } from '../state/player';
+import { allPlayerColors, PlayerColor, PlayerData } from '../state/player';
 import { OnRoll } from '../state/roll';
 import { SpaceData } from '../state/space';
 import { Random } from './random';
@@ -60,7 +60,7 @@ export class GameStarter {
   }
 
   initializePlayers(playerIds: number[]) {
-    const shuffledColors = this.random.shuffle(colors);
+    const shuffledColors = this.random.shuffle(allPlayerColors);
     const players = playerIds.map((id, index) => this.buildPlayer(id, shuffledColors[index]));
 
     this.players.initState(players);
@@ -102,12 +102,3 @@ export function draw<T>(num: number, arr: T[]): T[] {
   return duplicate(num, arr[0]).map((_) => arr.pop()!);
 }
 
-const colors = [
-  PlayerColor.RED,
-  PlayerColor.YELLOW,
-  PlayerColor.GREEN,
-  PlayerColor.PURPLE,
-  PlayerColor.BLACK,
-  PlayerColor.BLUE,
-  PlayerColor.BROWN,
-];

@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CreateInvitePage } from "../admin/create_invite";
 import { FeedbackPage } from "../admin/feedback";
 import { UserList } from "../admin/user_list";
+import { Pallet } from "../components/pallet";
 import { CreateGamePage } from "../game/create_page";
 import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
@@ -30,6 +31,10 @@ export function Router() {
         {
           path: '/',
           element: <LoginRequired><HomePage /></LoginRequired>,
+        },
+        {
+          path: '/app/pallet',
+          element: <Pallet />,
         },
         {
           path: '/app/users/login',

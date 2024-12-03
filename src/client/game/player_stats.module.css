@@ -24,7 +24,7 @@
   }
 }
 
-.user svg {
+svg.user {
   fill: var(--player-color);
   /* background-color: var(--player-color-text);
   border-radius: 50%; */
