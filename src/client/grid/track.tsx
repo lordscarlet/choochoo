@@ -9,8 +9,8 @@ export function Track({ track, center, size, highlighted }: { track: TrackInfo, 
 
   const curve = `M${point1.x} ${point1.y} Q ${center.x} ${center.y} ${point2.x} ${point2.y}`;
   return <>
-    {highlighted && <path d={curve} stroke="yellow" strokeWidth="6" strokeLinecap="round" fill="transparent"></path>}
-    <path className={`${styles.track} ${getPlayerColorCss(track.owner)}`} d={curve} strokeWidth="3" strokeLinecap="round" fill="transparent"></path>
+    {highlighted && <path d={curve} stroke="yellow" strokeWidth="10" strokeLinecap="butt" fill="transparent"></path>}
+    <path className={`${styles.track} ${getPlayerColorCss(track.owner)}`} d={curve} strokeWidth="8" strokeLinecap="butt" fill="transparent"></path>
   </>;
 }
 

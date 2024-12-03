@@ -35,7 +35,7 @@
 }
 
 .location.mountain {
-  fill: #9D8771;
+  fill: #F5DEB3;
 }
 
 :global(.dark-mode) .location.mountain {

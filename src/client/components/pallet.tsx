@@ -24,13 +24,13 @@ export function Pallet() {
         <div className={`${darkMode ? 'dark-mode' : ''} ${styles.column}`} key={playerColor}>
           <PlayerCircle color={playerColor} bid={5} />
           <PlayerColorIndicator playerColor={playerColor} currentTurn={true} />
-          {[SimpleTileType.STRAIGHT, TownTileType.STRAIGHT].map((tileType) => <>
+          {[SimpleTileType.CURVE, TownTileType.STRAIGHT].map((tileType) => <>
             {[plain, river, mountain].map((space) =>
-              <ModifiedSpace space={space} tile={{ tileType, orientation: Direction.TOP, owners: [playerColor, playerColor] }} />
+              < ModifiedSpace space={space} tile={{ tileType, orientation: Direction.TOP, owners: [playerColor, playerColor] }} />
             )}
           </>)}
-        </div>)}
+        </div >)}
     </>
     )}
-  </div>;
+  </div >;
 }

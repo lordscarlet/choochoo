@@ -69,7 +69,7 @@ function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClic
   };
 }
 
-function useZoom() {
+function useZoom(allowZoom?: boolean) {
   const key = 'choo:preferredZoom';
   const [internalZoom, setZoom] = useState(() => parseFloat(localStorage.getItem(key) ?? '1'));
 
@@ -79,11 +79,13 @@ function useZoom() {
     localStorage.setItem(key, `${zoom}`);
   }, [zoom]);
 
+  if (allowZoom == true) return [1, () => { }] as const;
+
   return [zoom, setZoom] as const;
 }
 
 export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
-  const [zoom, setZoom] = useZoom();
+  const [zoom, setZoom] = useZoom(allowZoom);
   const size = 70;
   const padding = 20;
 
