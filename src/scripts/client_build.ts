@@ -1,3 +1,4 @@
+import { exec } from 'child_process';
 import type { BuildResult, Plugin } from 'esbuild';
 import { writeFile } from 'fs/promises';
 import { resolve } from 'path';
@@ -41,8 +42,10 @@ export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<voi
 function rebuildPlugins(): Plugin[] {
   return [{
     name: 'rebuild-notify',
-    setup(build) {
+    async setup(build) {
       build.onEnd(logErrors);
+      const { stdout } = await exec('tsc');
+      stdout?.on('data', (d) => console.log(d));
     },
   }];
 }
