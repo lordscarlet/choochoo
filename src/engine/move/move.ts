@@ -10,7 +10,7 @@ import { BAG, injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Location } from "../map/location";
-import { getGoodColor, Good } from "../state/good";
+import { Good, goodToString } from "../state/good";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
 
@@ -62,8 +62,8 @@ export class MoveAction implements ActionProcessor<MoveData> {
     if (!(endingLocation instanceof City)) {
       throw new InvalidInputError(`${action.good} good cannot be delivered to non city`);
     }
-    if (endingLocation.goodColor() !== action.good) {
-      throw new InvalidInputError(`${action.good} good cannot be delivered to ${endingLocation.goodColor()} city`);
+    if (!endingLocation.accepts(action.good)) {
+      throw new InvalidInputError(`${goodToString(action.good)} good cannot be delivered to ${endingLocation.goodColors().map(goodToString).join('/')} city`);
     }
 
     // Validate that the route passes through cities and towns
@@ -72,8 +72,8 @@ export class MoveAction implements ActionProcessor<MoveData> {
       if (!(location instanceof City) && !(location instanceof Location && location.hasTown())) {
         throw new InvalidInputError('Invalid path, must pass through cities and towns');
       }
-      if (location instanceof City && location.goodColor() === action.good) {
-        throw new InvalidInputError(`Cannot pass through a ${location.goodColor()} city with a ${action.good} good`);
+      if (location instanceof City && location.accepts(action.good)) {
+        throw new InvalidInputError(`Cannot pass through a ${location.goodColors().map(goodToString).join('/')} city with a ${goodToString(action.good)} good`);
       }
     }
 
@@ -113,7 +113,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
     const partitioned = partition(action.path, (step) => step.owner);
 
-    this.log.currentPlayer(`moves a ${getGoodColor(action.good)} good from the city at ${action.startingCity} to the city at ${peek(action.path).endingStop}`)
+    this.log.currentPlayer(`moves a ${goodToString(action.good)} good from the city at ${action.startingCity} to the city at ${peek(action.path).endingStop}`)
 
     this.players.update((players) => {
       for (const player of players) {

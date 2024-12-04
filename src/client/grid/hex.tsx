@@ -35,7 +35,8 @@ export function cityColor(good: Good): string {
 
 function color(space: City | Location | undefined): string {
   if (space instanceof City) {
-    return cityColor(space.goodColor());
+    // TODO: figure out how to render multiple colors
+    return cityColor(space.goodColors()[0]);
   } else if (space instanceof Location) {
     const type = space.getLocationType();
     switch (type) {
@@ -45,6 +46,9 @@ function color(space: City | Location | undefined): string {
         return styles.river;
       case LocationType.MOUNTAIN:
         return styles.mountain;
+      // TODO: render street and street
+      case LocationType.LAKE:
+      case LocationType.STREET:
       case LocationType.SWAMP:
         return styles.swamp;
       default:

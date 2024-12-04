@@ -12,7 +12,7 @@ export enum Good {
 
 export const GoodZod = z.nativeEnum(Good);
 
-export function getGoodColor(good: Good): string {
+export function goodToString(good: Good): string {
   switch (good) {
     case Good.BLUE: return 'Blue';
     case Good.BLACK: return 'Black';

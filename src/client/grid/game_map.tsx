@@ -90,7 +90,7 @@ function onMoveToSpaceCb(moveActionProgress: MoveData | undefined, setMoveAction
       return;
     }
     const fromSpace = grid.get(peek(entirePath))!;
-    if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.goodColor() === moveActionProgress.good) return;
+    if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.accepts(moveActionProgress.good)) return;
     const paths = buildPaths(grid, fromSpace.coordinates, space.coordinates);
     if (paths.length === 0) return;
 
@@ -155,7 +155,7 @@ function maybeConfirmDeliveryCb(dialogs: DialogHook, grid: Grid, emitMove: (move
     if (moveActionProgress == null) return;
     if (moveActionProgress.path.length === 0) return;
     const endingStop = grid.get(peek(moveActionProgress.path).endingStop);
-    if (endingStop instanceof City && endingStop.goodColor() === moveActionProgress.good) {
+    if (endingStop instanceof City && endingStop.accepts(moveActionProgress.good)) {
       dialogs.confirm('Deliver to ' + endingStop.cityName(), {
         okText: 'Confirm Delivery',
         cancelText: 'Cancel',

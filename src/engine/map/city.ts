@@ -8,14 +8,22 @@ export function isCity(s: unknown): s is City {
 }
 
 export class City {
-  constructor(readonly coordinates: Coordinates, readonly data: CityData) { }
+  private readonly goodColorArray: Good[];
+
+  constructor(readonly coordinates: Coordinates, readonly data: CityData) {
+    this.goodColorArray = Array.isArray(data.color) ? data.color : [data.color];
+  }
 
   isUrbanized(): boolean {
     return this.data.urbanized ?? false;
   }
 
-  goodColor(): Good {
-    return this.data.color;
+  accepts(good: Good): boolean {
+    return this.goodColorArray.includes(good);
+  }
+
+  goodColors(): Good[] {
+    return this.goodColorArray;
   }
 
   cityName(): string {

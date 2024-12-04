@@ -5,7 +5,7 @@ import { PassAction } from "../../engine/goods_growth/pass";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { CityGroup } from "../../engine/state/city_group";
-import { getGoodColor, Good } from "../../engine/state/good";
+import { Good, goodToString } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { OnRoll } from "../../engine/state/roll";
 import { iterate } from "../../utils/functions";
@@ -89,9 +89,9 @@ export function PlaceGood({ good, toggleSelectedGood }: { good?: Good, toggleSel
   }
 
   return <div>
-    <p>{canEmit ? 'You' : canEmitUsername} drew {state!.goods.map(getGoodColor).join(', ')}</p>
+    <p>{canEmit ? 'You' : canEmitUsername} drew {state!.goods.map(goodToString).join(', ')}</p>
     {canEmit && <div>
-      Select where to place {getGoodColor(good!)}.
+      Select where to place {goodToString(good!)}.
       {state!.goods.length > 1 && <Button onClick={toggleSelectedGood}>Switch selected good</Button>}
       <Button onClick={emitPass}>Pass</Button>
     </div>}

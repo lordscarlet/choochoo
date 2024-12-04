@@ -38,6 +38,8 @@ export class BuildCostCalculator {
       case LocationType.RIVER: return 1;
       case LocationType.PLAIN: return 0;
       case LocationType.SWAMP: return 4;
+      case LocationType.LAKE: return 6;
+      case LocationType.STREET: return 4;
       default:
         assertNever(type);
     }
