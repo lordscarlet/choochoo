@@ -17,7 +17,6 @@ import { CreateLogModel, LogModel } from '../model/log';
 import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
-import { emitGameUpdate, emitLogsDestroyToRoom, emitLogsReplaceToRoom, emitToRoom } from '../socket';
 import { emailService } from '../util/email';
 import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
@@ -29,8 +28,9 @@ const s = initServer();
 const router = initServer().router(gameContract, {
   async list({ query }) {
     const defaultQuery: ListGamesApi = { pageSize: 20, order: ['id', 'DESC'] };
-    const { pageSize, order, userId, status, pageCursor, ...rest } = { ...defaultQuery, ...query };
+    const { pageSize, excludeUserId, order, userId, status, pageCursor, ...rest } = { ...defaultQuery, ...query };
     const where: WhereOptions<GameModel> = rest;
+    const wheres = [where];
     if (status != null) {
       if (status.length === 1) {
         where.status = status[0];
@@ -40,6 +40,14 @@ const router = initServer().router(gameContract, {
     }
     if (userId != null) {
       where.playerIds = { [Op.contains]: [userId] };
+    }
+    if (excludeUserId != null) {
+      where.playerIds = {
+        ...where.playerIds,
+        [Op.not]: {
+          [Op.contains]: [excludeUserId],
+        },
+      };
     }
     if (pageCursor != null) {
       where.id = { [Op.notIn]: pageCursor };
@@ -81,7 +89,6 @@ const router = initServer().router(gameContract, {
       status: GameStatus.enum.LOBBY,
       playerIds,
     });
-    emitGameUpdate(undefined, game);
     return { status: 201, body: { game: game.toApi() } };
   },
 
@@ -97,7 +104,6 @@ const router = initServer().router(gameContract, {
     const originalGame = game.toApi();
     game.playerIds = [...game.playerIds, userId];
     const newGame = await game.save();
-    emitGameUpdate(originalGame, newGame);
     return { status: 200, body: { game: newGame.toApi() } };
   },
 
@@ -117,7 +123,6 @@ const router = initServer().router(gameContract, {
     const originalGame = game.toApi();
     game.playerIds = game.playerIds.slice(0, index).concat(game.playerIds.slice(index + 1));
     const newGame = await game.save();
-    emitGameUpdate(originalGame, newGame);
     return { status: 200, body: { game: newGame.toApi() } };
   },
 
@@ -138,7 +143,6 @@ const router = initServer().router(gameContract, {
     game.status = GameStatus.enum.ACTIVE;
     game.activePlayerId = activePlayerId;
     const newGame = await game.save();
-    emitGameUpdate(originalGame, newGame);
     return { status: 200, body: { game: newGame.toApi() } };
   },
 
@@ -149,7 +153,6 @@ const router = initServer().router(gameContract, {
     const originalGame = game.toApi();
     game.gameData = body.gameData;
     await game.save();
-    emitGameUpdate(originalGame, game);
     return { status: 200, body: { game: game.toApi() } };
   },
 
@@ -204,9 +207,6 @@ const router = initServer().router(gameContract, {
 
         // TODO: send an email letting everyone know that the game has ended.
         async function processAsync() {
-          emitToRoom(newLogs);
-          emitGameUpdate(originalGame, newGame);
-
           if (playerChanged && newGame.activePlayerId !== null) {
             const user = await UserModel.findByPk(newGame.activePlayerId!, { transaction: null });
             if (user == null) return;
@@ -244,11 +244,6 @@ const router = initServer().router(gameContract, {
       const newGame = await game.save({ transaction });
       await GameHistoryModel.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
       await LogModel.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
-
-      transaction.afterCommit(() => {
-        emitLogsDestroyToRoom(game.id, backToVersion);
-        emitGameUpdate(originalGame, newGame);
-      });
 
       return { status: 200, body: { game: newGame.toApi() } };
     });
@@ -333,9 +328,6 @@ const router = initServer().router(gameContract, {
         ...allLogs.map(log => log.save({ transaction })),
       ]);
     });
-
-    emitLogsReplaceToRoom(game, allLogs, firstGameVersion);
-    emitGameUpdate(originalGame, game);
 
     return { status: 200, body: { game: game.toApi() } };
   },

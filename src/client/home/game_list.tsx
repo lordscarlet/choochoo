@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
-import { Link } from "react-router-dom";
 import { ListGamesApi } from "../../api/game";
+import { GameCard } from "../game/game";
 import { useGameList } from "../services/game";
 
 interface GameListProps {
@@ -15,10 +15,7 @@ export function GameList({ query, title }: GameListProps) {
 
   return <div>
     <h2>{title}</h2>
-    {games?.map((game) => <div key={game.id}>
-      {game.name}
-      <Button component={Link} to={`/app/games/${game.id}`}>View</Button>
-    </div>)}
+    {games?.map((game) => <GameCard game={game} key={game.id} />)}
     {hasPrevPage && <Button onClick={prevPage} >Prev</Button>}
     {hasNextPage && <Button onClick={nextPage} disabled={games == null}>Next</Button>}
   </div>;

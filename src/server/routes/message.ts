@@ -9,7 +9,6 @@ import { assert } from '../../utils/validate';
 import { GameModel } from '../model/game';
 import { LogModel } from '../model/log';
 import '../session';
-import { emitToRoom } from '../socket';
 import { badwords } from '../util/badwords';
 
 export const messageApp = express();
@@ -41,7 +40,6 @@ const router = initServer().router(messageContract, {
     }
     assert(gameId == null || (await GameModel.findByPk(gameId)) != null, { notFound: true });
     const log = await LogModel.create({ message, gameId, userId: req.session.userId });
-    emitToRoom([log]);
     return { status: 200, body: { message: log.toApi() } };
   },
 });

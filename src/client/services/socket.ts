@@ -53,8 +53,7 @@ export function useMessages(gameId?: number): UseMessages {
   }, [error]);
 
   const updateLogs = useCallback((updater: (logs: MessageApi[]) => MessageApi[]) => {
-    // TODO: fix the typing of this particular method.
-    queryClient.messages.list.setQueryData(queryKey, (r: any) => {
+    queryClient.messages.list.setQueryData(queryKey, () => {
       const newMessages = updater(messages);
       const nextPageCursors = data == null ? [undefined] : data.pages.map(page => page.body.nextPageCursor);
       const nextPageCursor = nextPageCursors.reduce((minNextPageCursor, nextPageCursor) => {
@@ -62,6 +61,7 @@ export function useMessages(gameId?: number): UseMessages {
         if (nextPageCursor == null) return nextPageCursor;
         return Math.min(nextPageCursor, minNextPageCursor);
       }, nextPageCursors[0]);
+      // TODO: fix the typing of this particular method.
       return {
         pageParams: [undefined],
         pages: [{ status: 200, headers: new Headers(), body: { messages: newMessages, nextPageCursor } }],
@@ -70,36 +70,22 @@ export function useMessages(gameId?: number): UseMessages {
   }, [queryClient, queryKey, messages, data]);
 
   useEffect(() => {
-    const listener = (messages: MessageApi[]) => {
-      if (messages.length === 0) {
-        console.warn('server sent emptty messages...');
-        return;
-      }
-      updateLogs((logs) => logs.concat(messages));
+    const listener = (message: MessageApi) => {
+      updateLogs((logs) => logs.concat([message]));
     };
-    socket.on('newLogs', listener);
+    socket.on('newLog', listener);
     return () => {
-      socket.off('newLogs', listener);
+      socket.off('newLog', listener);
     };
   }, [gameId, updateLogs]);
 
   useEffect(() => {
-    const listener = ({ gteGameVersion }: { gteGameVersion: number }) => {
-      updateLogs((logs) => logs.filter((log) => log.previousGameVersion == null || log.previousGameVersion < gteGameVersion));
+    const listener = (logId: number) => {
+      updateLogs((logs) => logs.filter((log) => log.id !== logId));
     };
-    socket.on('destroyLogs', listener);
+    socket.on('destroyLog', listener);
     return () => {
-      socket.off('destroyLogs', listener);
-    };
-  }, [gameId, updateLogs]);
-
-  useEffect(() => {
-    const listener = ({ gteGameVersion, newLogs }: { gameId: number, gteGameVersion: number, newLogs: MessageApi[] }) => {
-      updateLogs((logs) => logs.filter((log) => log.previousGameVersion == null || log.previousGameVersion < gteGameVersion).concat(newLogs));
-    };
-    socket.on('replaceLogs', listener);
-    return () => {
-      socket.off('replaceLogs', listener);
+      socket.off('destroyLog', listener);
     };
   }, [gameId, updateLogs]);
 

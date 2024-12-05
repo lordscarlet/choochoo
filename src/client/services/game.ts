@@ -2,11 +2,14 @@ import { useNotifications } from "@toolpad/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
-import { CreateGameApi, GameApi, GamePageCursor, ListGamesApi } from "../../api/game";
+import { CreateGameApi, GameApi, GameLiteApi, GamePageCursor, GameStatus, ListGamesApi } from "../../api/game";
 import { UserRole } from "../../api/user";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { MapRegistry } from "../../maps";
+import { entries, peek } from "../../utils/functions";
+import { Entry } from "../../utils/types";
+import { assert, assertNever } from "../../utils/validate";
 import { useInjected } from "../utils/injection_context";
 import { tsr } from "./client";
 import { useMe } from "./me";
@@ -18,7 +21,37 @@ function getQueryKey(gameId: number | string): string[] {
   return ['games', `${gameId}`];
 }
 
+function checkMatch(game: GameLiteApi, entry: Entry<ListGamesApi>): boolean {
+  if (entry == null) return true;
+  const [key, value] = entry;
+  if (value == null) return true;
+  switch (key) {
+    case 'userId':
+      return game.playerIds.includes(value);
+    case 'excludeUserId':
+      return !game.playerIds.includes(value);
+    case 'status':
+      return value.includes(game.status);
+    case 'gameKey':
+      return game.gameKey == value;
+    case 'name':
+      return game.name.toLowerCase().includes(value.toLowerCase());
+
+    case 'pageCursor':
+    case 'pageSize':
+    case 'order':
+      return true;
+    default:
+      assertNever(entry);
+  }
+}
+
+function checkMatches(baseQuery: ListGamesApi, game: GameLiteApi): boolean {
+  return entries(baseQuery).every((entry) => checkMatch(game, entry));
+}
+
 export function useGameList(baseQuery: ListGamesApi) {
+  const tsrQueryClient = tsr.useQueryClient();
   const queryWithLimit: ListGamesApi = { pageSize: 20, ...baseQuery };
   const queryKeyFromFilter =
     Object.entries(queryWithLimit)
@@ -57,17 +90,79 @@ export function useGameList(baseQuery: ListGamesApi) {
     setPage(page - 1);
   }, [page, setPage, page]);
 
+  useEffect(() => {
+    function setGame(game: GameLiteApi) {
+      tsrQueryClient.games.list.setQueryData(queryKey, (r) => {
+        if (games == null) return r;
+
+        assert(data != null);
+
+        const present = data.pages.some((page) => page.body.games.some((other) => other.id === game.id));
+
+        const matchesQuery = checkMatches(baseQuery, game);
+        let newPages: GameLiteApi[][];
+
+        const pages = data.pages.map((page) => page.body.games);
+        if (matchesQuery && present) {
+          newPages = pages.map((games) =>
+            games.map((other) => other.id === game.id ? game : other));
+        } else if (matchesQuery) {
+          newPages = pages.map((games, index) => {
+            const lastOfPrevious = index === 0 ? game : peek(pages[index - 1]);
+            return [lastOfPrevious, ...games.slice(0, games.length - 1)];
+          });
+        } else if (!matchesQuery && present) {
+          const pageIndex = pages.findIndex((games) => games.some(other => other.id === game.id));
+          newPages = pages.map((games, index) => {
+            if (index < pageIndex) return games;
+            const firstOfNext = pages[index + 1]?.[0];
+            const firstOfNextArr = firstOfNext != null ? [firstOfNext] : [];
+            if (index === pageIndex) {
+              return games.filter((other) => other.id !== game.id).concat(firstOfNextArr);
+            } else {
+              return games.slice(1).concat(firstOfNextArr);
+            }
+          });
+        } else {
+          newPages = pages;
+        }
+
+        const pageParams = newPages.map((_, index) => {
+          return newPages.slice(index).flatMap((games) => games.map(({ id }) => id));
+        });
+
+        // TODO: fix the typing of this particular method.
+        return {
+          pageParams,
+          pages: newPages.map(games => ({
+            status: 200,
+            headers: new Headers(),
+            body: { games },
+          })),
+        } as any;
+      });
+    }
+    socket.on('gameUpdateLite', setGame);
+    return () => {
+      socket.off('gameUpdateLite', setGame);
+    };
+  }, [queryKey, baseQuery, data]);
+
   return { games, hasNextPage: !isOnLastPage, nextPage, hasPrevPage, prevPage, isLoading };
 }
 
 export function useGame(): GameApi {
+  const tsrQueryClient = tsr.useQueryClient();
+
   const gameId = parseInt(useParams().gameId!);
   const { data } = tsr.games.get.useSuspenseQuery({ queryKey: getQueryKey(gameId), queryData: { params: { gameId } } });
 
   useJoinRoom();
-  const setGame = useSetGame();
 
   useEffect(() => {
+    function setGame(game: GameApi) {
+      tsrQueryClient.games.get.setQueryData(getQueryKey(game.id), (r) => r && ({ ...r, status: 200, body: { game } }));
+    }
     socket.on('gameUpdate', setGame);
     return () => {
       socket.off('gameUpdate', setGame);
@@ -75,15 +170,6 @@ export function useGame(): GameApi {
   }, []);
 
   return data.body.game;
-}
-
-function useSetGame(): (game: GameApi) => void {
-  const tsrQueryClient = tsr.useQueryClient();
-  return useCallback((game: GameApi) => {
-    // Update all the caches.
-    tsrQueryClient.games.get.setQueryData(getQueryKey(game.id), (r) => r && ({ ...r, status: 200, body: { game } }));
-    tsrQueryClient.games.list.setQueryData(getQueryKey('list'), (r) => r && ({ ...r, status: 200, body: { games: r.body.games.map(other => other.id === game.id ? game : other) } }));
-  }, []);
 }
 
 export function useCreateGame(): { createGame: (game: CreateGameApi) => void, isPending: boolean, validationError?: ValidationError } {
@@ -106,80 +192,62 @@ interface GameAction {
   perform(): void;
 }
 
-export function useJoinGame(): GameAction {
-  const game = useGame();
+export function useJoinGame(game: GameLiteApi): GameAction {
   const me = useMe();
-  const setGame = useSetGame();
   const { mutate, error, isPending } = tsr.games.join.useMutation();
   handleError(isPending, error);
 
-  const perform = useCallback(() => mutate({ params: { gameId: game.id } }, {
-    onSuccess: (data) => {
-      setGame(data.body.game);
-    },
-  }), [game.id]);
+  const perform = useCallback(() => mutate({ params: { gameId: game.id } }), [game.id]);
 
   const mapSettings = useMemo(() => {
     return MapRegistry.singleton.get(game.gameKey);
   }, [game.gameKey]);
 
-  const canPerform = me != null && !game.playerIds.includes(me.id) && game.playerIds.length < mapSettings.maxPlayers;
+  const canPerform = me != null &&
+    game.status == GameStatus.enum.LOBBY &&
+    !game.playerIds.includes(me.id) &&
+    game.playerIds.length < mapSettings.maxPlayers;
 
   return { canPerform, perform, isPending };
 }
 
-export function useLeaveGame(): GameAction {
-  const game = useGame();
+export function useLeaveGame(game: GameLiteApi): GameAction {
   const me = useMe();
-  const setGame = useSetGame();
   const { mutate, error, isPending } = tsr.games.leave.useMutation();
   handleError(isPending, error);
 
-  const perform = useCallback(() => mutate({ params: { gameId: game.id } }, {
-    onSuccess: (data) => {
-      setGame(data.body.game);
-    },
-  }), [game.id]);
+  const perform = useCallback(() => mutate({ params: { gameId: game.id } }), [game.id]);
 
-  const canPerform = me != null && game.playerIds.includes(me.id) && game.playerIds[0] !== me.id;
+  const canPerform = me != null && game.status == GameStatus.enum.LOBBY && game.playerIds.includes(me.id) && game.playerIds[0] !== me.id;
 
   return { canPerform, perform, isPending };
 }
 
 export function useSetGameData() {
   const game = useGame();
-  const me = useMe();
-  const setGame = useSetGame();
   const { mutate, error, isPending } = tsr.games.setGameData.useMutation();
   handleError(isPending, error);
 
-  const setGameData = useCallback((gameData: string) => mutate({ params: { gameId: game.id }, body: { gameData } }, {
-    onSuccess: (data) => {
-      setGame(data.body.game);
-    },
-  }), [game.id]);
+  const setGameData = useCallback((gameData: string) => mutate({ params: { gameId: game.id }, body: { gameData } }), [game.id]);
 
   return { setGameData, isPending };
 }
 
-export function useStartGame(): GameAction {
-  const game = useGame();
+export function useStartGame(game: GameLiteApi): GameAction {
   const me = useMe();
-  const setGame = useSetGame();
   const { mutate, error, isPending } = tsr.games.start.useMutation();
   handleError(isPending, error);
 
-  const perform = useCallback(() => mutate({ params: { gameId: game.id } }, {
-    onSuccess: (data) => {
-      setGame(data.body.game);
-    },
-  }), [game.id]);
+  const perform = useCallback(() => mutate({ params: { gameId: game.id } }), [game.id]);
 
   const mapSettings = useMemo(() => {
     return MapRegistry.singleton.get(game.gameKey);
   }, [game.gameKey]);
 
-  const canPerform = me != null && game.playerIds[0] === me.id && game.playerIds.length >= mapSettings.minPlayers;
+  const canPerform = me != null &&
+    game.status == GameStatus.enum.LOBBY &&
+    game.playerIds[0] === me.id &&
+    game.playerIds.length >= mapSettings.minPlayers;
 
   return { canPerform, perform, isPending };
 }
@@ -219,7 +287,6 @@ export function useGameVersionState<T>(initialValue: T): [T, (t: T) => void] {
 export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHandler<T> {
   const me = useMe();
   const game = useGame();
-  const setGame = useSetGame();
   const phaseDelegator = useInjected(PhaseDelegator);
   const notifications = useNotifications();
   const { mutate, isPending, error } = tsr.games.performAction.useMutation();
@@ -233,11 +300,7 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
       notifications.show('Error performing action', { autoHideDuration: 2000 });
       throw new Error('Cannot use event as actionData. You likely want to use useEmptyAction');
     }
-    mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
-      onSuccess: (data) => {
-        setGame(data.body.game);
-      },
-    });
+    mutate({ params: { gameId: game.id }, body: { actionName, actionData } });
   }, [game.id, actionName]);
 
   const actionCanBeEmitted = phaseDelegator.get().canEmit(action);;
@@ -256,14 +319,11 @@ export interface UndoAction {
 export function useUndoAction(): UndoAction {
   const game = useGame();
   const me = useMe();
-  const setGame = useSetGame();
   const { mutate } = tsr.games.undoAction.useMutation();
 
-  const undo = useCallback(() => mutate({ params: { gameId: game.id }, body: { backToVersion: game.version - 1 } }, {
-    onSuccess: (data) => {
-      setGame(data.body.game);
-    },
-  }), [game.id, game.version]);
+  const undo = useCallback(() =>
+    mutate({ params: { gameId: game.id }, body: { backToVersion: game.version - 1 } })
+    , [game.id, game.version]);
 
   const canUndo = game.undoPlayerId != null && game.undoPlayerId === me?.id;
 
@@ -278,14 +338,15 @@ export interface RetryAction {
 export function useRetryAction(): RetryAction {
   const game = useGame();
   const me = useMe();
-  const setGame = useSetGame();
   const { mutate } = tsr.games.retryLast.useMutation();
 
-  const retry = useCallback(() => mutate({ params: { gameId: game.id }, body: game.version == 1 ? { startOver: true } : { steps: 1 } }, {
-    onSuccess: (data) => {
-      setGame(data.body.game);
-    },
-  }), [game.id, game.version]);
+  const retry = useCallback(() =>
+    mutate({
+      params: { gameId: game.id },
+      body: game.version == 1 ?
+        { startOver: true } :
+        { steps: 1 },
+    }), [game.id, game.version]);
 
   const canRetry = me?.role == UserRole.enum.ADMIN;
 

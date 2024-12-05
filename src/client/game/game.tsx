@@ -1,26 +1,52 @@
-import { Button } from "@mui/material";
+import { Button, Card, CardActions, CardContent, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
+import { GameLiteApi, GameStatus, gameStatusToString } from "../../api/game";
 import { isNotNull } from "../../utils/functions";
-import { useGame, useJoinGame, useLeaveGame, useStartGame } from "../services/game";
-import { useMe } from "../services/me";
+import { useJoinGame, useLeaveGame, useStartGame } from "../services/game";
 import { useUsers } from "../services/user";
 
-export function Lobby() {
-  const user = useMe();
-  const game = useGame();
-  const players = useUsers(game.playerIds);
-  return <div>
-    <h2>{game.name}</h2>
-    <p>
-      Players: {players && players.filter(isNotNull).map((player) => player.username).join(', ')}
-      <LeaveButton />
-      <JoinButton />
-      <StartButton />
-    </p>
-  </div>;
+interface GameCardProps {
+  game: GameLiteApi;
 }
 
-export function LeaveButton() {
-  const { canPerform, perform, isPending } = useLeaveGame();
+export function GameCard({ game }: GameCardProps) {
+  const players = useUsers(game.playerIds);
+
+  return <Card sx={{ maxWidth: 345 }}>
+    <CardContent>
+      <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
+        Status: {gameStatusToString(game.status)}
+      </Typography>
+      <Typography gutterBottom variant="h5" component="div">
+        {game.name}
+      </Typography>
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        Players: {players && players.filter(isNotNull).map((player) => player.username).join(', ')}
+      </Typography>
+    </CardContent>
+    <CardActions>
+      <ViewButton game={game} />
+      <LeaveButton game={game} />
+      <JoinButton game={game} />
+      <StartButton game={game} />
+    </CardActions>
+  </Card>;
+}
+
+interface GameButtonProps {
+  game: GameLiteApi;
+}
+
+export function ViewButton({ game }: GameButtonProps) {
+  if (game.status !== GameStatus.enum.ACTIVE) return <></>;
+
+  return <Button component={Link} to={`/app/games/${game.id}`}>
+    View
+  </Button>;
+}
+
+export function LeaveButton({ game }: GameButtonProps) {
+  const { canPerform, perform, isPending } = useLeaveGame(game);
   if (!canPerform) {
     return <></>;
   }
@@ -28,8 +54,8 @@ export function LeaveButton() {
   return <Button disabled={isPending} onClick={perform}>Leave</Button>;
 }
 
-export function JoinButton() {
-  const { canPerform, perform, isPending } = useJoinGame();
+export function JoinButton({ game }: GameButtonProps) {
+  const { canPerform, perform, isPending } = useJoinGame(game);
   if (!canPerform) {
     return <></>;
   }
@@ -37,8 +63,8 @@ export function JoinButton() {
   return <Button disabled={isPending} onClick={perform}>Join</Button>;
 }
 
-export function StartButton() {
-  const { canPerform, perform, isPending } = useStartGame();
+export function StartButton({ game }: GameButtonProps) {
+  const { canPerform, perform, isPending } = useStartGame(game);
   if (!canPerform) {
     return <></>;
   }

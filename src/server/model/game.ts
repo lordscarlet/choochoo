@@ -58,16 +58,20 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   }
 
   toApi(): GameApi {
-    return {
-      ...this.toLiteApi(),
-      version: this.version,
-      gameData: this.gameData ?? undefined,
-      undoPlayerId: this.undoPlayerId ?? undefined,
-    };
+    return toApi(this);
   }
 }
 
-export function toLiteApi(game: GameApi | GameModel): GameLiteApi {
+export function toApi(game: InferAttributes<GameModel>): GameApi {
+  return {
+    ...toLiteApi(game),
+    version: game.version,
+    gameData: game.gameData ?? undefined,
+    undoPlayerId: game.undoPlayerId ?? undefined,
+  };
+}
+
+export function toLiteApi(game: GameApi | InferAttributes<GameModel>): GameLiteApi {
   return {
     id: game.id,
     gameKey: game.gameKey,
