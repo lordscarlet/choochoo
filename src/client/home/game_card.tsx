@@ -20,7 +20,7 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
 
   return <Card className={styles.gameCard}>
     <CardHeader title={game.name}
-      className={`${styles.header} ${gameStatusToStyle(game.status)} ${game.activePlayerId === me?.id ? styles.activePlayer : ''}`}
+      className={`${gameStatusToStyle(game.status)} ${game.activePlayerId === me?.id ? styles.activePlayer : ''}`}
       subheader={hideStatus ? '' : `Status: ${gameStatusToString(game.status)}`} />
     <CardContent>
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
