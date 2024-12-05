@@ -13,6 +13,8 @@ export const GameStatus = z.enum([
 
 export type GameStatus = z.infer<typeof GameStatus>;
 
+export const allGameStatuses = GameStatus.options;
+
 export function gameStatusToString(status: GameStatus): string {
   switch (status) {
     case GameStatus.enum.LOBBY: return 'Waiting for players...';

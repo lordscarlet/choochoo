@@ -1,3 +1,23 @@
 .gameCard {
   min-width: 400px;
 }
+
+.active {
+  background-color: lightyellow;
+}
+
+.lobby {
+  background-color: lightblue;
+}
+
+.abandoned {
+  background-color: lightgrey;
+}
+
+.active.activePlayer {
+  background-color: lightgreen;
+}
+
+.ended {
+  background-color: lightgrey;
+}

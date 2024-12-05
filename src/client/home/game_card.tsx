@@ -1,27 +1,31 @@
-import { Button, Card, CardActions, CardContent, Typography } from "@mui/material";
+import { Button, Card, CardActions, CardContent, CardHeader, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import { GameLiteApi, GameStatus, gameStatusToString } from "../../api/game";
+import { MapRegistry } from "../../maps";
 import { isNotNull } from "../../utils/functions";
+import { assertNever } from "../../utils/validate";
 import { useJoinGame, useLeaveGame, useStartGame } from "../services/game";
+import { useMe } from "../services/me";
 import { useUsers } from "../services/user";
 import * as styles from "./game_card.module.css";
 
 interface GameCardProps {
   game: GameLiteApi;
+  hideStatus?: boolean;
 }
 
-export function GameCard({ game }: GameCardProps) {
+export function GameCard({ game, hideStatus }: GameCardProps) {
+  const me = useMe();
   const players = useUsers(game.playerIds);
 
   return <Card className={styles.gameCard}>
+    <CardHeader title={game.name}
+      className={`${styles.header} ${gameStatusToStyle(game.status)} ${game.activePlayerId === me?.id ? styles.activePlayer : ''}`}
+      subheader={hideStatus ? '' : `Status: ${gameStatusToString(game.status)}`} />
     <CardContent>
-      <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
-        Status: {gameStatusToString(game.status)}
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        Game: {MapRegistry.singleton.get(game.gameKey)!.name}
       </Typography>
-      <Typography gutterBottom variant="h5" component="div">
-        {game.name}
-      </Typography>
-
       {game.activePlayerId && <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         Active Player: {players && players.find((player) => player?.id === game.activePlayerId)?.username}
       </Typography>}
@@ -36,6 +40,17 @@ export function GameCard({ game }: GameCardProps) {
       <StartButton game={game} />
     </CardActions>
   </Card>;
+}
+
+function gameStatusToStyle(status: GameStatus): string {
+  switch (status) {
+    case GameStatus.enum.LOBBY: return styles.lobby;
+    case GameStatus.enum.ABANDONED: return styles.abandoned;
+    case GameStatus.enum.ENDED: return styles.ended;
+    case GameStatus.enum.ACTIVE: return styles.active;
+    default:
+      assertNever(status);
+  }
 }
 
 interface GameButtonProps {
