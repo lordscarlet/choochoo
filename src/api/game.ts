@@ -2,6 +2,7 @@
 import { z } from 'zod';
 
 import { initContract } from '@ts-rest/core';
+import { assertNever } from '../utils/validate';
 
 export const GameStatus = z.enum([
   'LOBBY',
@@ -11,6 +12,19 @@ export const GameStatus = z.enum([
 ]);
 
 export type GameStatus = z.infer<typeof GameStatus>;
+
+export const allGameStatuses = GameStatus.options;
+
+export function gameStatusToString(status: GameStatus): string {
+  switch (status) {
+    case GameStatus.enum.LOBBY: return 'Waiting for players...';
+    case GameStatus.enum.ACTIVE: return 'Active';
+    case GameStatus.enum.ENDED: return 'Ended';
+    case GameStatus.enum.ABANDONED: return 'Abandoned';
+    default:
+      assertNever(status);
+  }
+}
 
 export const ActionApi = z.object({
   actionName: z.string(),
@@ -59,6 +73,7 @@ export type GamePageCursor = z.infer<typeof GamePageCursor>;
 
 export const ListGamesApi = z.object({
   userId: z.coerce.number().optional(),
+  excludeUserId: z.coerce.number().optional(),
   status: z.array(GameStatus).optional(),
   pageCursor: GamePageCursor.optional(),
   gameKey: z.string().optional(),

@@ -1,4 +1,4 @@
-import { Primitive } from "./types";
+import { Entry, Primitive } from "./types";
 import { assert } from "./validate";
 
 export function peek<T>(arr: T[]): T {
@@ -95,4 +95,8 @@ export function infiniteLoopCheck(numChecks: number, data?: string): (moreData?:
 
 export function isNotNull<T>(t: T): t is NonNullable<T> {
   return t != null;
+}
+
+export function entries<T extends {}>(obj: T): Array<Entry<T>> {
+  return Object.entries(obj) as Array<Entry<T>>;
 }

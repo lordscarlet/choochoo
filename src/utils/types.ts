@@ -10,3 +10,7 @@ export type UrlParameters = { [key: string]: Primitive };
 
 export type SomePartial<T, OptionalProps extends keyof T> =
   Partial<Pick<T, OptionalProps>> & Required<Omit<T, OptionalProps>>;
+
+export type Entry<T> = {
+  [K in keyof T]: [K, T[K]];
+}[keyof T];

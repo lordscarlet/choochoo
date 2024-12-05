@@ -19,6 +19,7 @@ import { waitForSequelize } from './sequelize';
 import { io } from './socket';
 import { enforceRoleMiddleware } from './util/enforce_role';
 import { environment, Stage } from './util/environment';
+import { Lifecycle } from './util/lifecycle';
 import { xsrfApp } from './xsrf';
 
 const app = express();
@@ -94,3 +95,5 @@ if (environment.cert != null) {
     console.log(`AoS listening on port ${environment.port}`);
   });
 }
+
+Lifecycle.singleton.start();

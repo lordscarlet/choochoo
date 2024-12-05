@@ -1,6 +1,7 @@
 .main {
   min-height: 100%;
   padding: 16px;
+  background-color: rgba(246, 247, 248, 0.5);
 }
 
 :global(.dark-mode) .main {

@@ -1,10 +1,11 @@
-import { Server, ServerOptions } from "socket.io";
+import { Server, ServerOptions, Socket } from "socket.io";
 import { GameApi } from "../api/game";
 import { ClientToServerEvents, ServerToClientEvents } from "../api/socket";
 import { deepEquals } from "../utils/deep_equals";
-import { GameModel, toLiteApi } from "./model/game";
+import { GameModel, toApi } from "./model/game";
 import { LogModel } from "./model/log";
 import { environment } from "./util/environment";
+import { Lifecycle } from "./util/lifecycle";
 
 const args: Partial<ServerOptions> = {};
 
@@ -30,28 +31,18 @@ export function emitGameUpdate(oldGame: GameApi | undefined, game: GameModel): v
   if (oldGame == null || !deepEquals(oldGame, gameApi)) {
     io.to(roomName(game.id)).emit('gameUpdate', game.toApi());
   }
-  if (oldGame == null) {
-    io.to(roomName()).emit('newGame', game.toApi());
-  } else if (!deepEquals(toLiteApi(oldGame), gameLiteApi)) {
-    io.to(roomName()).emit('gameUpdateLite', game.toApi());
-  }
+  io.to(roomName()).emit('gameUpdateLite', game.toApi());
 }
 
-export function emitToRoom(logs: LogModel[]): void {
-  if (logs.length === 0) return;
-  io.to(roomName(logs[0].gameId)).emit('newLogs', logs.map((l) => l.toApi()));
+export function emitLogCreate(log: LogModel): void {
+  io.to(roomName(log.gameId)).emit('newLog', log.toApi());
 }
 
-export function emitLogsDestroyToRoom(gameId: number, gteGameVersion: number): void {
-  io.to(roomName(gameId)).emit('destroyLogs', { gameId, gteGameVersion });
+export function emitLogDestroy(log: LogModel): void {
+  io.to(roomName(log.gameId)).emit('destroyLog', log.id);
 }
 
-export function emitLogsReplaceToRoom(game: GameModel, logs: LogModel[], gteGameVersion: number): void {
-  const newLogs = logs.map(l => l.toApi());
-  io.to(roomName(game.id)).emit('replaceLogs', { gameId: game.id, gteGameVersion, newLogs });
-}
-
-io.on('connection', (socket) => {
+function bindSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) {
   const rooms = new Map<string, number>();
 
   function joinRoom(gameId?: number) {
@@ -80,4 +71,30 @@ io.on('connection', (socket) => {
   socket.on('leaveHomeRoom', leaveRoom);
   socket.on('joinGameRoom', joinRoom);
   socket.on('leaveGameRoom', leaveRoom);
+}
+
+Lifecycle.singleton.onStart(() => {
+  io.on('connection', bindSocket);
+
+  const previous = new WeakMap<GameModel, GameApi | undefined>();
+
+  GameModel.hooks.addListener('beforeSave', (game: GameModel) => {
+    if (game.isNewRecord) {
+      previous.set(game, undefined);
+    } else {
+      previous.set(game, toApi({ ...game.dataValues, ...game.previous() }));
+    }
+  });
+
+  GameModel.hooks.addListener('afterSave', (game: GameModel) => {
+    emitGameUpdate(previous.get(game), game);
+  });
+
+  LogModel.hooks.addListener('afterDestroy', (log: LogModel) => {
+    emitLogDestroy(log);
+  });
+
+  LogModel.hooks.addListener('afterCreate', (log: LogModel) => {
+    emitLogCreate(log);
+  });
 });

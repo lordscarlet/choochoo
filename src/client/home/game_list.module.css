@@ -1,0 +1,11 @@
+.gameListCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.gameList {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+}

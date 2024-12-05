@@ -6,6 +6,7 @@ import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
 import { assert, isPositiveInteger } from '../../utils/validate';
 import { redisClient } from '../redis';
 import { environment, Stage } from '../util/environment';
+import { Lifecycle } from '../util/lifecycle';
 
 const saltRounds = 10;
 
@@ -161,4 +162,12 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     await user;
   }
 }
+
+
+Lifecycle.singleton.onStart(() => {
+  function updateUserCache(user: UserModel) {
+    userCache.set(user.toMyApi());
+  }
+  return UserModel.hooks.addListener('afterSave', updateUserCache);
+});
 
