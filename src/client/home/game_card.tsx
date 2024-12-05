@@ -4,6 +4,7 @@ import { GameLiteApi, GameStatus, gameStatusToString } from "../../api/game";
 import { isNotNull } from "../../utils/functions";
 import { useJoinGame, useLeaveGame, useStartGame } from "../services/game";
 import { useUsers } from "../services/user";
+import * as styles from "./game_card.module.css";
 
 interface GameCardProps {
   game: GameLiteApi;
@@ -12,7 +13,7 @@ interface GameCardProps {
 export function GameCard({ game }: GameCardProps) {
   const players = useUsers(game.playerIds);
 
-  return <Card sx={{ maxWidth: 345 }}>
+  return <Card className={styles.gameCard}>
     <CardContent>
       <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
         Status: {gameStatusToString(game.status)}
@@ -20,6 +21,10 @@ export function GameCard({ game }: GameCardProps) {
       <Typography gutterBottom variant="h5" component="div">
         {game.name}
       </Typography>
+
+      {game.activePlayerId && <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        Active Player: {players && players.find((player) => player?.id === game.activePlayerId)?.username}
+      </Typography>}
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         Players: {players && players.filter(isNotNull).map((player) => player.username).join(', ')}
       </Typography>
