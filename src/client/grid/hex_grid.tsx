@@ -46,7 +46,7 @@ interface HexGridProps {
   onClick?: (space: Space, good?: Good) => void;
   highlightedTrack?: Track[];
   selectedGood?: { good: Good, coordinates: Coordinates };
-  clickTargets: Set<ClickTarget>;
+  clickTargets?: Set<ClickTarget>;
   allowZoom?: boolean;
 }
 
@@ -121,6 +121,8 @@ export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, gr
     setZoom(1)
   }, [zoom, setZoom]);
 
+  const clickTargetsNormalized = useMemo(() => clickTargets ?? new Set<ClickTarget>(), [clickTargets]);
+
   const mapSpaces = [];
 
   // There should be the same number of spaces, so useMemo should be safe here.
@@ -130,8 +132,8 @@ export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, gr
       , [highlightedTrack]);
     const highlightedTrackSerialized = (highlightedTrackInSpace ?? []).map((track) => `${track.coordinates.serialize()}|${track.getExits().join(':')}`).join('?');
     mapSpaces.push(useMemo(() =>
-      hexFactory(space, selectedGood, highlightedTrackInSpace, offset, size, clickTargets),
-      [space, selectedGood, highlightedTrackSerialized, offset.x, offset.y, size, clickTargets]));
+      hexFactory(space, selectedGood, highlightedTrackInSpace, offset, size, clickTargetsNormalized),
+      [space, selectedGood, highlightedTrackSerialized, offset.x, offset.y, size, clickTargetsNormalized]));
   }
 
   const mapBox = useMemo(() => ({

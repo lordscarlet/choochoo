@@ -15,12 +15,20 @@ export class IncomeReductionPhase extends PhaseModule {
     this.players.update((players) => {
       for (const player of players) {
         if (player.outOfGame) continue;
-        const lostIncome = Math.min(10, Math.floor((player.income / 10)) * 2);
+        const lostIncome = this.calculateIncomeReduction(player.income);
         player.income -= lostIncome;
-        this.log.player(player.color, `loses ${lostIncome} income`);
+        if (lostIncome > 0) {
+          this.log.player(player.color, `loses ${lostIncome} income`);
+        }
       }
     });
     super.onStart();
+  }
+
+  protected calculateIncomeReduction(income: number): number {
+    if (income <= 10) return 0;
+    if (income >= 51) return 10;
+    return Math.floor((income - 1) / 10) * 2;
   }
 
   getPlayerOrder(): PlayerColor[] {
