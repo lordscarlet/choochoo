@@ -80,7 +80,8 @@ function numberFormat(num: number): string {
   return `${num}`;
 }
 
-function dollarFormat(num: number): string {
+function dollarFormat(num: number | string): string {
+  if (typeof num === 'string') return num;
   if (num < 0) {
     return `-$${-num}`;
   }
