@@ -2,18 +2,19 @@ import { Button } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { PHASE } from "../../engine/game/phase";
 import { ROUND, RoundEngine } from "../../engine/game/round";
+import { ProductionAction } from "../../engine/goods_growth/production";
 import { MOVE_STATE } from "../../engine/move/state";
 import { getPhaseString, Phase } from "../../engine/state/phase";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
 import { InjectionContextProvider, useInjected, useInjectedState } from "../utils/injection_context";
+import { AvailableCities } from "./available_cities";
 import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
 import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
 import { PlayerStats } from "./player_stats";
 import { SelectAction } from "./select_action";
-import { ProductionAction } from "../../engine/goods_growth/production";
 
 
 export function ActiveGame() {
@@ -24,11 +25,11 @@ export function ActiveGame() {
 }
 
 function InternalActiveGame() {
-  const {canEmit} = useAction(ProductionAction);
+  const { canEmit } = useAction(ProductionAction);
   const game = useGame();
   const [searchParams] = useSearchParams();
   const undoOnly = searchParams.get('undoOnly') != null;
-  // TODO: show available urbanization cities
+
   return <div>
     <h2>{game.name}</h2>
     <GameLog gameId={game.id} />
@@ -42,6 +43,7 @@ function InternalActiveGame() {
     {!undoOnly && <PlayerStats />}
     {!undoOnly && <GameMap />}
     {!undoOnly && !canEmit && <GoodsTable />}
+    {!undoOnly && <AvailableCities />}
   </div>;
 }
 

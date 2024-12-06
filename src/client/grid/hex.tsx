@@ -58,7 +58,6 @@ function color(space: City | Location | undefined): string {
 interface RawHexProps {
   space: Location | City;
   tile?: BaseTileData;
-  asCity?: Good;
   size: number;
   className?: string;
   hideGoods?: boolean;
@@ -68,7 +67,7 @@ interface RawHexProps {
   clickTargets: Set<ClickTarget>;
 }
 
-export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size, hideGoods, offset, clickTargets }: RawHexProps) {
+export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoods, offset, clickTargets }: RawHexProps) {
   const coordinates = space.coordinates;
   const center = useMemo(() => offsetPoint(coordinatesToCenter(coordinates, size), offset), [coordinates, offset, size]);
 
@@ -76,7 +75,7 @@ export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size,
     polygon(getCorners(center, size))
     , [center, size]);
 
-  const hexColor = asCity ? cityColor(asCity) : color(space);
+  const hexColor = color(space);
 
   const trackInfo = useMemo(() => {
     const tileData = tile != null ? tile : space instanceof Location ? space.getTileData() : undefined;
@@ -107,7 +106,7 @@ export function Hex({ space, asCity, selectedGood, highlightedTrack, tile, size,
     {space instanceof Location && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
     {space instanceof City && <OnRoll city={space} center={center} size={size} />}
-    {space instanceof City && <HexName name={space.cityName()} center={center} size={size} />}
+    {space instanceof City && space.cityName() != '' && <HexName name={space.cityName()} center={center} size={size} />}
     {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
   </>;
 }
