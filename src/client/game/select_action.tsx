@@ -1,6 +1,5 @@
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { alpha, Button, Menu, MenuItem, MenuProps, styled } from "@mui/material";
-import { useState } from "react";
+import { Button } from "@mui/material";
+import { useCallback } from "react";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
@@ -11,13 +10,14 @@ import { MOVE_STATE } from "../../engine/move/state";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
 import { ShareHelper } from "../../engine/shares/share_helper";
 import { TakeSharesAction } from "../../engine/shares/take_shares";
-import { allActions, getSelectedActionString } from "../../engine/state/action";
+import { Action, allActions, getSelectedActionString } from "../../engine/state/action";
 import { Phase } from "../../engine/state/phase";
 import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
 import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { iterate } from "../../utils/functions";
+import { DropdownMenu } from "../components/dropdown_menu";
 import { useAction, useEmptyAction, useGame } from "../services/game";
 import { useCurrentPlayer, useInject, useInjected, useInjectedState, usePhaseState } from "../utils/injection_context";
 import { LoginButton } from "./login_button";
@@ -56,8 +56,10 @@ export function MoveGoods() {
 }
 
 export function SpecialActionSelector() {
-  const { emit, canEmit, canEmitUsername } = useAction(ActionSelectionSelectAction);
+  const { emit, canEmit, canEmitUsername, isPending } = useAction(ActionSelectionSelectAction);
   const players = useInjectedState(PLAYERS);
+
+  const chooseAction = useCallback((action: Action) => emit({ action }), [emit]);
 
   if (canEmitUsername == null) {
     return <></>;
@@ -69,54 +71,21 @@ export function SpecialActionSelector() {
 
   const actions = allActions.filter((action) => !players.some(({ selectedAction }) => selectedAction === action));
   return <div>
-    You must select an action.
-    {actions.map((action) => <Button key={action} onClick={() => emit({ action })}>{getSelectedActionString(action)}</Button>)}
+    <p>You must select an action.</p>
+    <DropdownMenu title='Select action' options={actions} toString={getSelectedActionString} disabled={isPending} onClick={chooseAction} />
   </div>;
 }
 
+function numberFormat(num: number): string {
+  return `${num}`;
+}
 
-const StyledMenu = styled((props: MenuProps) => (
-  <Menu
-    elevation={0}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'right',
-    }}
-    transformOrigin={{
-      vertical: 'top',
-      horizontal: 'right',
-    }}
-    {...props}
-  />
-))(({ theme }) => ({
-  '& .MuiPaper-root': {
-    borderRadius: 6,
-    marginTop: theme.spacing(1),
-    minWidth: 180,
-    color: 'rgb(55, 65, 81)',
-    boxShadow:
-      'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
-    '& .MuiMenu-list': {
-      padding: '4px 0',
-    },
-    '& .MuiMenuItem-root': {
-      '& .MuiSvgIcon-root': {
-        fontSize: 18,
-        color: theme.palette.text.secondary,
-        marginRight: theme.spacing(1.5),
-      },
-      '&:active': {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          theme.palette.action.selectedOpacity,
-        ),
-      },
-    },
-    ...theme.applyStyles('dark', {
-      color: theme.palette.grey[300],
-    }),
-  },
-}));
+function dollarFormat(num: number): string {
+  if (num < 0) {
+    return `-$${-num}`;
+  }
+  return `$${num}`;
+}
 
 export function Bid() {
   const { emit: emitBid, canEmit, canEmitUsername, isPending: isBidPending } = useAction(BidAction);
@@ -126,16 +95,15 @@ export function Bid() {
 
   const isPending = isBidPending || isTurnOrderPending || isPassPending;
 
-  const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
-
-  const open = anchorEl != null;
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(undefined);
-  };
+  const placeBid = useCallback((bid: number | 'pass' | 'turnOrderPass') => {
+    if (bid === 'pass') {
+      emitPass();
+    } else if (bid === 'turnOrderPass') {
+      emitTurnOrderPass();
+    } else {
+      emitBid({ bid });
+    }
+  }, [emitBid, emitPass, emitTurnOrderPass]);
 
   if (canEmitUsername == null) {
     return <></>;
@@ -148,35 +116,15 @@ export function Bid() {
 
   const minBid = helper.getMinBid();
   const maxBid = helper.getMaxBid();
-  const bids = iterate(maxBid - minBid + 1, (i) => i + minBid);
+  const bids = [
+    ...(helper.canUseTurnOrderPass() ? ['turnOrderPass' as const] : []),
+    'pass' as const,
+    ...iterate(maxBid - minBid + 1, (i) => i + minBid),
+  ];
 
   return <div>
     <p>You must bid.</p>
-    {helper.canUseTurnOrderPass() && <Button onClick={emitTurnOrderPass} disabled={isPending}>Use Turn Order Pass</Button>}
-    <Button onClick={emitPass} disabled={isPending} variant="contained">Pass</Button>
-    <Button
-      id="demo-customized-button"
-      aria-controls={open ? 'demo-customized-menu' : undefined}
-      aria-haspopup="true"
-      aria-expanded={open ? 'true' : undefined}
-      variant="contained"
-      disableElevation
-      onClick={handleClick}
-      endIcon={<KeyboardArrowDownIcon />}
-    >
-      Select Bid
-    </Button>
-    <StyledMenu
-      id="demo-customized-menu"
-      MenuListProps={{
-        'aria-labelledby': 'demo-customized-button',
-      }}
-      anchorEl={anchorEl}
-      open={open}
-      onClose={handleClose}
-    >
-      {bids.map(bid => <MenuItem key={bid} onClick={() => { emitBid({ bid }); handleClose(); }} value={bid} disabled={isPending}>${bid}</MenuItem>)}
-    </StyledMenu>
+    <DropdownMenu title='Place bid' options={bids} toString={dollarFormat} disabled={isPending} onClick={placeBid} />
   </div >;
 }
 
@@ -199,9 +147,11 @@ export function GenericMessage({ children }: { children: string | string[] }) {
 }
 
 export function TakeShares() {
-  const { canEmit, canEmitUsername, emit } = useAction(TakeSharesAction);
+  const { canEmit, canEmitUsername, emit, isPending } = useAction(TakeSharesAction);
   const numShares = useInjected(ShareHelper).getSharesTheyCanTake();
-  const options = iterate(numShares, (numShares) => <Button key={numShares} onClick={() => emit({ numShares })}>{numShares}</Button>);
+  const options = iterate(numShares, (i) => i);
+
+  const chooseValue = useCallback((numShares: number) => emit({ numShares }), [emit]);
 
   if (canEmitUsername == null) {
     return <></>;
@@ -212,8 +162,8 @@ export function TakeShares() {
   }
 
   return <div>
-    Choose how many shares you would like to take out.
-    {options}
+    <p>Choose how many shares you would like to take out.</p>
+    <DropdownMenu title='Choose shares' options={options} toString={numberFormat} disabled={isPending} onClick={chooseValue} />
   </div>;
 }
 

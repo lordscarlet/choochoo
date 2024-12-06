@@ -136,7 +136,7 @@ export function Layout() {
             onClose={closeMenu}
           >
             <MenuList>
-              <MenuItem onClick={() => setMode(darkModeEnabled ? 'light' : 'dark')}>
+              <MenuItem onClick={() => { setMode(darkModeEnabled ? 'light' : 'dark'); closeMenu(); }}>
                 <ListItemIcon>
                   {darkModeEnabled ? <DarkMode fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
                 </ListItemIcon>
