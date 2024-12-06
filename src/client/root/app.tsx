@@ -9,7 +9,11 @@ import { Router } from "./routes";
 
 
 const theme = createTheme({
+  cssVariables: {
+    colorSchemeSelector: 'class'
+  },
   colorSchemes: {
+    light: true,
     dark: true,
   },
 });

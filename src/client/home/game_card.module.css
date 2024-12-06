@@ -6,18 +6,32 @@
   background-color: lightyellow;
 }
 
+:global(.dark-mode) .active {
+  background-color: #8B4000;
+}
+
 .lobby {
   background-color: lightblue;
 }
 
-.abandoned {
+:global(.dark-mode) .lobby {
+  background-color: darkblue;
+}
+
+.abandoned,
+.ended {
   background-color: lightgrey;
+}
+
+:global(.dark-mode) .abandoned,
+:global(.dark-mode) .ended {
+  background-color: darkgrey;
 }
 
 .active.activePlayer {
   background-color: lightgreen;
 }
 
-.ended {
-  background-color: lightgrey;
+:global(.dark-mode) .active.activePlayer {
+  background-color: darkgreen;
 }
