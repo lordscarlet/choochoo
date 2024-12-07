@@ -8,6 +8,7 @@ import { LocationType } from "../../engine/state/location_type";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { ClickTarget } from "./click_target";
+import { goodStyle } from "./good";
 import { GoodBlock } from "./good_block";
 import * as styles from './hex.module.css';
 import * as gridStyles from './hex_grid.module.css';
@@ -16,26 +17,9 @@ import { OnRoll } from "./on_roll";
 import { coordinatesToCenter, getCorners, offsetPoint, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
-export function cityColor(good: Good): string {
-  switch (good) {
-    case Good.BLACK:
-      return styles.black;
-    case Good.BLUE:
-      return styles.blue;
-    case Good.PURPLE:
-      return styles.purple;
-    case Good.RED:
-      return styles.red;
-    case Good.YELLOW:
-      return styles.yellow;
-    default:
-      assertNever(good);
-  }
-}
-
 function color(space: City | Location | undefined): string {
   if (space instanceof City) {
-    return cityColor(space.goodColor());
+    return `${styles.city} ${goodStyle(space.goodColor())}`;
   } else if (space instanceof Location) {
     const type = space.getLocationType();
     switch (type) {

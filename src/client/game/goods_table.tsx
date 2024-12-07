@@ -9,7 +9,8 @@ import { getGoodColor, Good } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { OnRoll } from "../../engine/state/roll";
 import { iterate } from "../../utils/functions";
-import { assert, assertNever } from "../../utils/validate";
+import { assert } from "../../utils/validate";
+import { goodStyle } from "../grid/good";
 import { useAction, useEmptyAction, useGameVersionState } from "../services/game";
 import { useGrid, useInjectedState, usePhaseState } from "../utils/injection_context";
 import * as styles from './goods_table.module.css';
@@ -109,29 +110,10 @@ function GoodBlock({ onClick, good, canSelect, emptySpace }: GoodBlockProps) {
   const classNames = [
     styles.goodPlace,
     !emptySpace ? styles.good : '',
-    goodStyle(good),
+    good != null ? goodStyle(good) : styles.empty,
     canSelect && !emptySpace && good == null ? styles.clickableGood : '',
   ]
   return <div onClick={canSelect ? onClick : undefined} className={classNames.join(' ')} />;
-}
-
-export function goodStyle(good?: Good): string {
-  switch (good) {
-    case Good.BLACK:
-      return styles.black;
-    case Good.BLUE:
-      return styles.blue;
-    case Good.PURPLE:
-      return styles.purple;
-    case Good.RED:
-      return styles.red;
-    case Good.YELLOW:
-      return styles.yellow;
-    case undefined:
-      return '';
-    default:
-      assertNever(good);
-  }
 }
 
 function numberToLetter(i: number) {
