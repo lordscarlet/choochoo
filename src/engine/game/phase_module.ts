@@ -17,7 +17,7 @@ export interface ActionBundle<T extends {}> {
 }
 
 export class PhaseModule {
-  private readonly turnOrder = injectState(TURN_ORDER);
+  protected readonly turnOrder = injectState(TURN_ORDER);
   private readonly actionRegistry = new Map<string, ActionProcessor<{}>>();
 
   installAction<T extends {}>(action: ActionConstructor<T>) {
