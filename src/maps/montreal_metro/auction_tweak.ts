@@ -1,19 +1,12 @@
-import z from "zod";
 import { injectState } from "../../engine/framework/execution_context";
-import { Key } from "../../engine/framework/key";
+import { SetKey } from "../../engine/framework/key";
 import { CURRENT_PLAYER } from "../../engine/game/state";
 import { SelectActionPhase } from "../../engine/select_action/phase";
 import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
 import { BidAction, BidData } from "../../engine/turn_order/bid";
 import { TurnOrderPhase } from "../../engine/turn_order/phase";
 
-const HasBid = z.array(PlayerColorZod);
-
-const HAS_BID = new Key<Set<PlayerColor>>('HAS_BID', {
-  parse: (value) => new Set(HasBid.parse(value)),
-  serialize: (value) => [...value],
-  merge: (_, newValue) => newValue,
-});
+const HAS_BID = new SetKey<PlayerColor>('HAS_BID', { parse: PlayerColorZod.parse });
 
 export class MontrealTurnOrderPhase extends TurnOrderPhase {
   private readonly hasBid = injectState(HAS_BID);

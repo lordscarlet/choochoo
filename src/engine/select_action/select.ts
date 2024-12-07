@@ -6,7 +6,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
-import { PLAYERS } from "../game/state";
+import { injectCurrentPlayer, PLAYERS } from "../game/state";
 import { Action, getSelectedActionString } from "../state/action";
 
 export const SelectData = z.object({
@@ -17,9 +17,10 @@ export type SelectData = z.infer<typeof SelectData>;
 
 export class SelectAction implements ActionProcessor<SelectData> {
   static readonly action = 'select';
-  private readonly helper = inject(PlayerHelper);
-  private readonly players = injectState(PLAYERS);
-  private readonly log = inject(Log);
+  protected readonly currentPlayer = injectCurrentPlayer();
+  protected readonly helper = inject(PlayerHelper);
+  protected readonly players = injectState(PLAYERS);
+  protected readonly log = inject(Log);
 
   readonly assertInput = SelectData.parse;
   validate({ action }: SelectData): void {
@@ -28,13 +29,21 @@ export class SelectAction implements ActionProcessor<SelectData> {
     }
   }
 
+  protected applyLocomotive(): void {
+    if (this.currentPlayer().locomotive >= 6) return;
+
+    this.helper.updateCurrentPlayer((player) => {
+      player.locomotive++;
+    });
+  }
+
   process({ action }: SelectData): boolean {
     this.helper.updateCurrentPlayer((player) => {
       player.selectedAction = action;
-      if (action === Action.LOCOMOTIVE && player.locomotive < 6) {
-        player.locomotive++;
-      }
     });
+    if (action === Action.LOCOMOTIVE) {
+      this.applyLocomotive();
+    }
     this.log.currentPlayer(`selected ${getSelectedActionString(action)}`);
     return true;
   }

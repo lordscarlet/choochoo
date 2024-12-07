@@ -1,5 +1,6 @@
 
 
+import z from "zod";
 import { deepEquals } from "../../utils/deep_equals";
 import { Immutable } from "../../utils/immutable";
 import { SomePartial } from "../../utils/types";
@@ -45,5 +46,40 @@ export class Key<T> {
     const result = this.registry.get(name);
     assert(result != null);
     return result as Key<T>;
+  }
+}
+
+const UnknownArray = z.array(z.unknown());
+
+export class SetKey<T> extends Key<Set<T>> {
+  constructor(name: string, params: SomePartial<Omit<KeyParams<T>, 'merge'>, 'serialize'>) {
+    super(name, {
+      parse: (value) => new Set(UnknownArray.parse(value).map(params.parse)),
+      serialize: (value) => [...value].map(params.serialize ?? defaultSerialize),
+      merge: (_, value) => value,
+    });
+  }
+}
+
+const EntryArray = z.array(z.tuple([z.unknown(), z.unknown()]));
+
+export class MapKey<R, S> extends Key<Map<R, S>> {
+  constructor(name: string, keyParse: ParseFunction<R>, valueParse: ParseFunction<S>) {
+    super(name, {
+      parse: (value) => new Map(EntryArray.parse(value).map(([key, value]) => [keyParse(key), valueParse(value)])),
+      serialize: (value: Map<R, S>) => [...value.entries()],
+      merge: (oldValue, newValue) => {
+        let mergedValue = oldValue;
+        for (const [key, value] of newValue) {
+          if (deepEquals(mergedValue.get(key), value)) continue;
+          mergedValue = mergedValue.set(key, value);
+        }
+        for (const key of mergedValue.keys()) {
+          if (newValue.has(key)) continue;
+          mergedValue = mergedValue.delete(key);
+        }
+        return mergedValue;
+      }
+    });
   }
 }

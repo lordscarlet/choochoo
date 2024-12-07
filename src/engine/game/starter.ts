@@ -1,5 +1,4 @@
 
-import { Map as ImmutableMap } from 'immutable';
 import { duplicate } from '../../utils/functions';
 import { assert } from '../../utils/validate';
 import { inject, injectState } from "../framework/execution_context";
@@ -43,7 +42,7 @@ export class GameStarter {
 
   drawCubesForCities(startingMap: InitialMapGrid) {
     const bag = [...this.bag()];
-    this.grid.initState(ImmutableMap());
+    this.grid.initState(new Map());
     for (const [coordinates, location] of startingMap.entries()) {
       this.gridHelper.set(coordinates, this.drawCubesFor(bag, location));
     }
