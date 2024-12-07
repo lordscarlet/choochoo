@@ -24,7 +24,7 @@ export class BuildCostCalculator {
     } else if (location.hasTown()) {
       return 3;
     } else if (isComplexTile(newTileType) && isSimpleTile(previousTileType) && crosses(newTileType)) {
-      return 4;
+      return 3;
     } else {
       return 2;
     }
@@ -37,7 +37,7 @@ export class BuildCostCalculator {
       case LocationType.MOUNTAIN: return 2;
       case LocationType.RIVER: return 1;
       case LocationType.PLAIN: return 0;
-      case LocationType.SWAMP: return 4;
+      case LocationType.SWAMP: return 2;
       default:
         assertNever(type);
     }
@@ -59,6 +59,6 @@ export class BuildCostCalculator {
   }
 
   getNumberOfExits(tileType: TownTileType): number {
-    return toBaseTile(tileType)[0].exits.length;
+    return toBaseTile(tileType).length;
   }
 }
