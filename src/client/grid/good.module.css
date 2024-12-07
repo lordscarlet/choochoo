@@ -1,0 +1,19 @@
+.black {
+  --good-color: #303030;
+}
+
+.blue {
+  --good-color: blue;
+}
+
+.purple {
+  --good-color: purple;
+}
+
+.red {
+  --good-color: red;
+}
+
+.yellow {
+  --good-color: yellow;
+}

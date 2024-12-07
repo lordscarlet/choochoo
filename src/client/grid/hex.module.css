@@ -1,21 +1,5 @@
-.black {
-  fill: rgb(0, 0, 0, 0.65);
-}
-
-.blue {
-  fill: blue;
-}
-
-.purple {
-  fill: purple;
-}
-
-.red {
-  fill: red;
-}
-
-.yellow {
-  fill: yellow;
+.city {
+  fill: var(--good-color);
 }
 
 .location.plain {

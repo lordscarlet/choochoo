@@ -27,12 +27,15 @@
 
 .goodPlace {
   aspect-ratio: 1 / 1;
-  background-color: var(--color);
+  background-color: var(--good-color);
+}
+
+.empty {
+  --good-color: lightgrey;
 }
 
 .good {
   border: solid 1px grey;
-  --color: grey:
 }
 
 .clickableGood {
@@ -41,24 +44,4 @@
 
 .gapRight {
   margin-right: 8px;
-}
-
-.red {
-  --color: red;
-}
-
-.blue {
-  --color: blue;
-}
-
-.purple {
-  --color: purple;
-}
-
-.yellow {
-  --color: yellow;
-}
-
-.black {
-  --color: black;
 }
