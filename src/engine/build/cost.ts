@@ -24,7 +24,7 @@ export class BuildCostCalculator {
     } else if (location.hasTown()) {
       return 3;
     } else if (isComplexTile(newTileType) && isSimpleTile(previousTileType) && crosses(newTileType)) {
-      return 4;
+      return 3;
     } else {
       return 2;
     }
@@ -34,9 +34,9 @@ export class BuildCostCalculator {
     if (location.hasTown()) return 0;
     const type = location.getLocationType();
     switch (type) {
-      case LocationType.MOUNTAIN: return 2;
-      case LocationType.RIVER: return 1;
-      case LocationType.PLAIN: return 0;
+      case LocationType.MOUNTAIN: return 4;
+      case LocationType.RIVER: return 3;
+      case LocationType.PLAIN: return 2;
       case LocationType.SWAMP: return 4;
       case LocationType.LAKE: return 6;
       case LocationType.STREET: return 4;
@@ -52,15 +52,15 @@ export class BuildCostCalculator {
 
   getTileCost(tileType: SimpleTileType | ComplexTileType): number {
     if (isSimpleTile(tileType)) {
-      return 2;
+      return 0;
     }
     if (isComplexTile(tileType)) {
-      return crosses(tileType) ? 4 : 3;
+      return crosses(tileType) ? 2 : 1;
     }
     assertNever(tileType);
   }
 
   getNumberOfExits(tileType: TownTileType): number {
-    return toBaseTile(tileType)[0].exits.length;
+    return toBaseTile(tileType).length;
   }
 }
