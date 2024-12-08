@@ -8,6 +8,7 @@ import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
 import { injectCurrentPlayer, PLAYERS } from "../game/state";
 import { Action, getSelectedActionString } from "../state/action";
+import { AllowedActions } from "./allowed_actions";
 
 export const SelectData = z.object({
   action: z.nativeEnum(Action),
@@ -21,12 +22,11 @@ export class SelectAction implements ActionProcessor<SelectData> {
   protected readonly helper = inject(PlayerHelper);
   protected readonly players = injectState(PLAYERS);
   protected readonly log = inject(Log);
+  private readonly actions = inject(AllowedActions);
 
   readonly assertInput = SelectData.parse;
   validate({ action }: SelectData): void {
-    for (const player of this.players()) {
-      assert(player.selectedAction !== action, 'action already selected');
-    }
+    assert(this.actions.getAvailableActions().has(action), { invalidInput: 'action already selected' });
   }
 
   protected applyLocomotive(): void {

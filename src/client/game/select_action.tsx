@@ -7,10 +7,11 @@ import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
 import { LocoAction } from "../../engine/move/loco";
 import { MovePassAction } from "../../engine/move/pass";
 import { MOVE_STATE } from "../../engine/move/state";
+import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
 import { ShareHelper } from "../../engine/shares/share_helper";
 import { TakeSharesAction } from "../../engine/shares/take_shares";
-import { Action, allActions, getSelectedActionString } from "../../engine/state/action";
+import { Action, getSelectedActionString } from "../../engine/state/action";
 import { Phase } from "../../engine/state/phase";
 import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
@@ -58,6 +59,7 @@ export function MoveGoods() {
 export function SpecialActionSelector() {
   const { emit, canEmit, canEmitUsername, isPending } = useAction(ActionSelectionSelectAction);
   const players = useInjectedState(PLAYERS);
+  const actions = useInjected(AllowedActions);
 
   const chooseAction = useCallback((action: Action) => emit({ action }), [emit]);
 
@@ -69,10 +71,9 @@ export function SpecialActionSelector() {
     return <GenericMessage>{canEmitUsername} must select an action.</GenericMessage>;
   }
 
-  const actions = allActions.filter((action) => !players.some(({ selectedAction }) => selectedAction === action));
   return <div>
     <p>You must select an action.</p>
-    <DropdownMenu title='Select action' options={actions} toString={getSelectedActionString} disabled={isPending} onClick={chooseAction} />
+    <DropdownMenu title='Select action' options={actions.getAvailableActions()} toString={getSelectedActionString} disabled={isPending} onClick={chooseAction} />
   </div>;
 }
 

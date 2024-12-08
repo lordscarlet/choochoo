@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Immutable } from "../../utils/immutable";
 import { assertNever } from "../../utils/validate";
-import { Action } from "./action";
+import { ActionZod } from "./action";
 
 
 export enum PlayerColor {
@@ -27,7 +27,7 @@ export const MutablePlayerData = z.object({
   shares: z.number(),
   money: z.number(),
   locomotive: z.number(),
-  selectedAction: z.nativeEnum(Action).optional(),
+  selectedAction: ActionZod.optional(),
   outOfGame: z.boolean().optional(),
 });
 
