@@ -1,36 +1,39 @@
 import { remove, replaceAll } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
-import { GameEngine } from "../game/game";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
-import { PlayerHelper } from "../game/player";
 import { PLAYERS, TURN_ORDER } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
 import { isLocation, Location } from "../map/location";
 import { LocationType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
+import { ProfitHelper } from "./helper";
 
 export class ExpensesPhase extends PhaseModule {
   static readonly phase = Phase.EXPENSES;
 
+  private readonly profitHelper = inject(ProfitHelper);
   private readonly grid = inject(GridHelper);
-  private readonly game = inject(GameEngine);
   private readonly log = inject(Log);
   private readonly players = injectState(PLAYERS);
   private readonly order = injectState(TURN_ORDER);
-  private readonly playerHelper = inject(PlayerHelper);
 
   onStart(): void {
     const outOfGamePlayers = new Set<PlayerColor>();
     this.players.update((players) => {
       for (const player of players) {
         if (player.outOfGame) continue;
-        const expenses = player.shares + player.locomotive;
+        const expenses = this.profitHelper.getExpenses(player);
         if (expenses <= player.money) {
           player.money -= expenses;
-          this.log.player(player.color, `earns $${player.income - player.shares - player.locomotive}`);
+          const profit = this.profitHelper.getProfit(player);
+          if (profit > 0) {
+            this.log.player(player.color, `earns $${profit}`);
+          } else {
+            this.log.player(player.color, `loses ${-profit}`);
+          }
         } else {
           const lostIncome = expenses - player.money;
           player.money = 0;

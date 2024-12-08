@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { UserApi } from "../../api/user";
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
+import { ProfitHelper } from '../../engine/income_and_expenses/helper';
 import { getSelectedActionString } from "../../engine/state/action";
 import { PlayerColor, PlayerData } from "../../engine/state/player";
 import { getPlayerColorCss } from '../components/player_color';
@@ -17,6 +18,7 @@ export function PlayerStats() {
   const playerData = useInjectedState(PLAYERS);
   const playerOrder = useInjectedState(TURN_ORDER);
   const currentPlayer = useInjectedState(CURRENT_PLAYER);
+  const profitHelper = useInjected(ProfitHelper);
   const helper = useInjected(PlayerHelper);
   const playerUsers = useUsers(playerData.map((player) => player.playerId));
   const outOfGamePlayers = playerData.filter((p) => p.outOfGame).map((p) => p.color);
@@ -61,14 +63,14 @@ export function PlayerStats() {
             </td>
             <td className={styles.collapsed}>
               {getSelectedActionString(player.selectedAction)}<br />
-              ${player.money} ({toNet(player.income - player.shares - player.locomotive)})<br />
+              ${player.money} ({toNet(profitHelper.getProfit(player))})<br />
               ${player.income}<br />
               {player.shares}<br />
               {player.locomotive}<br />
               {helper.getScore(player)}<br />
             </td>
             <td className={styles.expanded}>{getSelectedActionString(player.selectedAction)}</td>
-            <td className={styles.expanded}>${player.money} ({toNet(player.income - player.shares - player.locomotive)})</td>
+            <td className={styles.expanded}>${player.money} ({toNet(profitHelper.getProfit(player))})</td>
             <td className={styles.expanded}>${player.income}</td>
             <td className={styles.expanded}>{player.shares}</td>
             <td className={styles.expanded}>{player.locomotive}</td>
