@@ -50,7 +50,7 @@ const StyledMenu = styled((props: MenuProps) => (
 
 interface DropdownMenuProps<T> {
   title: string;
-  options: T[];
+  options: Iterable<T>;
   toString(t: T): string;
   onClick(t: T): void;
   disabled?: boolean;
@@ -89,7 +89,7 @@ export function DropdownMenu<T>({ options, title, disabled, onClick, toString }:
       open={open}
       onClose={handleClose}
     >
-      {options.map(option => <MenuItem key={toString(option)} onClick={() => { onClick(option); handleClose(); }} disabled={disabled}>{toString(option)}</MenuItem>)}
+      {[...options].map(option => <MenuItem key={toString(option)} onClick={() => { onClick(option); handleClose(); }} disabled={disabled}>{toString(option)}</MenuItem>)}
     </StyledMenu>
   </>;
 }
