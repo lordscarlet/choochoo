@@ -1,18 +1,20 @@
-import { injectState } from "../framework/execution_context";
+import { inject, injectState } from "../framework/execution_context";
 import { PhaseModule } from "../game/phase_module";
 import { PLAYERS } from "../game/state";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
+import { ProfitHelper } from "./helper";
 
 export class IncomePhase extends PhaseModule {
   static readonly phase = Phase.INCOME;
+  private readonly profitHelper = inject(ProfitHelper);
   private readonly players = injectState(PLAYERS);
 
   onStart(): void {
     this.players.update((players) => {
       for (const player of players) {
         if (player.outOfGame) continue;
-        player.money += player.income;
+        player.money += this.profitHelper.getIncome(player);
       }
     });
     super.onStart();
