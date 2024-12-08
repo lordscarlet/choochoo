@@ -1,10 +1,11 @@
 import { MapRegistry } from "../../maps";
 import { assert } from "../../utils/validate";
-import { GAME_STATUS, GameEngine, GameStatus } from "../game/game";
+import { GameEngine } from "../game/game";
 import { Log } from "../game/log";
+import { Memory } from "../game/memory";
 import { Random } from "../game/random";
 import { injectCurrentPlayer } from "../game/state";
-import { inject, injectState, setInjectionContext } from "./execution_context";
+import { inject, setInjectionContext } from "./execution_context";
 import { InjectionContext } from "./inject";
 import { StateStore } from "./state";
 
@@ -14,7 +15,7 @@ interface MapConfig {
 
 interface GameState {
   activePlayerId?: number;
-  gameStatus: GameStatus;
+  hasEnded: boolean;
   gameData: string;
   reversible: boolean;
   logs: string[];
@@ -54,8 +55,8 @@ export class EngineProcessor {
   private readonly state = inject(StateStore);
   private readonly random = inject(Random);
   private readonly log = inject(Log);
-  private readonly gameStatus = injectState(GAME_STATUS);
   private readonly currentPlayer = injectCurrentPlayer();
+  private readonly memory = inject(Memory);
 
   start(playerIds: number[], mapConfig: MapConfig): GameState {
     return this.getNextGameState(undefined, () => {
@@ -78,16 +79,14 @@ export class EngineProcessor {
     try {
       processFn();
       return {
-        activePlayerId: this.gameStatus() === GameStatus.ENDED ? undefined : this.currentPlayer().playerId,
-        gameStatus: this.gameStatus(),
+        activePlayerId: this.gameEngine.hasEnded() ? undefined : this.currentPlayer().playerId,
+        hasEnded: this.gameEngine.hasEnded(),
         gameData: this.state.serialize(),
         reversible: this.random.isReversible(),
         logs: this.log.dump(),
       };
     } finally {
-      this.log.reset();
-      this.random.reset();
-      this.state.reset();
+      this.memory.reset();
     }
   }
 }

@@ -9,7 +9,6 @@ import { Op, WhereOptions } from '@sequelize/core';
 import { NotificationFrequency, NotificationMethod } from '../../api/notifications';
 import { UserRole } from '../../api/user';
 import { EngineDelegator } from '../../engine/framework/engine';
-import { GameStatus as GameEngineStatus } from '../../engine/game/game';
 import { MapRegistry } from '../../maps';
 import { peek } from '../../utils/functions';
 import { GameHistoryModel } from '../model/history';
@@ -169,7 +168,7 @@ const router = initServer().router(gameContract, {
 
       const originalGame = game.toApi();
 
-      const { gameData, logs, activePlayerId, gameStatus, reversible } =
+      const { gameData, logs, activePlayerId, hasEnded, reversible } =
         EngineDelegator.singleton.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
 
       const gameHistory = GameHistoryModel.build({
@@ -188,7 +187,7 @@ const router = initServer().router(gameContract, {
       game.version = game.version + 1;
       game.gameData = gameData;
       game.activePlayerId = activePlayerId;
-      game.status = gameStatus === GameEngineStatus.ENDED ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
+      game.status = hasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
       game.undoPlayerId = reversible ? userId : undefined;
       const newGame = await game.save({ transaction });
       await gameHistory.save({ transaction });
@@ -284,10 +283,10 @@ const router = initServer().router(gameContract, {
       currentGameVersion = peek(previousActions).previousGameVersion;
     }
     let firstGameVersion = currentGameVersion;
-    let finalGameStatus: GameEngineStatus | undefined;
+    let finalHasEnded: boolean | undefined;
     const newHistory: GameHistoryModel[] = [];
     while (previousAction = previousActions.pop()) {
-      const { gameData, logs, activePlayerId, gameStatus, reversible } =
+      const { gameData, logs, activePlayerId, hasEnded, reversible } =
         EngineDelegator.singleton.processAction(game.gameKey, currentGameData, previousAction.actionName, JSON.parse(previousAction.actionData));
 
       newHistory.push(GameHistoryModel.build({
@@ -309,7 +308,7 @@ const router = initServer().router(gameContract, {
 
       currentGameVersion++;
       currentGameData = gameData;
-      finalGameStatus = gameStatus;
+      finalHasEnded = hasEnded;
       finalActivePlayerId = activePlayerId;
       finalUndoPlayerId = reversible ? previousAction.userId : undefined;
     }
@@ -317,7 +316,7 @@ const router = initServer().router(gameContract, {
     game.version = currentGameVersion;
     game.gameData = currentGameData;
     game.activePlayerId = finalActivePlayerId;
-    game.status = finalGameStatus === GameEngineStatus.ENDED ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
+    game.status = finalHasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
     game.undoPlayerId = finalUndoPlayerId;
     await sequelize.transaction(async (transaction) => {
       await Promise.all([

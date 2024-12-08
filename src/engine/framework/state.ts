@@ -5,6 +5,7 @@ import { deepCopy } from "../../utils/deep_copy";
 import { deepEquals } from "../../utils/deep_equals";
 import { freeze, Immutable } from "../../utils/immutable";
 import { assert } from '../../utils/validate';
+import { Memory } from '../game/memory';
 import { DependencyStack } from './dependency_stack';
 import { inject } from './execution_context';
 import { Key } from './key';
@@ -35,7 +36,7 @@ interface TypedMap {
 
 export class StateStore {
   private readonly dependencyStack = inject(DependencyStack);
-  private state: TypedMap = new Map() as TypedMap;
+  private state: TypedMap = inject(Memory).rememberMap() as TypedMap;
 
   reset(): void {
     this.state = new Map();
@@ -163,6 +164,7 @@ export class StateStore {
   merge(gameDataStr: string): void {
     const { gameData, ...rest } = SerializedGameData.parse(JSON.parse(gameDataStr));
     let changes: ValueChange[] = Object.entries(gameData)
+      .filter(([key]) => !Key.isDeprecated(key))
       .filter(([key, value]) => this.mergeValue(Key.fromString(key), value))
       .map(([key]) => ({ key }));
 

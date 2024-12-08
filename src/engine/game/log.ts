@@ -1,13 +1,11 @@
+import { inject } from "../framework/execution_context";
 import { getPlayerColor, PlayerColor } from "../state/player";
+import { Memory } from "./memory";
 import { injectCurrentPlayer } from "./state";
 
 export class Log {
   private readonly currPlayerData = injectCurrentPlayer();
-  private logs: string[] = [];
-
-  reset(): void {
-    this.logs = [];
-  }
+  private readonly logs = inject(Memory).rememberArray<string>();
 
   log(entry: string): void {
     this.logs.push(entry);

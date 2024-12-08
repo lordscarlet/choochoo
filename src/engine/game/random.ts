@@ -1,12 +1,10 @@
 import { iterate } from "../../utils/functions";
+import { inject } from "../framework/execution_context";
 import { OnRoll } from "../state/roll";
+import { Memory } from "./memory";
 
 export class Random {
-  private reversible = true;
-
-  reset(): void {
-    this.reversible = true;
-  }
+  private readonly reversible = inject(Memory).remember(true);
 
   shuffle<T>(array: T[]): T[] {
     const results: T[] = [];
@@ -29,11 +27,11 @@ export class Random {
   }
 
   random(number: number): number {
-    this.reversible = false;
+    this.reversible.set(false);
     return Math.floor(Math.random() * number);
   }
 
   isReversible(): boolean {
-    return this.reversible;
+    return this.reversible();
   }
 }
