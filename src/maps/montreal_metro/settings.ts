@@ -13,7 +13,6 @@ export class MontrealMetroMapSettings implements MapSettings {
   readonly maxPlayers = 3;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.BETA;
-  readonly disabledGoodsGrowth = true;
 
   registerOverrides(ctx: InjectionContext): void {
     ctx.override(SelectActionPhase, MontrealSelectActionPhase);
