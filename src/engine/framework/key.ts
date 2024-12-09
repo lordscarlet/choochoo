@@ -28,6 +28,7 @@ interface KeyParams<T> {
 }
 
 export class Key<T> {
+  private static readonly deprecatedKeys = new Set(['gameStatus']);
   private static readonly registry = new Map<string, Key<unknown>>();
 
   readonly parse: ParseFunction<T>;
@@ -42,9 +43,13 @@ export class Key<T> {
     Key.registry.set(this.name, this as Key<unknown>);
   }
 
+  static isDeprecated(name: string): boolean {
+    return this.deprecatedKeys.has(name);
+  }
+
   static fromString<T>(name: string): Key<T> {
     const result = this.registry.get(name);
-    assert(result != null);
+    assert(result != null, `key ${name} not found, should it have been deprecated?`);
     return result as Key<T>;
   }
 }

@@ -76,7 +76,8 @@ export type TileType = z.infer<typeof TileType>;
 export const MutableTileData = z.object({
   tileType: TileType,
   orientation: z.nativeEnum(Direction),
-  owners: z.array(z.nativeEnum(PlayerColor).optional()),
+  // An array that includes undefined values will be coerced into null by JSON.stringify.
+  owners: z.array(z.nativeEnum(PlayerColor).optional().nullable().transform((v) => v ?? undefined)),
 });
 
 export type MutableTileData = z.infer<typeof MutableTileData>;

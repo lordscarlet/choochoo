@@ -1,12 +1,10 @@
 
-import z from "zod";
 import { infiniteLoopCheck } from "../../utils/functions";
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
-import { Key } from "../framework/key";
 import { InitialMapGrid } from "../state/map_settings";
 import { CheckAutoAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
-import { Log } from "./log";
+import { Memory } from "./memory";
 import { PHASE, PhaseEngine } from "./phase";
 import { PhaseDelegator } from "./phase_delegator";
 import { PlayerHelper } from "./player";
@@ -14,15 +12,6 @@ import { ROUND, RoundEngine } from "./round";
 import { GameStarter } from "./starter";
 import { CURRENT_PLAYER } from "./state";
 import { TurnEngine } from "./turn";
-
-export enum GameStatus {
-  PROGRESS,
-  ENDED,
-}
-
-export const GameStatusZod = z.nativeEnum(GameStatus);
-
-export const GAME_STATUS = new Key('gameStatus', { parse: GameStatusZod.parse });
 
 export class GameEngine {
   private readonly playerHelper = inject(PlayerHelper);
@@ -32,14 +21,12 @@ export class GameEngine {
   private readonly round = injectState(ROUND);
   private readonly phaseEngine = inject(PhaseEngine);
   private readonly phase = injectState(PHASE);
-  private readonly log = inject(Log);
   private readonly turn = inject(TurnEngine);
   private lifecycle: LifecycleStage | undefined;
-  private readonly gameStatus = injectState(GAME_STATUS);
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
+  readonly hasEnded = inject(Memory).remember(false);
 
   start(playerIds: number[], startingMap: InitialMapGrid) {
-    this.gameStatus.initState(GameStatus.PROGRESS);
     this.starter.startGame(playerIds, startingMap);
     this.lifecycle = new StartRound(1)
     this.runLifecycle();
@@ -56,7 +43,7 @@ export class GameEngine {
 
   private runLifecycle(): void {
     const checkInfinite = infiniteLoopCheck(50);
-    while (this.gameStatus() !== GameStatus.ENDED && !(this.lifecycle instanceof WaitForAction)) {
+    while (!this.hasEnded() && !(this.lifecycle instanceof WaitForAction)) {
       checkInfinite(`${this.lifecycle!.constructor.name}`);
       this.stepLifecycle();
     }
@@ -129,6 +116,6 @@ export class GameEngine {
   }
 
   end(): void {
-    this.gameStatus.set(GameStatus.ENDED);
+    this.hasEnded.set(true);
   }
 }
