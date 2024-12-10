@@ -190,7 +190,9 @@ const router = initServer().router(gameContract, {
       game.status = hasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
       game.undoPlayerId = reversible ? userId : undefined;
       const newGame = await game.save({ transaction });
-      await gameHistory.save({ transaction });
+      const newGameHistory = await gameHistory.save({ transaction });
+      console.log(`Game action id=${newGameHistory.id} reversible=${reversible} actionName=${body.actionName}`);
+
       const createLogs = logs.map((message): CreateLogModel => ({
         gameId: game.id,
         message,
