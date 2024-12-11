@@ -319,7 +319,8 @@ export interface UndoAction {
 export function useUndoAction(): UndoAction {
   const game = useGame();
   const me = useMe();
-  const { mutate } = tsr.games.undoAction.useMutation();
+  const { mutate, error, isPending } = tsr.games.undoAction.useMutation();
+  handleError(isPending, error);
 
   const undo = useCallback(() =>
     mutate({ params: { gameId: game.id }, body: { backToVersion: game.version - 1 } })
@@ -338,7 +339,8 @@ export interface RetryAction {
 export function useRetryAction(): RetryAction {
   const game = useGame();
   const me = useMe();
-  const { mutate } = tsr.games.retryLast.useMutation();
+  const { mutate, isPending, error } = tsr.games.retryLast.useMutation();
+  handleError(isPending, error);
 
   const retry = useCallback(() =>
     mutate({
