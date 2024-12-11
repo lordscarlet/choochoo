@@ -5,7 +5,6 @@ import { injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
 import { Grid } from "../map/grid";
-import { GridHelper } from "../map/grid_helper";
 import { calculateTrackInfo, Location } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";
@@ -24,12 +23,11 @@ export type InvalidBuildReason = string;
 
 export class Validator {
   private readonly helper = inject(BuilderHelper);
-  private readonly gridHelper = inject(GridHelper);
   private readonly grid = injectGrid();
 
   getInvalidBuildReason(coordinates: Coordinates, buildData: BuildInfo): InvalidBuildReason | undefined {
     const grid = this.grid();
-    const space = this.gridHelper.lookup(coordinates);
+    const space = grid.get(coordinates);
     if (space == null) {
       return 'cannot build on impassable terrain';
     }
