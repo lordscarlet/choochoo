@@ -40,7 +40,7 @@ export class Memory {
 
   reset(): void {
     for (const reset of this.resetters) {
-      return reset();
+      reset();
     }
   }
 }
