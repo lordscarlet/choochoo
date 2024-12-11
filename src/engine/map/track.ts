@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Coordinates } from "../../utils/coordinates";
+import { fail } from "../../utils/validate";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
 import { City } from "./city";
@@ -15,6 +16,13 @@ export class Track {
   /** Returns the exits for the track */
   getExits(): [Exit, Exit] {
     return this.track.exits;
+  }
+
+  otherExit(lookingFor: Exit): Exit {
+    const [first, second] = this.track.exits;
+    if (first === lookingFor) return second;
+    if (second === lookingFor) return first;
+    fail(`cannot find other exit when exit not found: lookingFor=${lookingFor} exits=${first},${second}`);
   }
 
   /** Returns the owner of the track */

@@ -7,7 +7,7 @@ import { assert } from "../../utils/validate";
 import { GridData } from "../state/grid";
 import { LocationType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
-import { allDirections, Direction, isDirection } from "../state/tile";
+import { allDirections, Direction } from "../state/tile";
 import { City, isCity } from "./city";
 import { getOpposite } from "./direction";
 import { Location } from "./location";
@@ -55,7 +55,7 @@ export class Grid {
         if (!this.dangles(track)) continue;
         danglers.push({
           coordinates: space.coordinates,
-          immovableExit: this.immovableExits(track).filter(isDirection)[0],
+          immovableExit: this.getImmovableExitReference(track),
           length: this.getRoute(track).length,
         });
       }
@@ -65,13 +65,24 @@ export class Grid {
 
   /** Returns whether this track dangles. Not whether some track on the same route dangles. */
   dangles(track: Track): boolean {
-    return this.immovableExits(track).length !== 2;
+    return this.exitInfo(track).some((info) => info.dangles);
+  }
+
+  private getImmovableExitReference(track: Track): Direction {
+    return this.exitInfo(track).find((info) => info.exit != TOWN && info.immovable)!.exit as Direction;
   }
 
   /** Returns a list of exits that cannot be redirected. */
-  immovableExits(track: Track): Exit[] {
-    if (track.hasExit(TOWN)) return track.getExits();
-    return track.getExits().filter((exit) => exit !== TOWN && this.connection(track.coordinates, exit) !== undefined);
+  private exitInfo(track: Track): [ExitInfo, ExitInfo] {
+    return tupleMap(track.getExits(), (exit) => {
+      const otherExit = track.otherExit(exit);
+      const connects = exit === TOWN || this.connection(track.coordinates, exit) != null;
+      return {
+        exit,
+        dangles: !connects,
+        immovable: connects || otherExit === TOWN,
+      };
+    });
   }
 
   connection(fromCoordinates: Coordinates, direction: Direction): City | Track | undefined {
@@ -191,6 +202,12 @@ export class Grid {
   static fromSpaces(spaces: Space[]): Grid {
     return new Grid(ImmutableMap(spaces.map(s => [s.coordinates, s])));
   }
+}
+
+interface ExitInfo {
+  exit: Exit;
+  dangles: boolean;
+  immovable: boolean;
 }
 
 export const DanglerInfo = z.object({
