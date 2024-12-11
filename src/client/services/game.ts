@@ -314,31 +314,39 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
 export interface UndoAction {
   undo(): void;
   canUndo: boolean;
+  isPending: boolean;
 }
 
 export function useUndoAction(): UndoAction {
   const game = useGame();
   const me = useMe();
+  const notifications = useNotifications();
   const { mutate, error, isPending } = tsr.games.undoAction.useMutation();
   handleError(isPending, error);
 
   const undo = useCallback(() =>
-    mutate({ params: { gameId: game.id }, body: { backToVersion: game.version - 1 } })
+    mutate({ params: { gameId: game.id }, body: { backToVersion: game.version - 1 } }, {
+      onSuccess() {
+        notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
+      },
+    })
     , [game.id, game.version]);
 
   const canUndo = game.undoPlayerId != null && game.undoPlayerId === me?.id;
 
-  return { undo, canUndo };
+  return { undo, canUndo, isPending };
 }
 
 export interface RetryAction {
   retry(): void;
   canRetry: boolean;
+  isPending: boolean;
 }
 
 export function useRetryAction(): RetryAction {
   const game = useGame();
   const me = useMe();
+  const notifications = useNotifications();
   const { mutate, isPending, error } = tsr.games.retryLast.useMutation();
   handleError(isPending, error);
 
@@ -348,9 +356,13 @@ export function useRetryAction(): RetryAction {
       body: game.version == 1 ?
         { startOver: true } :
         { steps: 1 },
+    }, {
+      onSuccess() {
+        notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
+      },
     }), [game.id, game.version]);
 
   const canRetry = me?.role == UserRole.enum.ADMIN;
 
-  return { retry, canRetry };
+  return { retry, canRetry, isPending };
 }
