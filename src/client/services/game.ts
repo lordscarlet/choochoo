@@ -297,10 +297,14 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
 
   const emit = useCallback((actionData: T) => {
     if ('view' in actionData && actionData['view'] instanceof Window) {
-      notifications.show('Error performing action', { autoHideDuration: 2000 });
+      notifications.show('Error performing action', { autoHideDuration: 2000, severity: 'success' });
       throw new Error('Cannot use event as actionData. You likely want to use useEmptyAction');
     }
-    mutate({ params: { gameId: game.id }, body: { actionName, actionData } });
+    mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
+      onSuccess() {
+        notifications.show('Error performing action', { autoHideDuration: 2000, severity: 'success' });
+      }
+    });
   }, [game.id, actionName]);
 
   const actionCanBeEmitted = phaseDelegator.get().canEmit(action);;
