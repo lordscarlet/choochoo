@@ -21,6 +21,6 @@ export class Log {
   }
 
   dump(): string[] {
-    return this.logs;
+    return [...this.logs];
   }
 }

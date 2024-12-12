@@ -1,4 +1,4 @@
-import { CreationAttributes, CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "@sequelize/core";
+import { CreationAttributes, CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Op, Transaction } from "@sequelize/core";
 import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from "@sequelize/core/decorators-legacy";
 import { MessageApi } from "../../api/message";
 import { GameModel } from "./game";
@@ -43,6 +43,12 @@ export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttr
 
   @DeletedAt
   declare deletedAt?: Date | null;
+
+  static async destroyLogsBackTo(backToVersion: number, transaction: Transaction): Promise<void> {
+    // Fetch all the individual logs, so that socket.ts can individually notify the user that the logs were destroyed.
+    const logs = await LogModel.findAll({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
+    await Promise.all(logs.map((log) => log.destroy()));
+  }
 
   toApi(): MessageApi {
     return {

@@ -12,7 +12,7 @@ export function useSubmitFeedback() {
 
   const submitFeedback = useCallback((body: SubmitFeedbackApi, onSubmit?: () => void) => mutate({ body }, {
     onSuccess: (_) => {
-      notifications.show('Feedback submitted', { autoHideDuration: 2000 });
+      notifications.show('Feedback submitted', { autoHideDuration: 2000, severity: 'success' });
       onSubmit?.();
     },
   }), [notifications]);

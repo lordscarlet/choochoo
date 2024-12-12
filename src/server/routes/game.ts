@@ -198,7 +198,7 @@ const router = initServer().router(gameContract, {
         message,
         previousGameVersion: game.version - 1,
       }));
-      const newLogs = await LogModel.bulkCreate(createLogs, { transaction });
+      await LogModel.bulkCreate(createLogs, { transaction });
 
       transaction.afterCommit(() => {
         processAsync().catch(e => {
@@ -244,7 +244,7 @@ const router = initServer().router(gameContract, {
       game.undoPlayerId = versionBefore != null && versionBefore.reversible ? versionBefore.userId : undefined;
       const newGame = await game.save({ transaction });
       await GameHistoryModel.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
-      await LogModel.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
+      await LogModel.destroyLogsBackTo(backToVersion, transaction);
 
       return { status: 200, body: { game: newGame.toApi() } };
     });
@@ -323,7 +323,7 @@ const router = initServer().router(gameContract, {
     await sequelize.transaction(async (transaction) => {
       await Promise.all([
         game.save({ transaction }),
-        LogModel.destroy({ where: { previousGameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
+        await LogModel.destroyLogsBackTo(firstGameVersion, transaction),
         GameHistoryModel.destroy({ where: { previousGameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
         ...newHistory.map((history) => history.save({ transaction })),
         ...allLogs.map(log => log.save({ transaction })),

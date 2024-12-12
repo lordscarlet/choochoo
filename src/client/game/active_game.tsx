@@ -64,17 +64,17 @@ export function MovingMetadata() {
 }
 
 export function UndoButton() {
-  const { undo, canUndo } = useUndoAction();
+  const { undo, canUndo , isPending } = useUndoAction();
   if (!canUndo) {
     return <></>;
   }
-  return <Button onClick={undo}>Undo</Button>;
+  return <Button onClick={undo} disabled={isPending}>Undo</Button>;
 }
 
 export function RetryButton() {
-  const { retry, canRetry } = useRetryAction();
+  const { retry, canRetry, isPending } = useRetryAction();
   if (!canRetry) {
     return <></>;
   }
-  return <Button onClick={retry}>Retry</Button>;
+  return <Button onClick={retry} disabled={isPending}>Retry</Button>;
 }
