@@ -723,5 +723,139 @@ describe('BuildValidator', () => {
       .toBe(`new track must come off a city or extend previous track`);
   });
 
-  // Can add track to a town where I already have presence (and the opposite)
+  it('can add track to a town by connecting to it', () => {
+    const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
+    const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
+    const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
+    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+      [cityCoordinates, city()],
+      [trackCoordinates, plain({
+        tile: {
+          tileType: SimpleTileType.STRAIGHT,
+          orientation: Direction.TOP,
+          owners: [undefined],
+        },
+      })],
+      [extensionCoordinates, town({
+        tile: {
+          tileType: TownTileType.LEFT_LEANER,
+          orientation: Direction.TOP_LEFT,
+          owners: [PlayerColor.GREEN, PlayerColor.GREEN, PlayerColor.GREEN],
+        },
+      })],
+      [extensionCoordinates.neighbor(Direction.TOP_RIGHT), plain()],
+      [extensionCoordinates.neighbor(Direction.TOP_LEFT), plain()],
+      [extensionCoordinates.neighbor(Direction.BOTTOM_LEFT), plain()],
+    ]));
+
+    const build: BuildInfo = {
+      playerColor: PlayerColor.BLUE,
+      tileType: TownTileType.CHICKEN_FOOT,
+      orientation: Direction.BOTTOM_RIGHT,
+    };
+
+    expect(validator().getInvalidBuildReason(extensionCoordinates, build))
+      .toBe(undefined);
+  });
+
+  it('can take ownership of unowned town track', () => {
+    const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
+    const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
+    const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
+    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+      [cityCoordinates, city()],
+      [trackCoordinates, plain()],
+      [extensionCoordinates, town({
+        tile: {
+          tileType: TownTileType.LOLLYPOP,
+          orientation: Direction.TOP,
+          owners: [undefined],
+        },
+      })],
+    ]));
+
+    const build: BuildInfo = {
+      playerColor: PlayerColor.BLUE,
+      tileType: SimpleTileType.STRAIGHT,
+      orientation: Direction.TOP,
+    };
+
+    expect(validator().getInvalidBuildReason(trackCoordinates, build))
+      .toBe(undefined);
+  });
+
+  it('can build more track off a town where I have track', () => {
+    const townCoordinates = Coordinates.from({ q: 0, r: 0 });
+    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+      [townCoordinates, town({
+        tile: {
+          tileType: TownTileType.LOLLYPOP,
+          orientation: Direction.TOP,
+          owners: [PlayerColor.BLUE],
+        },
+      })],
+      [townCoordinates.neighbor(Direction.TOP), plain()],
+      [townCoordinates.neighbor(Direction.BOTTOM), plain()],
+    ]));
+
+    const build: BuildInfo = {
+      playerColor: PlayerColor.BLUE,
+      tileType: TownTileType.STRAIGHT,
+      orientation: Direction.TOP,
+    };
+
+    expect(validator().getInvalidBuildReason(townCoordinates, build))
+      .toBe(undefined);
+  });
+
+  it('cannot build more track off a town where I have no track', () => {
+    const townCoordinates = Coordinates.from({ q: 0, r: 0 });
+    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+      [townCoordinates, town({
+        tile: {
+          tileType: TownTileType.LOLLYPOP,
+          orientation: Direction.TOP,
+          owners: [PlayerColor.GREEN],
+        },
+      })],
+      [townCoordinates.neighbor(Direction.TOP), plain()],
+      [townCoordinates.neighbor(Direction.BOTTOM), plain()],
+    ]));
+
+    const build: BuildInfo = {
+      playerColor: PlayerColor.BLUE,
+      tileType: TownTileType.STRAIGHT,
+      orientation: Direction.TOP,
+    };
+
+    expect(validator().getInvalidBuildReason(townCoordinates, build))
+      .toBe(`new track must come off a city or extend previous track`);
+  });
+
+  it('can build new town track with multiple exits', () => {
+    const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
+    const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
+    const townCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
+    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+      [cityCoordinates, city()],
+      [trackCoordinates, plain({
+        tile: {
+          tileType: SimpleTileType.STRAIGHT,
+          orientation: Direction.TOP,
+          owners: [PlayerColor.BLUE],
+        },
+      })],
+      [townCoordinates, town()],
+      [townCoordinates.neighbor(Direction.BOTTOM), plain()],
+    ]));
+
+    const build: BuildInfo = {
+      playerColor: PlayerColor.BLUE,
+      tileType: TownTileType.STRAIGHT,
+      orientation: Direction.TOP,
+    };
+
+    expect(validator().getInvalidBuildReason(townCoordinates, build))
+      .toBe(undefined);
+  });
 });
