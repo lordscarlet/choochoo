@@ -5,6 +5,7 @@ import { InjectionContext } from "../engine/framework/inject";
 import { Key } from '../engine/framework/key';
 import { StateStore } from '../engine/framework/state';
 import { ReversteamMapSettings } from '../maps/reversteam/settings';
+import { Immutable } from '../utils/immutable';
 import { resettable } from './resettable';
 
 export class InjectionHelper {
@@ -27,11 +28,15 @@ export class InjectionHelper {
   }
 
   resettableSpyOn<T, K extends keyof T = keyof T>(ctor: SimpleConstructor<T>, key: T[K] extends Function ? K : never, handleSpy?: (spy: ReturnType<typeof spyOn<T, K>>) => void): () => ReturnType<typeof spyOn<T, K>> {
-    const spy = resettable(() => spyOn(this.injector().get(ctor), key));
+    const spy = resettable(() => this.spyOn(ctor, key));
     beforeEach(() => {
       handleSpy && handleSpy(spy());
     });
     return spy;
+  }
+
+  spyOn<T, K extends keyof T = keyof T>(ctor: SimpleConstructor<T>, key: T[K] extends Function ? K : never): ReturnType<typeof spyOn<T, K>> {
+    return spyOn(this.injector().get(ctor), key);
   }
 
   initResettableState<T>(key: Key<T>, value: T): void {
@@ -44,8 +49,12 @@ export class InjectionHelper {
     this.injector().get(StateStore).init(key, value);
   }
 
-  updateState<T>(key: Key<T>, value: T): void {
+  getState<T>(key: Key<T>): Immutable<T> {
+    return this.injector().get(StateStore).get(key);
+  }
 
+  setState<T>(key: Key<T>, value: T): void {
+    this.injector().get(StateStore).set(key, value);
   }
 }
 
