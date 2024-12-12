@@ -15,6 +15,8 @@ if [ -n "$(git diff HEAD)" ]; then
   exit 1
 fi
 
+npm run test
+
 if [ "$branch" != "prod" ]; then
   if [ -z "$(git diff prod)" ]; then
     git checkout prod
