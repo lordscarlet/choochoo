@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
+import { PHASE } from "../../engine/game/phase";
 import { PLAYERS } from "../../engine/game/state";
 import { LocoAction } from "../../engine/move/loco";
 import { MovePassAction } from "../../engine/move/pass";
@@ -17,13 +18,12 @@ import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
 import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
+import { PassAction as DeurbanizationPassAction } from "../../maps/ireland/deurbanization";
 import { iterate } from "../../utils/functions";
+import { assertNever } from "../../utils/validate";
 import { DropdownMenu } from "../components/dropdown_menu";
 import { useAction, useEmptyAction } from "../services/game";
 import { useCurrentPlayer, useInject, useInjected, useInjectedState, usePhaseState } from "../utils/injection_context";
-import { SwitchToActive, SwitchToUndo } from "./switch";
-import { PHASE } from "../../engine/game/phase";
-import { assertNever } from "../../utils/validate";
 
 
 export function SelectAction() {
@@ -36,6 +36,8 @@ export function SelectAction() {
     case Phase.MOVING: return <MoveGoods />;
     case Phase.END_GAME:
       return <EndGame />
+    case Phase.DEURBANIZATION:
+      return <Deurbanization />;
     case Phase.GOODS_GROWTH:
     case Phase.INCOME:
     case Phase.EXPENSES:
@@ -166,6 +168,23 @@ export function TakeShares() {
   return <div>
     <p>Choose how many shares you would like to take out.</p>
     <DropdownMenu title='Choose shares' options={options} toString={numberFormat} disabled={isPending} onClick={chooseValue} />
+  </div>;
+}
+
+export function Deurbanization() {
+  const { emit: emitPass, canEmit, isPending, canEmitUsername } = useEmptyAction(DeurbanizationPassAction);
+
+  if (canEmitUsername == null) {
+    return <></>;
+  }
+
+  if (!canEmit) {
+    return <GenericMessage>{canEmitUsername} must select a good to deurbanize.</GenericMessage>;
+  }
+
+  return <div>
+    You must select a good to deurbanize.
+    <Button onClick={emitPass} disabled={isPending}>Skip</Button>
   </div>;
 }
 
