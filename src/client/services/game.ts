@@ -302,7 +302,7 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
     }
     mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
       onSuccess() {
-        notifications.show('Error performing action', { autoHideDuration: 2000, severity: 'success' });
+        notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
       }
     });
   }, [game.id, actionName]);

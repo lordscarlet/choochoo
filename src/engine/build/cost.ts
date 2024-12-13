@@ -1,7 +1,6 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
-import { inject } from "../framework/execution_context";
-import { GridHelper } from "../map/grid_helper";
+import { injectGrid } from "../game/state";
 import { Location, toBaseTile } from "../map/location";
 import { crosses, isComplexTile, isSimpleTile, isTownTile } from "../map/tile";
 import { LocationType } from "../state/location_type";
@@ -9,10 +8,10 @@ import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../stat
 
 
 export class BuildCostCalculator {
-  private readonly grid = inject(GridHelper);
+  private readonly grid = injectGrid();
 
   costOf(coordinates: Coordinates, newTileType: TileType): number {
-    const location = this.grid.lookup(coordinates);
+    const location = this.grid().get(coordinates);
     assert(location instanceof Location, 'cannot calculate cost of track in non-buildable location');
     const previousTileType = location.getTileType();
     const isReplacingTile = previousTileType != null;

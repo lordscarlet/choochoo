@@ -8,6 +8,8 @@ export function deepEquals<T>(t1: T, t2: NoInfer<T>): unknown {
     return t1 === t2;
   } else if (t1 == null) {
     return t2 == null;
+  } else if (t2 == null) {
+    return t1 == null;
   } else if (Array.isArray(t1)) {
     assert(Array.isArray(t2));
     return t1.length === t2.length && t1.every((v, i) => deepEquals(t2[i], v));
@@ -30,7 +32,7 @@ export function deepEquals<T>(t1: T, t2: NoInfer<T>): unknown {
     return t1 === t2;
   } else {
     assert(typeof t1 === 'object');
-    assert(typeof t2 === 'object' && t2 != null);
+    assert(typeof t2 === 'object');
     return deepEquals(new Map(Object.entries(t1)), new Map(Object.entries(t2)));
   }
 }
