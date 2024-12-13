@@ -36,13 +36,13 @@ export type MoveData = z.infer<typeof MoveData>;
 
 export class MoveAction implements ActionProcessor<MoveData> {
   static readonly action = 'move';
-  private readonly currentPlayer = injectCurrentPlayer();
-  private readonly gridHelper = inject(GridHelper);
-  private readonly grid = injectGrid();
-  private readonly log = inject(Log);
-  private readonly bag = injectState(BAG);
-  private readonly players = injectState(PLAYERS);
-  private readonly moveHelper = inject(MoveHelper);
+  protected readonly currentPlayer = injectCurrentPlayer();
+  protected readonly gridHelper = inject(GridHelper);
+  protected readonly grid = injectGrid();
+  protected readonly log = inject(Log);
+  protected readonly bag = injectState(BAG);
+  protected readonly players = injectState(PLAYERS);
+  protected readonly moveHelper = inject(MoveHelper);
 
   readonly assertInput = MoveData.parse;
   validate(action: MoveData): void {
