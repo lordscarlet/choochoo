@@ -3,7 +3,7 @@ import { Immutable } from "../../utils/immutable";
 import { Good } from "./good";
 import { LocationType, LocationTypeZod } from "./location_type";
 import { OnRollData } from "./roll";
-import { MutableTileData } from "./tile";
+import { DirectionZod, MutableTileData } from "./tile";
 
 
 export const MutableCityData = z.object({
@@ -28,6 +28,7 @@ export const MutableLocationData = z.object({
   tile: MutableTileData.optional(),
   terrainCost: z.number().optional(),
   goods: z.array(z.number()).optional(),
+  unpassableEdges: z.array(DirectionZod).optional(),
 });
 
 export type MutableLocationData = z.infer<typeof MutableLocationData>;
