@@ -15,6 +15,7 @@ import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
 import { PlayerStats } from "./player_stats";
 import { SelectAction } from "./select_action";
+import { SwitchToActive, SwitchToUndo } from "./switch";
 
 
 export function ActiveGame() {
@@ -35,6 +36,8 @@ function InternalActiveGame() {
     <GameLog gameId={game.id} />
     <Editor />
     <UndoButton />
+    <SwitchToActive />
+    <SwitchToUndo />
     {!undoOnly && <SelectAction />}
     {!undoOnly && canEmit && <GoodsTable />}
     {!undoOnly && <BiddingInfo />}

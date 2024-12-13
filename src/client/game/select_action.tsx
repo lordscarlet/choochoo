@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
-import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
+import { PLAYERS } from "../../engine/game/state";
 import { LocoAction } from "../../engine/move/loco";
 import { MovePassAction } from "../../engine/move/pass";
 import { MOVE_STATE } from "../../engine/move/state";
@@ -19,21 +19,35 @@ import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { iterate } from "../../utils/functions";
 import { DropdownMenu } from "../components/dropdown_menu";
-import { useAction, useEmptyAction, useGame } from "../services/game";
+import { useAction, useEmptyAction } from "../services/game";
 import { useCurrentPlayer, useInject, useInjected, useInjectedState, usePhaseState } from "../utils/injection_context";
-import { LoginButton } from "./login_button";
+import { SwitchToActive, SwitchToUndo } from "./switch";
+import { PHASE } from "../../engine/game/phase";
+import { assertNever } from "../../utils/validate";
 
 
 export function SelectAction() {
-  return <div>
-    <TakeShares />
-    <Build />
-    <Bid />
-    <SpecialActionSelector />
-    <MoveGoods />
-    <SwitchToActive />
-    <SwitchToUndo />
-  </div>;
+  const currentPhase = useInjectedState(PHASE);
+  switch (currentPhase) {
+    case Phase.SHARES: return <TakeShares />;
+    case Phase.TURN_ORDER: return <Bid />;
+    case Phase.ACTION_SELECTION: return <SpecialActionSelector />
+    case Phase.BUILDING: return <Build />;
+    case Phase.MOVING: return <MoveGoods />;
+    case Phase.END_GAME:
+      return <EndGame />
+    case Phase.GOODS_GROWTH:
+    case Phase.INCOME:
+    case Phase.EXPENSES:
+    case Phase.INCOME_REDUCTION:
+      return <></>
+    default:
+      assertNever(currentPhase);
+  }
+}
+
+export function EndGame() {
+  return <GenericMessage>This game is over.</GenericMessage>;
 }
 
 export function MoveGoods() {
@@ -128,20 +142,6 @@ export function Bid() {
     <p>You must bid.</p>
     <DropdownMenu title='Place bid' options={bids} toString={dollarFormat} disabled={isPending} onClick={placeBid} />
   </div >;
-}
-
-export function SwitchToActive() {
-  const currentPlayerColor = useInjectedState(CURRENT_PLAYER);
-  const players = useInjectedState(PLAYERS);
-  const currentPlayer = players.find((player) => player.color === currentPlayerColor);
-  if (currentPlayer == null) return <></>;
-  return <LoginButton playerId={currentPlayer.playerId}>Switch to active user</LoginButton>;
-}
-
-export function SwitchToUndo() {
-  const game = useGame();
-  if (game.undoPlayerId == null) return <></>;
-  return <LoginButton playerId={game.undoPlayerId}>Switch to undo user</LoginButton>;
 }
 
 export function GenericMessage({ children }: { children: string | string[] }) {
