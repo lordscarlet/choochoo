@@ -58,7 +58,7 @@ export class Location {
   }
 
   canExit(exit: Direction): boolean {
-    return (this.data.unpassableEdges ?? []).includes(exit);
+    return !(this.data.unpassableEdges ?? []).includes(exit);
   }
 }
 

@@ -487,6 +487,27 @@ describe('BuildValidator', () => {
       .toBe(`cannot create a loop back to the same location`);
   });
 
+  it(`cannot pass through an unpassable edge`, () => {
+    const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
+    const extensionCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
+      [cityCoordinates, city()],
+      [extensionCoordinates, plain({
+        unpassableEdges: [Direction.TOP_LEFT],
+      })],
+      [extensionCoordinates.neighbor(Direction.TOP_LEFT), plain()],
+    ]));
+
+    const build: BuildInfo = {
+      playerColor: PlayerColor.BLUE,
+      tileType: SimpleTileType.TIGHT,
+      orientation: Direction.TOP,
+    };
+
+    expect(validator().getInvalidBuildReason(extensionCoordinates, build))
+      .toBe(`cannot build towards an unpassable edge`);
+  });
+
   it(`cannot create a circular loop w/ a town`, () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = townCoordinates.neighbor(Direction.BOTTOM);
