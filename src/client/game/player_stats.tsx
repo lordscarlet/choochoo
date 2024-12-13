@@ -5,6 +5,7 @@ import { UserApi } from "../../api/user";
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
 import { ProfitHelper } from '../../engine/income_and_expenses/helper';
+import { MoveHelper } from '../../engine/move/helper';
 import { getSelectedActionString } from "../../engine/state/action";
 import { PlayerColor, PlayerData } from "../../engine/state/player";
 import { getPlayerColorCss } from '../components/player_color';
@@ -19,6 +20,7 @@ export function PlayerStats() {
   const playerOrder = useInjectedState(TURN_ORDER);
   const currentPlayer = useInjectedState(CURRENT_PLAYER);
   const profitHelper = useInjected(ProfitHelper);
+  const moveHelper = useInjected(MoveHelper);
   const helper = useInjected(PlayerHelper);
   const playerUsers = useUsers(playerData.map((player) => player.playerId));
   const outOfGamePlayers = playerData.filter((p) => p.outOfGame).map((p) => p.color);
@@ -27,6 +29,7 @@ export function PlayerStats() {
     const user = playerUsers.find(user => user?.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
+  // TODO: Render the locomotive addition for Ireland.
   return <div className={styles.playerStats}>
     <table>
       <thead>
@@ -66,14 +69,14 @@ export function PlayerStats() {
               ${player.money} ({toNet(profitHelper.getProfit(player))})<br />
               ${player.income}<br />
               {player.shares}<br />
-              {player.locomotive}<br />
+              {moveHelper.getLocomotiveDisplay(player)}<br />
               {helper.getScore(player)}<br />
             </td>
             <td className={styles.expanded}>{getSelectedActionString(player.selectedAction)}</td>
             <td className={styles.expanded}>${player.money} ({toNet(profitHelper.getProfit(player))})</td>
             <td className={styles.expanded}>${player.income}</td>
             <td className={styles.expanded}>{player.shares}</td>
-            <td className={styles.expanded}>{player.locomotive}</td>
+            <td className={styles.expanded}>{moveHelper.getLocomotiveDisplay(player)}</td>
             <td className={styles.expanded}>{helper.getScore(player)}</td>
             <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
           </tr>)}

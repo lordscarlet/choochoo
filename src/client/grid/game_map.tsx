@@ -6,6 +6,7 @@ import { getOpposite } from "../../engine/map/direction";
 import { Grid, Space } from "../../engine/map/grid";
 import { Location } from "../../engine/map/location";
 import { Track } from "../../engine/map/track";
+import { MoveHelper } from "../../engine/move/helper";
 import { MoveAction, MoveData, Path } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";
 import { PlayerData } from "../../engine/state/player";
@@ -15,7 +16,7 @@ import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { useAction, useGameVersionState } from "../services/game";
 import { useTypedCallback, useTypedMemo } from "../utils/hooks";
-import { useCurrentPlayer, useGrid } from "../utils/injection_context";
+import { useCurrentPlayer, useGrid, useInjected } from "../utils/injection_context";
 import { BuildingDialog } from "./building_dialog";
 import { ClickTarget } from "./click_target";
 import { HexGrid } from "./hex_grid";
@@ -54,7 +55,7 @@ function onSelectGoodCb(moveActionProgress: MoveData | undefined, setMoveActionP
   }
 }
 
-function onMoveToSpaceCb(moveActionProgress: MoveData | undefined, setMoveActionProgress: (data: MoveData | undefined) => void, grid: Grid, player: PlayerData, maybeConfirmDelivery: (data: MoveData) => void) {
+function onMoveToSpaceCb(moveHelper: MoveHelper, moveActionProgress: MoveData | undefined, setMoveActionProgress: (data: MoveData | undefined) => void, grid: Grid, player: PlayerData, maybeConfirmDelivery: (data: MoveData) => void) {
   return (space?: Space) => {
     if (space == null || moveActionProgress == null) return;
     const entirePath = [moveActionProgress.startingCity, ...moveActionProgress.path.map(p => p.endingStop)];
@@ -94,13 +95,13 @@ function onMoveToSpaceCb(moveActionProgress: MoveData | undefined, setMoveAction
     const paths = buildPaths(grid, fromSpace.coordinates, space.coordinates);
     if (paths.length === 0) return;
 
-    if (moveActionProgress.path.length >= player.locomotive) return;
     // Prefer the path belonging to the current player.
     const path = paths.find((p) => p.owner === player.color) ?? paths[0];
     const newData = {
       ...moveActionProgress,
       path: moveActionProgress.path.concat([path]),
     };
+    if (!moveHelper.isWithinLocomotive(player, newData)) return;
     setMoveActionProgress(newData);
     maybeConfirmDelivery(newData);
   };
@@ -173,6 +174,7 @@ export function GameMap() {
   const player = useCurrentPlayer();
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Location | undefined>(undefined);
+  const moveHelper = useInjected(MoveHelper);
 
   const isPending = isBuildPending || isMovePending;
 
@@ -184,7 +186,7 @@ export function GameMap() {
 
   const maybeConfirmDelivery = useTypedCallback(maybeConfirmDeliveryCb, [dialogs, grid, emitMove]);
 
-  const onMoveToSpace = useTypedCallback(onMoveToSpaceCb, [moveActionProgress, setMoveActionProgress, grid, player, maybeConfirmDelivery]);
+  const onMoveToSpace = useTypedCallback(onMoveToSpaceCb, [moveHelper, moveActionProgress, setMoveActionProgress, grid, player, maybeConfirmDelivery]);
 
   const highlightedTrack = useTypedMemo(getHighlightedTrack, [grid, moveActionProgress]);
 
