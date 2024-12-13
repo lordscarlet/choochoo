@@ -1,6 +1,7 @@
 import { BLACK, BLUE, Good, PURPLE, RED, YELLOW } from '../../engine/state/good';
+import { Direction } from '../../engine/state/tile';
 import { duplicate } from '../../utils/functions';
-import { black, city, grid, MOUNTAIN, PLAIN, RIVER, town, UNPASSABLE, white } from '../factory';
+import { black, city, grid, MOUNTAIN, plain, PLAIN, RIVER, town, UNPASSABLE, white } from '../factory';
 
 export const map = grid([
   [
@@ -27,8 +28,8 @@ export const map = grid([
     PLAIN,
     PLAIN,
     MOUNTAIN,
-    PLAIN,
-    PLAIN,
+    plain({ unpassableEdges: [Direction.BOTTOM_RIGHT] }),
+    plain({ unpassableEdges: [Direction.TOP_RIGHT] }),
     PLAIN,
   ],
   [
@@ -72,8 +73,8 @@ export const map = grid([
     RIVER,
     PLAIN,
     PLAIN,
-    PLAIN,
-    PLAIN,
+    plain({ unpassableEdges: [Direction.BOTTOM, Direction.BOTTOM_RIGHT] }),
+    plain({ unpassableEdges: [Direction.BOTTOM_LEFT] }),
   ],
   [
     city('Wales', [RED, BLUE], black(2)),
@@ -114,7 +115,7 @@ export const map = grid([
     PLAIN,
     MOUNTAIN,
     city('Limerick', PURPLE, white(5)),
-    PLAIN,
+    plain({ unpassableEdges: [Direction.TOP_RIGHT, Direction.BOTTOM_RIGHT] }),
     city('Ballyunion', [], [], 3),
   ],
   [
@@ -126,7 +127,7 @@ export const map = grid([
     town('Tipperary'),
     PLAIN,
     PLAIN,
-    PLAIN,
+    plain({ unpassableEdges: [Direction.BOTTOM_LEFT] }),
   ],
   [
     UNPASSABLE,
@@ -138,7 +139,7 @@ export const map = grid([
     PLAIN,
     MOUNTAIN,
     town('Tralee'),
-    PLAIN,
+    plain({ unpassableEdges: [Direction.TOP_RIGHT, Direction.BOTTOM_RIGHT] }),
   ],
   [
     ...duplicate(4, UNPASSABLE),
@@ -147,7 +148,7 @@ export const map = grid([
     city('Cork', Good.BLACK, white(6)),
     MOUNTAIN,
     PLAIN,
-    PLAIN,
+    plain({ unpassableEdges: [Direction.TOP_RIGHT] }),
     city('Valentia', [], [], 3),
   ],
   [
@@ -156,7 +157,7 @@ export const map = grid([
     ...duplicate(4, UNPASSABLE),
     PLAIN,
     PLAIN,
-    PLAIN,
+    plain({ unpassableEdges: [Direction.TOP_RIGHT] }),
   ],
   [
     UNPASSABLE,
