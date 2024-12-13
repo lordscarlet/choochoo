@@ -1,8 +1,8 @@
 import { Map as ImmutableMap } from 'immutable';
-import { CityGroup } from "../engine/state/city_group";
+import { BLACK, WHITE } from "../engine/state/city_group";
 import { Good } from "../engine/state/good";
 import { LocationType } from "../engine/state/location_type";
-import { CitySettingData } from "../engine/state/map_settings";
+import { CitySettingData, OnRollSettingData } from "../engine/state/map_settings";
 import { OnRoll } from "../engine/state/roll";
 import { LocationData } from '../engine/state/space';
 import { Coordinates } from "../utils/coordinates";
@@ -25,8 +25,17 @@ export const MOUNTAIN: LocationData = {
   type: LocationType.MOUNTAIN,
 };
 
-export function city(name: string, color: Good | Good[], group: CityGroup, onRoll: OnRoll, startingNumCubes = 2): CitySettingData {
-  return customCity({ name, color, startingNumCubes, onRoll: [{ onRoll, group }] });
+export function black(onRoll: OnRoll): OnRollSettingData {
+  return { group: BLACK, onRoll };
+}
+
+export function white(onRoll: OnRoll): OnRollSettingData {
+  return { group: WHITE, onRoll };
+}
+
+export function city(name: string, color: Good | Good[], onRollData?: OnRollSettingData | OnRollSettingData[], startingNumCubes = 2): CitySettingData {
+  const onRoll = Array.isArray(onRollData) ? onRollData : onRollData != null ? [onRollData] : [];
+  return customCity({ name, color: Array.isArray(color) ? color : [color], startingNumCubes, onRoll });
 }
 
 export function customCity(city: Omit<CitySettingData, 'type'>): CitySettingData {
