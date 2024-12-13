@@ -10,6 +10,13 @@ export enum Good {
   YELLOW,
 }
 
+
+export const BLUE = Good.BLUE;
+export const BLACK = Good.BLACK;
+export const RED = Good.RED;
+export const PURPLE = Good.PURPLE;
+export const YELLOW = Good.YELLOW;
+
 export const GoodZod = z.nativeEnum(Good);
 
 export function getGoodColor(good: Good): string {
