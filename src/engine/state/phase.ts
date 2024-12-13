@@ -13,6 +13,9 @@ export enum Phase {
   INCOME_REDUCTION,
   GOODS_GROWTH,
   END_GAME,
+
+  // Ireland
+  DEURBANIZATION,
 };
 
 export const PhaseZod = z.nativeEnum(Phase);
@@ -29,6 +32,7 @@ export function getPhaseString(phase: Phase): string {
     case Phase.INCOME_REDUCTION: return 'Income Reduction';
     case Phase.GOODS_GROWTH: return 'Goods Growth';
     case Phase.END_GAME: return 'End Game';
+    case Phase.DEURBANIZATION: return 'Deurbanization';
     default:
       assertNever(phase);
   }
