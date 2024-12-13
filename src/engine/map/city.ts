@@ -2,6 +2,7 @@ import { Coordinates } from "../../utils/coordinates";
 import { Good } from "../state/good";
 import { OnRollData } from "../state/roll";
 import { CityData } from "../state/space";
+import { Direction } from "../state/tile";
 
 export function isCity(s: unknown): s is City {
   return s instanceof City;
@@ -36,5 +37,9 @@ export class City {
 
   onRoll(): OnRollData[] {
     return this.data.onRoll;
+  }
+
+  canExit(_: Direction): boolean {
+    return true;
   }
 }

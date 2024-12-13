@@ -70,8 +70,12 @@ export class Validator {
     for (const track of [...newTracks, ...rerouted]) {
       for (const exit of track.exits) {
         if (exit === TOWN) continue;
-        if (grid.getNeighbor(space.coordinates, exit) == null) {
+        const neighbor = grid.getNeighbor(space.coordinates, exit);
+        if (neighbor == null) {
           return 'cannot have an exit to unpassable terrain';
+        }
+        if (!space.canExit(exit) || !neighbor.canExit(getOpposite(exit))) {
+          return 'cannot build towards an unpassable edge';
         }
       }
     }

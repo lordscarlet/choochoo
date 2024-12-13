@@ -56,6 +56,10 @@ export class Location {
   trackExiting(direction: Direction): Track | undefined {
     return this.getTrack().find((track) => track.hasExit(direction));
   }
+
+  canExit(exit: Direction): boolean {
+    return !(this.data.unpassableEdges ?? []).includes(exit);
+  }
 }
 
 export type MakeOptional<T, Optional extends string> =
