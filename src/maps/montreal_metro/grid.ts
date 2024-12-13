@@ -1,10 +1,9 @@
 
-import { WHITE } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
 import { LocationType } from "../../engine/state/location_type";
 import { LocationData } from "../../engine/state/space";
 import { duplicate } from "../../utils/functions";
-import { city, grid, MOUNTAIN, PLAIN, town, UNPASSABLE } from "../factory";
+import { city, grid, MOUNTAIN, PLAIN, town, UNPASSABLE, white } from "../factory";
 
 const STREET: LocationData = {
   type: LocationType.STREET,
@@ -18,15 +17,15 @@ export const map = grid([
   [
     ...duplicate(3, PLAIN),
     ...duplicate(6, STREET),
-    city('Angrignon', Good.RED, WHITE, 4),
+    city('Angrignon', Good.RED, white(4)),
   ],
   [
-    city('Côte-Vertu', Good.PURPLE, WHITE, 5),
+    city('Côte-Vertu', Good.PURPLE, white(5)),
     PLAIN,
     STREET,
     town('Namur'),
     PLAIN,
-    city('Snowdon', Good.BLUE, WHITE, 4),
+    city('Snowdon', Good.BLUE, white(4)),
     PLAIN,
     town('Vendôme'),
     STREET,
@@ -40,7 +39,7 @@ export const map = grid([
     MOUNTAIN,
     STREET,
     PLAIN,
-    city('Lionel-Groulx', Good.RED, WHITE, 3),
+    city('Lionel-Groulx', Good.RED, white(3)),
   ],
   [
     LAKE,
@@ -50,7 +49,7 @@ export const map = grid([
     PLAIN,
     town('Université de Montréal'),
     UNPASSABLE,
-    city('Atwater', [Good.RED, Good.BLUE], WHITE, 4),
+    city('Atwater', [Good.RED, Good.BLUE], white(4)),
     STREET,
     PLAIN,
   ],
@@ -82,10 +81,10 @@ export const map = grid([
   [
     town('Cartier'),
     LAKE,
-    city('Henri-Bourassa', Good.PURPLE, WHITE, 3),
+    city('Henri-Bourassa', Good.PURPLE, white(3)),
     STREET,
     PLAIN,
-    city('Jean-Talon', Good.BLUE, WHITE, 4),
+    city('Jean-Talon', Good.BLUE, white(4)),
     MOUNTAIN,
     PLAIN,
     STREET,
@@ -101,7 +100,7 @@ export const map = grid([
     MOUNTAIN,
     town('Laurier'),
     PLAIN,
-    city('Berri-Uqam', Good.YELLOW, WHITE, 6),
+    city('Berri-Uqam', Good.YELLOW, white(6)),
     LAKE,
   ],
   [
@@ -118,12 +117,12 @@ export const map = grid([
     PLAIN,
     STREET,
     PLAIN,
-    city('Saint Michel', Good.BLUE, WHITE, 3),
+    city('Saint Michel', Good.BLUE, white(3)),
     PLAIN,
     PLAIN,
     town('Pie-Ix'),
     LAKE,
-    city('Longueuil', Good.YELLOW, WHITE, 4),
+    city('Longueuil', Good.YELLOW, white(4)),
   ], [
     ...duplicate(5, UNPASSABLE),
     ...duplicate(3, PLAIN),
@@ -133,7 +132,7 @@ export const map = grid([
   [
     ...duplicate(6, UNPASSABLE),
     PLAIN,
-    city('Assomption', Good.RED, WHITE, 4),
+    city('Assomption', Good.RED, white(4)),
     PLAIN,
     LAKE,
     PLAIN,
