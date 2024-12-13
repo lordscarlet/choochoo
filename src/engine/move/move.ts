@@ -13,6 +13,7 @@ import { Location } from "../map/location";
 import { Good, goodToString } from "../state/good";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
+import { MoveHelper } from "./helper";
 
 export const Path = z.object({
   owner: z.nativeEnum(PlayerColor).optional(),
@@ -41,13 +42,14 @@ export class MoveAction implements ActionProcessor<MoveData> {
   private readonly log = inject(Log);
   private readonly bag = injectState(BAG);
   private readonly players = injectState(PLAYERS);
+  private readonly moveHelper = inject(MoveHelper);
 
   readonly assertInput = MoveData.parse;
   validate(action: MoveData): void {
     const grid = this.grid();
     const curr = this.currentPlayer();
-    if (action.path.length > curr.locomotive) {
-      throw new InvalidInputError(`Can only move ${curr.locomotive} steps`);
+    if (!this.moveHelper.isWithinLocomotive(curr, action)) {
+      throw new InvalidInputError(`Can only move ${this.moveHelper.getLocomotiveDisplay(curr)} steps`);
     }
     if (action.path.length === 0) {
       throw new InvalidInputError('must move over at least one route');
