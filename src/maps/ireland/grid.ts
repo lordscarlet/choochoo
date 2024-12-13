@@ -1,11 +1,10 @@
-import { BLACK, WHITE } from '../../engine/state/city_group';
-import { BLUE, Good, PURPLE, RED, YELLOW } from '../../engine/state/good';
+import { BLACK, BLUE, Good, PURPLE, RED, YELLOW } from '../../engine/state/good';
 import { duplicate } from '../../utils/functions';
-import { city, grid, MOUNTAIN, PLAIN, RIVER, town, UNPASSABLE } from '../factory';
+import { black, city, grid, MOUNTAIN, PLAIN, RIVER, town, UNPASSABLE, white } from '../factory';
 
 export const map = grid([
   [
-    city('Scotland', [RED, BLUE], BLACK, 1),
+    city('Scotland', [RED, BLUE], black(1)),
     UNPASSABLE,
     PLAIN,
     town('Coleraine'),
@@ -18,13 +17,13 @@ export const map = grid([
     PLAIN,
     PLAIN,
     PLAIN,
-    city('Londonderry', Good.BLACK, WHITE, 1),
+    city('Londonderry', BLACK, white(1)),
     PLAIN,
-    city('Glenties', []),
+    city('Glenties', [], [], 3),
   ],
   [
     UNPASSABLE,
-    city('Belfast', PURPLE, WHITE, 2),
+    city('Belfast', PURPLE, white(2)),
     PLAIN,
     PLAIN,
     MOUNTAIN,
@@ -39,7 +38,7 @@ export const map = grid([
     PLAIN,
     town('Enniskillen'),
     PLAIN,
-    city('Sligo', []),
+    city('Sligo', [], [], 3),
   ],
   [
     MOUNTAIN,
@@ -54,7 +53,7 @@ export const map = grid([
   ],
   [
     UNPASSABLE,
-    city('Dundalk', PURPLE, WHITE, 3),
+    city('Dundalk', PURPLE, white(3)),
     PLAIN,
     town('Cavan'),
     PLAIN,
@@ -62,7 +61,7 @@ export const map = grid([
     town('Castlerea'),
     PLAIN,
     PLAIN,
-    city('Westport'),
+    city('Westport', [], [], 3),
   ],
   [
     UNPASSABLE,
@@ -77,20 +76,20 @@ export const map = grid([
     PLAIN,
   ],
   [
-    city('Wales', [RED, BLUE], BLACK, 2),
+    city('Wales', [RED, BLUE], black(2)),
     UNPASSABLE,
     PLAIN,
     town('Mullingar'),
     PLAIN,
-    city('Athlone'),
+    city('Athlone', [], [], 3),
     PLAIN,
     town('Galway'),
     PLAIN,
-    city('Clifden'),
+    city('Clifden', [], [], 3),
   ],
   [
     UNPASSABLE,
-    city('Dublin', PURPLE, WHITE, 4),
+    city('Dublin', PURPLE, white(4)),
     PLAIN,
     PLAIN,
     PLAIN,
@@ -114,9 +113,9 @@ export const map = grid([
     PLAIN,
     PLAIN,
     MOUNTAIN,
-    city('Limerick', PURPLE, WHITE, 5),
+    city('Limerick', PURPLE, white(5)),
     PLAIN,
-    city('Ballyunion'),
+    city('Ballyunion', [], [], 3),
   ],
   [
     UNPASSABLE,
@@ -131,9 +130,9 @@ export const map = grid([
   ],
   [
     UNPASSABLE,
-    city('Rosslare'),
+    city('Rosslare', [], [], 2),
     PLAIN,
-    city('Waterford'),
+    city('Waterford', [], [], 2),
     PLAIN,
     MOUNTAIN,
     PLAIN,
@@ -145,11 +144,11 @@ export const map = grid([
     ...duplicate(4, UNPASSABLE),
     PLAIN,
     PLAIN,
-    city('Cork', Good.BLACK, WHITE, 6),
+    city('Cork', Good.BLACK, white(6)),
     MOUNTAIN,
     PLAIN,
     PLAIN,
-    city('Valentia'),
+    city('Valentia', [], [], 3),
   ],
   [
     PLAIN,
@@ -167,6 +166,6 @@ export const map = grid([
     UNPASSABLE,
     UNPASSABLE,
     UNPASSABLE,
-    city('Bantry'),
+    city('Bantry', [], [], 3),
   ],
 ]);
