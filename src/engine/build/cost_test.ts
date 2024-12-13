@@ -1,7 +1,6 @@
 import 'jasmine';
 import { InjectionHelper } from '../../testing/injection_helper';
 import { Coordinates } from '../../utils/coordinates';
-import { ImmutableMap } from '../../utils/immutable';
 import { GRID } from '../game/state';
 import { isTownTile } from '../map/tile';
 import { LocationType } from '../state/location_type';
@@ -9,7 +8,7 @@ import { LocationData, SpaceData } from '../state/space';
 import { ComplexTileType, Direction, SimpleTileType, TileType, TownTileType } from '../state/tile';
 import { BuildCostCalculator } from "./cost";
 
-const { RIVER, MOUNTAIN, PLAIN, SWAMP } = LocationType;
+const { RIVER, MOUNTAIN, PLAIN, SWAMP, LAKE, STREET } = LocationType;
 const {
   LOLLYPOP,
   THREE_WAY,
@@ -42,11 +41,11 @@ describe(BuildCostCalculator.name, () => {
     type?: LocationData['type'],
   }
 
-  injector.initResettableState(GRID, ImmutableMap());
+  injector.initResettableState(GRID, new Map());
 
   function calculateCost({ from, to, type }: CalculateCostProps) {
     const coordinates = Coordinates.from({ q: 0, r: 0 });
-    const grid = ImmutableMap<Coordinates, SpaceData>([
+    const grid = new Map<Coordinates, SpaceData>([
       [coordinates, {
         type: type ?? PLAIN,
         townName: isTownTile(to) ? 'Foo Town' : undefined,
@@ -79,6 +78,14 @@ describe(BuildCostCalculator.name, () => {
     expect(calculateCost({ type: SWAMP, to: SimpleTileType.STRAIGHT })).toBe(4);
     expect(calculateCost({ type: SWAMP, to: SimpleTileType.CURVE })).toBe(4);
     expect(calculateCost({ type: SWAMP, to: SimpleTileType.TIGHT })).toBe(4);
+
+    expect(calculateCost({ type: LAKE, to: SimpleTileType.STRAIGHT })).toBe(6);
+    expect(calculateCost({ type: LAKE, to: SimpleTileType.CURVE })).toBe(6);
+    expect(calculateCost({ type: LAKE, to: SimpleTileType.TIGHT })).toBe(6);
+
+    expect(calculateCost({ type: STREET, to: SimpleTileType.STRAIGHT })).toBe(4);
+    expect(calculateCost({ type: STREET, to: SimpleTileType.CURVE })).toBe(4);
+    expect(calculateCost({ type: STREET, to: SimpleTileType.TIGHT })).toBe(4);
   });
 
   it('calculates towns', () => {
