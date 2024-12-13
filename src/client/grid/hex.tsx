@@ -19,7 +19,7 @@ import { Track as TrackSvg } from "./track";
 
 function color(space: City | Location | undefined): string {
   if (space instanceof City) {
-    return `${styles.city} ${goodStyle(space.goodColor())}`;
+    return `${styles.city} ${goodStyle(space.goodColors()[0])}`;
   } else if (space instanceof Location) {
     const type = space.getLocationType();
     switch (type) {
@@ -29,6 +29,9 @@ function color(space: City | Location | undefined): string {
         return styles.river;
       case LocationType.MOUNTAIN:
         return styles.mountain;
+      // TODO: render street and street
+      case LocationType.LAKE:
+      case LocationType.STREET:
       case LocationType.SWAMP:
         return styles.swamp;
       default:

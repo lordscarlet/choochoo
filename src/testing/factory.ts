@@ -1,10 +1,7 @@
-import { Map as ImmutableMap } from 'immutable';
 import { CityGroup } from "../engine/state/city_group";
 import { Good } from "../engine/state/good";
 import { LocationType } from "../engine/state/location_type";
-import { CityData, LocationData, MutableSpaceData } from "../engine/state/space";
-import { Direction } from "../engine/state/tile";
-import { Coordinates } from "../utils/coordinates";
+import { CityData, LocationData } from "../engine/state/space";
 import { freeze } from "../utils/immutable";
 
 const defaultCityData: CityData = freeze({

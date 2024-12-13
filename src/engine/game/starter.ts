@@ -1,5 +1,4 @@
 
-import { Map as ImmutableMap } from 'immutable';
 import { duplicate } from '../../utils/functions';
 import { assert } from '../../utils/validate';
 import { inject, injectState } from "../framework/execution_context";
@@ -42,7 +41,7 @@ export class GameStarter {
 
   drawCubesForCities(startingMap: InitialMapGrid) {
     const bag = [...this.bag()];
-    this.grid.initState(ImmutableMap());
+    this.grid.initState(new Map());
     for (const [coordinates, location] of startingMap.entries()) {
       this.gridHelper.set(coordinates, this.drawCubesFor(bag, location));
     }
@@ -103,7 +102,7 @@ export class GameStarter {
 }
 
 
-export function draw<T>(num: number, arr: T[]): T[] {
+function draw<T>(num: number, arr: T[]): T[] {
   assert(arr.length > num, 'drew too many!');
   return duplicate(num, arr[0]).map((_) => arr.pop()!);
 }

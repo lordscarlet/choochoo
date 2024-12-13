@@ -2,10 +2,9 @@ import { city, plain, town } from "../../testing/factory";
 import { InjectionHelper } from "../../testing/injection_helper";
 import { resettable } from "../../testing/resettable";
 import { Coordinates } from "../../utils/coordinates";
-import { ImmutableMap } from "../../utils/immutable";
 import { GRID } from "../game/state";
 import { PlayerColor } from "../state/player";
-import { SpaceData } from "../state/space";
+import { MutableSpaceData, SpaceData } from "../state/space";
 import { allDirections, Direction, SimpleTileType, TownTileType } from "../state/tile";
 import { BuilderHelper } from "./helper";
 import { BuildInfo, Validator } from "./validator";
@@ -19,7 +18,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const plainCoordinates = cityCoordinates.neighbor(Direction.TOP);
     const townCoordinates = plainCoordinates.neighbor(Direction.TOP);
-    const grid = ImmutableMap<Coordinates, SpaceData>([
+    const grid = new Map<Coordinates, MutableSpaceData>([
       [cityCoordinates, city()],
       [plainCoordinates, plain()],
       [townCoordinates, town()],
@@ -86,7 +85,7 @@ describe('BuildValidator', () => {
 
   it('cannot reroute a town track', () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.LOLLYPOP,
@@ -110,7 +109,7 @@ describe('BuildValidator', () => {
   it('can reroute their own track', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -136,7 +135,7 @@ describe('BuildValidator', () => {
   it(`cannot reroute someone else's track`, () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -163,7 +162,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -196,7 +195,7 @@ describe('BuildValidator', () => {
   it(`cannot reroute a track that connects to cities`, () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -222,7 +221,7 @@ describe('BuildValidator', () => {
   it(`cannot build a track that is a noop`, () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -247,7 +246,7 @@ describe('BuildValidator', () => {
   it(`cannot build a track that is a noop reversed`, () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -272,7 +271,7 @@ describe('BuildValidator', () => {
   it(`cannot just drop track`, () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -298,7 +297,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -327,7 +326,7 @@ describe('BuildValidator', () => {
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
     const otherTrackCoordinates = extensionCoordinates.neighbor(Direction.BOTTOM);
     const otherCityCoordinates = otherTrackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -361,7 +360,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -390,7 +389,7 @@ describe('BuildValidator', () => {
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
     const otherTrackCoordinates = extensionCoordinates.neighbor(Direction.BOTTOM);
     const otherCityCoordinates = otherTrackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -426,7 +425,7 @@ describe('BuildValidator', () => {
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
     const otherTrackCoordinates = extensionCoordinates.neighbor(Direction.BOTTOM);
     const otherCityCoordinates = otherTrackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -466,7 +465,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = trackCoordinates.neighbor(Direction.TOP_LEFT);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -492,7 +491,7 @@ describe('BuildValidator', () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = townCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = townCoordinates.neighbor(Direction.BOTTOM_LEFT);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.LOLLYPOP,
@@ -530,7 +529,7 @@ describe('BuildValidator', () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = townCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = townCoordinates.neighbor(Direction.BOTTOM_LEFT);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.TIGHT,
@@ -562,7 +561,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -589,7 +588,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -614,7 +613,7 @@ describe('BuildValidator', () => {
   it(`can extend an unowned route from a town you connect to`, () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
     const extensionCoordinates = townCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.STRAIGHT,
@@ -639,7 +638,7 @@ describe('BuildValidator', () => {
   it(`can reroute an unowned route from a town you connect to`, () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
     const extensionCoordinates = townCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.STRAIGHT,
@@ -670,7 +669,7 @@ describe('BuildValidator', () => {
   it(`cannot extend an unowned route from a town you do not connect to`, () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
     const extensionCoordinates = townCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.STRAIGHT,
@@ -695,7 +694,7 @@ describe('BuildValidator', () => {
   it(`cannot reroute an unowned route from a town you do not connect to`, () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
     const extensionCoordinates = townCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.STRAIGHT,
@@ -727,7 +726,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {
@@ -762,7 +761,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const extensionCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain()],
       [extensionCoordinates, town({
@@ -786,7 +785,7 @@ describe('BuildValidator', () => {
 
   it('can build more track off a town where I have track', () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.LOLLYPOP,
@@ -810,7 +809,7 @@ describe('BuildValidator', () => {
 
   it('cannot build more track off a town where I have no track', () => {
     const townCoordinates = Coordinates.from({ q: 0, r: 0 });
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [townCoordinates, town({
         tile: {
           tileType: TownTileType.LOLLYPOP,
@@ -836,7 +835,7 @@ describe('BuildValidator', () => {
     const cityCoordinates = Coordinates.from({ q: 0, r: 0 });
     const trackCoordinates = cityCoordinates.neighbor(Direction.BOTTOM);
     const townCoordinates = trackCoordinates.neighbor(Direction.BOTTOM);
-    injector.setState(GRID, ImmutableMap<Coordinates, SpaceData>([
+    injector.setState(GRID, new Map<Coordinates, SpaceData>([
       [cityCoordinates, city()],
       [trackCoordinates, plain({
         tile: {

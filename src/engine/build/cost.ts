@@ -1,7 +1,6 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
-import { inject } from "../framework/execution_context";
-import { GridHelper } from "../map/grid_helper";
+import { injectGrid } from "../game/state";
 import { Location, toBaseTile } from "../map/location";
 import { crosses, isComplexTile, isSimpleTile, isTownTile } from "../map/tile";
 import { LocationType } from "../state/location_type";
@@ -9,10 +8,10 @@ import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../stat
 
 
 export class BuildCostCalculator {
-  private readonly grid = inject(GridHelper);
+  private readonly grid = injectGrid();
 
   costOf(coordinates: Coordinates, newTileType: TileType): number {
-    const location = this.grid.lookup(coordinates);
+    const location = this.grid().get(coordinates);
     assert(location instanceof Location, 'cannot calculate cost of track in non-buildable location');
     const previousTileType = location.getTileType();
     const isReplacingTile = previousTileType != null;
@@ -34,10 +33,12 @@ export class BuildCostCalculator {
     if (location.hasTown()) return 0;
     const type = location.getLocationType();
     switch (type) {
-      case LocationType.MOUNTAIN: return 2;
-      case LocationType.RIVER: return 1;
-      case LocationType.PLAIN: return 0;
-      case LocationType.SWAMP: return 2;
+      case LocationType.MOUNTAIN: return 4;
+      case LocationType.RIVER: return 3;
+      case LocationType.PLAIN: return 2;
+      case LocationType.SWAMP: return 4;
+      case LocationType.LAKE: return 6;
+      case LocationType.STREET: return 4;
       default:
         assertNever(type);
     }
@@ -50,10 +51,10 @@ export class BuildCostCalculator {
 
   getTileCost(tileType: SimpleTileType | ComplexTileType): number {
     if (isSimpleTile(tileType)) {
-      return 2;
+      return 0;
     }
     if (isComplexTile(tileType)) {
-      return crosses(tileType) ? 4 : 3;
+      return crosses(tileType) ? 2 : 1;
     }
     assertNever(tileType);
   }

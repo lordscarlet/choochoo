@@ -17,5 +17,6 @@ export interface MapSettings {
   readonly maxPlayers: number;
   readonly startingGrid: InitialMapGrid;
   readonly stage: ReleaseStage;
+
   registerOverrides(ctx: InjectionContext): void;
 }

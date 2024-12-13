@@ -1,3 +1,4 @@
+import z from "zod";
 import { assertNever } from "../../utils/validate";
 
 export enum Action {
@@ -8,17 +9,12 @@ export enum Action {
   TURN_ORDER_PASS,
   URBANIZATION,
   PRODUCTION,
+
+  // Montreal metro
+  REPOPULATION,
 }
 
-export const allActions = [
-  Action.LOCOMOTIVE,
-  Action.FIRST_BUILD,
-  Action.FIRST_MOVE,
-  Action.ENGINEER,
-  Action.TURN_ORDER_PASS,
-  Action.URBANIZATION,
-  Action.PRODUCTION,
-];
+export const ActionZod = z.nativeEnum(Action);
 
 export function getSelectedActionString(action?: Action) {
   switch (action) {
@@ -30,6 +26,7 @@ export function getSelectedActionString(action?: Action) {
     case Action.TURN_ORDER_PASS: return 'Turn Order Pass';
     case Action.URBANIZATION: return 'Urbanization';
     case Action.PRODUCTION: return 'Production';
+    case Action.REPOPULATION: return 'Repopulation';
     default:
       assertNever(action);
   }

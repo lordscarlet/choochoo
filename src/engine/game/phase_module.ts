@@ -17,7 +17,7 @@ export interface ActionBundle<T extends {}> {
 }
 
 export class PhaseModule {
-  private readonly turnOrder = injectState(TURN_ORDER);
+  protected readonly turnOrder = injectState(TURN_ORDER);
   private readonly actionRegistry = new Map<string, ActionProcessor<{}>>();
 
   installAction<T extends {}>(action: ActionConstructor<T>) {
@@ -26,10 +26,15 @@ export class PhaseModule {
   }
 
   canEmit<T extends {}>(action: ActionConstructor<T>): boolean {
-    return this.actionRegistry.has(action.action);
+    return this.canEmitAction(action.action);
+  }
+
+  canEmitAction(actionName: string): boolean {
+    return this.actionRegistry.has(actionName);
   }
 
   processAction(actionName: string, data: unknown): boolean {
+    assert(this.canEmitAction(actionName), `Cannot emit ${actionName}`);
     const action: ActionProcessor<{}> | undefined = this.actionRegistry.get(actionName);
     assert(action != null, `No action processor found for ${actionName}`);
     return this.runAction(action, data);

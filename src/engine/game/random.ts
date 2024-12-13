@@ -1,4 +1,5 @@
 import { iterate } from "../../utils/functions";
+import { assert } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
 import { OnRoll } from "../state/roll";
 import { Memory } from "./memory";
@@ -24,6 +25,14 @@ export class Random {
 
   rollDice(numDice: number): OnRoll[] {
     return iterate(numDice, () => this.rollDie());
+  }
+
+  draw<T>(number: number, arr: T[], failOnOverflow: boolean): T[] {
+    assert(!failOnOverflow || number <= arr.length, 'cannot pull too many items from array');
+    return iterate(Math.max(number, arr.length), () => {
+      const index = this.random(arr.length);
+      return arr.splice(index, 1)[0];
+    });
   }
 
   random(number: number): number {

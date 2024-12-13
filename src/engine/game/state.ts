@@ -1,9 +1,7 @@
-import { Map as ImmutableMap } from 'immutable';
 import z from "zod";
-import { CoordinatesZod } from "../../utils/coordinates";
-import { deepEquals } from '../../utils/deep_equals';
+import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
 import { composeState } from "../framework/execution_context";
-import { Key } from "../framework/key";
+import { Key, MapKey } from "../framework/key";
 import { Grid } from "../map/grid";
 import { MutableAvailableCity } from '../state/available_city';
 import { GoodZod } from '../state/good';
@@ -17,22 +15,7 @@ export const PLAYERS = new Key('players', { parse: z.array(MutablePlayerData).pa
 export const BAG = new Key('bag', { parse: z.array(GoodZod).parse });
 export const AVAILABLE_CITIES = new Key('availableCities', { parse: z.array(MutableAvailableCity).parse });
 
-export const GRID = new Key('grid', {
-  parse: z.array(z.tuple([CoordinatesZod, MutableSpaceData])).transform((entries) => ImmutableMap(entries)).parse,
-  serialize: (grid: GridData) => [...grid.entries()],
-  merge: (oldGrid: GridData, newGrid: GridData) => {
-    let mergedGrid = oldGrid;
-    for (const [key, value] of newGrid) {
-      if (deepEquals(mergedGrid.get(key), value)) continue;
-      mergedGrid = mergedGrid.set(key, value);
-    }
-    for (const key of mergedGrid.keys()) {
-      if (newGrid.has(key)) continue;
-      mergedGrid = mergedGrid.delete(key);
-    }
-    return mergedGrid;
-  },
-});
+export const GRID = new MapKey<Coordinates, MutableSpaceData>('grid', CoordinatesZod.parse, MutableSpaceData.parse);
 
 export const injectCurrentPlayer = composeState([CURRENT_PLAYER, PLAYERS], (_: PlayerData | undefined, playerColor: PlayerColor, players: PlayerData[]) => {
   return players.find(player => player.color === playerColor)!;

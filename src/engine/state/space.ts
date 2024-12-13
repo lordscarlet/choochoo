@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Immutable } from "../../utils/immutable";
 import { Good } from "./good";
-import { LocationType } from "./location_type";
+import { LocationType, LocationTypeZod } from "./location_type";
 import { OnRollData } from "./roll";
 import { MutableTileData } from "./tile";
 
@@ -9,7 +9,7 @@ import { MutableTileData } from "./tile";
 export const MutableCityData = z.object({
   type: z.literal(LocationType.CITY),
   name: z.string(),
-  color: z.nativeEnum(Good),
+  color: z.union([z.array(z.nativeEnum(Good)), z.nativeEnum(Good)]),
   goods: z.array(z.nativeEnum(Good)),
   urbanized: z.boolean().optional(),
   onRoll: z.array(OnRollData),
@@ -18,8 +18,12 @@ export const MutableCityData = z.object({
 export type MutableCityData = z.infer<typeof MutableCityData>;
 export type CityData = Immutable<MutableCityData>;
 
+function isLocationType(value: LocationType): value is Exclude<LocationType, LocationType.CITY | LocationType.UNPASSABLE> {
+  return value !== LocationType.CITY && value !== LocationType.UNPASSABLE;
+}
+
 export const MutableLocationData = z.object({
-  type: z.union([z.literal(LocationType.PLAIN), z.literal(LocationType.RIVER), z.literal(LocationType.MOUNTAIN), z.literal(LocationType.SWAMP)]),
+  type: LocationTypeZod.refine(isLocationType),
   townName: z.string().optional(),
   tile: MutableTileData.optional(),
   terrainCost: z.number().optional(),
