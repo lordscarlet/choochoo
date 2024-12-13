@@ -63,7 +63,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
   useEffect(() => {
     if (coordinates != null && !hasBuildingOptions) {
       cancelBuild();
-      notifications.show('No eligible building options', { autoHideDuration: 2000 })
+      notifications.show('No eligible building options', { autoHideDuration: 2000, severity: 'error' })
     }
   }, [coordinates, hasBuildingOptions, cancelBuild]);
 

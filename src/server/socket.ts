@@ -6,6 +6,7 @@ import { GameModel, toApi } from "./model/game";
 import { LogModel } from "./model/log";
 import { environment } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
+import { DestroyOptions } from "@sequelize/core";
 
 const args: Partial<ServerOptions> = {};
 
@@ -92,6 +93,12 @@ Lifecycle.singleton.onStart(() => {
 
   LogModel.hooks.addListener('afterDestroy', (log: LogModel) => {
     emitLogDestroy(log);
+  });
+
+  LogModel.hooks.addListener('afterBulkCreate', (logs: LogModel[]) => {
+    for (const log of logs) {
+      emitLogCreate(log);
+    }
   });
 
   LogModel.hooks.addListener('afterCreate', (log: LogModel) => {

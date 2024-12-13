@@ -9,6 +9,12 @@
       "request": "launch",
       "name": "Launch Program",
       "command": "npm run dev"
+    },
+    {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "Test Program",
+      "command": "npm run test-watch"
     }
   ]
 }

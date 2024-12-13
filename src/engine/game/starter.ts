@@ -9,7 +9,6 @@ import { Good } from '../state/good';
 import { LocationType } from '../state/location_type';
 import { InitialMapGrid, SpaceSettingData } from '../state/map_settings';
 import { allPlayerColors, PlayerColor, PlayerData } from '../state/player';
-import { OnRoll } from '../state/roll';
 import { SpaceData } from '../state/space';
 import { Random } from './random';
 import { AVAILABLE_CITIES, BAG, GRID, PLAYERS, TURN_ORDER } from './state';
@@ -68,15 +67,22 @@ export class GameStarter {
 
   initializeAvailableCities() {
     const bag = [...this.bag()];
-    const availableCities: AvailableCity[] = [
-      Good.RED,
-      Good.BLUE,
-      ...duplicate(4, Good.BLACK),
-      Good.YELLOW,
-      Good.PURPLE,
-    ].map((color, index) => ({
+    const availableCities: AvailableCity[] = ([
+      [Good.RED, CityGroup.WHITE, 3],
+      [Good.BLUE, CityGroup.WHITE, 4],
+      [Good.BLACK, CityGroup.WHITE, 5],
+      [Good.BLACK, CityGroup.WHITE, 6],
+      [Good.YELLOW, CityGroup.BLACK, 1],
+      [Good.PURPLE, CityGroup.BLACK, 2],
+      [Good.BLACK, CityGroup.BLACK, 3],
+      [Good.BLACK, CityGroup.BLACK, 4],
+    ] as const).map(([color, group, onRoll]) => ({
       color,
-      onRoll: [{ goods: draw(2, bag), group: index < 4 ? CityGroup.WHITE : CityGroup.BLACK, onRoll: OnRoll.parse(index >= 4 ? index - 3 : index + 3) }],
+      onRoll: [{
+        goods: draw(2, bag),
+        group,
+        onRoll,
+      }],
       goods: [],
     }));
     this.availableCities.initState(availableCities);

@@ -20,7 +20,7 @@ export function ActivatePage() {
     if (hasNavigated.current) return;
     if (me == null) {
       hasNavigated.current = true;
-      notifications.show('Login to activate your account', { autoHideDuration: 2000 });
+      notifications.show('Login to activate your account', { autoHideDuration: 2000, severity: 'error' });
       navigate('/app/users/login?activationCode=' + activationCode);
       return;
     }

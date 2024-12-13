@@ -7,6 +7,7 @@ import { Coordinates } from './coordinates';
 import { isPrimitive } from "./functions";
 import { Primitive } from "./types";
 
+export { ImmutableMap, ImmutableSet };
 
 export type Immutable<T> =
   T extends null ? null

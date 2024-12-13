@@ -27,7 +27,7 @@ export function useCreateInvitation() {
 
   const createInvite = useCallback((body: CreateInviteApi) => mutate({ params: { userId: me!.id }, body }, {
     onSuccess: (_) => {
-      notifications.show('Code Created', { autoHideDuration: 2000 });
+      notifications.show('Code Created', { autoHideDuration: 2000, severity: 'success' });
     },
   }), [me]);
   return { createInvite, validationError, isPending };
@@ -57,7 +57,7 @@ export function useLogin() {
     onSuccess: (data) => {
       tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: data.body.user } }));
       if (body.activationCode) {
-        notifications.show('Welcome! CCMF!', { autoHideDuration: 2000 });
+        notifications.show('Welcome! CCMF!', { autoHideDuration: 2000, severity: 'success' });
       }
       navigate('/');
     },
@@ -110,7 +110,7 @@ export function useUpdatePassword() {
 
   const updatePassword = useCallback((body: UpdatePasswordRequest, onSuccess?: () => void) => mutate({ body }, {
     onSuccess: (data) => {
-      notifications.show('Update succeeded!', { autoHideDuration: 2000 });
+      notifications.show('Update succeeded!', { autoHideDuration: 2000, severity: 'success' });
       onSuccess?.();
     },
   }), []);
@@ -129,7 +129,7 @@ export function useLogout() {
       onSuccess({ status, body }) {
         assert(status === 200 && body.success);
         tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: undefined } }));
-        notifications.show('Logout successful', { autoHideDuration: 2000 });
+        notifications.show('Logout successful', { autoHideDuration: 2000, severity: 'success' });
       },
     });
   }, []);
@@ -146,7 +146,7 @@ export function useResendActivationCode() {
     mutate({ body }, {
       onSuccess({ status, body }) {
         assert(status === 200 && body.success);
-        notifications.show('Activation code sent', { autoHideDuration: 2000 });
+        notifications.show('Activation code sent', { autoHideDuration: 2000, severity: 'success' });
       },
     });
   }, []);
@@ -166,7 +166,7 @@ export function useActivateAccount() {
       onSuccess({ status, body }) {
         assert(status === 200);
         tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: body.user } }));
-        notifications.show('Success! CCMF!', { autoHideDuration: 2000 });
+        notifications.show('Success! CCMF!', { autoHideDuration: 2000, severity: 'success' });
         navigate('/');
       },
     });

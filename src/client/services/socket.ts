@@ -49,7 +49,7 @@ export function useMessages(gameId?: number): UseMessages {
 
   useEffect(() => {
     if (error == null) return;
-    notifications.show('Failed to load', { autoHideDuration: 2000 });
+    notifications.show('Failed to load messages', { autoHideDuration: 2000, severity: 'error' });
   }, [error]);
 
   const updateLogs = useCallback((updater: (logs: MessageApi[]) => MessageApi[]) => {

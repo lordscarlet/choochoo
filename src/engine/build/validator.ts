@@ -5,7 +5,6 @@ import { injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
 import { Grid } from "../map/grid";
-import { GridHelper } from "../map/grid_helper";
 import { calculateTrackInfo, Location } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";
@@ -24,12 +23,11 @@ export type InvalidBuildReason = string;
 
 export class Validator {
   private readonly helper = inject(BuilderHelper);
-  private readonly gridHelper = inject(GridHelper);
   private readonly grid = injectGrid();
 
   getInvalidBuildReason(coordinates: Coordinates, buildData: BuildInfo): InvalidBuildReason | undefined {
     const grid = this.grid();
-    const space = this.gridHelper.lookup(coordinates);
+    const space = grid.get(coordinates);
     if (space == null) {
       return 'cannot build on impassable terrain';
     }
@@ -61,7 +59,7 @@ export class Validator {
       const oldTrack = this.oldTrack(space, reroutedTrack)!;
       const oldOwner = oldTrack.getOwner();
       if (oldOwner != null && oldOwner !== buildData.playerColor) {
-        return 'cannot reroute another players track';
+        return `cannot reroute another player's track`;
       }
 
       if (!this.grid().dangles(oldTrack)) {
@@ -87,15 +85,18 @@ export class Validator {
       return 'must preserve previous track';
     }
 
-    if (!this.newTrackExtendsPrevious(buildData.playerColor, space, newTracks)) {
+    // Don't validate unmodified track because those are owned by other players.
+    const trackToValidate = newTracks.concat(rerouted);
+
+    if (!this.newTrackExtendsPrevious(buildData.playerColor, space, trackToValidate)) {
       return 'new track must come off a city or extend previous track';
     }
 
-    if (this.newTrackConnectsToAnotherPlayer(buildData.playerColor, space, newTracks)) {
+    if (this.newTrackConnectsToAnotherPlayer(buildData.playerColor, space, trackToValidate)) {
       return 'new track cannot connect to another player\'s track';
     }
 
-    if (this.createsCircularLoop(grid, coordinates, newTileData)) {
+    if (this.createsCircularLoop(grid, coordinates, trackToValidate)) {
       return 'cannot create a loop back to the same location';
     }
   }
@@ -183,7 +184,7 @@ export class Validator {
       if (trackExiting.getOwner() != null) return false;
 
       // The track is unowned, check to see if it connects to a city, or to a town the owner has presense.
-      const [end, endExit] = this.getEnd(trackExiting.coordinates, exit);
+      const [end, endExit] = this.getEnd(trackExiting.coordinates, trackExiting.otherExit(getOpposite(exit)));
       if (endExit == TOWN) {
         const endSpace = this.grid().get(end);
         assert(endSpace instanceof Location);

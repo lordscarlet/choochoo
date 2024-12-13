@@ -15,8 +15,10 @@ if [ -n "$(git diff HEAD)" ]; then
   exit 1
 fi
 
+
 if [ "$branch" != "prod" ]; then
   if [ -z "$(git diff prod)" ]; then
+    npm run test
     git checkout prod
     exit
   fi
@@ -29,6 +31,7 @@ if [ "$branch" != "prod" ]; then
     echo "You can only deploy from the prod branch, on $branch"
     exit 1
   fi
+  npm run test
   git checkout prod
   git merge "$branch"
   git push
