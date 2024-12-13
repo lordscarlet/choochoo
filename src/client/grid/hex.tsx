@@ -19,7 +19,7 @@ import { Track as TrackSvg } from "./track";
 
 function color(space: City | Location | undefined): string {
   if (space instanceof City) {
-    return `${styles.city} ${goodStyle(space.goodColor()[0])}`;
+    return `${styles.city} ${goodStyle(space.goodColors()[0])}`;
   } else if (space instanceof Location) {
     const type = space.getLocationType();
     switch (type) {
