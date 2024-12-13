@@ -3,9 +3,11 @@ import { Coordinates } from "../../utils/coordinates";
 import { OnRollData } from './roll';
 import { CityData, LocationData } from "./space";
 
+export type OnRollSettingData = Omit<OnRollData, 'goods'>;
+
 export type CitySettingData = Omit<CityData, 'goods' | 'onRoll'> & {
   startingNumCubes: number;
-  onRoll: Array<Omit<OnRollData, 'goods'>>;
+  onRoll: OnRollSettingData[];
 };
 
 export type SpaceSettingData = CitySettingData | LocationData;

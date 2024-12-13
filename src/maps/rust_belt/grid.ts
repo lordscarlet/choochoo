@@ -1,26 +1,26 @@
 import { CityGroup } from '../../engine/state/city_group';
 import { Good } from '../../engine/state/good';
 import { duplicate } from '../../utils/functions';
-import { city, grid, MOUNTAIN, PLAIN, RIVER, town, UNPASSABLE } from '../factory';
+import { black, city, grid, MOUNTAIN, PLAIN, RIVER, town, UNPASSABLE, white } from '../factory';
 
 const { WHITE, BLACK } = CityGroup;
 
 export const map = grid([
   [
     ...duplicate(10, PLAIN),
-    city('Kansas City', Good.PURPLE, WHITE, 3),
+    city('Kansas City', Good.PURPLE, white(3)),
   ],
   [
     ...duplicate(2, PLAIN),
-    city('Minneapolis', Good.BLUE, WHITE, 5),
+    city('Minneapolis', Good.BLUE, white(5)),
     ...duplicate(7, PLAIN),
   ],
   [
-    city('Deluth', Good.PURPLE, WHITE, 6),
+    city('Deluth', Good.PURPLE, white(6)),
     ...duplicate(2, PLAIN),
     RIVER,
     ...duplicate(3, PLAIN),
-    city('Desmoines', Good.BLUE, WHITE, 4),
+    city('Desmoines', Good.BLUE, white(4)),
     ...duplicate(3, PLAIN),
   ],
   [
@@ -43,7 +43,7 @@ export const map = grid([
     town('Rock Island'),
     PLAIN,
     RIVER,
-    city('St. Louis', Good.RED, WHITE, 2),
+    city('St. Louis', Good.RED, white(2)),
   ],
   [
     ...duplicate(8, PLAIN),
@@ -57,7 +57,7 @@ export const map = grid([
     PLAIN,
     town('Milwaukee'),
     PLAIN,
-    city('Chicago', Good.RED, WHITE, 1),
+    city('Chicago', Good.RED, white(1)),
     ...duplicate(4, PLAIN),
   ],
   [
@@ -73,7 +73,7 @@ export const map = grid([
     PLAIN,
     PLAIN,
     PLAIN,
-    city('Evansville', Good.BLUE, BLACK, 1),
+    city('Evansville', Good.BLUE, black(1)),
   ],
   [
     UNPASSABLE,
@@ -100,13 +100,13 @@ export const map = grid([
     town('Toledo'),
     PLAIN,
     PLAIN,
-    city('Cincinatti', Good.BLUE, BLACK, 2),
+    city('Cincinatti', Good.BLUE, black(2)),
     RIVER,
     PLAIN,
   ],
   [
     ...duplicate(3, UNPASSABLE),
-    city('Detroit', Good.RED, BLACK, 3),
+    city('Detroit', Good.RED, black(3)),
     UNPASSABLE,
     ...duplicate(3, PLAIN),
     RIVER,
@@ -133,14 +133,14 @@ export const map = grid([
   ],
   [
     PLAIN,
-    city('Toronto', Good.YELLOW, BLACK, 6),
+    city('Toronto', Good.YELLOW, black(6)),
     RIVER,
     UNPASSABLE,
     PLAIN,
     PLAIN,
     RIVER,
     RIVER,
-    city('Wheeling', Good.YELLOW, BLACK, 4, 3),
+    city('Wheeling', Good.YELLOW, black(4), 3),
     MOUNTAIN,
     MOUNTAIN,
   ],
@@ -150,7 +150,7 @@ export const map = grid([
     town('Buffalo'),
     PLAIN,
     MOUNTAIN,
-    city('Pittsburgh', Good.RED, BLACK, 5, 3),
+    city('Pittsburgh', Good.RED, black(5), 3),
     ...duplicate(4, MOUNTAIN),
   ],
 ]);
