@@ -33,8 +33,9 @@ export function white(onRoll: OnRoll): OnRollSettingData {
   return { group: WHITE, onRoll };
 }
 
-export function city(name: string, color: Good | Good[], onRollData?: OnRollSettingData | OnRollSettingData[], startingNumCubes = 2): CitySettingData {
+export function city(name: string, cityColor?: Good | Good[], onRollData?: OnRollSettingData | OnRollSettingData[], startingNumCubes = 2): CitySettingData {
   const onRoll = Array.isArray(onRollData) ? onRollData : onRollData != null ? [onRollData] : [];
+  const color = Array.isArray(cityColor) ? cityColor : cityColor != null ? [cityColor] : [];
   return customCity({ name, color: Array.isArray(color) ? color : [color], startingNumCubes, onRoll });
 }
 
