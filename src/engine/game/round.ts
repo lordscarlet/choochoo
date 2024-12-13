@@ -8,9 +8,9 @@ import { PLAYERS } from "./state";
 export const ROUND = new Key('roundNumber', { parse: z.number().parse });
 
 export class RoundEngine {
-  private readonly log = inject(Log);
-  private readonly players = injectState(PLAYERS);
-  private readonly currentRound = injectState(ROUND);
+  protected readonly log = inject(Log);
+  protected readonly players = injectState(PLAYERS);
+  protected readonly currentRound = injectState(ROUND);
 
   startFirstRound(): void {
     // The rounds go from 1 to max rounds

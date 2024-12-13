@@ -12,6 +12,9 @@ export enum Action {
 
   // Montreal metro
   REPOPULATION,
+
+  // Ireland
+  DEURBANIZATION,
 }
 
 export const ActionZod = z.nativeEnum(Action);
@@ -27,6 +30,7 @@ export function getSelectedActionString(action?: Action) {
     case Action.URBANIZATION: return 'Urbanization';
     case Action.PRODUCTION: return 'Production';
     case Action.REPOPULATION: return 'Repopulation';
+    case Action.DEURBANIZATION: return 'Deurbanization';
     default:
       assertNever(action);
   }
