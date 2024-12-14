@@ -58,7 +58,11 @@ export class Land {
   }
 
   canExit(exit: Direction): boolean {
-    return !(this.data.unpassableEdges ?? []).includes(exit);
+    return !this.unpassableExits().includes(exit);
+  }
+
+  unpassableExits(): Direction[] {
+    return this.data.unpassableEdges ?? [];
   }
 }
 

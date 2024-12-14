@@ -1,7 +1,6 @@
 import { Exit, TOWN } from "../../engine/map/track";
 import { Direction } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
-import { iterate } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
 
 export function movePointInDirection(point: Point, size: number, rad: number): Point {
@@ -44,9 +43,41 @@ export function pointBetween(point1: Point, point2: Point, portion = 0.5): Point
   };
 }
 
+const RIGHT = 0;
+const BOTTOM_RIGHT = Math.PI / 3;
+const BOTTOM_LEFT = Math.PI * 2 / 3;
+const LEFT = Math.PI;
+const TOP_LEFT = Math.PI * 4 / 3;
+const TOP_RIGHT = Math.PI * 5 / 3;
+
+const allCornerLocations = [
+  RIGHT,
+  BOTTOM_RIGHT,
+  BOTTOM_LEFT,
+  LEFT,
+  TOP_LEFT,
+  TOP_RIGHT,
+];
+
 /** Returns corners, starting with the right corner and rotating clockwise. */
 export function getCorners(center: Point, size: number): Point[] {
-  return iterate(6, i => movePointInDirection(center, size, Math.PI * i / 3));
+  return allCornerLocations.map((cornerLocation) => movePointInDirection(center, size, cornerLocation));
+}
+
+/** Returns corners of an edge of a hex. */
+export function edgeCorners(center: Point, size: number, direction: Direction): Point[] {
+  return edgeAngles(direction).map(angle => movePointInDirection(center, size, angle));
+}
+
+export function edgeAngles(direction: Direction): number[] {
+  switch (direction) {
+    case Direction.TOP_LEFT: return [LEFT, TOP_LEFT];
+    case Direction.TOP: return [TOP_LEFT, TOP_RIGHT];
+    case Direction.TOP_RIGHT: return [TOP_RIGHT, RIGHT];
+    case Direction.BOTTOM_RIGHT: return [RIGHT, BOTTOM_RIGHT];
+    case Direction.BOTTOM: return [BOTTOM_RIGHT, BOTTOM_LEFT];
+    case Direction.BOTTOM_LEFT: return [BOTTOM_LEFT, LEFT];
+  }
 }
 
 export function getExitPoint(center: Point, exit: Exit, size: number): Point {

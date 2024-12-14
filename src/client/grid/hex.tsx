@@ -6,6 +6,7 @@ import { isTownTile } from "../../engine/map/tile";
 import { Track, TrackInfo } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { SpaceType } from "../../engine/state/location_type";
+import { Direction } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { ClickTarget } from "./click_target";
@@ -15,7 +16,7 @@ import * as styles from './hex.module.css';
 import * as gridStyles from './hex_grid.module.css';
 import { HexName } from "./hex_name";
 import { OnRoll } from "./on_roll";
-import { coordinatesToCenter, getCorners, offsetPoint, Point, polygon } from "./point";
+import { coordinatesToCenter, edgeCorners, getCorners, offsetPoint, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
 function color(space: Space): string {
@@ -92,6 +93,7 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
 
   return <>
     <polygon className={`${space instanceof City ? '' : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
+    {space instanceof Land && space.unpassableExits().map(direction => <UnpassableEdge center={center} size={size} direction={direction} />)}
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Land && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Land && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
@@ -101,4 +103,16 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
   </>;
 }
 
+interface UnpassableEdgeProps {
+  center: Point;
+  size: number;
+  direction: Direction;
+}
+
+export function UnpassableEdge({ center, size, direction }: UnpassableEdgeProps) {
+  const [corner1, corner2] = useMemo(
+    () => edgeCorners(center, size, direction)
+    , [center.x, center.y, size, direction]);
+  return <line x1={corner1.x} y1={corner1.y} x2={corner2.x} y2={corner2.y} stroke="black" strokeLinecap="round" strokeWidth={12} />
+}
 
