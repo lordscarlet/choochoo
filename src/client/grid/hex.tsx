@@ -20,7 +20,8 @@ import { Track as TrackSvg } from "./track";
 
 function color(space: Space): string {
   if (space instanceof City) {
-    return `${styles.city} ${goodStyle(space.goodColors()[0])}`;
+    const colors = space.goodColors();
+    return `${styles.city} ${colors.length > 0 ? goodStyle(colors[0]) : ''}`;
   } else if (space instanceof Land) {
     const type = space.getLandType();
     switch (type) {
@@ -94,7 +95,7 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Land && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Land && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
-    {space instanceof City && <OnRoll city={space} center={center} size={size} />}
+    {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} />}
     {space instanceof City && space.cityName() != '' && <HexName name={space.cityName()} center={center} size={size} />}
     {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
   </>;

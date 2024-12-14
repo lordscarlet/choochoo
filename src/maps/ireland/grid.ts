@@ -48,6 +48,7 @@ export const map = grid([
     city('Sligo', [], [], 3),
   ],
   [
+    UNPASSABLE,
     MOUNTAIN,
     PLAIN,
     PLAIN,
@@ -100,6 +101,7 @@ export const map = grid([
     city('Clifden', [], [], 3),
   ],
   [
+    UNPASSABLE,
     bridge({
       tile: {
         ...startFrom(Direction.BOTTOM).curveLeft(),
@@ -125,6 +127,7 @@ export const map = grid([
   ],
   [
     UNPASSABLE,
+    UNPASSABLE,
     town('Wicklow'),
     PLAIN,
     PLAIN,
@@ -146,6 +149,7 @@ export const map = grid([
     plain({ unpassableEdges: [Direction.BOTTOM_LEFT] }),
   ],
   [
+    UNPASSABLE,
     UNPASSABLE,
     city('Rosslare', [], [], 2),
     PLAIN,
@@ -176,7 +180,8 @@ export const map = grid([
     city('Valentia', [], [], 3),
   ],
   [
-    PLAIN,
+    UNPASSABLE,
+    UNPASSABLE,
     city('England', YELLOW),
     ...duplicate(3, UNPASSABLE),
     bridge({
@@ -190,6 +195,7 @@ export const map = grid([
     plain({ unpassableEdges: [Direction.TOP_RIGHT] }),
   ],
   [
+    UNPASSABLE,
     UNPASSABLE,
     UNPASSABLE,
     UNPASSABLE,
