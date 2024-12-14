@@ -3,12 +3,12 @@ import { InjectionHelper } from '../../testing/injection_helper';
 import { Coordinates } from '../../utils/coordinates';
 import { GRID } from '../game/state';
 import { isTownTile } from '../map/tile';
-import { LocationType } from '../state/location_type';
-import { LocationData, SpaceData } from '../state/space';
+import { SpaceType } from '../state/location_type';
+import { LandData, SpaceData } from '../state/space';
 import { ComplexTileType, Direction, SimpleTileType, TileType, TownTileType } from '../state/tile';
 import { BuildCostCalculator } from "./cost";
 
-const { RIVER, MOUNTAIN, PLAIN, SWAMP, LAKE, STREET } = LocationType;
+const { RIVER, MOUNTAIN, PLAIN, SWAMP, LAKE, STREET } = SpaceType;
 const {
   LOLLYPOP,
   THREE_WAY,
@@ -38,7 +38,7 @@ describe(BuildCostCalculator.name, () => {
   interface CalculateCostProps {
     from?: TileType,
     to: TileType,
-    type?: LocationData['type'],
+    type?: LandData['type'],
   }
 
   injector.initResettableState(GRID, new Map());

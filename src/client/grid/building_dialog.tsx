@@ -9,11 +9,11 @@ import { City } from '../../engine/map/city';
 import { rotateDirectionClockwise } from "../../engine/map/direction";
 import { Grid, Space } from '../../engine/map/grid';
 import { GridHelper } from "../../engine/map/grid_helper";
-import { calculateTrackInfo, Location, trackEquals } from "../../engine/map/location";
+import { calculateTrackInfo, Land, trackEquals } from "../../engine/map/location";
 import { isTownTile } from '../../engine/map/tile';
 import { Action } from "../../engine/state/action";
 import { AvailableCity } from '../../engine/state/available_city';
-import { LocationType } from '../../engine/state/location_type';
+import { SpaceType } from '../../engine/state/location_type';
 import { allDirections, ComplexTileType, Direction, SimpleTileType, TileData, TownTileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { useAction } from '../services/game';
@@ -38,7 +38,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
   const grid = useInjected(GridHelper);
   const [showReasons, setShowReasons] = useState(false);
   const [direction, rotate] = useReducer((prev: Direction, _: {}) => rotateDirectionClockwise(prev), Direction.TOP);
-  const space = coordinates && (grid.lookup(coordinates) as Location);
+  const space = coordinates && (grid.lookup(coordinates) as Land);
   const eligible = useTypedMemo(getEligibleBuilds, [action, coordinates, direction, showReasons]);
   const onSelect = useCallback((build: BuildData) => {
     cancelBuild();
@@ -125,7 +125,7 @@ export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpacePro
       return new City(space.coordinates, space.data);
     } else if (asCity != null) {
       return new City(space.coordinates, {
-        type: LocationType.CITY,
+        type: SpaceType.CITY,
         name: space.getTownName()!,
         color: asCity.color,
         goods: [],
@@ -138,7 +138,7 @@ export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpacePro
         townName: tile == null || isTownTile(tile.tileType) ? space.data.townName : undefined,
         tile,
       };
-      return new Location(space.coordinates, newLocationData);
+      return new Land(space.coordinates, newLocationData);
     }
   }, [space, tile, asCity]);
   const grid = useMemo(() => Grid.fromSpaces([newSpace]), [newSpace]);

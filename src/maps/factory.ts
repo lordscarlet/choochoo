@@ -1,28 +1,28 @@
 import { Map as ImmutableMap } from 'immutable';
 import { BLACK, WHITE } from "../engine/state/city_group";
 import { Good } from "../engine/state/good";
-import { LocationType } from "../engine/state/location_type";
+import { SpaceType } from "../engine/state/location_type";
 import { CitySettingData, OnRollSettingData } from "../engine/state/map_settings";
 import { OnRoll } from "../engine/state/roll";
-import { LocationData } from '../engine/state/space';
+import { LandData } from '../engine/state/space';
 import { Coordinates } from "../utils/coordinates";
 
-export const PLAIN: LocationData = {
-  type: LocationType.PLAIN,
+export const PLAIN: LandData = {
+  type: SpaceType.PLAIN,
 };
 
-export function plain(data: Omit<LocationData, 'type'>): LocationData {
-  return { ...data, type: LocationType.PLAIN };
+export function plain(data: Omit<LandData, 'type'>): LandData {
+  return { ...data, type: SpaceType.PLAIN };
 }
 
 export const UNPASSABLE = undefined;
 
-export const RIVER: LocationData = {
-  type: LocationType.RIVER,
+export const RIVER: LandData = {
+  type: SpaceType.RIVER,
 };
 
-export const MOUNTAIN: LocationData = {
-  type: LocationType.MOUNTAIN,
+export const MOUNTAIN: LandData = {
+  type: SpaceType.MOUNTAIN,
 };
 
 export function black(onRoll: OnRoll): OnRollSettingData {
@@ -40,7 +40,7 @@ export function city(name: string, cityColor?: Good | Good[], onRollData?: OnRol
 }
 
 export function customCity(city: Omit<CitySettingData, 'type'>): CitySettingData {
-  return { ...city, type: LocationType.CITY };
+  return { ...city, type: SpaceType.CITY };
 }
 
 export function grid<T>(array: Array<Array<T | undefined>>): ImmutableMap<Coordinates, T> {
@@ -69,7 +69,7 @@ function offset<T>(grid: Array<Array<T | undefined>>): Array<Array<T | undefined
   return newGrid;
 }
 
-export function town(townName: string): LocationData {
+export function town(townName: string): LandData {
   return {
     ...PLAIN,
     townName,

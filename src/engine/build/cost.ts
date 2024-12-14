@@ -1,9 +1,9 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { injectGrid } from "../game/state";
-import { Location, toBaseTile } from "../map/location";
+import { Land, toBaseTile } from "../map/location";
 import { crosses, isComplexTile, isSimpleTile, isTownTile } from "../map/tile";
-import { LocationType } from "../state/location_type";
+import { SpaceType } from "../state/location_type";
 import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../state/tile";
 
 
@@ -12,7 +12,7 @@ export class BuildCostCalculator {
 
   costOf(coordinates: Coordinates, newTileType: TileType): number {
     const location = this.grid().get(coordinates);
-    assert(location instanceof Location, 'cannot calculate cost of track in non-buildable location');
+    assert(location instanceof Land, 'cannot calculate cost of track in non-buildable location');
     const previousTileType = location.getTileType();
     const isReplacingTile = previousTileType != null;
     if (!isReplacingTile) {
@@ -29,16 +29,16 @@ export class BuildCostCalculator {
     }
   }
 
-  getTerrainCost(location: Location): number {
+  getTerrainCost(location: Land): number {
     if (location.hasTown()) return 0;
-    const type = location.getLocationType();
+    const type = location.getLandType();
     switch (type) {
-      case LocationType.MOUNTAIN: return 4;
-      case LocationType.RIVER: return 3;
-      case LocationType.PLAIN: return 2;
-      case LocationType.SWAMP: return 4;
-      case LocationType.LAKE: return 6;
-      case LocationType.STREET: return 4;
+      case SpaceType.MOUNTAIN: return 4;
+      case SpaceType.RIVER: return 3;
+      case SpaceType.PLAIN: return 2;
+      case SpaceType.SWAMP: return 4;
+      case SpaceType.LAKE: return 6;
+      case SpaceType.STREET: return 4;
       default:
         assertNever(type);
     }

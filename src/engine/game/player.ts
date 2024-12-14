@@ -1,6 +1,6 @@
 import { inject, injectState } from "../framework/execution_context";
 import { GridHelper } from "../map/grid_helper";
-import { Location } from "../map/location";
+import { Land } from "../map/location";
 import { MutablePlayerData, PlayerColor, PlayerData } from "../state/player";
 import { CURRENT_PLAYER, PLAYERS } from "./state";
 
@@ -44,7 +44,7 @@ export class PlayerHelper {
   countTrack(color: PlayerColor): number {
     let numTrack = 0;
     for (const space of this.grid.all()) {
-      if (!(space instanceof Location)) continue;
+      if (!(space instanceof Land)) continue;
       for (const track of space.getTrack()) {
         if (track.getOwner() !== color) continue;
         numTrack++;

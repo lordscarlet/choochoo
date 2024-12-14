@@ -6,7 +6,7 @@ import { BAG, injectGrid } from "../../../engine/game/state";
 import { City } from "../../../engine/map/city";
 import { GridHelper } from "../../../engine/map/grid_helper";
 import { goodToString, GoodZod } from "../../../engine/state/good";
-import { LocationType } from "../../../engine/state/location_type";
+import { SpaceType } from "../../../engine/state/location_type";
 import { CoordinatesZod } from "../../../utils/coordinates";
 import { assert } from "../../../utils/validate";
 import { REPOPULATION } from "./state";
@@ -34,7 +34,7 @@ export class RepopulateAction implements ActionProcessor<RepopulateData> {
 
   process({ coordinates, good }: RepopulateData): boolean {
     this.gridHelper.update(coordinates, (space) => {
-      assert(space.type === LocationType.CITY);
+      assert(space.type === SpaceType.CITY);
       space.goods.push(good);
     });
 

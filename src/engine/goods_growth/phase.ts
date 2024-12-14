@@ -9,7 +9,7 @@ import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
 import { Good, goodToString } from "../state/good";
-import { LocationType } from "../state/location_type";
+import { SpaceType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { GoodsHelper } from "./helper";
@@ -80,7 +80,7 @@ export class GoodsGrowthPhase extends PhaseModule {
         const numRolled = rolls.get(group)!.filter((r) => r === onRoll).length;
         if (numRolled === 0) continue;
         this.grid.update(city.coordinates, (location) => {
-          assert(location.type === LocationType.CITY);
+          assert(location.type === SpaceType.CITY);
           const newGoods = location.onRoll[index].goods.splice(-numRolled, numRolled);
           location.goods.push(...newGoods);
         });

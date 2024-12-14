@@ -8,7 +8,7 @@ import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { CityGroup } from "../state/city_group";
 import { Good } from "../state/good";
-import { LocationType } from "../state/location_type";
+import { SpaceType } from "../state/location_type";
 import { OnRoll, OnRollData } from "../state/roll";
 import { GoodsHelper } from "./helper";
 import { GOODS_GROWTH_STATE } from "./state";
@@ -55,7 +55,7 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
   process(data: ProductionData): boolean {
     const city = this.findCity(data);
     this.grid.update(city!.coordinates, city => {
-      assert(city.type === LocationType.CITY);
+      assert(city.type === SpaceType.CITY);
       const onRoll = this.findOnRoll(city.onRoll, data);
       onRoll!.goods.push(data.good);
       this.log.currentPlayer(`puts ${data.good} in $${city.name}`);

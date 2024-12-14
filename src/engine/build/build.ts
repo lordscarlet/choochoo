@@ -8,9 +8,9 @@ import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
 import { injectCurrentPlayer, injectGrid } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
-import { calculateTrackInfo, Location } from "../map/location";
+import { calculateTrackInfo, Land } from "../map/location";
 import { TOWN, Track } from "../map/track";
-import { LocationType } from "../state/location_type";
+import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { Direction, getTileTypeString, TileData, TileType } from "../state/tile";
 import { BuildCostCalculator } from "./cost";
@@ -67,11 +67,11 @@ export class BuildAction implements ActionProcessor<BuildData> {
     const newTile = this.newTile(data);
     this.log.currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${data.coordinates}`);
     this.gridHelper.update(coordinates, (hex) => {
-      assert(hex.type !== LocationType.CITY);
+      assert(hex.type !== SpaceType.CITY);
       hex.tile = newTile;
     });
     const location = this.gridHelper.lookup(coordinates);
-    assert(location instanceof Location);
+    assert(location instanceof Land);
 
     const toUpdate: Array<[Track, PlayerColor | undefined]> = [];
     for (const originatingTrack of location.getTrack()) {
@@ -95,7 +95,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
   private newTile(data: BuildData): TileData {
     const newTileData = calculateTrackInfo(data);
     const oldTrack = this.gridHelper.lookup(data.coordinates);
-    assert(oldTrack instanceof Location);
+    assert(oldTrack instanceof Land);
     const owners = newTileData.map((newTrack) => {
       const previousTrack = oldTrack.getTrack().find((track) =>
         track.getExits().some((exit) => exit !== TOWN && newTrack.exits.includes(exit)));

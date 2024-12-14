@@ -5,18 +5,18 @@ import { deepEquals } from '../../utils/deep_equals';
 import { isNotNull, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GridData } from "../state/grid";
-import { LocationType } from "../state/location_type";
+import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { allDirections, Direction } from "../state/tile";
 import { City, isCity } from "./city";
 import { getOpposite } from "./direction";
-import { Location } from "./location";
+import { Land } from "./location";
 import { Exit, TOWN, Track, tupleMap } from "./track";
 
-export type Space = City | Location;
+export type Space = City | Land;
 
 export class Grid {
-  private constructor(readonly grid: ImmutableMap<Coordinates, Space>) { }
+  private constructor(private readonly grid: ImmutableMap<Coordinates, Space>) { }
 
   get(coordinates: Coordinates): Space | undefined {
     return this.grid.get(coordinates);
@@ -42,14 +42,14 @@ export class Grid {
     return this.grid.entries();
   }
 
-  getNeighbor(coordinates: Coordinates, dir: Direction): City | Location | undefined {
+  getNeighbor(coordinates: Coordinates, dir: Direction): City | Land | undefined {
     return this.get(coordinates.neighbor(dir));
   }
 
   getDanglers(color?: PlayerColor): DanglerInfo[] {
     const danglers: DanglerInfo[] = [];
     for (const space of this.values()) {
-      if (!(space instanceof Location)) continue;
+      if (!(space instanceof Land)) continue;
       for (const track of space.getTrack()) {
         if (track.getOwner() !== color) continue;
         if (!this.dangles(track)) continue;
@@ -162,7 +162,7 @@ export class Grid {
     return this.findRoutesToLocationFromTown(space, toCoordinates);
   }
 
-  findRoutesToLocationFromTown(location: Location, coordinates: Coordinates): Track[] {
+  findRoutesToLocationFromTown(location: Land, coordinates: Coordinates): Track[] {
     assert(location.hasTown(), 'cannot call findRoutesToLocation from a non-town hex');
     return location.getTrack().filter((track) => this.endsWith(track, coordinates));
   }
@@ -185,10 +185,10 @@ export class Grid {
       if (map.has(coordinates) && deepEquals(map.get(coordinates)!.data, spaceData)) {
         continue;
       }
-      if (spaceData.type === LocationType.CITY) {
+      if (spaceData.type === SpaceType.CITY) {
         map = map.set(coordinates, new City(coordinates, spaceData));
       } else {
-        map = map.set(coordinates, new Location(coordinates, spaceData));
+        map = map.set(coordinates, new Land(coordinates, spaceData));
       }
     }
     if (map === this.grid) return this;

@@ -9,7 +9,7 @@ import { Log } from "../game/log";
 import { BAG, injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
-import { Location } from "../map/location";
+import { Land } from "../map/location";
 import { Good, goodToString } from "../state/good";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
@@ -71,7 +71,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
     // Validate that the route passes through cities and towns
     for (const step of action.path.slice(0, action.path.length - 1)) {
       const location = grid.get(step.endingStop);
-      if (!(location instanceof City) && !(location instanceof Location && location.hasTown())) {
+      if (!(location instanceof City) && !(location instanceof Land && location.hasTown())) {
         throw new InvalidInputError('Invalid path, must pass through cities and towns');
       }
       if (location instanceof City && location.accepts(action.good)) {
@@ -89,7 +89,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
 
     // Validate that the route is valid
-    let fromCity: City | Location = startingCity;
+    let fromCity: City | Land = startingCity;
     for (const step of action.path) {
       const toCoordinates = step.endingStop;
       const startingRouteTrack = fromCity instanceof City

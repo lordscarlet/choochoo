@@ -3,7 +3,7 @@ import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { injectCurrentPlayer } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
-import { Location } from "../map/location";
+import { Land } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Action } from "../state/action";
 import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../state/tile";
@@ -66,8 +66,8 @@ export class BuilderHelper {
 
     const townTiles = new Map<TownTileType, number>();
 
-    const tiles = [...this.grid.all()].filter((space): space is Location =>
-      space instanceof Location).filter(space => space.hasTile())
+    const tiles = [...this.grid.all()].filter((space): space is Land =>
+      space instanceof Land).filter(space => space.hasTile())
       .map((space) => space.getTileType()!);
     // We have to verify the new tile before shifting through all the
     // complexities around town tiles.
