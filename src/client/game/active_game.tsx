@@ -16,6 +16,7 @@ import { GoodsTable } from "./goods_table";
 import { PlayerStats } from "./player_stats";
 import { SelectAction } from "./select_action";
 import { SwitchToActive, SwitchToUndo } from "./switch";
+import { AlternateRules } from "./alternate_rules";
 
 
 export function ActiveGame() {
@@ -47,6 +48,7 @@ function InternalActiveGame() {
     {!undoOnly && <GameMap />}
     {!undoOnly && !canEmit && <GoodsTable />}
     {!undoOnly && <AvailableCities />}
+    <AlternateRules gameKey={game.gameKey} />
   </div>;
 }
 
