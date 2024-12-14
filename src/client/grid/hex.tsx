@@ -16,29 +16,32 @@ import * as styles from './hex.module.css';
 import * as gridStyles from './hex_grid.module.css';
 import { HexName } from "./hex_name";
 import { OnRoll } from "./on_roll";
-import { coordinatesToCenter, edgeCorners, getCorners, offsetPoint, Point, polygon } from "./point";
+import { coordinatesToCenter, edgeCorners, getCorners, getHalfCorners, offsetPoint, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
-function color(space: Space): string {
+function colorStyles(space: Space): string[] {
   if (space instanceof City) {
     const colors = space.goodColors();
-    return `${styles.city} ${colors.length > 0 ? goodStyle(colors[0]) : ''}`;
+    if (colors.length === 0) {
+      return [''];
+    }
+    return colors.map((color) => goodStyle(color));
   } else if (space instanceof Land) {
     const type = space.getLandType();
     switch (type) {
       case SpaceType.PLAIN:
-        return styles.plain;
+        return [styles.plain];
       case SpaceType.RIVER:
-        return styles.river;
+        return [styles.river];
       case SpaceType.MOUNTAIN:
-        return styles.mountain;
+        return [styles.mountain];
       // TODO: render street and street
       case SpaceType.LAKE:
       case SpaceType.STREET:
       case SpaceType.SWAMP:
-        return styles.swamp;
+        return [styles.swamp];
       case SpaceType.UNPASSABLE:
-        return styles.unpassable;
+        return [styles.unpassable];
       default:
         assertNever(type);
     }
@@ -66,7 +69,7 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
     polygon(getCorners(center, size))
     , [center, size]);
 
-  const hexColor = color(space);
+  const [hexColor, alternateColor] = colorStyles(space);
 
   const trackInfo = useMemo(() => {
     const tileData = tile != null ? tile : space instanceof Land ? space.getTileData() : undefined;
@@ -104,7 +107,9 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
     isClaimableTrack;
 
   return <>
-    <polygon className={`${space instanceof City ? '' : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
+    <polygon className={`${space instanceof City ? styles.city : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="0" />
+    {alternateColor && <HalfHex center={center} size={size} alternateColor={alternateColor} />}
+    <polygon fillOpacity="0" data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
     {space instanceof Land && space.unpassableExits().map(direction => <UnpassableEdge key={direction} center={center} size={size} direction={direction} />)}
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Land && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
@@ -113,6 +118,19 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
     {space instanceof City && space.cityName() != '' && <HexName name={space.cityName()} center={center} size={size} />}
     {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
   </>;
+}
+
+interface HalfHexProps {
+  center: Point;
+  size: number;
+  alternateColor: string;
+}
+
+function HalfHex({ center, size, alternateColor }: HalfHexProps) {
+  const corners = useMemo(() =>
+    polygon(getHalfCorners(center, size))
+    , [center, size]);
+  return <polygon className={`${styles.city} ${alternateColor}`} points={corners} strokeWidth="0" />
 }
 
 interface UnpassableEdgeProps {

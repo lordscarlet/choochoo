@@ -64,6 +64,16 @@ export function getCorners(center: Point, size: number): Point[] {
   return allCornerLocations.map((cornerLocation) => movePointInDirection(center, size, cornerLocation));
 }
 
+export function getHalfCorners(center: Point, size: number): Point[] {
+  const [topRight, right, bottomRight] =
+    [TOP_RIGHT, RIGHT, BOTTOM_RIGHT].map(
+      cornerLocation => movePointInDirection(center, size, cornerLocation));
+
+  const top = { x: center.x, y: topRight.y };
+  const bottom = { x: center.x, y: bottomRight.y };
+  return [top, topRight, right, bottomRight, bottom];
+}
+
 /** Returns corners of an edge of a hex. */
 export function edgeCorners(center: Point, size: number, direction: Direction): Point[] {
   return edgeAngles(direction).map(angle => movePointInDirection(center, size, angle));
