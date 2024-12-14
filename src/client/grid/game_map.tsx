@@ -11,6 +11,7 @@ import { MoveAction, MoveData, Path } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";
 import { PlayerData } from "../../engine/state/player";
 import { isDirection } from "../../engine/state/tile";
+import { DeurbanizeAction, DeurbanizeData } from "../../maps/ireland/deurbanization";
 import { Coordinates } from "../../utils/coordinates";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
@@ -131,9 +132,15 @@ function getSelectedGood(moveActionProgress: MoveData | undefined): { good: Good
   };
 }
 
-function onClickCb(isPending: boolean, canEmitBuild: boolean, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Location) => void, onMoveToSpace: (space: Space) => void) {
+function onClickCb(isPending: boolean, canEmitBuild: boolean, canEmitDeurbanize: boolean, emitDeurbanize: (data: DeurbanizeData) => void, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Location) => void, onMoveToSpace: (space: Space) => void) {
   return (space: Space, good?: Good) => {
     if (isPending) return;
+    if (canEmitDeurbanize) {
+      if (good != null) {
+        emitDeurbanize({ coordinates: space.coordinates, good });
+      }
+      return;
+    }
     if (canEmitMove) {
       if (good != null) {
         assert(space instanceof City);
@@ -171,12 +178,13 @@ function maybeConfirmDeliveryCb(dialogs: DialogHook, grid: Grid, emitMove: (move
 export function GameMap() {
   const { canEmit: canEmitBuild, isPending: isBuildPending } = useAction(BuildAction);
   const { canEmit: canEmitMove, emit: emitMove, isPending: isMovePending } = useAction(MoveAction);
+  const { canEmit: canEmitDeurbanize, emit: emitDeurbanize, isPending: isDeurbanizePending } = useAction(DeurbanizeAction);
   const player = useCurrentPlayer();
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Location | undefined>(undefined);
   const moveHelper = useInjected(MoveHelper);
 
-  const isPending = isBuildPending || isMovePending;
+  const isPending = isBuildPending || isMovePending || isDeurbanizePending;
 
   const dialogs = useDialogs();
 
@@ -192,7 +200,7 @@ export function GameMap() {
 
   const selectedGood = useTypedMemo(getSelectedGood, [moveActionProgress]);
 
-  const onClick = useTypedCallback(onClickCb, [isPending, canEmitBuild, canEmitMove, onSelectGood, setBuildingSpace, onMoveToSpace]);
+  const onClick = useTypedCallback(onClickCb, [isPending, canEmitBuild, canEmitDeurbanize, emitDeurbanize, canEmitMove, onSelectGood, setBuildingSpace, onMoveToSpace]);
 
   const clickTargets: Set<ClickTarget> = useMemo(() => {
     if (isPending) return new Set();
@@ -200,11 +208,14 @@ export function GameMap() {
     if (canEmitMove) {
       return new Set([ClickTarget.GOOD, ClickTarget.TOWN, ClickTarget.CITY]);
     }
+    if (canEmitDeurbanize) {
+      return new Set([ClickTarget.GOOD]);
+    }
     if (canEmitBuild) {
       return new Set([ClickTarget.LOCATION]);
     }
     return new Set();
-  }, [canEmitMove, canEmitBuild, isPending]);
+  }, [canEmitMove, canEmitDeurbanize, canEmitBuild, isPending]);
 
   return <>
     <HexGrid onClick={onClick} allowZoom highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
