@@ -23,7 +23,7 @@ function colorStyles(space: Space): string[] {
   if (space instanceof City) {
     const colors = space.goodColors();
     if (colors.length === 0) {
-      return [''];
+      return [styles.colorless];
     }
     return colors.map((color) => goodStyle(color));
   } else if (space instanceof Land) {

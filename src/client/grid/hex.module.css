@@ -2,6 +2,10 @@
   fill: var(--good-color);
 }
 
+.colorless {
+  --good-color: rgb(224, 99, 59);
+}
+
 .location.plain {
   fill: lightgreen;
 }
