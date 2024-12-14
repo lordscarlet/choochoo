@@ -1,7 +1,7 @@
 
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { FormEvent, useCallback, useMemo } from "react";
-import { ReleaseStage } from "../../engine/game/map_settings";
+import { ReleaseStage, releaseStageToString } from "../../engine/game/map_settings";
 import { MapRegistry } from "../../maps";
 import { environment, Stage } from "../services/environment";
 import { useCreateGame } from "../services/game";
@@ -30,6 +30,7 @@ export function CreateGamePage() {
     autoComplete="off"
     onSubmit={onSubmit}
   >
+    <h1>Create a new Game</h1>
     <FormControl>
       <TextField
         required
@@ -52,7 +53,10 @@ export function CreateGamePage() {
         autoWidth
         label="Map"
       >
-        {maps.map((m) => <MenuItem key={m.key} value={m.key}>{m.name}</MenuItem>)}
+        {maps.map((m) => <MenuItem key={m.key} value={m.key}>
+          {m.name}
+          {m.stage !== ReleaseStage.PRODUCTION && ` (${releaseStageToString(m.stage)})`}
+        </MenuItem>)}
       </Select>
       {validationError?.gameKey && <FormHelperText>{validationError?.gameKey}</FormHelperText>}
     </FormControl>
