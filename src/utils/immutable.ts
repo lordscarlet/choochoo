@@ -2,7 +2,7 @@
 import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import { City } from '../engine/map/city';
 import { Grid } from '../engine/map/grid';
-import { Location } from '../engine/map/location';
+import { Land } from '../engine/map/location';
 import { Coordinates } from './coordinates';
 import { isPrimitive } from "./functions";
 import { Primitive } from "./types";
@@ -17,7 +17,7 @@ export type Immutable<T> =
   : T extends Grid ? Grid
   : T extends ImmutableSet<any> ? T
   : T extends City ? T
-  : T extends Location ? T
+  : T extends Land ? T
   : T extends ImmutableMap<any, any> ? T
   : T extends ReadonlyArray<Immutable<any>> ? T
   : T extends Array<infer A> ? ReadonlyArray<Immutable<A>>

@@ -4,7 +4,7 @@ import { BuildAction } from "../../engine/build/build";
 import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
 import { Grid, Space } from "../../engine/map/grid";
-import { Location } from "../../engine/map/location";
+import { Land } from "../../engine/map/location";
 import { Track } from "../../engine/map/track";
 import { MoveHelper } from "../../engine/move/helper";
 import { MoveAction, MoveData, Path } from "../../engine/move/move";
@@ -113,7 +113,7 @@ function getHighlightedTrack(grid: Grid, moveActionProgress: MoveData | undefine
   return moveActionProgress.path.flatMap((p, index) => {
     const startingStop = index === 0 ? moveActionProgress.startingCity : moveActionProgress.path[index - 1].endingStop;
     const space = grid.get(startingStop);
-    if (space instanceof Location) {
+    if (space instanceof Land) {
       const track = space.trackExiting(p.startingExit);
       assert(track != null);
       return grid.getRoute(track);
@@ -132,7 +132,7 @@ function getSelectedGood(moveActionProgress: MoveData | undefined): { good: Good
   };
 }
 
-function onClickCb(isPending: boolean, canEmitBuild: boolean, canEmitDeurbanize: boolean, emitDeurbanize: (data: DeurbanizeData) => void, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Location) => void, onMoveToSpace: (space: Space) => void) {
+function onClickCb(isPending: boolean, canEmitBuild: boolean, canEmitDeurbanize: boolean, emitDeurbanize: (data: DeurbanizeData) => void, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Land) => void, onMoveToSpace: (space: Space) => void) {
   return (space: Space, good?: Good) => {
     if (isPending) return;
     if (canEmitDeurbanize) {
@@ -151,7 +151,7 @@ function onClickCb(isPending: boolean, canEmitBuild: boolean, canEmitDeurbanize:
       onMoveToSpace(space);
       return;
     }
-    if (canEmitBuild && space instanceof Location) {
+    if (canEmitBuild && space instanceof Land) {
       setBuildingSpace(space);
       return;
     }
@@ -181,7 +181,7 @@ export function GameMap() {
   const { canEmit: canEmitDeurbanize, emit: emitDeurbanize, isPending: isDeurbanizePending } = useAction(DeurbanizeAction);
   const player = useCurrentPlayer();
   const grid = useGrid();
-  const [buildingSpace, setBuildingSpace] = useGameVersionState<Location | undefined>(undefined);
+  const [buildingSpace, setBuildingSpace] = useGameVersionState<Land | undefined>(undefined);
   const moveHelper = useInjected(MoveHelper);
 
   const isPending = isBuildPending || isMovePending || isDeurbanizePending;

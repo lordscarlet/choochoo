@@ -1,19 +1,19 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assertNever } from "../../utils/validate";
 import { Good } from "../state/good";
-import { LocationData } from "../state/space";
+import { LandData, LandType } from "../state/space";
 import { ComplexTileType, Direction, SimpleTileType, TileData, TileType, TownTileType } from "../state/tile";
 import { rotateDirectionClockwise } from "./direction";
 import { Exit, rotateExitClockwise, TOWN, Track, TrackInfo } from "./track";
 
-export function isLocation(s: unknown): s is Location {
-  return s instanceof Location;
+export function isLand(s: unknown): s is Land {
+  return s instanceof Land;
 }
 
-export class Location {
+export class Land {
   private readonly track: Track[];
 
-  constructor(readonly coordinates: Coordinates, readonly data: LocationData) {
+  constructor(readonly coordinates: Coordinates, readonly data: LandData) {
     this.track = calculateTrackInfo(this.data.tile).map((trackInfo, index) => new Track(index, this.coordinates, trackInfo));
   }
 
@@ -49,7 +49,7 @@ export class Location {
     return this.data.goods ?? [];
   }
 
-  getLocationType(): LocationData['type'] {
+  getLandType(): LandType {
     return this.data.type;
   }
 

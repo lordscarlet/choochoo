@@ -2,11 +2,11 @@ import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 import { injectState } from "../framework/execution_context";
 import { GRID, injectGrid } from "../game/state";
-import { LocationType } from "../state/location_type";
+import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { MutableSpaceData, SpaceData } from "../state/space";
 import { City } from "./city";
-import { Location } from "./location";
+import { Land } from "./location";
 import { Track } from "./track";
 
 
@@ -27,16 +27,16 @@ export class GridHelper {
 
   setTrackOwner(track: Track, owner?: PlayerColor): void {
     this.update(track.coordinates, (hex) => {
-      assert(hex.type !== LocationType.CITY);
+      assert(hex.type !== SpaceType.CITY);
       hex.tile!.owners[track.ownerIndex] = owner;
     });
   }
 
-  lookup(coordinates: Coordinates): City | Location | undefined {
+  lookup(coordinates: Coordinates): City | Land | undefined {
     return this.spaces().get(coordinates);
   }
 
-  all(): Iterable<City | Location> {
+  all(): Iterable<City | Land> {
     return this.spaces().values();
   }
 

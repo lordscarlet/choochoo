@@ -8,11 +8,11 @@ import { Log } from "../game/log";
 import { AVAILABLE_CITIES, injectCurrentPlayer, injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
-import { Location } from "../map/location";
+import { Land } from "../map/location";
 import { Track } from "../map/track";
 import { Action } from "../state/action";
 import { toLetter } from "../state/city_group";
-import { LocationType } from "../state/location_type";
+import { SpaceType } from "../state/location_type";
 import { allDirections } from "../state/tile";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
@@ -46,7 +46,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
     }
 
     const space = this.gridHelper.lookup(data.coordinates);
-    assert(space instanceof Location, 'can only urbanize in town locations');
+    assert(space instanceof Land, 'can only urbanize in town locations');
     assert(space.hasTown(), 'can only urbanize in town locations');
     const city = this.availableCities()[data.cityIndex];
     assert(city != null, `Available city doesn't exist at ${data.cityIndex}`);
@@ -56,11 +56,11 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
     this.buildState.update((state) => state.hasUrbanized = true);
     const city = this.availableCities()[data.cityIndex];
 
-    const location = this.gridHelper.lookup(data.coordinates) as Location;
+    const location = this.gridHelper.lookup(data.coordinates) as Land;
 
     this.availableCities.update((cities) => cities.splice(data.cityIndex, 1));
     this.gridHelper.set(data.coordinates, {
-      type: LocationType.CITY,
+      type: SpaceType.CITY,
       name: location.getTownName()!,
       color: city.color,
       goods: [],

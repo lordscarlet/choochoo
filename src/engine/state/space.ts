@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { Immutable } from "../../utils/immutable";
 import { Good } from "./good";
-import { LocationType, LocationTypeZod } from "./location_type";
+import { SpaceType, SpaceTypeZod } from "./location_type";
 import { OnRollData } from "./roll";
 import { DirectionZod, MutableTileData } from "./tile";
 
 
 export const MutableCityData = z.object({
-  type: z.literal(LocationType.CITY),
+  type: z.literal(SpaceType.CITY),
   name: z.string(),
   color: z.union([z.array(z.nativeEnum(Good)), z.nativeEnum(Good)]),
   goods: z.array(z.nativeEnum(Good)),
@@ -18,12 +18,15 @@ export const MutableCityData = z.object({
 export type MutableCityData = z.infer<typeof MutableCityData>;
 export type CityData = Immutable<MutableCityData>;
 
-function isLocationType(value: LocationType): value is Exclude<LocationType, LocationType.CITY | LocationType.UNPASSABLE> {
-  return value !== LocationType.CITY && value !== LocationType.UNPASSABLE;
+export const LandType = SpaceTypeZod.refine(isLandType);
+export type LandType = Exclude<SpaceType, SpaceType.CITY | SpaceType.UNPASSABLE>;
+
+function isLandType(value: SpaceType): value is LandType {
+  return value !== SpaceType.CITY && value !== SpaceType.UNPASSABLE;
 }
 
-export const MutableLocationData = z.object({
-  type: LocationTypeZod.refine(isLocationType),
+export const MutableLandData = z.object({
+  type: LandType,
   townName: z.string().optional(),
   tile: MutableTileData.optional(),
   terrainCost: z.number().optional(),
@@ -31,9 +34,9 @@ export const MutableLocationData = z.object({
   unpassableEdges: z.array(DirectionZod).optional(),
 });
 
-export type MutableLocationData = z.infer<typeof MutableLocationData>;
-export type LocationData = Immutable<MutableLocationData>;
+export type MutableLandData = z.infer<typeof MutableLandData>;
+export type LandData = Immutable<MutableLandData>;
 
-export const MutableSpaceData = z.union([MutableCityData, MutableLocationData]);
+export const MutableSpaceData = z.union([MutableCityData, MutableLandData]);
 export type MutableSpaceData = z.infer<typeof MutableSpaceData>;
 export type SpaceData = Immutable<MutableSpaceData>;

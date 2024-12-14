@@ -3,7 +3,7 @@ import { AVAILABLE_CITIES } from "../../engine/game/state";
 import { City } from "../../engine/map/city";
 import { Grid } from "../../engine/map/grid";
 import { MutableAvailableCity } from "../../engine/state/available_city";
-import { LocationType } from "../../engine/state/location_type";
+import { SpaceType } from "../../engine/state/location_type";
 import { Coordinates } from "../../utils/coordinates";
 import { HexGrid } from "../grid/hex_grid";
 import { useInjectedState } from "../utils/injection_context";
@@ -25,7 +25,7 @@ export function AvailableCities() {
 export function AvailableCity({ city }: { city: MutableAvailableCity }) {
   const grid = useMemo(() => {
     const newCity = new City(Coordinates.from({ q: 0, r: 0 }), {
-      type: LocationType.CITY,
+      type: SpaceType.CITY,
       name: '',
       color: city.color,
       goods: [],

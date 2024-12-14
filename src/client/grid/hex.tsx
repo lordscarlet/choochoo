@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { City } from "../../engine/map/city";
-import { BaseTileData, calculateTrackInfo, Location } from "../../engine/map/location";
+import { BaseTileData, calculateTrackInfo, Land } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
 import { Track, TrackInfo } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
-import { LocationType } from "../../engine/state/location_type";
+import { SpaceType } from "../../engine/state/location_type";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { ClickTarget } from "./click_target";
@@ -17,22 +17,22 @@ import { OnRoll } from "./on_roll";
 import { coordinatesToCenter, getCorners, offsetPoint, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
-function color(space: City | Location | undefined): string {
+function color(space: City | Land | undefined): string {
   if (space instanceof City) {
     return `${styles.city} ${goodStyle(space.goodColors()[0])}`;
-  } else if (space instanceof Location) {
-    const type = space.getLocationType();
+  } else if (space instanceof Land) {
+    const type = space.getLandType();
     switch (type) {
-      case LocationType.PLAIN:
+      case SpaceType.PLAIN:
         return styles.plain;
-      case LocationType.RIVER:
+      case SpaceType.RIVER:
         return styles.river;
-      case LocationType.MOUNTAIN:
+      case SpaceType.MOUNTAIN:
         return styles.mountain;
       // TODO: render street and street
-      case LocationType.LAKE:
-      case LocationType.STREET:
-      case LocationType.SWAMP:
+      case SpaceType.LAKE:
+      case SpaceType.STREET:
+      case SpaceType.SWAMP:
         return styles.swamp;
       default:
         assertNever(type);
@@ -43,7 +43,7 @@ function color(space: City | Location | undefined): string {
 }
 
 interface RawHexProps {
-  space: Location | City;
+  space: Land | City;
   tile?: BaseTileData;
   size: number;
   className?: string;
@@ -65,7 +65,7 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
   const hexColor = color(space);
 
   const trackInfo = useMemo(() => {
-    const tileData = tile != null ? tile : space instanceof Location ? space.getTileData() : undefined;
+    const tileData = tile != null ? tile : space instanceof Land ? space.getTileData() : undefined;
     if (tileData == null) return [];
     return calculateTrackInfo(tileData);
   }, [space, tile]);
@@ -84,14 +84,14 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
   }, [space, coordinates, selectedGood]);
 
   const clickable = (clickTargets.has(ClickTarget.CITY) && space instanceof City) ||
-    (clickTargets.has(ClickTarget.LOCATION) && space instanceof Location) ||
-    (clickTargets.has(ClickTarget.TOWN) && space instanceof Location && space.hasTown());
+    (clickTargets.has(ClickTarget.LOCATION) && space instanceof Land) ||
+    (clickTargets.has(ClickTarget.TOWN) && space instanceof Land && space.hasTown());
 
   return <>
     <polygon className={`${space instanceof City ? '' : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
-    {space instanceof Location && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
-    {space instanceof Location && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
+    {space instanceof Land && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
+    {space instanceof Land && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
     {space instanceof City && <OnRoll city={space} center={center} size={size} />}
     {space instanceof City && space.cityName() != '' && <HexName name={space.cityName()} center={center} size={size} />}
     {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}

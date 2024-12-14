@@ -5,7 +5,7 @@ import { injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
 import { Grid } from "../map/grid";
-import { calculateTrackInfo, Location } from "../map/location";
+import { calculateTrackInfo, Land } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";
 import { PlayerColor } from "../state/player";
@@ -135,7 +135,7 @@ export class Validator {
     return this.grid().getEnd(neighbor, getOpposite(exit));
   }
 
-  private partitionTracks(space: Location, tracks: TrackInfo[]): Partitioned {
+  private partitionTracks(space: Land, tracks: TrackInfo[]): Partitioned {
     const preserved: TrackInfo[] = [];
     const rerouted: TrackInfo[] = [];
     const newTracks: TrackInfo[] = [];
@@ -156,7 +156,7 @@ export class Validator {
     return { preserved, newTracks, rerouted };
   }
 
-  private oldTrack(space: Location, newTrack: TrackInfo): Track | undefined {
+  private oldTrack(space: Land, newTrack: TrackInfo): Track | undefined {
     const oldTrackList = space.getTrack().filter((track) => {
       return newTrack.exits.some((exit) => exit !== TOWN && track.hasExit(exit));
     });
@@ -166,7 +166,7 @@ export class Validator {
     return oldTrackList[0];
   }
 
-  private newTrackExtendsPrevious(playerColor: PlayerColor, space: Location, newTracks: TrackInfo[]): boolean {
+  private newTrackExtendsPrevious(playerColor: PlayerColor, space: Land, newTracks: TrackInfo[]): boolean {
     // if it's a town tile, only one of the track needs to be placeable
     if (space.hasTown()) {
       return newTracks.some((track) => this.newTrackConnectsToOwned(space, playerColor, track));
@@ -174,7 +174,7 @@ export class Validator {
     return newTracks.every((track) => this.newTrackConnectsToOwned(space, playerColor, track));
   }
 
-  protected newTrackConnectsToOwned(space: Location, owner: PlayerColor, newTrack: TrackInfo): boolean {
+  protected newTrackConnectsToOwned(space: Land, owner: PlayerColor, newTrack: TrackInfo): boolean {
     return newTrack.exits.some((exit) => {
       if (exit === TOWN) {
         return space.getTrack().some((track) => track.getOwner() == owner);
@@ -191,7 +191,7 @@ export class Validator {
       const [end, endExit] = this.getEnd(trackExiting.coordinates, trackExiting.otherExit(getOpposite(exit)));
       if (endExit == TOWN) {
         const endSpace = this.grid().get(end);
-        assert(endSpace instanceof Location);
+        assert(endSpace instanceof Land);
         return endSpace.hasTown() && endSpace.getTrack().some((track) => track.getOwner() == owner);
       }
       const endSpace = this.grid().get(end.neighbor(endExit));
@@ -199,7 +199,7 @@ export class Validator {
     });
   }
 
-  private newTrackConnectsToAnotherPlayer(playerColor: PlayerColor, space: Location, newTracks: TrackInfo[]): boolean {
+  private newTrackConnectsToAnotherPlayer(playerColor: PlayerColor, space: Land, newTracks: TrackInfo[]): boolean {
     return newTracks.some((track) => {
       return track.exits.some((exit) => {
         if (exit == TOWN) return false;

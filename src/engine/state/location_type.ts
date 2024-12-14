@@ -1,6 +1,6 @@
 import z from "zod";
 
-export enum LocationType {
+export enum SpaceType {
   CITY = 1,
   PLAIN,
   RIVER,
@@ -11,4 +11,4 @@ export enum LocationType {
   UNPASSABLE,
 }
 
-export const LocationTypeZod = z.nativeEnum(LocationType);
+export const SpaceTypeZod = z.nativeEnum(SpaceType);

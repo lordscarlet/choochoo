@@ -6,7 +6,7 @@ import { GridHelper } from "../map/grid_helper";
 import { AvailableCity } from '../state/available_city';
 import { CityGroup } from '../state/city_group';
 import { Good } from '../state/good';
-import { LocationType } from '../state/location_type';
+import { SpaceType } from '../state/location_type';
 import { InitialMapGrid, SpaceSettingData } from '../state/map_settings';
 import { allPlayerColors, PlayerColor, PlayerData } from '../state/player';
 import { SpaceData } from '../state/space';
@@ -49,7 +49,7 @@ export class GameStarter {
   }
 
   protected drawCubesFor(bag: Good[], location: SpaceSettingData): SpaceData {
-    if (location.type !== LocationType.CITY) return location;
+    if (location.type !== SpaceType.CITY) return location;
     return {
       ...location,
       goods: draw(location.startingNumCubes, bag),

@@ -1,16 +1,16 @@
 
 import { Good } from "../../engine/state/good";
-import { LocationType } from "../../engine/state/location_type";
-import { LocationData } from "../../engine/state/space";
+import { SpaceType } from "../../engine/state/location_type";
+import { LandData } from "../../engine/state/space";
 import { duplicate } from "../../utils/functions";
 import { city, grid, MOUNTAIN, PLAIN, town, UNPASSABLE, white } from "../factory";
 
-const STREET: LocationData = {
-  type: LocationType.STREET,
+const STREET: LandData = {
+  type: SpaceType.STREET,
 };
 
-const LAKE: LocationData = {
-  type: LocationType.LAKE,
+const LAKE: LandData = {
+  type: SpaceType.LAKE,
 };
 
 export const map = grid([

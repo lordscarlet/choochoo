@@ -6,9 +6,9 @@ import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
 import { injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
-import { Location } from "../map/location";
+import { Land } from "../map/location";
 import { Action } from "../state/action";
-import { LocationType } from "../state/location_type";
+import { SpaceType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { BuildAction } from "./build";
@@ -52,7 +52,7 @@ export class BuildPhase extends PhaseModule {
 
     const toRemoveAll = toRemoveIndividual.flatMap((removing) => {
       const space = grid.get(removing.coordinates);
-      assert(space instanceof Location);
+      assert(space instanceof Land);
       const track = space.trackExiting(removing.immovableExit);
       return grid.getRoute(track!);
     });
@@ -60,7 +60,7 @@ export class BuildPhase extends PhaseModule {
     for (const track of toRemoveAll) {
       const index = track.ownerIndex;
       this.gridHelper.update(track.coordinates, (spaceData) => {
-        assert(spaceData.type !== LocationType.CITY);
+        assert(spaceData.type !== SpaceType.CITY);
         assert(spaceData.tile != null);
         spaceData.tile.owners[index] = undefined;
       });

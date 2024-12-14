@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Location } from '../../engine/map/location';
-import { LocationType } from '../../engine/state/location_type';
+import { Land } from '../../engine/map/location';
+import { SpaceType } from '../../engine/state/location_type';
 import { allPlayerColors } from '../../engine/state/player';
 import { Direction, SimpleTileType, TownTileType } from '../../engine/state/tile';
 import { Coordinates } from '../../utils/coordinates';
@@ -10,9 +10,9 @@ import { ModifiedSpace } from '../grid/building_dialog';
 import * as styles from './pallet.module.css';
 
 export function Pallet() {
-  const plain = new Location(Coordinates.from({ q: 0, r: 0 }), { type: LocationType.PLAIN, townName: 'Foo bar' });
-  const river = new Location(Coordinates.from({ q: 0, r: 0 }), { type: LocationType.RIVER, townName: 'Foo bar' });
-  const mountain = new Location(Coordinates.from({ q: 0, r: 0 }), { type: LocationType.MOUNTAIN, townName: 'Foo bar' });
+  const plain = new Land(Coordinates.from({ q: 0, r: 0 }), { type: SpaceType.PLAIN, townName: 'Foo bar' });
+  const river = new Land(Coordinates.from({ q: 0, r: 0 }), { type: SpaceType.RIVER, townName: 'Foo bar' });
+  const mountain = new Land(Coordinates.from({ q: 0, r: 0 }), { type: SpaceType.MOUNTAIN, townName: 'Foo bar' });
 
   const allColors = useMemo(() => [
     undefined,
