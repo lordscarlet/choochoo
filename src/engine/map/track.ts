@@ -35,6 +35,11 @@ export class Track {
     return this.track.exits.includes(exit);
   }
 
+  wasClaimed(): boolean {
+    return this.track.claimableCost != null &&
+      this.getOwner() != null;
+  }
+
   isClaimable(): boolean {
     return this.track.claimableCost != null &&
       this.getOwner() == null;

@@ -1,13 +1,12 @@
-import { inject, injectState } from "../framework/execution_context";
-import { GridHelper } from "../map/grid_helper";
+import { injectState } from "../framework/execution_context";
 import { Land } from "../map/location";
 import { MutablePlayerData, PlayerColor, PlayerData } from "../state/player";
-import { CURRENT_PLAYER, PLAYERS } from "./state";
+import { CURRENT_PLAYER, injectGrid, PLAYERS } from "./state";
 
 export class PlayerHelper {
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
   private readonly players = injectState(PLAYERS);
-  private readonly grid = inject(GridHelper);
+  private readonly grid = injectGrid();
 
   update(playerColor: PlayerColor, updateFn: (data: MutablePlayerData) => void): void {
     this.players.update((players) => {
@@ -43,11 +42,16 @@ export class PlayerHelper {
 
   countTrack(color: PlayerColor): number {
     let numTrack = 0;
-    for (const space of this.grid.all()) {
+    for (const space of this.grid().values()) {
       if (!(space instanceof Land)) continue;
       for (const track of space.getTrack()) {
         if (track.getOwner() !== color) continue;
-        numTrack++;
+        if (track.wasClaimed()) {
+          // Other track should not be claimed, but will be, so offset those track.
+          numTrack += 2 - this.grid().getRoute(track).length;
+        } else {
+          numTrack++;
+        }
       }
     }
     return numTrack;
