@@ -1,6 +1,7 @@
 import z from "zod";
 import { inject, injectState } from "../../engine/framework/execution_context";
 import { ActionProcessor } from "../../engine/game/action";
+import { PhaseEngine } from "../../engine/game/phase";
 import { PhaseModule } from "../../engine/game/phase_module";
 import { BAG, injectGrid, PLAYERS } from "../../engine/game/state";
 import { GridHelper } from "../../engine/map/grid_helper";
@@ -69,5 +70,22 @@ export class PassAction implements ActionProcessor<{}> {
 
   process(_: {}): boolean {
     return true;
+  }
+}
+
+export class IrelandPhaseEngine extends PhaseEngine {
+  phaseOrder(): Phase[] {
+    return [
+      Phase.SHARES,
+      Phase.TURN_ORDER,
+      Phase.ACTION_SELECTION,
+      Phase.BUILDING,
+      Phase.DEURBANIZATION,
+      Phase.MOVING,
+      Phase.INCOME,
+      Phase.EXPENSES,
+      Phase.INCOME_REDUCTION,
+      Phase.GOODS_GROWTH,
+    ];
   }
 }

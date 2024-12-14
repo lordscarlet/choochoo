@@ -1,6 +1,6 @@
 import { assert } from "../../utils/validate";
 import { BuildPhase } from "../build/phase";
-import { injectState } from "../framework/execution_context";
+import { inject, injectState } from "../framework/execution_context";
 import { GoodsGrowthPhase } from "../goods_growth/phase";
 import { ExpensesPhase } from "../income_and_expenses/expenses";
 import { IncomePhase } from "../income_and_expenses/income";
@@ -37,7 +37,7 @@ export class PhaseDelegator {
   }
 
   install<T>(ctor: PhaseConstructor): void {
-    const phase = new ctor();
+    const phase = inject(ctor);
     phase.configureActions();
     this.phases.set(ctor.phase, phase);
   }

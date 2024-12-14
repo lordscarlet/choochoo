@@ -1,10 +1,12 @@
 import z from "zod";
 import { injectState } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
+import { PHASE } from "../../engine/game/phase";
 import { MoveHelper } from "../../engine/move/helper";
 import { MoveAction, MoveData } from "../../engine/move/move";
 import { MovePhase } from "../../engine/move/phase";
 import { Action } from "../../engine/state/action";
+import { Phase } from "../../engine/state/phase";
 import { PlayerData } from "../../engine/state/player";
 
 export const USED_LOCO_KEY = new Key('USED_LOCO', { parse: z.boolean().parse });
@@ -23,6 +25,7 @@ export class IrelandMovePhase extends MovePhase {
 }
 
 export class IrelandMoveHelper extends MoveHelper {
+  private readonly phase = injectState(PHASE);
   private readonly usedLoco = injectState(USED_LOCO_KEY);
 
   getLocomotiveDisplay(player: PlayerData): string {
@@ -39,7 +42,11 @@ export class IrelandMoveHelper extends MoveHelper {
   }
 
   canUseLoco(player: PlayerData): boolean {
-    return player.selectedAction === Action.LOCOMOTIVE && !this.usedLoco();
+    const selectedLoco = player.selectedAction === Action.LOCOMOTIVE;
+    const phase = this.phase();
+    if (phase === Phase.MOVING) return selectedLoco && !this.usedLoco();
+    if (phase === Phase.ACTION_SELECTION || phase === Phase.BUILDING) return selectedLoco;
+    return false;
   }
 }
 
