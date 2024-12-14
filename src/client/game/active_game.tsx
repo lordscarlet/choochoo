@@ -13,10 +13,10 @@ import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
 import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
+import { MapInfo } from "./map_info";
 import { PlayerStats } from "./player_stats";
 import { SelectAction } from "./select_action";
 import { SwitchToActive, SwitchToUndo } from "./switch";
-import { AlternateRules } from "./alternate_rules";
 
 
 export function ActiveGame() {
@@ -48,7 +48,7 @@ function InternalActiveGame() {
     {!undoOnly && <GameMap />}
     {!undoOnly && !canEmit && <GoodsTable />}
     {!undoOnly && <AvailableCities />}
-    <AlternateRules gameKey={game.gameKey} />
+    <MapInfo gameKey={game.gameKey} />
   </div>;
 }
 
@@ -69,7 +69,7 @@ export function MovingMetadata() {
 }
 
 export function UndoButton() {
-  const { undo, canUndo , isPending } = useUndoAction();
+  const { undo, canUndo, isPending } = useUndoAction();
   if (!canUndo) {
     return <></>;
   }

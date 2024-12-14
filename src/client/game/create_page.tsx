@@ -6,6 +6,7 @@ import { MapRegistry } from "../../maps";
 import { environment, Stage } from "../services/environment";
 import { useCreateGame } from "../services/game";
 import { useCheckboxState, useNumberInputState, useSelectState, useTextInputState } from "../utils/form_state";
+import { MapInfo } from "./map_info";
 
 
 export function CreateGamePage() {
@@ -113,5 +114,6 @@ export function CreateGamePage() {
     <div>
       <Button type="submit" disabled={isPending}>Create</Button>
     </div>
+    <MapInfo gameKey={gameKey} />
   </Box>;
 }

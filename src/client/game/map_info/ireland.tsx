@@ -1,7 +1,6 @@
 
 export function IrelandRules() {
   return <div>
-    <h2>Ireland Rules</h2>
     <p>Same as base game with the following changes:</p>
     <ul>
       <li><b>Brown hexes:</b> start with a fixed number of goods and won't get any more for the rest of the game. They don't accept goods but still act as stops.</li>

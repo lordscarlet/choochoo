@@ -46,23 +46,29 @@ export const ActionApi = z.object({
 
 export type ActionApi = z.infer<typeof ActionApi>;
 
+function numPlayersMessage(gameKey: string): string {
+  const {name, minPlayers, maxPlayers} = MapRegistry.singleton.get(gameKey);
+
+  return `${name} only support ${minPlayers}-${maxPlayers} players`;
+}
+
 export const CreateGameApi = z.object({
   gameKey: z.string(),
   name: z.string().trim().min(1).max(32).regex(/^[a-zA-Z0-9_\- ]*$/, 'Can only use letters, numbers, spaces, _, and - characters'),
   artificialStart: z.boolean(),
 }).and(MapConfig)
+  .refine((data) => data.minPlayers <= data.maxPlayers,
+    { message: 'Cannot be less than min players', path: ['maxPlayers'] })
   .refine((data) => data.minPlayers >= MapRegistry.singleton.get(data.gameKey).minPlayers,
     (data) => ({
-      message: `Must be at least ${MapRegistry.singleton.get(data.gameKey).minPlayers}`,
+      message: numPlayersMessage(data.gameKey),
       path: ['minPlayers'],
     }))
   .refine((data) => data.maxPlayers <= MapRegistry.singleton.get(data.gameKey).maxPlayers,
     (data) => ({
-      message: `Must be at most ${MapRegistry.singleton.get(data.gameKey).maxPlayers}`,
+      message: numPlayersMessage(data.gameKey),
       path: ['maxPlayers'],
-    }))
-  .refine((data) => data.minPlayers <= data.maxPlayers,
-    { message: 'Cannot be less than min players', path: ['maxPlayers'] });
+    }));
 
 export type CreateGameApi = z.infer<typeof CreateGameApi>;
 

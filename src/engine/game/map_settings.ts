@@ -28,6 +28,8 @@ export interface MapSettings {
   readonly name: string;
   readonly minPlayers: number;
   readonly maxPlayers: number;
+  readonly bestAt?: string;
+  readonly recommendedPlayerCount?: string;
   readonly startingGrid: InitialMapGrid;
   readonly stage: ReleaseStage;
 
