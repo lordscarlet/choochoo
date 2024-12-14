@@ -1,18 +1,14 @@
-import { z } from "zod";
+import { z, ZodIssue } from "zod";
 
-export const ZodError = z.object({
+function assumeIsZodIssue(t: unknown): t is ZodIssue {
+  return true;
+}
+
+export const ZodErrorResponse = z.object({
   name: z.literal('ZodError'),
-  issues: z.array(z.object({
-    code: z.string(),
-    exact: z.boolean().optional(),
-    inclusive: z.boolean().optional(),
-    message: z.string(),
-    minimum: z.number().optional(),
-    path: z.array(z.string()),
-    type: z.string().optional(),
-  })),
+  issues: z.unknown().refine(assumeIsZodIssue).array(),
 });
 
-export type ZodError = z.infer<typeof ZodError>;
+export type ZodErrorResponse = z.infer<typeof ZodErrorResponse>;
 
 export type ValidationError = Record<string, string>;

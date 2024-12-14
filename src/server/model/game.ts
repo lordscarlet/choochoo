@@ -1,6 +1,6 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
-import { GameApi, GameLiteApi, GameStatus } from '../../api/game';
+import { GameApi, GameLiteApi, GameStatus, MapConfig } from '../../api/game';
 
 @Table({ modelName: 'Game' })
 export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAttributes<GameModel>> {
@@ -31,6 +31,9 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   @Attribute(DataTypes.ARRAY(DataTypes.INTEGER))
   @NotNull
   declare playerIds: number[];
+
+  @Attribute(DataTypes.JSONB)
+  declare config: MapConfig;
 
   @Attribute({ type: DataTypes.INTEGER, allowNull: true })
   declare activePlayerId?: number | null;
@@ -79,5 +82,6 @@ export function toLiteApi(game: GameApi | InferAttributes<GameModel>): GameLiteA
     status: game.status,
     playerIds: [...game.playerIds],
     activePlayerId: game.activePlayerId ?? undefined,
+    config: game.config,
   };
 }

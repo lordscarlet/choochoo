@@ -11,12 +11,12 @@ export function useTextInputState(initialValue = ''): [string, (e: ChangeEvent<H
   return [state, useCallback((e) => setState(e.target.value), [setState]), setState];
 }
 
-export function useNumberInputState(initialValue: number): [number, (e: ChangeEvent<HTMLInputElement>) => void, (value: number) => void] {
+export function useNumberInputState(initialValue: number | ''): [number | '', (e: ChangeEvent<HTMLInputElement>) => void, (value: number | '') => void] {
   const [state, setState] = useState(initialValue);
-  return [state, useCallback((e) => setState(e.target.valueAsNumber), [setState]), setState];
+  return [state, useCallback((e) => setState(isNaN(e.target.valueAsNumber) ? '' : e.target.valueAsNumber), [setState]), setState];
 }
 
-export function useSelectState<T>(initialValue: T): [T, (e: SelectChangeEvent<T>) => void] {
+export function useSelectState<T>(initialValue: T): [T, (e: SelectChangeEvent<T>) => void, (value: T) => void] {
   const [state, setState] = useState(initialValue);
-  return [state, useCallback((e) => setState(e.target.value as T), [setState])];
+  return [state, useCallback((e) => setState(e.target.value as T), [setState]), setState];
 }

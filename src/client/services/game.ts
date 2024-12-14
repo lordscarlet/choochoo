@@ -1,19 +1,19 @@
 import { useNotifications } from "@toolpad/core";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { CreateGameApi, GameApi, GameLiteApi, GamePageCursor, GameStatus, ListGamesApi } from "../../api/game";
 import { UserRole } from "../../api/user";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
-import { MapRegistry } from "../../maps";
 import { entries, peek } from "../../utils/functions";
 import { Entry } from "../../utils/types";
 import { assert, assertNever } from "../../utils/validate";
+import { useMostRecentValue } from "../utils/hooks";
 import { useInjected } from "../utils/injection_context";
 import { tsr } from "./client";
 import { useMe } from "./me";
-import { handleError } from "./network";
+import { handleError, toValidationError } from "./network";
 import { socket, useJoinRoom } from "./socket";
 import { useUsers } from "./user";
 
@@ -172,18 +172,41 @@ export function useGame(): GameApi {
   return data.body.game;
 }
 
-export function useCreateGame(): { createGame: (game: CreateGameApi) => void, isPending: boolean, validationError?: ValidationError } {
+type AllowedNumber<T, N extends keyof T> = {
+  [K in keyof T]: N extends K ? T[K] | '' : T[K];
+};
+
+export type CreateGameInputApi = AllowedNumber<CreateGameApi, 'minPlayers' | 'maxPlayers'>;
+
+export function useCreateGame(): { validateGame: (game: CreateGameInputApi) => CreateGameApi | undefined, createGame: (game: CreateGameInputApi) => void, isPending: boolean, validationError?: ValidationError } {
   const { mutate, error, isPending } = tsr.games.create.useMutation();
   const navigate = useNavigate();
-  const validationError = handleError(isPending, error);
+  const networkValidationError = handleError(isPending, error);
+  const [preMutateError, setPreMutateError] = useState<ValidationError | undefined>(undefined);
+  const validationError = useMostRecentValue(networkValidationError, preMutateError);
 
-  const createGame = useCallback((body: CreateGameApi) => mutate({ body }, {
-    onSuccess: (data) => {
-      navigate('/app/games/' + data.body.game.id);
-    },
-  }), []);
+  const validateGame = useCallback((bodyUnmodified: CreateGameInputApi) => {
+    const body = CreateGameApi.safeParse(bodyUnmodified);
+    if (!body.success) {
+      setPreMutateError(toValidationError(body.error));
+      return undefined;
+    }
+    setPreMutateError(undefined);
+    return body.data;
+  }, [setPreMutateError]);
 
-  return { createGame, isPending, validationError };
+  const createGame = useCallback((bodyUnmodified: CreateGameInputApi) => {
+    const body = validateGame(bodyUnmodified);
+    if (body != null) {
+      mutate({ body }, {
+        onSuccess: (data) => {
+          navigate('/app/games/' + data.body.game.id);
+        },
+      });
+    }
+  }, [mutate, validateGame]);
+
+  return { validateGame, createGame, isPending, validationError };
 }
 
 interface GameAction {
@@ -199,14 +222,10 @@ export function useJoinGame(game: GameLiteApi): GameAction {
 
   const perform = useCallback(() => mutate({ params: { gameId: game.id } }), [game.id]);
 
-  const mapSettings = useMemo(() => {
-    return MapRegistry.singleton.get(game.gameKey);
-  }, [game.gameKey]);
-
   const canPerform = me != null &&
     game.status == GameStatus.enum.LOBBY &&
     !game.playerIds.includes(me.id) &&
-    game.playerIds.length < mapSettings.maxPlayers;
+    game.playerIds.length < game.config.maxPlayers;
 
   return { canPerform, perform, isPending };
 }
@@ -240,14 +259,10 @@ export function useStartGame(game: GameLiteApi): GameAction {
 
   const perform = useCallback(() => mutate({ params: { gameId: game.id } }), [game.id]);
 
-  const mapSettings = useMemo(() => {
-    return MapRegistry.singleton.get(game.gameKey);
-  }, [game.gameKey]);
-
   const canPerform = me != null &&
     game.status == GameStatus.enum.LOBBY &&
     game.playerIds[0] === me.id &&
-    game.playerIds.length >= mapSettings.minPlayers;
+    game.playerIds.length >= game.config.minPlayers;
 
   return { canPerform, perform, isPending };
 }

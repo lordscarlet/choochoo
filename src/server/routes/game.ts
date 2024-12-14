@@ -9,7 +9,6 @@ import { Op, WhereOptions } from '@sequelize/core';
 import { NotificationFrequency, NotificationMethod } from '../../api/notifications';
 import { UserRole } from '../../api/user';
 import { EngineDelegator } from '../../engine/framework/engine';
-import { MapRegistry } from '../../maps';
 import { peek } from '../../utils/functions';
 import { GameHistoryModel } from '../model/history';
 import { CreateLogModel, LogModel } from '../model/log';
@@ -29,7 +28,6 @@ const router = initServer().router(gameContract, {
     const defaultQuery: ListGamesApi = { pageSize: 20, order: ['id', 'DESC'] };
     const { pageSize, excludeUserId, order, userId, status, pageCursor, ...rest } = { ...defaultQuery, ...query };
     const where: WhereOptions<GameModel> = rest;
-    const wheres = [where];
     if (status != null) {
       if (status.length === 1) {
         where.status = status[0];
@@ -52,7 +50,7 @@ const router = initServer().router(gameContract, {
       where.id = { [Op.notIn]: pageCursor };
     }
     const games = await GameModel.findAll({
-      attributes: ['id', 'gameKey', 'name', 'status', 'activePlayerId', 'playerIds'],
+      attributes: ['id', 'gameKey', 'name', 'config', 'status', 'activePlayerId', 'playerIds'],
       where,
       limit: pageSize! + 1,
       order: order != null ? [order] : [['id', 'DESC']],
@@ -87,6 +85,10 @@ const router = initServer().router(gameContract, {
       name: body.name,
       status: GameStatus.enum.LOBBY,
       playerIds,
+      config: {
+        minPlayers: body.minPlayers,
+        maxPlayers: body.maxPlayers,
+      },
     });
     return { status: 201, body: { game: game.toApi() } };
   },
@@ -99,6 +101,7 @@ const router = initServer().router(gameContract, {
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, 'cannot join started game');
     assert(!game.playerIds.includes(userId), { invalidInput: true });
+    assert(game.playerIds.length < game.toLiteApi().config.maxPlayers, {invalidInput: 'game full'});
 
     const originalGame = game.toApi();
     game.playerIds = [...game.playerIds, userId];
@@ -117,7 +120,6 @@ const router = initServer().router(gameContract, {
     assert(index >= 0, { invalidInput: 'cannot leave game you are not in' });
     // Figure out what to do if the owner wants to leave
     assert(index > 0, { invalidInput: 'the owner cannot leave the game' });
-    assert(game.playerIds.length < MapRegistry.singleton.get(game.gameKey)!.maxPlayers, 'game full');
 
     const originalGame = game.toApi();
     game.playerIds = game.playerIds.slice(0, index).concat(game.playerIds.slice(index + 1));
@@ -133,6 +135,7 @@ const router = initServer().router(gameContract, {
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, { invalidInput: 'cannot start a game that has already been started' });
     assert(game.playerIds[0] === userId, { invalidInput: 'only the owner can start the game' });
+    assert(game.playerIds.length >= game.toLiteApi().config.minPlayers, 'not enough players to start the game');
 
     const originalGame = game.toApi();
     const { gameData, logs, activePlayerId } = EngineDelegator.singleton.start(game.playerIds, { mapKey: game.gameKey });

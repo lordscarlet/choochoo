@@ -1,5 +1,6 @@
 import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback } from "react";
+import { assert } from "../../utils/validate";
 import { useCreateInvitation } from "../services/me";
 import { useNumberInputState, useTextInputState } from "../utils/form_state";
 
@@ -11,6 +12,7 @@ export function CreateInvitePage() {
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    assert(count !== '');
     createInvite({ code, count });
   }, [createInvite, code, count]);
 

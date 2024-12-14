@@ -21,7 +21,7 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
   return <Card className={styles.gameCard}>
     <CardHeader title={game.name}
       className={`${gameStatusToStyle(game.status)} ${game.activePlayerId === me?.id ? styles.activePlayer : ''}`}
-      subheader={hideStatus ? '' : `Status: ${gameStatusToString(game.status)}`} />
+      subheader={hideStatus ? '' : `Status: ${gameStatusToString(game)}`} />
     <CardContent>
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         Game: {MapRegistry.singleton.get(game.gameKey)!.name}
