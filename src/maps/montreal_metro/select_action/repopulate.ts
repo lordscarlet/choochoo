@@ -40,7 +40,7 @@ export class RepopulateAction implements ActionProcessor<RepopulateData> {
 
     const city = this.grid().get(coordinates);
     assert(city instanceof City);
-    this.log.currentPlayer(`places a ${goodToString(good)} in ${city.cityName()}`)
+    this.log.currentPlayer(`places a ${goodToString(good)} in ${city.name()}`)
 
     this.bag.update((bag) => {
       const repopulation = this.repopulation();

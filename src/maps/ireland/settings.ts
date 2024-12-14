@@ -3,6 +3,8 @@ import { ClaimAction } from '../../engine/build/claim';
 import { BuildPhase } from '../../engine/build/phase';
 import { InjectionContext } from '../../engine/framework/inject';
 import { MapSettings, ReleaseStage } from '../../engine/game/map_settings';
+import { PhaseEngine } from '../../engine/game/phase';
+import { PhaseDelegator } from '../../engine/game/phase_delegator';
 import { RoundEngine } from '../../engine/game/round';
 import { MoveHelper } from '../../engine/move/helper';
 import { MoveAction } from '../../engine/move/move';
@@ -10,6 +12,7 @@ import { MovePhase } from '../../engine/move/phase';
 import { AllowedActions } from '../../engine/select_action/allowed_actions';
 import { SelectAction } from '../../engine/select_action/select';
 import { IrelandBuildPhase, IrelandClaimAction } from './claim_once';
+import { IrelandPhaseDelegator, IrelandPhaseEngine } from './deurbanization';
 import { map } from './grid';
 import { IrelandMoveAction, IrelandMoveHelper, IrelandMovePhase } from './locomotive_action';
 import { IrelandAllowedActions, IrelandSelectAction } from './select_action';
@@ -34,5 +37,7 @@ export class IrelandMapSettings implements MapSettings {
     ctx.override(MovePhase, IrelandMovePhase);
     ctx.override(MoveHelper, IrelandMoveHelper);
     ctx.override(MoveAction, IrelandMoveAction);
+    ctx.override(PhaseDelegator, IrelandPhaseDelegator);
+    ctx.override(PhaseEngine, IrelandPhaseEngine);
   }
 }

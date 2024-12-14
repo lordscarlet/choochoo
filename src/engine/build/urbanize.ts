@@ -61,7 +61,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
     this.availableCities.update((cities) => cities.splice(data.cityIndex, 1));
     this.gridHelper.set(data.coordinates, {
       type: SpaceType.CITY,
-      name: location.getTownName()!,
+      name: location.name()!,
       color: city.color,
       goods: [],
       urbanized: true,

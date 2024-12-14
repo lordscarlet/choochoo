@@ -3,6 +3,7 @@ import { CoordinatesZod } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
+import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
 import { CURRENT_PLAYER, injectGrid } from "../game/state";
 import { City } from "../map/city";
@@ -22,6 +23,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
   static readonly action = 'claim';
   readonly assertInput = ClaimData.parse;
 
+  protected readonly log = inject(Log);
   protected readonly helper = inject(BuilderHelper);
   protected readonly buildState = injectState(BUILD_STATE);
   protected readonly grid = injectGrid();
@@ -43,6 +45,8 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
     assert(track != null);
 
     const route = this.grid().getRoute(track);
+
+    this.log.currentPlayer(`claimes the route at ${data.coordinates.toString()}`);
 
     for (const t of route) {
       this.gridHelper.update(t.coordinates, (space) => {

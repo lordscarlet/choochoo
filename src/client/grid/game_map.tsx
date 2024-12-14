@@ -171,7 +171,7 @@ function maybeConfirmDeliveryCb(dialogs: DialogHook, grid: Grid, emitMove: (move
     if (moveActionProgress.path.length === 0) return;
     const endingStop = grid.get(peek(moveActionProgress.path).endingStop);
     if (endingStop instanceof City && endingStop.accepts(moveActionProgress.good)) {
-      dialogs.confirm('Deliver to ' + endingStop.cityName(), {
+      dialogs.confirm('Deliver to ' + endingStop.name(), {
         okText: 'Confirm Delivery',
         cancelText: 'Cancel',
       }).then((confirmed) => {

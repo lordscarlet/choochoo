@@ -41,7 +41,7 @@ export class Land {
     return this.data.townName != null;
   }
 
-  getTownName(): string | undefined {
+  name(): string | undefined {
     return this.data.townName;
   }
 

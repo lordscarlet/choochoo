@@ -126,7 +126,7 @@ export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpacePro
     } else if (asCity != null) {
       return new City(space.coordinates, {
         type: SpaceType.CITY,
-        name: space.getTownName()!,
+        name: space.name()!,
         color: asCity.color,
         goods: [],
         urbanized: true,

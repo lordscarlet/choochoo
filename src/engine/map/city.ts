@@ -27,7 +27,7 @@ export class City {
     return this.goodColorArray;
   }
 
-  cityName(): string {
+  name(): string {
     return this.data.name;
   }
 

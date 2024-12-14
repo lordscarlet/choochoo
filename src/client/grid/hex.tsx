@@ -113,9 +113,9 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
     {space instanceof Land && space.unpassableExits().map(direction => <UnpassableEdge key={direction} center={center} size={size} direction={direction} />)}
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Land && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
-    {space instanceof Land && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}
+    {space instanceof Land && space.hasTown() && <HexName name={space.name()!} center={center} size={size} />}
     {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} />}
-    {space instanceof City && space.cityName() != '' && <HexName name={space.cityName()} center={center} size={size} />}
+    {space instanceof City && space.name() != '' && <HexName name={space.name()} center={center} size={size} />}
     {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
   </>;
 }
