@@ -8,7 +8,11 @@ import { useCreateGame } from "../services/game";
 import { useCheckboxState, useSelectState, useTextInputState } from "../utils/form_state";
 
 export function CreateGamePage() {
-  const maps = useMemo(() => [...MapRegistry.singleton.values()].filter((map) => map.stage !== ReleaseStage.DEPRECATED), []);
+  const maps = useMemo(() =>
+    [...MapRegistry.singleton.values()]
+      .filter((map) => map.stage !== ReleaseStage.DEPRECATED)
+      .filter((map) => environment.stage === 'development' || map.stage !== ReleaseStage.DEVELOPMENT)
+    , []);
   const [name, setName] = useTextInputState('');
   const [gameKey, setGameKey] = useSelectState(maps[0].key);
   const [artificialStart, setArtificialStart] = useCheckboxState();

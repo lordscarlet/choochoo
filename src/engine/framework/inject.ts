@@ -24,7 +24,7 @@ export class InjectionContext {
 
   get<R>(factory: SimpleConstructor<R>): R {
     const overridden = this.overrides.get(factory) as SimpleConstructor<R> ?? factory;
-    this.dependencyStack.addDependency(factory);
+    this.dependencyStack.addDependency(overridden);
     if (!this.injected.has(overridden)) {
       if (this.inConstruction.has(overridden)) {
         return this.inConstruction.get(overridden)!.proxy as R;
