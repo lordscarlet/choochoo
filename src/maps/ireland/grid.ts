@@ -1,7 +1,8 @@
 import { BLACK, BLUE, Good, PURPLE, RED, YELLOW } from '../../engine/state/good';
 import { Direction } from '../../engine/state/tile';
 import { duplicate } from '../../utils/functions';
-import { black, city, grid, MOUNTAIN, plain, PLAIN, RIVER, town, UNPASSABLE, white } from '../factory';
+import { black, bridge, city, grid, MOUNTAIN, plain, PLAIN, RIVER, town, UNPASSABLE, white } from '../factory';
+import { startFrom } from '../tile_factory';
 
 export const map = grid([
   [
@@ -14,7 +15,12 @@ export const map = grid([
     PLAIN,
   ],
   [
-    UNPASSABLE,
+    bridge({
+      tile: {
+        ...startFrom(Direction.BOTTOM_RIGHT).straightAcross(),
+        claimableCost: [6],
+      },
+    }),
     PLAIN,
     PLAIN,
     PLAIN,
@@ -66,7 +72,12 @@ export const map = grid([
   ],
   [
     UNPASSABLE,
-    UNPASSABLE,
+    bridge({
+      tile: {
+        ...startFrom(Direction.BOTTOM_LEFT).straightAcross(),
+        claimableCost: [6],
+      },
+    }),
     PLAIN,
     PLAIN,
     PLAIN,
@@ -89,7 +100,12 @@ export const map = grid([
     city('Clifden', [], [], 3),
   ],
   [
-    UNPASSABLE,
+    bridge({
+      tile: {
+        ...startFrom(Direction.BOTTOM).curveLeft(),
+        claimableCost: [6],
+      },
+    }),
     city('Dublin', PURPLE, white(4)),
     PLAIN,
     PLAIN,
@@ -142,7 +158,15 @@ export const map = grid([
     plain({ unpassableEdges: [Direction.TOP_RIGHT, Direction.BOTTOM_RIGHT] }),
   ],
   [
-    ...duplicate(4, UNPASSABLE),
+    UNPASSABLE,
+    bridge({
+      tile: {
+        ...startFrom(Direction.BOTTOM_LEFT).curveRight(),
+        claimableCost: [6],
+      },
+    }),
+    UNPASSABLE,
+    UNPASSABLE,
     PLAIN,
     PLAIN,
     city('Cork', Good.BLACK, white(6)),
@@ -154,7 +178,13 @@ export const map = grid([
   [
     PLAIN,
     city('England', YELLOW),
-    ...duplicate(4, UNPASSABLE),
+    ...duplicate(3, UNPASSABLE),
+    bridge({
+      tile: {
+        ...startFrom(Direction.BOTTOM_LEFT).straightAcross(),
+        claimableCost: [6],
+      },
+    }),
     PLAIN,
     PLAIN,
     plain({ unpassableEdges: [Direction.TOP_RIGHT] }),
@@ -164,7 +194,9 @@ export const map = grid([
     UNPASSABLE,
     UNPASSABLE,
     city('England', YELLOW),
-    UNPASSABLE,
+    bridge({
+      tile: startFrom(Direction.BOTTOM_LEFT).curveLeft(),
+    }),
     UNPASSABLE,
     UNPASSABLE,
     city('Bantry', [], [], 3),
