@@ -12,6 +12,7 @@ import { SpaceType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { BuildAction } from "./build";
+import { ClaimAction } from "./claim";
 import { DoneAction } from "./done";
 import { BUILD_STATE } from "./state";
 import { UrbanizeAction } from "./urbanize";
@@ -28,6 +29,7 @@ export class BuildPhase extends PhaseModule {
 
   configureActions() {
     this.installAction(BuildAction);
+    this.installAction(ClaimAction);
     this.installAction(UrbanizeAction);
     this.installAction(DoneAction);
   }

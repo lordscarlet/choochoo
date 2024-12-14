@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Coordinates } from "../../utils/coordinates";
-import { fail } from "../../utils/validate";
+import { assert, fail } from "../../utils/validate";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
 import { City } from "./city";
@@ -35,6 +35,16 @@ export class Track {
     return this.track.exits.includes(exit);
   }
 
+  isClaimable(): boolean {
+    return this.track.claimableCost != null &&
+      this.getOwner() == null;
+  }
+
+  claimCost(): number {
+    assert(this.isClaimable());
+    return this.track.claimableCost!;
+  }
+
   equals(other: Track): boolean {
     return this.coordinates.equals(other.coordinates) &&
       this.getExits().every((e) => other.getExits().includes(e));
@@ -56,6 +66,7 @@ export const ExitZod = z.union([z.nativeEnum(Direction), z.literal(TOWN)]);
 export interface TrackInfo {
   exits: [Exit, Exit];
   owner?: PlayerColor;
+  claimableCost?: number;
 }
 
 export function rotateExitClockwise(exit: Exit): Exit {
