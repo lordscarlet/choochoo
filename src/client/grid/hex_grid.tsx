@@ -79,7 +79,7 @@ function useZoom(allowZoom?: boolean) {
     localStorage.setItem(key, `${zoom}`);
   }, [zoom]);
 
-  if (allowZoom == true) return [1, () => { }] as const;
+  if (allowZoom != true) return [1, () => { }] as const;
 
   return [zoom, setZoom] as const;
 }
@@ -118,7 +118,7 @@ export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, gr
   }, [zoom, setZoom]);
 
   const normalizeZoom = useCallback(() => {
-    setZoom(1)
+    setZoom(1);
   }, [zoom, setZoom]);
 
   const clickTargetsNormalized = useMemo(() => clickTargets ?? new Set<ClickTarget>(), [clickTargets]);

@@ -218,7 +218,7 @@ export function GameMap() {
   }, [canEmitMove, canEmitDeurbanize, canEmitBuild, isPending]);
 
   return <>
-    <HexGrid onClick={onClick} allowZoom highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
+    <HexGrid onClick={onClick} allowZoom={true} highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
     <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
   </>;
 }
