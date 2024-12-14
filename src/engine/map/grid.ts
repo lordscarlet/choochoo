@@ -42,7 +42,7 @@ export class Grid {
     return this.grid.entries();
   }
 
-  getNeighbor(coordinates: Coordinates, dir: Direction): City | Land | undefined {
+  getNeighbor(coordinates: Coordinates, dir: Direction): Space | undefined {
     return this.get(coordinates.neighbor(dir));
   }
 
@@ -181,7 +181,9 @@ export class Grid {
 
   merge(gridData: GridData): Grid {
     let map = this.grid;
+    const toDeleteKeys = new Set([...this.grid.keys()]);
     for (const [coordinates, spaceData] of gridData) {
+      toDeleteKeys.delete(coordinates);
       if (map.has(coordinates) && deepEquals(map.get(coordinates)!.data, spaceData)) {
         continue;
       }
@@ -191,7 +193,13 @@ export class Grid {
         map = map.set(coordinates, new Land(coordinates, spaceData));
       }
     }
+
+    if (toDeleteKeys.size > 0) {
+      map = map.deleteAll(toDeleteKeys);
+    }
+
     if (map === this.grid) return this;
+
     return new Grid(map);
   }
 

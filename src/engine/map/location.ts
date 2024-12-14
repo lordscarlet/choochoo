@@ -79,7 +79,11 @@ export function calculateTrackInfo(tileData?: BaseTileData): TrackInfo[] {
     trackInfo = trackInfo.map(rotateTrackInfoClockwise);
   }
 
-  return trackInfo.map((trackInfo, index) => ({ ...trackInfo, owner: tileData.owners?.[index] }));
+  return trackInfo.map((trackInfo, index) => ({
+    ...trackInfo,
+    owner: tileData.owners?.[index],
+    claimableCost: tileData.claimableCost?.[index],
+  }));
 }
 
 export function rotateTrackInfoClockwise(trackInfo: TrackInfo): TrackInfo {

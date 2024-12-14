@@ -6,7 +6,7 @@ import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { MutableSpaceData, SpaceData } from "../state/space";
 import { City } from "./city";
-import { Land } from "./location";
+import { Space } from "./grid";
 import { Track } from "./track";
 
 
@@ -32,11 +32,11 @@ export class GridHelper {
     });
   }
 
-  lookup(coordinates: Coordinates): City | Land | undefined {
+  lookup(coordinates: Coordinates): Space | undefined {
     return this.spaces().get(coordinates);
   }
 
-  all(): Iterable<City | Land> {
+  all(): Iterable<Space> {
     return this.spaces().values();
   }
 

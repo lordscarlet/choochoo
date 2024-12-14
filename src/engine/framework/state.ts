@@ -113,6 +113,12 @@ export class StateStore {
     };
   }
 
+  update<T>(key: Key<T>, updateFn: (t: T) => void): void {
+    const newValue = deepCopy(this.get(key));
+    updateFn(newValue);
+    this.set(key, newValue);
+  }
+
   delete<T>(key: Key<T>): void {
     assert(this.isInitialized(key), 'cannot call delete on uninitialized key');
     this.getContainer(key).state = undefined;
@@ -137,11 +143,7 @@ export class StateStore {
       isInitialized: () => this.isInitialized(key),
       listen: (listenFn: (t: Immutable<T>) => void): () => void =>
         this.listen(key, listenFn),
-      update: (updateFn: (t: T) => void) => {
-        const newValue = deepCopy(this.get(key));
-        updateFn(newValue);
-        this.set(key, newValue);
-      },
+      update: (updateFn: (t: T) => void) => this.update(key, updateFn),
       delete: () => this.delete(key),
     };
     return Object.assign(result, ops);

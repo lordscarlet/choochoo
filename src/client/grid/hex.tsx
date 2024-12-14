@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { City } from "../../engine/map/city";
+import { Space } from "../../engine/map/grid";
 import { BaseTileData, calculateTrackInfo, Land } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
 import { Track, TrackInfo } from "../../engine/map/track";
@@ -17,7 +18,7 @@ import { OnRoll } from "./on_roll";
 import { coordinatesToCenter, getCorners, offsetPoint, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
-function color(space: City | Land | undefined): string {
+function color(space: Space): string {
   if (space instanceof City) {
     return `${styles.city} ${goodStyle(space.goodColors()[0])}`;
   } else if (space instanceof Land) {
@@ -34,12 +35,13 @@ function color(space: City | Land | undefined): string {
       case SpaceType.STREET:
       case SpaceType.SWAMP:
         return styles.swamp;
+      case SpaceType.UNPASSABLE:
+        return styles.unpassable;
       default:
         assertNever(type);
     }
-  } else {
-    return styles.unpassable;
   }
+  assertNever(space);
 }
 
 interface RawHexProps {
@@ -84,7 +86,7 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
   }, [space, coordinates, selectedGood]);
 
   const clickable = (clickTargets.has(ClickTarget.CITY) && space instanceof City) ||
-    (clickTargets.has(ClickTarget.LOCATION) && space instanceof Land) ||
+    (clickTargets.has(ClickTarget.LOCATION) && space instanceof Land && space.getLandType() !== SpaceType.UNPASSABLE) ||
     (clickTargets.has(ClickTarget.TOWN) && space instanceof Land && space.hasTown());
 
   return <>

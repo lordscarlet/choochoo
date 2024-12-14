@@ -80,6 +80,7 @@ export const MutableTileData = z.object({
   orientation: z.nativeEnum(Direction),
   // An array that includes undefined values will be coerced into null by JSON.stringify.
   owners: z.array(z.nativeEnum(PlayerColor).optional().nullable().transform((v) => v ?? undefined)),
+  claimableCost: z.array(z.number().optional().nullable().transform(v => v ?? undefined)).optional(),
 });
 
 export type MutableTileData = z.infer<typeof MutableTileData>;
