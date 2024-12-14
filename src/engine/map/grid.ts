@@ -42,7 +42,7 @@ export class Grid {
     return this.grid.entries();
   }
 
-  getNeighbor(coordinates: Coordinates, dir: Direction): City | Land | undefined {
+  getNeighbor(coordinates: Coordinates, dir: Direction): Space | undefined {
     return this.get(coordinates.neighbor(dir));
   }
 

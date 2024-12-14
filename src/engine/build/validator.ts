@@ -8,6 +8,7 @@ import { Grid } from "../map/grid";
 import { calculateTrackInfo, Land } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";
+import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { Direction, TileType } from "../state/tile";
 import { BuilderHelper } from "./helper";
@@ -28,11 +29,14 @@ export class Validator {
   getInvalidBuildReason(coordinates: Coordinates, buildData: BuildInfo): InvalidBuildReason | undefined {
     const grid = this.grid();
     const space = grid.get(coordinates);
+    if (space instanceof City) {
+      return 'cannot build on a city';
+    }
     if (space == null) {
       return 'cannot build on impassable terrain';
     }
-    if (space instanceof City) {
-      return 'cannot build on a city';
+    if (space == null || space.getLandType() === SpaceType.UNPASSABLE) {
+      return 'cannot build on unpassable terrain';
     }
 
     if (!this.helper.tileAvailableInManifest(buildData.tileType)) {

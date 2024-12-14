@@ -19,10 +19,10 @@ export type MutableCityData = z.infer<typeof MutableCityData>;
 export type CityData = Immutable<MutableCityData>;
 
 export const LandType = SpaceTypeZod.refine(isLandType);
-export type LandType = Exclude<SpaceType, SpaceType.CITY | SpaceType.UNPASSABLE>;
+export type LandType = Exclude<SpaceType, SpaceType.CITY>;
 
 function isLandType(value: SpaceType): value is LandType {
-  return value !== SpaceType.CITY && value !== SpaceType.UNPASSABLE;
+  return value !== SpaceType.CITY;
 }
 
 export const MutableLandData = z.object({
