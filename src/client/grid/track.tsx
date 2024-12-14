@@ -23,7 +23,7 @@ interface ClaimableTrackProps {
 
 function ClaimableTrack({ center, size, cost }: ClaimableTrackProps) {
   return <>
-    <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />
+    <circle cx={center.x} cy={center.y} className={styles.claimableCostContainer} r={size / 2} />
     <text x={center.x} y={center.y} dominantBaseline="middle" textAnchor="middle">${cost}</text>
   </>;
 }

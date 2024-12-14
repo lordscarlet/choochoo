@@ -1,3 +1,13 @@
 .track {
   stroke: var(--player-color);
 }
+
+.claimableCostContainer {
+  stroke: white;
+  fill: white;
+}
+
+:global(.dark-mode) .claimableCostContainer {
+  stroke: black;
+  fill: black;
+}
