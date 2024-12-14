@@ -9,31 +9,14 @@ import { Action } from "../../engine/state/action";
 import { Phase } from "../../engine/state/phase";
 import { PlayerData } from "../../engine/state/player";
 
-export const USED_LOCO_KEY = new Key('USED_LOCO', { parse: z.boolean().parse });
-
-export class IrelandMovePhase extends MovePhase {
-  private readonly usedLoco = injectState(USED_LOCO_KEY);
-  onStart(): void {
-    this.usedLoco.initState(true);
-    return super.onStart();
-  }
-
-  onEnd(): void {
-    this.usedLoco.delete();
-    return super.onEnd();
-  }
-}
-
 export class IrelandMoveHelper extends MoveHelper {
   private readonly phase = injectState(PHASE);
-  private readonly usedLoco = injectState(USED_LOCO_KEY);
 
   getLocomotiveDisplay(player: PlayerData): string {
-    const display = super.getLocomotiveDisplay(player);
     if (this.canUseLoco(player)) {
-      return `${display} (+1)`;
+      return `${player.locomotive} (+1)`;
     }
-    return display;
+    return super.getLocomotiveDisplay(player);
   }
 
   getLocomotive(player: PlayerData): number {
@@ -41,26 +24,14 @@ export class IrelandMoveHelper extends MoveHelper {
     return super.getLocomotive(player) + offset;
   }
 
-  canUseLoco(player: PlayerData): boolean {
-    const selectedLoco = player.selectedAction === Action.LOCOMOTIVE;
-    const phase = this.phase();
-    if (phase === Phase.MOVING) return selectedLoco && !this.usedLoco();
-    if (phase === Phase.ACTION_SELECTION || phase === Phase.BUILDING) return selectedLoco;
-    return false;
-  }
-}
-
-export class IrelandMoveAction extends MoveAction {
-  private readonly usedLoco = injectState(USED_LOCO_KEY);
-
-  process(action: MoveData): boolean {
-    // TODO: figure out a better way to make this inference.
-    const moveHelper = this.moveHelper as IrelandMoveHelper;
-    if (moveHelper.canUseLoco(this.currentPlayer())) {
-      if (action.path.length > this.currentPlayer().locomotive) {
-        this.usedLoco.set(true);
-      }
+  private canUseLoco(player: PlayerData): boolean {
+    switch (this.phase()) {
+      case Phase.MOVING:
+      case Phase.ACTION_SELECTION:
+      case Phase.BUILDING:
+        return player.selectedAction === Action.LOCOMOTIVE;
+      default:
+        return false;
     }
-    return super.process(action);
   }
 }
