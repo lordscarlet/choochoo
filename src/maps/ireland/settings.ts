@@ -22,7 +22,7 @@ export class IrelandMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 4;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly stage = ReleaseStage.ALPHA;
 
   registerOverrides(ctx: InjectionContext): void {
     ctx.override(RoundEngine, IrelandRoundEngine);
