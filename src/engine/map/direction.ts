@@ -1,3 +1,4 @@
+import { infiniteLoopCheck } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
 import { Direction } from "../state/tile";
 
@@ -12,6 +13,16 @@ export function rotateDirectionClockwise(dir: Direction): Direction {
     default:
       assertNever(dir);
   }
+}
+
+export function numRotationsClockwise(dir: Direction, lookingFor: Direction): number {
+  let rotations = 0;
+  const loopCheck = infiniteLoopCheck(10);
+  for (let currDir = dir; dir !== lookingFor; currDir = rotateDirectionClockwise(currDir)) {
+    loopCheck();
+    rotations++;
+  }
+  return rotations;
 }
 
 export function getOpposite(dir: Direction): Direction {
