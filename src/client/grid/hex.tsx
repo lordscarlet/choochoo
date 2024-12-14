@@ -87,13 +87,25 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
     return space.getGoods().indexOf(selectedGood.good);
   }, [space, coordinates, selectedGood]);
 
-  const clickable = (clickTargets.has(ClickTarget.CITY) && space instanceof City) ||
-    (clickTargets.has(ClickTarget.LOCATION) && space instanceof Land && space.getLandType() !== SpaceType.UNPASSABLE) ||
-    (clickTargets.has(ClickTarget.TOWN) && space instanceof Land && space.hasTown());
+  const isClickableCity = clickTargets.has(ClickTarget.CITY) && space instanceof City;
+  const isClickableTown = clickTargets.has(ClickTarget.TOWN) &&
+    space instanceof Land &&
+    space.hasTown();
+  const isClickableBuild = clickTargets.has(ClickTarget.LOCATION) &&
+    space instanceof Land &&
+    space.getLandType() !== SpaceType.UNPASSABLE;
+  const isClaimableTrack = clickTargets.has(ClickTarget.LOCATION) &&
+    space instanceof Land &&
+    space.getTrack().some(track => track.isClaimable());
+
+  const clickable = isClickableCity ||
+    isClickableTown ||
+    isClickableBuild ||
+    isClaimableTrack;
 
   return <>
     <polygon className={`${space instanceof City ? '' : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
-    {space instanceof Land && space.unpassableExits().map(direction => <UnpassableEdge center={center} size={size} direction={direction} />)}
+    {space instanceof Land && space.unpassableExits().map(direction => <UnpassableEdge key={direction} center={center} size={size} direction={direction} />)}
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Land && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Land && space.hasTown() && <HexName name={space.getTownName()!} center={center} size={size} />}

@@ -1,6 +1,7 @@
 import { DialogHook, useDialogs } from "@toolpad/core";
 import { useMemo } from "react";
 import { BuildAction } from "../../engine/build/build";
+import { ClaimAction, ClaimData } from "../../engine/build/claim";
 import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
 import { Grid, Space } from "../../engine/map/grid";
@@ -132,9 +133,15 @@ function getSelectedGood(moveActionProgress: MoveData | undefined): { good: Good
   };
 }
 
-function onClickCb(isPending: boolean, canEmitBuild: boolean, canEmitDeurbanize: boolean, emitDeurbanize: (data: DeurbanizeData) => void, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Land) => void, onMoveToSpace: (space: Space) => void) {
+function onClickCb(isPending: boolean, canEmitClaim: boolean, emitClaim: (data: ClaimData) => void, canEmitBuild: boolean, canEmitDeurbanize: boolean, emitDeurbanize: (data: DeurbanizeData) => void, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Land) => void, onMoveToSpace: (space: Space) => void) {
   return (space: Space, good?: Good) => {
     if (isPending) return;
+    if (canEmitClaim) {
+      if (space instanceof Land && space.getTrack().some(track => track.isClaimable())) {
+        emitClaim({ coordinates: space.coordinates });
+        return;
+      }
+    }
     if (canEmitDeurbanize) {
       if (good != null) {
         emitDeurbanize({ coordinates: space.coordinates, good });
@@ -178,13 +185,14 @@ function maybeConfirmDeliveryCb(dialogs: DialogHook, grid: Grid, emitMove: (move
 export function GameMap() {
   const { canEmit: canEmitBuild, isPending: isBuildPending } = useAction(BuildAction);
   const { canEmit: canEmitMove, emit: emitMove, isPending: isMovePending } = useAction(MoveAction);
+  const { canEmit: canEmitClaim, emit: emitClaim, isPending: isClaimPending } = useAction(ClaimAction);
   const { canEmit: canEmitDeurbanize, emit: emitDeurbanize, isPending: isDeurbanizePending } = useAction(DeurbanizeAction);
   const player = useCurrentPlayer();
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Land | undefined>(undefined);
   const moveHelper = useInjected(MoveHelper);
 
-  const isPending = isBuildPending || isMovePending || isDeurbanizePending;
+  const isPending = isBuildPending || isMovePending || isDeurbanizePending || isClaimPending;
 
   const dialogs = useDialogs();
 
@@ -200,7 +208,19 @@ export function GameMap() {
 
   const selectedGood = useTypedMemo(getSelectedGood, [moveActionProgress]);
 
-  const onClick = useTypedCallback(onClickCb, [isPending, canEmitBuild, canEmitDeurbanize, emitDeurbanize, canEmitMove, onSelectGood, setBuildingSpace, onMoveToSpace]);
+  const onClick = useTypedCallback(onClickCb,
+    [
+      isPending,
+      canEmitClaim,
+      emitClaim,
+      canEmitBuild,
+      canEmitDeurbanize,
+      emitDeurbanize,
+      canEmitMove,
+      onSelectGood,
+      setBuildingSpace,
+      onMoveToSpace,
+    ]);
 
   const clickTargets: Set<ClickTarget> = useMemo(() => {
     if (isPending) return new Set();
