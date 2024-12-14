@@ -36,6 +36,8 @@ export class Coordinates {
     return newCoordinates;
   }
 
+  static readonly ORIGIN = Coordinates.from({q: 0, r: 0});
+
   static fromCartesianString(str: string): Coordinates {
     const matches = str.match(/^\((\d+)\, (\d+)\)$/);
     assert(matches != null);

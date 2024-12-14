@@ -56,7 +56,7 @@ describe(BuildCostCalculator.name, () => {
         },
       }],
     ]);
-    injector.setState(GRID, grid);
+    injector.state().set(GRID, grid);
 
     const calculator = new BuildCostCalculator();
     return calculator.costOf(coordinates, to);

@@ -5,7 +5,6 @@ import { InjectionContext } from "../engine/framework/inject";
 import { Key } from '../engine/framework/key';
 import { StateStore } from '../engine/framework/state';
 import { ReversteamMapSettings } from '../maps/reversteam/settings';
-import { Immutable } from '../utils/immutable';
 import { resettable } from './resettable';
 
 export class InjectionHelper {
@@ -41,20 +40,12 @@ export class InjectionHelper {
 
   initResettableState<T>(key: Key<T>, value: T): void {
     beforeEach(() => {
-      this.initState(key, value);
+      this.state().init(key, value);
     });
   }
 
-  initState<T>(key: Key<T>, value: T): void {
-    this.injector().get(StateStore).init(key, value);
-  }
-
-  getState<T>(key: Key<T>): Immutable<T> {
-    return this.injector().get(StateStore).get(key);
-  }
-
-  setState<T>(key: Key<T>, value: T): void {
-    this.injector().get(StateStore).set(key, value);
+  state(): StateStore {
+    return this.injector().get(StateStore);
   }
 }
 
