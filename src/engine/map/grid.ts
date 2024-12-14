@@ -164,7 +164,8 @@ export class Grid {
 
   findRoutesToLocationFromTown(location: Land, coordinates: Coordinates): Track[] {
     assert(location.hasTown(), 'cannot call findRoutesToLocation from a non-town hex');
-    return location.getTrack().filter((track) => this.endsWith(track, coordinates));
+    return location.getTrack().filter((track) => this.endsWith(track, coordinates))
+      .filter((track) => this.canMoveGoodsAcrossTrack(track));
   }
 
   findRoutesToLocationFromCity(city: City, coordinates: Coordinates): Track[] {
@@ -176,7 +177,12 @@ export class Grid {
       return neighbor.trackExiting(getOpposite(direction));
     })
       .filter(isNotNull)
-      .filter((track) => this.endsWith(track, coordinates));
+      .filter((track) => this.endsWith(track, coordinates))
+      .filter((track) => this.canMoveGoodsAcrossTrack(track));
+  }
+
+  canMoveGoodsAcrossTrack(track: Track): boolean {
+    return this.getRoute(track).every((track) => !track.isClaimable());
   }
 
   merge(gridData: GridData): Grid {
