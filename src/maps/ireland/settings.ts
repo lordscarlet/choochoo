@@ -6,6 +6,7 @@ import { MapSettings, ReleaseStage } from '../../engine/game/map_settings';
 import { PhaseEngine } from '../../engine/game/phase';
 import { PhaseDelegator } from '../../engine/game/phase_delegator';
 import { RoundEngine } from '../../engine/game/round';
+import { GameStarter } from '../../engine/game/starter';
 import { MoveHelper } from '../../engine/move/helper';
 import { MoveAction } from '../../engine/move/move';
 import { MovePhase } from '../../engine/move/phase';
@@ -17,6 +18,7 @@ import { map } from './grid';
 import { IrelandMoveAction, IrelandMoveHelper, IrelandMovePhase } from './locomotive_action';
 import { IrelandAllowedActions, IrelandSelectAction } from './select_action';
 import { IrelandRoundEngine } from './shortened_round';
+import { IrelandStarter } from './starter';
 
 
 export class IrelandMapSettings implements MapSettings {
@@ -39,5 +41,6 @@ export class IrelandMapSettings implements MapSettings {
     ctx.override(MoveAction, IrelandMoveAction);
     ctx.override(PhaseDelegator, IrelandPhaseDelegator);
     ctx.override(PhaseEngine, IrelandPhaseEngine);
+    ctx.override(GameStarter, IrelandStarter);
   }
 }

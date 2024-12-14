@@ -53,7 +53,9 @@ export function GoodsTable() {
     assert(productionState != null);
     assert(good != null);
     setSelectedGood(productionState.goods[(productionState.goods.indexOf(good) + 1) % productionState.goods.length]);
-  }, [good, productionState])
+  }, [good, productionState]);
+
+  const hasUrbanizedCities = cities.urbanizedCities.get(CityGroup.WHITE)!.length + cities.urbanizedCities.get(CityGroup.BLACK)!.length > 0;
 
   return <div>
     <PlaceGood good={good} toggleSelectedGood={toggleSelectedGood} />
@@ -72,8 +74,8 @@ export function GoodsTable() {
           return <div className={`${styles.column} ${i === 5 ? styles.gapRight : ''}`} key={i}>
             <div>{onRoll}</div>
             {iterate(3, goodIndex => <GoodBlock key={goodIndex} good={city?.[2 - goodIndex]} canSelect={canEmit} onClick={() => onClick(false, cityGroup, onRoll)} />)}
-            <div>{urbanizedCity && letter}</div>
-            {iterate(2, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[1 - goodIndex]} canSelect={canEmit} emptySpace={urbanizedCity == null} onClick={() => onClick(true, cityGroup, onRoll)} />)}
+            {hasUrbanizedCities && <div>{urbanizedCity && letter}</div>}
+            {hasUrbanizedCities && iterate(2, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[1 - goodIndex]} canSelect={canEmit} emptySpace={urbanizedCity == null} onClick={() => onClick(true, cityGroup, onRoll)} />)}
           </div>;
         })}
       </div>
