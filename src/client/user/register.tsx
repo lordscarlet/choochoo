@@ -77,6 +77,9 @@ export function RegisterPage() {
       <Button type="submit" disabled={isPending}>Register</Button>
     </div>
     <p>
+      By registering, you are agreeing to the <a href="/terms.html" target="_blank">Terms of Service</a>.
+    </p>
+    <p>
       <Link to="/">Get added to waitlist</Link>
     </p>
   </Box>;

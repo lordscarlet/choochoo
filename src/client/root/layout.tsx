@@ -6,7 +6,7 @@ import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import FeedbackOutlined from '@mui/icons-material/FeedbackOutlined';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
-import { AppBar, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
+import { AppBar, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
@@ -67,98 +67,96 @@ export function Layout() {
   }, [darkModeEnabled]);
 
   return <>
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="fixed">
-        <Toolbar>
-          <Typography color="white" style={{ textDecoration: 'none' }} variant="h6" sx={{ flexGrow: 1 }} component={Link} to="/">
-            Choo Choo Games
-          </Typography>
-          {me == null &&
-            <Button color="inherit" component={Link} to="/app/users/login">Login</Button>}
+    <AppBar position="fixed">
+      <Toolbar>
+        <Typography color="white" style={{ textDecoration: 'none' }} variant="h6" sx={{ flexGrow: 1 }} component={Link} to="/">
+          Choo Choo Games
+        </Typography>
+        {me == null &&
+          <Button color="inherit" component={Link} to="/app/users/login">Login</Button>}
 
-          {me?.role == UserRole.enum.ADMIN && <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={openAdminMenu}
-            color="inherit"
-          >
-            <ManageAccounts />
-          </IconButton>}
+        {me?.role == UserRole.enum.ADMIN && <IconButton
+          size="large"
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={openAdminMenu}
+          color="inherit"
+        >
+          <ManageAccounts />
+        </IconButton>}
 
-          <Menu
-            id="menu-appbar"
-            anchorEl={adminAnchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(adminAnchorEl)}
-            onClose={closeAdminMenu}
-          >
-            <MenuItem>Dark mode: {mode ?? 'undefined'}</MenuItem>
-            <MenuItem>Prefers dark mode: {prefersDarkMode ? 'true' : 'false'}</MenuItem>
-            <MenuItem>Dark mode enabled: {darkModeEnabled ? 'true' : 'false'}</MenuItem>
-            <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">Create Invitation</MenuItem>
-            <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">View Feedback</MenuItem>
-            <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">View users</MenuItem>
-          </Menu>
+        <Menu
+          id="menu-appbar"
+          anchorEl={adminAnchorEl}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(adminAnchorEl)}
+          onClose={closeAdminMenu}
+        >
+          <MenuItem>Dark mode: {mode ?? 'undefined'}</MenuItem>
+          <MenuItem>Prefers dark mode: {prefersDarkMode ? 'true' : 'false'}</MenuItem>
+          <MenuItem>Dark mode enabled: {darkModeEnabled ? 'true' : 'false'}</MenuItem>
+          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">Create Invitation</MenuItem>
+          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">View Feedback</MenuItem>
+          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">View users</MenuItem>
+        </Menu>
 
-          {me != null && <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={openMenu}
-            color="inherit"
-          >
-            <AccountCircle />
-          </IconButton>}
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(anchorEl)}
-            onClose={closeMenu}
-          >
-            <MenuList>
-              <MenuItem onClick={() => { setMode(darkModeEnabled ? 'light' : 'dark'); closeMenu(); }}>
-                <ListItemIcon>
-                  {darkModeEnabled ? <DarkMode fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
-                </ListItemIcon>
-                Dark Mode
-              </MenuItem>
-              <MenuItem onClick={openFeedback}>
-                <ListItemIcon>
-                  <FeedbackOutlined fontSize="small" />
-                </ListItemIcon>
-                Submit feedback
-              </MenuItem>
-              <MenuItem onClick={logoutClick} disabled={isLogoutPending}>
-                <ListItemIcon>
-                  <LogoutOutlined fontSize="small" />
-                </ListItemIcon>
-                Logout
-              </MenuItem>
-            </MenuList>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-    </Box>
+        {me != null && <IconButton
+          size="large"
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={openMenu}
+          color="inherit"
+        >
+          <AccountCircle />
+        </IconButton>}
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(anchorEl)}
+          onClose={closeMenu}
+        >
+          <MenuList>
+            <MenuItem onClick={() => { setMode(darkModeEnabled ? 'light' : 'dark'); closeMenu(); }}>
+              <ListItemIcon>
+                {darkModeEnabled ? <DarkMode fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
+              </ListItemIcon>
+              Dark Mode
+            </MenuItem>
+            <MenuItem onClick={openFeedback}>
+              <ListItemIcon>
+                <FeedbackOutlined fontSize="small" />
+              </ListItemIcon>
+              Submit feedback
+            </MenuItem>
+            <MenuItem onClick={logoutClick} disabled={isLogoutPending}>
+              <ListItemIcon>
+                <LogoutOutlined fontSize="small" />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
+          </MenuList>
+        </Menu>
+      </Toolbar>
+    </AppBar>
     <Offset />
     <Banner />
     <main className={`${styles.main}`}>
@@ -168,8 +166,17 @@ export function Layout() {
         </ErrorBoundary>
       </Suspense>
     </main>
+    <Footer />
     <FeedbackDialog isOpen={isFeedbackOpen} close={closeFeedback} />
   </>;
+}
+
+function Footer() {
+  return <footer className={styles.footer}>
+    <a href="/terms.html" target="_blank">Terms of Service</a>
+    {` • `}
+    <a href="/privacy.html" target="_blank">Privacy Policy</a>
+  </footer>;
 }
 
 function ResetError({ error, resetErrorBoundary }: { error: unknown, resetErrorBoundary(): void }) {

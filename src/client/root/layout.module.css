@@ -1,10 +1,10 @@
 .main {
   min-height: 100%;
   padding: 16px;
-  background-color: rgba(246, 247, 248, 0.5);
+  flex: 1;
 }
 
-:global(.dark-mode) .main {
-  background-color: black;
-  color: white;
+.footer {
+  padding: 8px;
+  margin: 0 auto;
 }
