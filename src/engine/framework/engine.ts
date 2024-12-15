@@ -5,6 +5,7 @@ import { Log } from "../game/log";
 import { Memory } from "../game/memory";
 import { Random } from "../game/random";
 import { injectCurrentPlayer } from "../game/state";
+import { SimpleConstructor } from "./dependency_stack";
 import { inject, setInjectionContext } from "./execution_context";
 import { InjectionContext } from "./inject";
 import { StateStore } from "./state";
@@ -23,22 +24,28 @@ interface GameState {
 
 export class EngineDelegator {
   static readonly singleton = new EngineDelegator();
-  private readonly engines = new Map<string, EngineProcessor>();
+  private readonly engines = new Map<string, InjectionContext>();
 
   private constructor() { }
 
   private getEngine(mapKey: string): EngineProcessor {
-    if (!this.engines.has(mapKey)) {
-      try {
-        const injectionContext = new InjectionContext(mapKey);
+    return this.getInjectionContext(mapKey).get(EngineProcessor);
+  }
 
-        setInjectionContext(injectionContext);
-        this.engines.set(mapKey, injectionContext.get(EngineProcessor));
-      } finally {
-        setInjectionContext();
-      }
+  private getInjectionContext(mapKey: string): InjectionContext {
+    if (!this.engines.has(mapKey)) {
+      this.engines.set(mapKey, new InjectionContext(mapKey));
     }
     return this.engines.get(mapKey)!;
+  }
+
+  private get<T>(mapKey: string, gameData: string|undefined, ctor: SimpleConstructorM<T>): T {
+    try {
+      setInjectionContext(this.getInjectionContext(mapKey));
+      return inject(ctor);
+    } finally {
+      setInjectionContext();
+    }
   }
 
   start(playerIds: number[], mapConfig: MapConfig): GameState {
@@ -47,6 +54,17 @@ export class EngineDelegator {
 
   processAction(mapKey: string, gameData: string, actionName: string, data: unknown): GameState {
     return this.getEngine(mapKey).processAction(gameData, actionName, data);
+  }
+
+  runInContext<T>(mapKey: string, gameData: string, runFn: (ctx: InjectionContext) => T): T {
+    try {
+
+      setInjectionContext(injectionContext);
+    } finally {
+      setInjectionContext();
+    }
+    const ctx = this.getInjectionContext(mapKey);
+    return ctx.get(EngineProcessor).runInContext(gameData, () => runFn(ctx));
   }
 }
 
@@ -72,11 +90,19 @@ export class EngineProcessor {
     });
   }
 
-  private getNextGameState(gameData: string | undefined, processFn: () => void): GameState {
-    if (gameData != null) {
-      this.state.merge(gameData);
-    }
+  runInContext<T>(gameData: string | undefined, runFn: () => T): T {
     try {
+      if (gameData != null) {
+        this.state.merge(gameData);
+      }
+      return runFn();
+    } finally {
+      this.memory.reset();
+    }
+  }
+
+  private getNextGameState(gameData: string | undefined, processFn: () => void): GameState {
+    return this.runInContext(gameData, () => {
       processFn();
       return {
         activePlayerId: this.gameEngine.hasEnded() ? undefined : this.currentPlayer().playerId,
@@ -85,8 +111,6 @@ export class EngineProcessor {
         reversible: this.random.isReversible(),
         logs: this.log.dump(),
       };
-    } finally {
-      this.memory.reset();
-    }
+    });
   }
 }

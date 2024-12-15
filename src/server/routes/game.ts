@@ -50,7 +50,7 @@ const router = initServer().router(gameContract, {
       where.id = { [Op.notIn]: pageCursor };
     }
     const games = await GameModel.findAll({
-      attributes: ['id', 'gameKey', 'name', 'config', 'status', 'activePlayerId', 'playerIds'],
+      attributes: ['id', 'gameKey', 'name', 'gameData', 'config', 'status', 'activePlayerId', 'playerIds'],
       where,
       limit: pageSize! + 1,
       order: order != null ? [order] : [['id', 'DESC']],

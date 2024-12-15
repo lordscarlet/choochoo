@@ -47,7 +47,7 @@ export const ActionApi = z.object({
 export type ActionApi = z.infer<typeof ActionApi>;
 
 function numPlayersMessage(gameKey: string): string {
-  const {name, minPlayers, maxPlayers} = MapRegistry.singleton.get(gameKey);
+  const { name, minPlayers, maxPlayers } = MapRegistry.singleton.get(gameKey);
 
   return `${name} only support ${minPlayers}-${maxPlayers} players`;
 }
@@ -86,6 +86,7 @@ export const GameLiteApi = z.object({
   status: GameStatus,
   activePlayerId: z.number().optional(),
   config: MapConfig,
+  summary: z.string().optional(),
 });
 export type GameLiteApi = z.infer<typeof GameLiteApi>;
 
