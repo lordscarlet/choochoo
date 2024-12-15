@@ -1,6 +1,4 @@
-.gameCard {
-  min-width: 400px;
-}
+.gameCard {}
 
 .active {
   background-color: lightyellow;
