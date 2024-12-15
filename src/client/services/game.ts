@@ -369,17 +369,28 @@ export function useRetryAction(): RetryAction {
   const { mutate, isPending, error } = tsr.games.retryLast.useMutation();
   handleError(isPending, error);
 
-  const retry = useCallback(() =>
+  const retry = useCallback(() => {
+    const steps = Number(prompt('How many steps?'));
+    if (isNaN(steps)) {
+      notifications.show('Enter a valid number', { autoHideDuration: 2000, severity: 'error' });
+      return;
+    }
+    if (steps >= game.version) {
+      notifications.show('Cannot start the game over, that has a bug', { autoHideDuration: 2000, severity: 'error' });
+      return;
+    }
+
     mutate({
       params: { gameId: game.id },
-      body: game.version == 1 ?
+      body: steps >= game.version ?
         { startOver: true } :
-        { steps: 1 },
+        { steps },
     }, {
       onSuccess() {
         notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
       },
-    }), [game.id, game.version]);
+    })
+  }, [game.id, game.version]);
 
   const canRetry = me?.role == UserRole.enum.ADMIN;
 

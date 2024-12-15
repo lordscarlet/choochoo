@@ -5,7 +5,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
-import { CURRENT_PLAYER, injectGrid } from "../game/state";
+import { CURRENT_PLAYER, injectCurrentPlayer, injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
@@ -28,14 +28,17 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
   protected readonly buildState = injectState(BUILD_STATE);
   protected readonly grid = injectGrid();
   protected readonly gridHelper = inject(GridHelper);
-  protected readonly currentPlayer = injectState(CURRENT_PLAYER);
+  protected readonly currentPlayerColor = injectState(CURRENT_PLAYER);
+  protected readonly currentPlayer = injectCurrentPlayer();
   protected readonly playerHelper = inject(PlayerHelper);
 
   validate(data: ClaimData): void {
     const space = this.grid().get(data.coordinates);
     assert(!(space instanceof City), { invalidInput: 'cannot claim on a city' });
     assert(space != null, { invalidInput: 'cannot call claim on an invalid space' });
-    assert(space.getTrack().some((track) => track.isClaimable()), { invalidInput: 'No claimable track on given space' });
+    const track = space.getTrack().find((track) => track.isClaimable());
+    assert(track != null, { invalidInput: 'No claimable track on given space' });
+    assert(this.currentPlayer().money >= track.claimCost(), { invalidInput: 'cannot afford claim' });
   }
 
   process(data: ClaimData): boolean {
@@ -51,7 +54,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
     for (const t of route) {
       this.gridHelper.update(t.coordinates, (space) => {
         assert(space.type !== SpaceType.CITY);
-        space.tile!.owners[t.ownerIndex] = this.currentPlayer();
+        space.tile!.owners[t.ownerIndex] = this.currentPlayerColor();
       });
     }
 
@@ -59,7 +62,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
       previousBuilds.push(data.coordinates);
     });
 
-    this.playerHelper.addMoneyForCurrentPlayer(track.claimCost());
+    this.playerHelper.addMoneyForCurrentPlayer(-track.claimCost());
     return this.helper.isAtEndOfTurn();
   }
 }
