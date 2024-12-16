@@ -29,7 +29,7 @@ export class EngineDelegator {
   private constructor() { }
 
   private getEngine(mapKey: string): EngineProcessor {
-    return this.getInjectionContext(mapKey).get(EngineProcessor);
+    return this.get(mapKey, EngineProcessor);
   }
 
   private getInjectionContext(mapKey: string): InjectionContext {
@@ -39,13 +39,10 @@ export class EngineDelegator {
     return this.engines.get(mapKey)!;
   }
 
-  private get<T>(mapKey: string, gameData: string|undefined, ctor: SimpleConstructorM<T>): T {
-    try {
-      setInjectionContext(this.getInjectionContext(mapKey));
+  private get<T>(mapKey: string, gameData: string|undefined, ctor: SimpleConstructor<T>): T {
+    return this.runInContext(mapKey, gameData, () => {
       return inject(ctor);
-    } finally {
-      setInjectionContext();
-    }
+    });
   }
 
   start(playerIds: number[], mapConfig: MapConfig): GameState {
@@ -56,15 +53,13 @@ export class EngineDelegator {
     return this.getEngine(mapKey).processAction(gameData, actionName, data);
   }
 
-  runInContext<T>(mapKey: string, gameData: string, runFn: (ctx: InjectionContext) => T): T {
+  runInContext<T>(mapKey: string, gameData: string, runFn: () => T): T {
     try {
-
-      setInjectionContext(injectionContext);
+      setInjectionContext(this.getInjectionContext(mapKey));
+      return this.get(EngineProcessor).runInContext(gameData, runFn);
     } finally {
       setInjectionContext();
     }
-    const ctx = this.getInjectionContext(mapKey);
-    return ctx.get(EngineProcessor).runInContext(gameData, () => runFn(ctx));
   }
 }
 
