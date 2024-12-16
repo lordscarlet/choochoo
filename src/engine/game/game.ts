@@ -24,18 +24,18 @@ export class GameEngine {
   private readonly phaseEngine = inject(PhaseEngine);
   private readonly phase = injectState(PHASE);
   private readonly turn = inject(TurnEngine);
-  private lifecycle: LifecycleStage | undefined;
+  private readonly lifecycle = inject(Memory).remember<LifecycleStage | undefined>(undefined);
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
   readonly hasEnded = inject(Memory).remember(false);
 
   start(playerIds: number[], startingMap: InitialMapGrid) {
     this.starter.startGame(playerIds, startingMap);
-    this.lifecycle = new StartRound(1)
+    this.lifecycle.set(new StartRound(1));
     this.runLifecycle();
   }
 
   processAction(actionName: string, data: unknown): void {
-    this.lifecycle = new ProcessAction(this.round(), this.phase(), this.currentPlayer(), actionName, data);
+    this.lifecycle.set(new ProcessAction(this.round(), this.phase(), this.currentPlayer(), actionName, data));
     this.runLifecycle();
   }
 
@@ -45,8 +45,8 @@ export class GameEngine {
 
   private runLifecycle(): void {
     const checkInfinite = infiniteLoopCheck(50);
-    while (!this.hasEnded() && !(this.lifecycle instanceof WaitForAction)) {
-      checkInfinite(`${this.lifecycle!.constructor.name}`);
+    while (!this.hasEnded() && !(this.lifecycle() instanceof WaitForAction)) {
+      checkInfinite(`${this.lifecycle()!.constructor.name}`);
       this.stepLifecycle();
     }
   }
@@ -57,63 +57,64 @@ export class GameEngine {
       return;
     }
 
-    assert(this.lifecycle != null);
-    assert(!(this.lifecycle instanceof WaitForAction));
+    const lifecycle = this.lifecycle();
+    assert(lifecycle != null);
+    assert(!(lifecycle instanceof WaitForAction));
 
-    if (this.lifecycle instanceof StartRound) {
-      this.roundEngine.start(this.lifecycle.round);
-      this.lifecycle = this.lifecycle.startPhase(this.phaseEngine.getFirstPhase());
-    } else if (this.lifecycle instanceof StartPhase) {
-      this.phaseEngine.start(this.lifecycle.phase);
+    if (lifecycle instanceof StartRound) {
+      this.roundEngine.start(lifecycle.round);
+      this.lifecycle.set(lifecycle.startPhase(this.phaseEngine.getFirstPhase()));
+    } else if (lifecycle instanceof StartPhase) {
+      this.phaseEngine.start(lifecycle.phase);
       const firstPlayer = this.delegator.get().getFirstPlayer();
       if (firstPlayer != null) {
-        this.lifecycle = this.lifecycle.startTurn(firstPlayer);
+        this.lifecycle.set(lifecycle.startTurn(firstPlayer));
         return;
       }
-      this.lifecycle = this.lifecycle.endPhase();
-    } else if (this.lifecycle instanceof StartTurn) {
-      this.turn.start(this.lifecycle.currentPlayer);
-      this.lifecycle = this.lifecycle.checkAutoAction();
-    } else if (this.lifecycle instanceof CheckAutoAction) {
+      this.lifecycle.set(lifecycle.endPhase());
+    } else if (lifecycle instanceof StartTurn) {
+      this.turn.start(lifecycle.currentPlayer);
+      this.lifecycle.set(lifecycle.checkAutoAction());
+    } else if (lifecycle instanceof CheckAutoAction) {
       const autoAction = this.delegator.get().autoAction();
       if (autoAction != null) {
-        this.lifecycle = this.lifecycle.processAction(autoAction.action.action, autoAction.data);
+        this.lifecycle.set(lifecycle.processAction(autoAction.action.action, autoAction.data));
         return;
       }
-      this.lifecycle = this.lifecycle.waitForAction();
-    } else if (this.lifecycle instanceof ProcessAction) {
-      const endsTurn = this.delegator.get().processAction(this.lifecycle.actionName, this.lifecycle.data);
+      this.lifecycle.set(lifecycle.waitForAction());
+    } else if (lifecycle instanceof ProcessAction) {
+      const endsTurn = this.delegator.get().processAction(lifecycle.actionName, lifecycle.data);
       if (endsTurn) {
-        this.lifecycle = this.lifecycle.endTurn();
+        this.lifecycle.set(lifecycle.endTurn());
         return;
       }
 
-      this.lifecycle = this.lifecycle.checkAutoAction();
-    } else if (this.lifecycle instanceof EndTurn) {
+      this.lifecycle.set(lifecycle.checkAutoAction());
+    } else if (lifecycle instanceof EndTurn) {
       this.turn.end();
-      const nextPlayer = this.delegator.get().findNextPlayer(this.lifecycle.currentPlayer);
+      const nextPlayer = this.delegator.get().findNextPlayer(lifecycle.currentPlayer);
       if (nextPlayer != null) {
-        this.lifecycle = this.lifecycle.startTurn(nextPlayer);
+        this.lifecycle.set(lifecycle.startTurn(nextPlayer));
         return;
       }
-      this.lifecycle = this.lifecycle.endPhase();
-    } else if (this.lifecycle instanceof EndPhase) {
+      this.lifecycle.set(lifecycle.endPhase());
+    } else if (lifecycle instanceof EndPhase) {
       this.phaseEngine.end();
-      const nextPhase = this.phaseEngine.findNextPhase(this.lifecycle.phase);
+      const nextPhase = this.phaseEngine.findNextPhase(lifecycle.phase);
       if (nextPhase != null) {
-        this.lifecycle = this.lifecycle.startPhase(nextPhase);
+        this.lifecycle.set(lifecycle.startPhase(nextPhase));
         return;
       }
-      this.lifecycle = this.lifecycle.endRound();
-    } else if (this.lifecycle instanceof EndRound) {
+      this.lifecycle.set(lifecycle.endRound());
+    } else if (lifecycle instanceof EndRound) {
       this.roundEngine.end();
-      if (this.lifecycle.round >= this.roundEngine.maxRounds()) {
+      if (lifecycle.round >= this.roundEngine.maxRounds()) {
         this.end();
         return;
       }
-      this.lifecycle = this.lifecycle.startNextRound();
+      this.lifecycle.set(lifecycle.startNextRound());
     } else {
-      assertNever(this.lifecycle);
+      assertNever(lifecycle);
     }
   }
 
