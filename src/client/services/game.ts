@@ -322,7 +322,7 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
     });
   }, [game.id, actionName]);
 
-  const actionCanBeEmitted = phaseDelegator.get().canEmit(action);;
+  const actionCanBeEmitted = game.status == GameStatus.enum.ACTIVE && phaseDelegator.get().canEmit(action);
 
   const canEmitUsername = actionCanBeEmitted ? users?.[0]?.username : undefined;
   const canEmit = me?.id === game.activePlayerId && actionCanBeEmitted;

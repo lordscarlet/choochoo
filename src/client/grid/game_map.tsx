@@ -57,9 +57,9 @@ function onSelectGoodCb(moveActionProgress: MoveData | undefined, setMoveActionP
   }
 }
 
-function onMoveToSpaceCb(moveHelper: MoveHelper, moveActionProgress: MoveData | undefined, setMoveActionProgress: (data: MoveData | undefined) => void, grid: Grid, player: PlayerData, maybeConfirmDelivery: (data: MoveData) => void) {
+function onMoveToSpaceCb(moveHelper: MoveHelper, moveActionProgress: MoveData | undefined, setMoveActionProgress: (data: MoveData | undefined) => void, grid: Grid, player: PlayerData | undefined, maybeConfirmDelivery: (data: MoveData) => void) {
   return (space?: Space) => {
-    if (space == null || moveActionProgress == null) return;
+    if (space == null || moveActionProgress == null || player == null) return;
     const entirePath = [moveActionProgress.startingCity, ...moveActionProgress.path.map(p => p.endingStop)];
     const entirePathIndex = entirePath.findIndex((p) => p.equals(space.coordinates));
     if (entirePathIndex >= 0) {
@@ -98,7 +98,7 @@ function onMoveToSpaceCb(moveHelper: MoveHelper, moveActionProgress: MoveData | 
     if (paths.length === 0) return;
 
     // Prefer the path belonging to the current player.
-    const path = paths.find((p) => p.owner === player.color) ?? paths[0];
+    const path = paths.find((p) => p.owner === player!.color) ?? paths[0];
     const newData = {
       ...moveActionProgress,
       path: moveActionProgress.path.concat([path]),

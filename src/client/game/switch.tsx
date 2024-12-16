@@ -1,6 +1,5 @@
-import { CURRENT_PLAYER, PLAYERS } from "../../engine/game/state";
 import { useGame } from "../services/game";
-import { useInjectedState } from "../utils/injection_context";
+import { useCurrentPlayer } from "../utils/injection_context";
 import { LoginButton } from "./login_button";
 
 
@@ -11,9 +10,7 @@ export function SwitchToUndo() {
 }
 
 export function SwitchToActive() {
-  const currentPlayerColor = useInjectedState(CURRENT_PLAYER);
-  const players = useInjectedState(PLAYERS);
-  const currentPlayer = players.find((player) => player.color === currentPlayerColor);
+  const currentPlayer = useCurrentPlayer();
   if (currentPlayer == null) return <></>;
   return <LoginButton playerId={currentPlayer.playerId}>Switch to active user</LoginButton>;
 }

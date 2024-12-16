@@ -50,7 +50,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
     emitUrbanize({ cityIndex, coordinates: space!.coordinates });
   }, [space, emitUrbanize]);
 
-  const canUrbanize = curr.selectedAction === Action.URBANIZATION &&
+  const canUrbanize = curr?.selectedAction === Action.URBANIZATION &&
     space != null &&
     space.hasTown() &&
     availableCities.length > 0;
@@ -97,7 +97,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
         </p>
         {showReasons && <Button onClick={rotate}>Rotate</Button>}
         <div className={buildingDialogContainer}>
-          {curr.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
+          {curr?.selectedAction === Action.URBANIZATION && space != null && space.hasTown() && availableCities.map((city, index) =>
             <div key={city.onRoll[0].group * 10 + city.onRoll[0].onRoll} className={buildingOption}>
               <ModifiedSpace space={space!} asCity={city} onClick={() => selectAvailableCity(index)} />
             </div>
