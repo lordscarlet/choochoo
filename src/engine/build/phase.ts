@@ -5,10 +5,10 @@ import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
 import { injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
+import { DanglerInfo } from "../map/grid";
 import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
 import { Action } from "../state/action";
-import { SpaceType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { BuildAction } from "./build";
@@ -39,35 +39,37 @@ export class BuildPhase extends PhaseModule {
     this.turnState.initState({
       previousBuilds: [],
       hasUrbanized: false,
-      danglers: this.grid().getDanglers(this.currentPlayer().color).concat(this.grid().getDanglers(undefined)),
+      danglers: this.getDanglersAsInfo(this.currentPlayer().color).concat(this.getDanglersAsInfo(undefined)),
     });
+  }
+
+  getDanglersAsInfo(color?: PlayerColor): DanglerInfo[] {
+    return this.grid().getDanglers(color).map((track) => ({
+      coordinates: track.coordinates,
+      immovableExit: this.grid().getImmovableExitReference(track),
+      length: this.grid().getRoute(track).length,
+    }));
   }
 
   onEndTurn(): void {
     const { danglers } = this.turnState();
     const grid = this.grid();
-    const newDanglers = grid.getDanglers(this.currentPlayer().color);
+    const newDanglers = this.getDanglersAsInfo(this.currentPlayer().color);
     const toRemoveIndividual = danglers.filter((dangler) => {
       const newDangler = newDanglers.find((d) => d.coordinates.equals(dangler.coordinates) && d.immovableExit === dangler.immovableExit);
       return newDangler != null && newDangler.length <= dangler.length;
     });
 
-    const toRemoveAll = toRemoveIndividual.flatMap((removing) => {
+    const toRemoveTrack = toRemoveIndividual.map((removing) => {
       const space = grid.get(removing.coordinates);
       assert(space instanceof Land);
-      const track = space.trackExiting(removing.immovableExit);
-      return grid.getRoute(track!);
+      return space.trackExiting(removing.immovableExit)!;
     });
 
-    for (const track of toRemoveAll) {
-      const index = track.ownerIndex;
-      this.gridHelper.update(track.coordinates, (spaceData) => {
-        assert(spaceData.type !== SpaceType.CITY);
-        assert(spaceData.tile != null);
-        spaceData.tile.owners[index] = undefined;
-      });
+    for (const track of toRemoveTrack) {
+      this.gridHelper.setRouteOwner(track, undefined);
     }
-    if (toRemoveAll.length > 0) {
+    if (toRemoveTrack.length > 0) {
       this.log.currentPlayer('abandons dangling track');
     }
     super.onEndTurn();

@@ -3,6 +3,7 @@ import { infiniteLoopCheck } from "../../utils/functions";
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { InitialMapGrid } from "../state/map_settings";
+import { Ender } from "./ender";
 import { CheckAutoAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
 import { Memory } from "./memory";
 import { PHASE, PhaseEngine } from "./phase";
@@ -18,6 +19,7 @@ export class GameEngine {
   private readonly starter = inject(GameStarter);
   private readonly delegator = inject(PhaseDelegator);
   private readonly roundEngine = inject(RoundEngine);
+  private readonly ender = inject(Ender);
   private readonly round = injectState(ROUND);
   private readonly phaseEngine = inject(PhaseEngine);
   private readonly phase = injectState(PHASE);
@@ -37,8 +39,8 @@ export class GameEngine {
     this.runLifecycle();
   }
 
-  private isGameOverPrematurely(): boolean {
-    return this.playerHelper.allPlayersEliminated();
+  private shouldGameEndPrematurely(): boolean {
+    return this.playerHelper.atMostOnePlayerRemaining();
   }
 
   private runLifecycle(): void {
@@ -50,7 +52,7 @@ export class GameEngine {
   }
 
   private stepLifecycle(): void {
-    if (this.isGameOverPrematurely()) {
+    if (this.shouldGameEndPrematurely()) {
       this.end();
       return;
     }
@@ -116,6 +118,7 @@ export class GameEngine {
   }
 
   end(): void {
+    this.ender.endGame();
     this.hasEnded.set(true);
   }
 }
