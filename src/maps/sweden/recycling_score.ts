@@ -6,8 +6,8 @@ import { ImmutableSet } from "../../utils/immutable";
 import { Incinerator } from "./incinerator";
 
 export class SwedenAllowedActions extends AllowedActions {
-  getAvailableActions(): ImmutableSet<Action> {
-    return super.getAvailableActions()
+  getActions(): ImmutableSet<Action> {
+    return super.getActions()
       .remove(Action.PRODUCTION)
       .add(Action.WTE_PLANT_OPERATOR);
   }
@@ -20,6 +20,8 @@ export class SwedenSelectAction extends SelectAction {
   process(data: SelectData): boolean {
     const result = super.process(data);
     if (data.action === Action.WTE_PLANT_OPERATOR) {
+      const count = this.incinerator.getGarbageCount();
+      this.log.currentPlayer(`takes ${count} black cubes, scoring ${count * 2} points.`)
       this.incinerator.takeCubes(this.currentPlayer().color);
     }
     return result;
