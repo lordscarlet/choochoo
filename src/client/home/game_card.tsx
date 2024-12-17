@@ -58,7 +58,7 @@ interface GameButtonProps {
 }
 
 export function ViewButton({ game }: GameButtonProps) {
-  if (game.status !== GameStatus.enum.ACTIVE) return <></>;
+  if (game.status !== GameStatus.enum.ACTIVE && game.status !== GameStatus.enum.ENDED) return <></>;
 
   return <Button component={Link} to={`/app/games/${game.id}`}>
     View

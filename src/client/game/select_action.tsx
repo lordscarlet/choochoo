@@ -23,11 +23,11 @@ import { iterate } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
 import { DropdownMenu } from "../components/dropdown_menu";
 import { useAction, useEmptyAction } from "../services/game";
-import { useCurrentPlayer, useInject, useInjected, useInjectedState, usePhaseState } from "../utils/injection_context";
+import { useActiveGameState, useCurrentPlayer, useInject, useInjected, useInjectedState, usePhaseState } from "../utils/injection_context";
 
 
 export function SelectAction() {
-  const currentPhase = useInjectedState(PHASE);
+  const currentPhase = useActiveGameState(PHASE);
   switch (currentPhase) {
     case Phase.SHARES: return <TakeShares />;
     case Phase.TURN_ORDER: return <Bid />;
@@ -42,6 +42,7 @@ export function SelectAction() {
     case Phase.INCOME:
     case Phase.EXPENSES:
     case Phase.INCOME_REDUCTION:
+    case undefined:
       return <></>
     default:
       assertNever(currentPhase);
@@ -67,7 +68,7 @@ export function MoveGoods() {
   }
 
   return <div>
-    {!state!.locomotive.includes(player.color) && <Button onClick={emitLoco}>Locomotive</Button>}
+    {!state!.locomotive.includes(player!.color) && <Button onClick={emitLoco}>Locomotive</Button>}
     <Button onClick={emitPass}>Pass</Button>
   </div>
 }

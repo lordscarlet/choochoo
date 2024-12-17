@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useReducer, useState } from "react";
-import { GameApi } from "../../api/game";
+import { GameApi, GameStatus } from "../../api/game";
 import { SimpleConstructor } from "../../engine/framework/dependency_stack";
 import { inject, injectState, setInjectionContext } from "../../engine/framework/execution_context";
 import { InjectionContext } from "../../engine/framework/inject";
@@ -12,6 +12,7 @@ import { Phase } from "../../engine/state/phase";
 import { PlayerData } from "../../engine/state/player";
 import { Immutable } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
+import { useGame } from "../services/game";
 
 export const InjectionContextContext = createContext<InjectionContext | undefined>(undefined);
 
@@ -80,7 +81,7 @@ export function InjectionContextProvider({ game, children }: InjectionContextPro
 }
 
 export function usePhaseState<T>(phase: Phase, key: Key<T>): Immutable<T> | undefined {
-  const currentPhase = useInjectedState(PHASE);
+  const currentPhase = useActiveGameState(PHASE);
   return useOptionalInjectedState(key, phase === currentPhase);
 }
 
@@ -105,14 +106,19 @@ function useOptionalInjectedState<T>(key: Key<T>, optionalCheck: boolean): Immut
   return undefined;
 }
 
+export function useActiveGameState<T>(key: Key<T>): Immutable<T> | undefined {
+  const game = useGame();
+  return useOptionalInjectedState(key, game.status === GameStatus.enum.ACTIVE)!;
+}
+
 export function useInjectedState<T>(key: Key<T>): Immutable<T> {
   return useOptionalInjectedState(key, true)!;
 }
 
-export function useCurrentPlayer(): PlayerData {
-  const playerColor = useInjectedState(CURRENT_PLAYER);
+export function useCurrentPlayer(): PlayerData | undefined {
+  const playerColor = useActiveGameState(CURRENT_PLAYER);
   const players = useInjectedState(PLAYERS);
-  return players.find((player) => player.color === playerColor)!;
+  return players.find((player) => player.color === playerColor);
 }
 
 export function useGrid(): Grid {

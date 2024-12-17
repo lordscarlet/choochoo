@@ -5,13 +5,13 @@ import { PlayerColor } from "../../engine/state/player";
 import { TURN_ORDER_STATE } from "../../engine/turn_order/state";
 import { duplicate } from "../../utils/functions";
 import { getPlayerColorCss } from "../components/player_color";
-import { useInjectedState, usePhaseState } from "../utils/injection_context";
+import { useActiveGameState, useInjectedState, usePhaseState } from "../utils/injection_context";
 import * as styles from './bidding_info.module.css';
 
 
 export function BiddingInfo() {
   const playerOrder = useInjectedState(TURN_ORDER);
-  const currentPlayer = useInjectedState(CURRENT_PLAYER);
+  const currentPlayer = useActiveGameState(CURRENT_PLAYER);
   const turnOrderState = usePhaseState(Phase.TURN_ORDER, TURN_ORDER_STATE);
 
   const biddingPlayers = useMemo(() =>

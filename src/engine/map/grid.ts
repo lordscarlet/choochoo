@@ -10,7 +10,7 @@ import { PlayerColor } from "../state/player";
 import { allDirections, Direction } from "../state/tile";
 import { City, isCity } from "./city";
 import { getOpposite } from "./direction";
-import { Land } from "./location";
+import { isLand, Land } from "./location";
 import { Exit, TOWN, Track, tupleMap } from "./track";
 
 export type Space = City | Land;
@@ -46,21 +46,10 @@ export class Grid {
     return this.get(coordinates.neighbor(dir));
   }
 
-  getDanglers(color?: PlayerColor): DanglerInfo[] {
-    const danglers: DanglerInfo[] = [];
-    for (const space of this.values()) {
-      if (!(space instanceof Land)) continue;
-      for (const track of space.getTrack()) {
-        if (track.getOwner() !== color) continue;
-        if (!this.dangles(track)) continue;
-        danglers.push({
-          coordinates: space.coordinates,
-          immovableExit: this.getImmovableExitReference(track),
-          length: this.getRoute(track).length,
-        });
-      }
-    }
-    return danglers;
+  getDanglers(color?: PlayerColor): Track[] {
+    return [...this.values()].filter(isLand).flatMap((land) => land.getTrack())
+      .filter((track) => track.getOwner() === color)
+      .filter((track) => this.dangles(track));
   }
 
   /** Returns whether this track dangles. Not whether some track on the same route dangles. */
@@ -68,7 +57,7 @@ export class Grid {
     return this.exitInfo(track).some((info) => info.dangles);
   }
 
-  private getImmovableExitReference(track: Track): Direction {
+  getImmovableExitReference(track: Track): Direction {
     return this.exitInfo(track).find((info) => info.exit != TOWN && info.immovable)!.exit as Direction;
   }
 

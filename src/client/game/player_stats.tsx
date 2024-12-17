@@ -10,7 +10,7 @@ import { getSelectedActionString } from "../../engine/state/action";
 import { PlayerColor, PlayerData } from "../../engine/state/player";
 import { getPlayerColorCss } from '../components/player_color';
 import { useUsers } from "../services/user";
-import { useInjected, useInjectedState } from "../utils/injection_context";
+import { useActiveGameState, useInjected, useInjectedState } from "../utils/injection_context";
 import { LoginButton } from "./login_button";
 import * as styles from './player_stats.module.css';
 
@@ -18,7 +18,7 @@ import * as styles from './player_stats.module.css';
 export function PlayerStats() {
   const playerData = useInjectedState(PLAYERS);
   const playerOrder = useInjectedState(TURN_ORDER);
-  const currentPlayer = useInjectedState(CURRENT_PLAYER);
+  const currentPlayer = useActiveGameState(CURRENT_PLAYER);
   const profitHelper = useInjected(ProfitHelper);
   const moveHelper = useInjected(MoveHelper);
   const helper = useInjected(PlayerHelper);

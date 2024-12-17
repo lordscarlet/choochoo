@@ -25,11 +25,13 @@ export class GridHelper {
     this.grid.update((grid) => updateFn(grid.get(coordinates)!));
   }
 
-  setTrackOwner(track: Track, owner?: PlayerColor): void {
-    this.update(track.coordinates, (hex) => {
-      assert(hex.type !== SpaceType.CITY);
-      hex.tile!.owners[track.ownerIndex] = owner;
-    });
+  setRouteOwner(track: Track, owner?: PlayerColor): void {
+    for (const trackInRoute of this.spaces().getRoute(track)) {
+      this.update(trackInRoute.coordinates, (hex) => {
+        assert(hex.type !== SpaceType.CITY);
+        hex.tile!.owners[trackInRoute.ownerIndex] = owner;
+      });
+    }
   }
 
   lookup(coordinates: Coordinates): Space | undefined {

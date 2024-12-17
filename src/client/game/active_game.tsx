@@ -1,13 +1,19 @@
 import { Button } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
+import { GameStatus } from "../../api/game";
+import { inject, injectState } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
+import { PlayerHelper } from "../../engine/game/player";
 import { ROUND, RoundEngine } from "../../engine/game/round";
+import { PLAYERS } from "../../engine/game/state";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { MOVE_STATE } from "../../engine/move/state";
 import { getPhaseString, Phase } from "../../engine/state/phase";
+import { isNumber } from "../../utils/validate";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
-import { InjectionContextProvider, useInjected, useInjectedState } from "../utils/injection_context";
+import { useUsers } from "../services/user";
+import { InjectionContextProvider, useActiveGameState, useInject, useInjected, useInjectedState } from "../utils/injection_context";
 import { AvailableCities } from "./available_cities";
 import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
@@ -53,14 +59,36 @@ function InternalActiveGame() {
 }
 
 export function CurrentPhase() {
-  const round = useInjectedState(ROUND);
-  const roundHelper = useInjected(RoundEngine)
-  const phase = useInjectedState(PHASE);
+  const game = useGame();
+  const round = useActiveGameState(ROUND);
+  const roundHelper = useInjected(RoundEngine);
+  const phase = useActiveGameState(PHASE);
   return <div>
-    <p>Round: {round}/{roundHelper.maxRounds()}.</p>
-    <p>Phase: {getPhaseString(phase)}.</p>
+    {game.status === GameStatus.enum.ENDED && <GameOver />}
+    {round != null && <p>Round: {round}/{roundHelper.maxRounds()}.</p>}
+    {phase != null && <p>Phase: {getPhaseString(phase)}.</p>}
     {phase === Phase.MOVING && <MovingMetadata />}
   </div>;
+}
+
+export function GameOver() {
+  const winnerIds = useInject(() => {
+    const helper = inject(PlayerHelper);
+    const players = injectState(PLAYERS);
+    const scores = players().map((player) => [player.playerId, helper.getScore(player)] as const);
+    const bestScore = Math.max(...scores.map(([_, score]) => score).filter(isNumber));
+    return scores.filter(([_, score]) => score === bestScore).map(([id]) => id);
+  }, []);
+  const winners = useUsers(winnerIds);
+  return <>
+    <p>Game over.</p>
+    <p>
+      {winners.length === 0 ? 'No one wins.' :
+        winners.length === 1 ? `${winners[0]?.username ?? 'Unknown'} wins!` :
+          `Winners: ${winners.map((u) => u?.username ?? 'Unknown').join(', ')}`
+      }
+    </p>
+  </>;
 }
 
 export function MovingMetadata() {

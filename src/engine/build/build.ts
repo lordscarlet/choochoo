@@ -74,16 +74,10 @@ export class BuildAction implements ActionProcessor<BuildData> {
     assert(location instanceof Land);
 
     const toUpdate: Array<[Track, PlayerColor | undefined]> = [];
-    for (const originatingTrack of location.getTrack()) {
-      for (const track of this.grid().getRoute(originatingTrack)) {
-        if (track.getOwner() !== originatingTrack.getOwner()) {
-          toUpdate.push([track, originatingTrack.getOwner()]);
-        }
+    for (const track of location.getTrack()) {
+      if (track.getOwner() === this.currentPlayer().color) {
+        this.gridHelper.setRouteOwner(track, this.currentPlayer().color);
       }
-    }
-
-    for (const [track, color] of toUpdate) {
-      this.gridHelper.setTrackOwner(track, color);
     }
 
     this.buildState.update(({ previousBuilds }) => {

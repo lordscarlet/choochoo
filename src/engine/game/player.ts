@@ -19,7 +19,7 @@ export class PlayerHelper {
     return this.update(this.currentPlayer(), updateFn);
   }
 
-  allPlayersEliminated(): boolean {
+  atMostOnePlayerRemaining(): boolean {
     const checkFor = this.players().length === 1 ? 0 : 1;
     const playersRemaining = this.players().filter(p => p.outOfGame !== true).length;
     return playersRemaining <= checkFor;

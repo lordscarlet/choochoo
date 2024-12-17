@@ -30,7 +30,6 @@ export function HomePage() {
 
   const endedQuery: ListGamesApi = useMemo(() => ({
     status: [GameStatus.Enum.ENDED],
-    excludeUserId: user?.id,
     order: ['updatedAt', 'DESC'],
   }), [user]);
 
