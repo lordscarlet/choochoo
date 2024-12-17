@@ -12,7 +12,7 @@ export class MovePassAction implements ActionProcessor<{}> {
   validate(_: {}): void { }
 
   process(_: {}): boolean {
-    this.log.currentPlayer('locos');
+    this.log.currentPlayer('passes');
     return true;
   }
 } 
