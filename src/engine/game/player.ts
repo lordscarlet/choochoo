@@ -37,6 +37,10 @@ export class PlayerHelper {
     if (player.outOfGame) {
       return DISQUALIFIED;
     }
+    return this.calculateScore(player);
+  }
+
+  protected calculateScore(player: PlayerData): number {
     return 3 * (player.income - player.shares) + this.countTrack(player.color);
   }
 

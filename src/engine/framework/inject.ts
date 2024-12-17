@@ -11,7 +11,10 @@ export class InjectionContext {
   private readonly dependencyStack = new DependencyStack();
 
   constructor(mapKey: string) {
-    MapRegistry.singleton.get(mapKey).registerOverrides(this);
+    for (const override of MapRegistry.singleton.get(mapKey).getOverrides()) {
+      const original = Object.getPrototypeOf(override);
+      this.overrides.set(original, override);
+    }
 
     // Carve out a special path for DependencyStack
     this.dependencies.set(DependencyStack, new Set<Dependency>());
@@ -58,10 +61,6 @@ export class InjectionContext {
       dependencies.push(...this.dependencies.get(dependency)!);
     }
     return stateDependencies;
-  }
-
-  override<R>(factory: SimpleConstructor<R>, override: SimpleConstructor<R>): void {
-    this.overrides.set(factory, override);
   }
 }
 

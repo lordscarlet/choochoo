@@ -98,7 +98,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
       assert(startingRouteTrack != null, { invalidInput: `no route found from ${fromCity.coordinates} exiting ${step.startingExit}` });
       assert(!(startingRouteTrack instanceof City), `cannot move from city to city`);
       assert(startingRouteTrack.getOwner() === step.owner, { invalidInput: `route not owned by ${step.owner}` });
-      assert(this.grid().canMoveGoodsAcrossTrack(startingRouteTrack), {invalidInput: 'cannot move track across route'});
+      assert(this.grid().canMoveGoodsAcrossTrack(startingRouteTrack), { invalidInput: 'cannot move track across route' });
       assert(
         this.grid().endsWith(startingRouteTrack, step.endingStop),
         { invalidInput: `indicated track does not end with ${step.endingStop}` });
@@ -127,8 +127,12 @@ export class MoveAction implements ActionProcessor<MoveData> {
         player.income += incomeBonus;
       }
     });
-    this.bag.update(goods => goods.push(action.good));
+    this.returnToBag(action);
     return true;
+  }
+
+  protected returnToBag(action: MoveData): void {
+    this.bag.update(goods => goods.push(action.good));
   }
 }
 

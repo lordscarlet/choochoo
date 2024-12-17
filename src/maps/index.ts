@@ -4,6 +4,7 @@ import { assert } from '../utils/validate';
 import { IrelandMapSettings } from './ireland/settings';
 import { ReversteamMapSettings } from './reversteam/settings';
 import { RustBeltMapSettings } from './rust_belt/settings';
+import { SwedenRecyclingMapSettings } from './sweden/settings';
 
 
 export class MapRegistry {
@@ -14,6 +15,7 @@ export class MapRegistry {
     this.add(new RustBeltMapSettings());
     this.add(new ReversteamMapSettings());
     this.add(new IrelandMapSettings());
+    this.add(new SwedenRecyclingMapSettings());
   }
 
   values(): Iterable<MapSettings> {

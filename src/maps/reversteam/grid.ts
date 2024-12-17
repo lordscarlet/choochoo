@@ -1,11 +1,8 @@
-import { CityGroup } from '../../engine/state/city_group';
 import { Good } from '../../engine/state/good';
 import { duplicate } from '../../utils/functions';
-import { black, city, grid, MOUNTAIN, PLAIN, RIVER, town, UNPASSABLE, white } from '../factory';
+import { black, city, MOUNTAIN, PLAIN, RIVER, startsLowerGrid, town, UNPASSABLE, white } from '../factory';
 
-const { WHITE, BLACK } = CityGroup;
-
-export const map = grid([
+export const map = startsLowerGrid([
   [
     PLAIN,
     UNPASSABLE,

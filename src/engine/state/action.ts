@@ -15,6 +15,9 @@ export enum Action {
 
   // Ireland
   DEURBANIZATION,
+
+  // Sweden Recycling
+  WTE_PLANT_OPERATOR,
 }
 
 export const ActionZod = z.nativeEnum(Action);
@@ -31,6 +34,7 @@ export function getSelectedActionString(action?: Action) {
     case Action.PRODUCTION: return 'Production';
     case Action.REPOPULATION: return 'Repopulation';
     case Action.DEURBANIZATION: return 'Deurbanization';
+    case Action.WTE_PLANT_OPERATOR: return 'WTE Plant Operator';
     default:
       assertNever(action);
   }

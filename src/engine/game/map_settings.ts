@@ -1,6 +1,6 @@
 
 import { assertNever } from "../../utils/validate";
-import { InjectionContext } from "../framework/inject";
+import { SimpleConstructor } from "../framework/dependency_stack";
 import { InitialMapGrid } from "../state/map_settings";
 
 export enum ReleaseStage {
@@ -33,5 +33,5 @@ export interface MapSettings {
   readonly startingGrid: InitialMapGrid;
   readonly stage: ReleaseStage;
 
-  registerOverrides(ctx: InjectionContext): void;
+  getOverrides(): Array<SimpleConstructor<unknown>>;
 }

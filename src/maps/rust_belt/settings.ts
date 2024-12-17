@@ -1,5 +1,4 @@
 
-import { InjectionContext } from '../../engine/framework/inject';
 import { MapSettings, ReleaseStage } from '../../engine/game/map_settings';
 import { map } from './grid';
 
@@ -12,5 +11,7 @@ export class RustBeltMapSettings implements MapSettings {
   readonly startingGrid = map;
   readonly stage = ReleaseStage.DEPRECATED;
 
-  registerOverrides(_: InjectionContext): void { }
+  getOverrides() {
+    return [];
+  }
 }

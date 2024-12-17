@@ -1,5 +1,5 @@
-import { MapRegistry } from "../../../maps";
-import { IrelandRules } from "./ireland";
+import { MapRegistry } from "../../maps";
+import { IrelandRules } from "./maps/ireland";
 
 export function MapInfo({ gameKey }: { gameKey: string }) {
   const selectedMap = MapRegistry.singleton.get(gameKey);

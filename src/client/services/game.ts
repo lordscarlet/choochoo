@@ -376,8 +376,7 @@ export function useRetryAction(): RetryAction {
       return;
     }
     if (steps >= game.version) {
-      notifications.show('Cannot start the game over, that has a bug', { autoHideDuration: 2000, severity: 'error' });
-      return;
+      notifications.show('Warning, the active player breaks when starting over', { autoHideDuration: 2000, severity: 'error' });
     }
 
     mutate({

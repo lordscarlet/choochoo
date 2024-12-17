@@ -19,6 +19,7 @@ import { Editor } from "./editor";
 import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
 import { MapInfo } from "./map_info";
+import { MapSpecificMetadata } from "./map_specific_metadata";
 import { PlayerStats } from "./player_stats";
 import { SelectAction } from "./select_action";
 import { SwitchToActive, SwitchToUndo } from "./switch";
@@ -49,6 +50,7 @@ function InternalActiveGame() {
     {!undoOnly && <BiddingInfo />}
     <RetryButton />
     {!undoOnly && <CurrentPhase />}
+    {!undoOnly && <MapSpecificMetadata />}
     {!undoOnly && <PlayerStats />}
     {!undoOnly && <GameMap />}
     {!undoOnly && !canEmit && <GoodsTable />}

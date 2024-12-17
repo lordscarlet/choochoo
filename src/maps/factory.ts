@@ -6,6 +6,7 @@ import { CitySettingData, OnRollSettingData } from "../engine/state/map_settings
 import { OnRoll } from "../engine/state/roll";
 import { LandData } from '../engine/state/space';
 import { Coordinates } from "../utils/coordinates";
+import { duplicate } from '../utils/functions';
 
 export const PLAIN: LandData = {
   type: SpaceType.PLAIN,
@@ -47,8 +48,12 @@ export function customCity(city: Omit<CitySettingData, 'type'>): CitySettingData
   return { ...city, type: SpaceType.CITY };
 }
 
-export function grid<T>(array: Array<Array<T | undefined>>): ImmutableMap<Coordinates, T> {
-  const newArray = offset(array);
+export function startsLowerGrid<T>(array: Array<Array<T | undefined>>): ImmutableMap<Coordinates, T> {
+  return grid(array, true);
+}
+
+export function grid<T>(array: Array<Array<T | undefined>>, startsLower = false): ImmutableMap<Coordinates, T> {
+  const newArray = offset(array, startsLower);
 
   return ImmutableMap<Coordinates, T>().withMutations((grid) => {
     for (const [q, row] of newArray.entries()) {
@@ -61,16 +66,20 @@ export function grid<T>(array: Array<Array<T | undefined>>): ImmutableMap<Coordi
 }
 
 
-function offset<T>(grid: Array<Array<T | undefined>>): Array<Array<T | undefined>> {
+function offset<T>(grid: Array<Array<T | undefined>>, startsLower = false): Array<Array<T | undefined>> {
   const newGrid: Array<Array<T | undefined>> = [];
   for (let i = 0; i < grid.length; i++) {
     const newColumn: Array<T | undefined> = [];
-    for (let l = 0; l < grid.length - i - 2; l += 2) {
-      newColumn.push(undefined);
-    }
+    newColumn.push(...duplicate(getOffset(i, grid.length, startsLower), UNPASSABLE));
     newGrid.push([...newColumn, ...grid[i]]);
   }
   return newGrid;
+}
+
+function getOffset(i: number, length: number, startsLower: boolean): number {
+  const placement = startsLower ? Math.ceil(i / 2) : Math.floor(i / 2);
+  const total = Math.ceil(length / 2);
+  return total - placement;
 }
 
 export function town(townName: string): LandData {
