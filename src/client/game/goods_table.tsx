@@ -9,12 +9,20 @@ import { Good, goodToString } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { OnRoll } from "../../engine/state/roll";
 import { iterate } from "../../utils/functions";
+import { ImmutableMap } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
 import { goodStyle } from "../grid/good";
 import { useAction, useEmptyAction, useGameVersionState } from "../services/game";
 import { useGrid, useInjectedState, usePhaseState } from "../utils/injection_context";
 import * as styles from './goods_table.module.css';
 
+
+function getMaxGoods(goodsMap: ImmutableMap<CityGroup, Good[][]>): number {
+  const goodArrays: Good[][] =
+    [...goodsMap.values()].flatMap((i) => i);
+
+  return Math.max(...goodArrays.map((goods) => goods.length));
+}
 
 export function GoodsTable() {
   const [manuallySelectedGood, setSelectedGood] = useGameVersionState<Good | undefined>(undefined);
@@ -35,22 +43,14 @@ export function GoodsTable() {
         urbanizedCities.get(group)![onRoll] = goods;
       }
     }
-    return { regularCities, urbanizedCities };
+    return {
+      regularCities: ImmutableMap(regularCities),
+      urbanizedCities: ImmutableMap(urbanizedCities),
+    };
   }, [grid, availableCities]);
 
-  const maxRegularGoods = useMemo(() => {
-    const goods = [
-      ...cities.regularCities.values()
-    ].map((goodsArray) => goodsArray.length);
-    return Math.max(3, ...goods);
-  }, [cities]);
-
-  const maxUrbanizedGoods = useMemo(() => {
-    const goods = [
-      ...cities.regularCities.values()
-    ].map((goodsArray) => goodsArray.length);
-    return Math.max(2, ...goods);
-  }, [cities]);
+  const maxRegularGoods = useMemo(() => Math.max(3, getMaxGoods(cities.regularCities)), [cities]);
+  const maxUrbanizedGoods = useMemo(() => Math.max(2, getMaxGoods(cities.urbanizedCities)), [cities]);
 
   const { emit, canEmit } = useAction(ProductionAction);
   const productionState = usePhaseState(Phase.GOODS_GROWTH, GOODS_GROWTH_STATE);
@@ -87,9 +87,9 @@ export function GoodsTable() {
           const letter = i < 2 || i >= 10 ? '' : numberToLetter(i - 2);
           return <div className={`${styles.column} ${i === 5 ? styles.gapRight : ''}`} key={i}>
             <div>{onRoll}</div>
-            {iterate(maxRegularGoods, goodIndex => <GoodBlock key={goodIndex} good={city?.[2 - goodIndex]} canSelect={canEmit} onClick={() => onClick(false, cityGroup, onRoll)} />)}
+            {iterate(maxRegularGoods, goodIndex => <GoodBlock key={goodIndex} good={city?.[maxRegularGoods - 1 - goodIndex]} canSelect={canEmit} onClick={() => onClick(false, cityGroup, onRoll)} />)}
             {hasUrbanizedCities && <div>{urbanizedCity && letter}</div>}
-            {hasUrbanizedCities && iterate(maxUrbanizedGoods, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[1 - goodIndex]} canSelect={canEmit} emptySpace={urbanizedCity == null} onClick={() => onClick(true, cityGroup, onRoll)} />)}
+            {hasUrbanizedCities && iterate(maxUrbanizedGoods, goodIndex => <GoodBlock key={goodIndex} good={urbanizedCity?.[maxUrbanizedGoods - 1 - goodIndex]} canSelect={canEmit} emptySpace={urbanizedCity == null} onClick={() => onClick(true, cityGroup, onRoll)} />)}
           </div>;
         })}
       </div>
