@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 import { useCallback, useMemo } from "react";
+import { PHASE } from "../../engine/game/phase";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
 import { PassAction } from "../../engine/goods_growth/pass";
 import { ProductionAction } from "../../engine/goods_growth/production";
@@ -8,11 +9,12 @@ import { CityGroup } from "../../engine/state/city_group";
 import { Good, goodToString } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { OnRoll } from "../../engine/state/roll";
+import { SwedenRecyclingMapSettings } from "../../maps/sweden/settings";
 import { iterate } from "../../utils/functions";
 import { ImmutableMap } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
 import { goodStyle } from "../grid/good";
-import { useAction, useEmptyAction, useGameVersionState } from "../services/game";
+import { useAction, useEmptyAction, useGame, useGameVersionState } from "../services/game";
 import { useGrid, useInjectedState, usePhaseState } from "../utils/injection_context";
 import * as styles from './goods_table.module.css';
 
@@ -25,8 +27,10 @@ function getMaxGoods(goodsMap: ImmutableMap<CityGroup, Good[][]>): number {
 }
 
 export function GoodsTable() {
+  const gameKey = useGame().gameKey;
   const [manuallySelectedGood, setSelectedGood] = useGameVersionState<Good | undefined>(undefined);
   const grid = useGrid();
+  const phase = useInjectedState(PHASE);
   const availableCities = useInjectedState(AVAILABLE_CITIES);
   const cities = useMemo(() => {
     const cities = grid.cities();
@@ -70,6 +74,12 @@ export function GoodsTable() {
   }, [good, productionState]);
 
   const hasUrbanizedCities = cities.urbanizedCities.get(CityGroup.WHITE)!.length + cities.urbanizedCities.get(CityGroup.BLACK)!.length > 0;
+
+  if (gameKey === SwedenRecyclingMapSettings.key && phase !== Phase.MOVING) {
+    // Only render the goods table during the moving phase, where it is used as
+    // a display of what goods were recycled that round.
+    return <></>;
+  }
 
   return <div>
     <PlaceGood good={good} toggleSelectedGood={toggleSelectedGood} />
