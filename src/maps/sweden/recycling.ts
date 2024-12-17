@@ -1,4 +1,5 @@
 import { inject } from "../../engine/framework/execution_context";
+import { PhaseEngine } from "../../engine/game/phase";
 import { injectGrid } from "../../engine/game/state";
 import { City } from "../../engine/map/city";
 import { GridHelper } from "../../engine/map/grid_helper";
@@ -6,6 +7,7 @@ import { MoveAction, MoveData } from "../../engine/move/move";
 import { MovePhase } from "../../engine/move/phase";
 import { Good } from "../../engine/state/good";
 import { SpaceType } from "../../engine/state/location_type";
+import { Phase } from "../../engine/state/phase";
 import { peek } from "../../utils/functions";
 import { assert, assertNever } from "../../utils/validate";
 import { Incinerator } from "./incinerator";
@@ -54,5 +56,11 @@ export class SwedenMovePhase extends MovePhase {
       default:
         assertNever(good);
     }
+  }
+}
+
+export class SwedenPhaseEngine extends PhaseEngine {
+  phaseOrder(): Phase[] {
+    return super.phaseOrder().filter((phase) => phase !== Phase.GOODS_GROWTH);
   }
 }
