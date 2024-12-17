@@ -14,7 +14,7 @@ export class PhaseEngine {
 
   start(phase: Phase): void {
     this.phase.initState(phase);
-    this.log.log(`Starting ${getPhaseString(phase)} phase`);
+    this.log.log(`Starting ${getPhaseString(phase)}`);
     const phaseProcessor = this.delegator.get();
     phaseProcessor.onStart();
   }
@@ -23,7 +23,7 @@ export class PhaseEngine {
     const currentPhase = this.phase();
     this.delegator.get().onEnd();
     this.phase.delete();
-    this.log.log(`Ending ${getPhaseString(currentPhase)} phase`);
+    this.log.log(`Ending ${getPhaseString(currentPhase)}`);
   }
 
   getFirstPhase(): Phase {

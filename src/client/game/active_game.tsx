@@ -4,16 +4,15 @@ import { GameStatus } from "../../api/game";
 import { inject, injectState } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
 import { PlayerHelper } from "../../engine/game/player";
-import { ROUND, RoundEngine } from "../../engine/game/round";
 import { PLAYERS } from "../../engine/game/state";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { MOVE_STATE } from "../../engine/move/state";
-import { getPhaseString, Phase } from "../../engine/state/phase";
+import { Phase } from "../../engine/state/phase";
 import { isNumber } from "../../utils/validate";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
 import { useUsers } from "../services/user";
-import { InjectionContextProvider, useActiveGameState, useInject, useInjected, useInjectedState } from "../utils/injection_context";
+import { InjectionContextProvider, useActiveGameState, useInject, useInjectedState } from "../utils/injection_context";
 import { AvailableCities } from "./available_cities";
 import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
@@ -60,13 +59,10 @@ function InternalActiveGame() {
 
 export function CurrentPhase() {
   const game = useGame();
-  const round = useActiveGameState(ROUND);
-  const roundHelper = useInjected(RoundEngine);
   const phase = useActiveGameState(PHASE);
   return <div>
     {game.status === GameStatus.enum.ENDED && <GameOver />}
-    {round != null && <p>Round: {round}/{roundHelper.maxRounds()}.</p>}
-    {phase != null && <p>Phase: {getPhaseString(phase)}.</p>}
+    {game.summary && <p>{game.summary}</p>}
     {phase === Phase.MOVING && <MovingMetadata />}
   </div>;
 }

@@ -26,6 +26,7 @@ export type GameStatus = z.infer<typeof GameStatus>;
 export const allGameStatuses = GameStatus.options;
 
 export function gameStatusToString(game: GameLiteApi): string {
+  if (game.summary != null) return game.summary;
   switch (game.status) {
     case GameStatus.enum.LOBBY:
       return game.playerIds.length === game.config.maxPlayers ?

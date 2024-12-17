@@ -2,10 +2,6 @@ import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, 
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { GameApi, GameLiteApi, GameStatus, MapConfig } from '../../api/game';
 import { EngineDelegator } from '../../engine/framework/engine';
-import { StateStore } from '../../engine/framework/state';
-import { PHASE } from '../../engine/game/phase';
-import { ROUND, RoundEngine } from '../../engine/game/round';
-import { getPhaseString } from '../../engine/state/phase';
 
 @Table({ modelName: 'Game' })
 export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAttributes<GameModel>> {
@@ -96,12 +92,6 @@ function toSummary(game: GameApi | InferAttributes<GameModel>): string | undefin
   if ('summary' in game) {
     return game.summary;
   }
-  if (game.gameData == null) return undefined;
-  return EngineDelegator.singleton.runInContext(game.gameKey, game.gameData, (ctx) => {
-    const state = ctx.get(StateStore);
-    const round = state.get(ROUND);
-    const maxRounds = ctx.get(RoundEngine).maxRounds();
-    const phase = state.get(PHASE);
-    return `Round ${round} out of ${maxRounds}. Phase: ${getPhaseString(phase)}`;
-  });
+  if (game.status != GameStatus.enum.ACTIVE) return undefined;
+  return EngineDelegator.singleton.readSummary(game.gameKey, game.gameData!);
 }
