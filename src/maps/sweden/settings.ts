@@ -10,7 +10,7 @@ export class SwedenRecyclingMapSettings implements MapSettings {
   readonly key = SwedenRecyclingMapSettings.key;
   readonly name = 'Sweden Recycling';
   readonly minPlayers = 3;
-  readonly maxPlayers = 4;
+  readonly maxPlayers = 6;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.ALPHA;
 
