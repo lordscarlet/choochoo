@@ -26,7 +26,7 @@ export class Incinerator {
   }
 
   addCube(): void {
-    this.count.update((count) => count + 1);
+    this.count.set(this.count() + 1);
   }
 
   takeCubes(playerColor: PlayerColor): void {

@@ -1,6 +1,6 @@
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
 import { map } from "./grid";
-import { SwedenMoveAction, SwedenMovePhase } from "./recycling";
+import { SwedenMoveAction, SwedenMovePhase, SwedenPhaseEngine } from "./recycling";
 import { SwedenAllowedActions, SwedenSelectAction } from "./recycling_score";
 import { SwedenPlayerHelper } from "./score";
 import { SwedenStarter } from "./starter";
@@ -22,6 +22,7 @@ export class SwedenRecyclingMapSettings implements MapSettings {
       SwedenMovePhase,
       SwedenMoveAction,
       SwedenPlayerHelper,
+      SwedenPhaseEngine,
     ];
   }
 }
