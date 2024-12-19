@@ -8,7 +8,10 @@ import { ProfitHelper } from '../../engine/income_and_expenses/helper';
 import { MoveHelper } from '../../engine/move/helper';
 import { getSelectedActionString } from "../../engine/state/action";
 import { PlayerColor, PlayerData } from "../../engine/state/player";
+import { Incinerator } from '../../maps/sweden/incinerator';
+import { SwedenRecyclingMapSettings } from '../../maps/sweden/settings';
 import { getPlayerColorCss } from '../components/player_color';
+import { useGame } from '../services/game';
 import { useUsers } from "../services/user";
 import { useActiveGameState, useInjected, useInjectedState } from "../utils/injection_context";
 import { LoginButton } from "./login_button";
@@ -29,6 +32,8 @@ export function PlayerStats() {
     const user = playerUsers.find(user => user?.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
+  const gameKey = useGame().gameKey;
+  const incinerator = useInjected(Incinerator);
   // TODO: Render the locomotive addition for Ireland.
   return <div className={styles.playerStats}>
     <table>
@@ -43,6 +48,7 @@ export function PlayerStats() {
           <th className={styles.expanded}>Income</th>
           <th className={styles.expanded}>Shares</th>
           <th className={styles.expanded}>Locomotive</th>
+          {gameKey === SwedenRecyclingMapSettings.key && <th className={styles.expanded}>Garbage</th>}
           <th className={styles.expanded}>Score</th>
           <th></th>
         </tr>
@@ -62,6 +68,7 @@ export function PlayerStats() {
               Income:<br />
               Shares:<br />
               Loco:<br />
+              {gameKey === SwedenRecyclingMapSettings.key && `Garbage:`}
               Score:<br />
             </td>
             <td className={styles.collapsed}>
@@ -70,6 +77,7 @@ export function PlayerStats() {
               ${player.income}<br />
               {player.shares}<br />
               {moveHelper.getLocomotiveDisplay(player)}<br />
+              {gameKey === SwedenRecyclingMapSettings.key && <>{incinerator.getGarbageCountForUser(player.color)}<br /></>}
               {helper.getScore(player)}<br />
             </td>
             <td className={styles.expanded}>{getSelectedActionString(player.selectedAction)}</td>
@@ -77,6 +85,7 @@ export function PlayerStats() {
             <td className={styles.expanded}>${player.income}</td>
             <td className={styles.expanded}>{player.shares}</td>
             <td className={styles.expanded}>{moveHelper.getLocomotiveDisplay(player)}</td>
+            {gameKey === SwedenRecyclingMapSettings.key && <td>{incinerator.getGarbageCountForUser(player.color)}</td>}
             <td className={styles.expanded}>{helper.getScore(player)}</td>
             <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
           </tr>)}
