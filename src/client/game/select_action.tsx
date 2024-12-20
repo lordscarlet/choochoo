@@ -26,6 +26,12 @@ import { useAction, useEmptyAction } from "../services/game";
 import { useActiveGameState, useCurrentPlayer, useInject, useInjected, useInjectedState, usePhaseState } from "../utils/injection_context";
 
 
+const PASS_ACTION = 'Pass';
+type PassAction = typeof PASS_ACTION;
+
+const TURN_ORDER_PASS_ACTION = 'Turn Order Pass';
+type TurnOrderPassAction = typeof TURN_ORDER_PASS_ACTION;
+
 export function SelectAction() {
   const currentPhase = useActiveGameState(PHASE);
   switch (currentPhase) {
@@ -114,10 +120,10 @@ export function Bid() {
 
   const isPending = isBidPending || isTurnOrderPending || isPassPending;
 
-  const placeBid = useCallback((bid: number | 'pass' | 'turnOrderPass') => {
-    if (bid === 'pass') {
+  const placeBid = useCallback((bid: number | PassAction | TurnOrderPassAction) => {
+    if (bid === PASS_ACTION) {
       emitPass();
-    } else if (bid === 'turnOrderPass') {
+    } else if (bid === TURN_ORDER_PASS_ACTION) {
       emitTurnOrderPass();
     } else {
       emitBid({ bid });
@@ -136,8 +142,8 @@ export function Bid() {
   const minBid = helper.getMinBid();
   const maxBid = helper.getMaxBid();
   const bids = [
-    ...(helper.canUseTurnOrderPass() ? ['turnOrderPass' as const] : []),
-    'pass' as const,
+    ...(helper.canUseTurnOrderPass() ? [TURN_ORDER_PASS_ACTION] : []),
+    PASS_ACTION,
     ...iterate(maxBid - minBid + 1, (i) => i + minBid),
   ];
 
