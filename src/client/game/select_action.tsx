@@ -27,10 +27,10 @@ import { useActiveGameState, useCurrentPlayer, useInject, useInjected, useInject
 
 
 const PASS_ACTION = 'Pass';
-type PassAction = typeof PASS_ACTION;
+type PassActionString = typeof PASS_ACTION;
 
 const TURN_ORDER_PASS_ACTION = 'Turn Order Pass';
-type TurnOrderPassAction = typeof TURN_ORDER_PASS_ACTION;
+type TurnOrderPassActionString = typeof TURN_ORDER_PASS_ACTION;
 
 export function SelectAction() {
   const currentPhase = useActiveGameState(PHASE);
@@ -120,7 +120,7 @@ export function Bid() {
 
   const isPending = isBidPending || isTurnOrderPending || isPassPending;
 
-  const placeBid = useCallback((bid: number | PassAction | TurnOrderPassAction) => {
+  const placeBid = useCallback((bid: number | PassActionString | TurnOrderPassActionString) => {
     if (bid === PASS_ACTION) {
       emitPass();
     } else if (bid === TURN_ORDER_PASS_ACTION) {
