@@ -32,6 +32,9 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         Players: {players && players.filter(isNotNull).map((player) => player.username).join(', ')}
       </Typography>
+      {game.status === GameStatus.enum.LOBBY && <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        Seats: {seats(game)}
+      </Typography>}
     </CardContent>
     <CardActions>
       <ViewButton game={game} />
@@ -40,6 +43,11 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
       <StartButton game={game} />
     </CardActions>
   </Card>;
+}
+
+function seats(game: GameLiteApi): string {
+  const { minPlayers, maxPlayers } = game.config;
+  return minPlayers === maxPlayers ? `${minPlayers}` : `${minPlayers}-${maxPlayers}`;
 }
 
 function gameStatusToStyle(status: GameStatus): string {
