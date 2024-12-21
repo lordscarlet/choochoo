@@ -40,7 +40,6 @@ export abstract class EmailService {
   }
 
   async sendTestNotification(user: MyUserApi): Promise<void> {
-
     await this.sendEmail({
       email: user.email,
       subject: `Test notification`,
@@ -67,8 +66,6 @@ ${this.makeUnsubscribeLink(user.email)}
   }
 
   async sendTurnReminder(user: UserModel, game: GameApi): Promise<void> {
-    // TODO: investigate why this doesn't work.
-    if (1 === 1) return;
     const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
     await this.sendEmail({
       email: user.email,
