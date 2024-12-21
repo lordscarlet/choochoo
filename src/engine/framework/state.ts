@@ -80,7 +80,7 @@ export class StateStore {
   }
 
   get<T>(key: Key<T>): Immutable<T> {
-    assert(this.isInitialized(key), 'cannot call get on uninitialized key');
+    assert(this.isInitialized(key), `cannot call get on uninitialized key: ${key.name}`);
     return this.getContainer(key).state!.value;
   }
 
