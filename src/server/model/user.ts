@@ -1,7 +1,7 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Transaction } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { compare, hash } from 'bcrypt';
-import { NotificationFrequency, NotificationMethod, NotificationPreferences } from '../../api/notifications';
+import { NotificationFrequency, NotificationMethod, NotificationPreferences, TurnNotificationSetting } from '../../api/notifications';
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
 import { assert, isPositiveInteger } from '../../utils/validate';
 import { redisClient } from '../redis';
@@ -81,8 +81,8 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     return asApi;
   }
 
-  getTurnNotificationMethod(frequency: NotificationFrequency): NotificationMethod | undefined {
-    return this.notificationPreferences.turnNotifications.find((preference) => preference.frequency === frequency)?.method;
+  getTurnNotificationSetting(frequency: NotificationFrequency): TurnNotificationSetting | undefined {
+    return this.notificationPreferences.turnNotifications.find((preference) => preference.frequency === frequency);
   }
 
   updateCache() {

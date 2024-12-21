@@ -64,6 +64,10 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   toApi(): GameApi {
     return toApi(this);
   }
+
+  getSummary(): string | undefined {
+    return toSummary(this);
+  }
 }
 
 export function toApi(game: InferAttributes<GameModel>): GameApi {

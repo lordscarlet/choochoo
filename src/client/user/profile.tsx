@@ -1,9 +1,9 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, TextField } from "@mui/material";
-import { FormEvent, useCallback, useMemo } from "react";
+import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { GameStatus, ListGamesApi } from "../../api/game";
-import { isWebHookSetting, NotificationFrequency, NotificationMethod } from "../../api/notifications";
+import { NotificationFrequency, NotificationMethod, TurnNotificationSetting, WebHookSetting } from "../../api/notifications";
 import { MyUserApi } from "../../api/user";
 import { iterate } from "../../utils/functions";
 import { Loading } from "../components/loading";
@@ -11,7 +11,6 @@ import { GameList } from "../home/game_list";
 import { useMe } from "../services/me";
 import { useNotificationPreferences, useSetNotificationPreferences } from "../services/notifications/preferences";
 import { useUser } from "../services/user";
-import { useCheckboxState, useTextInputState } from "../utils/form_state";
 import { UpdatePassword } from "./update_password";
 
 export function UserProfilePage() {
@@ -47,28 +46,48 @@ function NotificationSettings() {
   const { validationError, setPreferences, isPending } = useSetNotificationPreferences();
 
   const marketing = preferences.marketing;
-  const [email, setEmail] = useCheckboxState(preferences.turnNotifications.some(({ method }) => method === NotificationMethod.EMAIL));
-  const [enableWebHook, setEnableWebHook] = useCheckboxState(preferences.turnNotifications.some(({ method }) => method === NotificationMethod.WEBHOOK));
-  const [webHookUrl, setWebHookUrl] = useTextInputState(preferences.turnNotifications.find(isWebHookSetting)?.webHookUrl ?? '');
-  const [webHookUserId, setWebHookUserId] = useTextInputState(preferences.turnNotifications.find(isWebHookSetting)?.webHookUserId ?? '');
+  const [setting, setSetting] = useState<TurnNotificationSetting | undefined>(preferences.turnNotifications[0]);
+
+  const email = setting?.method === NotificationMethod.EMAIL;
+  const enableWebHook = setting?.method === NotificationMethod.WEBHOOK;
+
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPreferences({
       marketing,
-      turnNotifications: [
-        ...(email ? [emailSettings] : []),
-        ...(enableWebHook ? [{
-          method: NotificationMethod.WEBHOOK,
-          frequency: NotificationFrequency.IMMEDIATELY,
-          webHookUrl,
-          webHookUserId,
-        }] : []),
-      ],
+      turnNotifications: setting != null ? [setting] : [],
     });
-  }, [marketing, email, setPreferences, enableWebHook, webHookUrl, webHookUserId]);
+  }, [marketing, setting, setPreferences]);
 
   const webHookUrlError = findErrorInNotifications(validationError, 'webHookUrl');
   const webHookUserIdError = findErrorInNotifications(validationError, 'webHookUserId');
+
+  const setEmail = useCallback(() => {
+    setSetting(emailSettings);
+  }, [setSetting]);
+
+  const setEnableWebHook = useCallback(() => {
+    setSetting({
+      method: NotificationMethod.WEBHOOK,
+      frequency: NotificationFrequency.IMMEDIATELY,
+      webHookUrl: '',
+      webHookUserId: '',
+    });
+  }, [setSetting]);
+
+  const setWebHookUrl = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setSetting({
+      ...(setting as WebHookSetting),
+      webHookUrl: e.target.value,
+    });
+  }, [setSetting, setting]);
+
+  const setWebHookUserId = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setSetting({
+      ...(setting as WebHookSetting),
+      webHookUserId: e.target.value,
+    });
+  }, [setSetting, setting]);
 
   return <>
     <h2>Notification Preferences</h2>
@@ -105,7 +124,7 @@ function NotificationSettings() {
         <TextField
           required
           label="Webhook URL"
-          value={webHookUrl}
+          value={setting!.webHookUrl}
           error={webHookUrlError != null}
           helperText={webHookUrlError}
           onChange={setWebHookUrl}
@@ -115,7 +134,7 @@ function NotificationSettings() {
         <TextField
           required
           label="Webhook User ID"
-          value={webHookUserId}
+          value={setting!.webHookUserId}
           error={webHookUserIdError != null}
           helperText={webHookUserIdError}
           onChange={setWebHookUserId}

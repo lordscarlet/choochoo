@@ -6,7 +6,6 @@ import { assert } from '../../utils/validate';
 import { GameModel } from '../model/game';
 
 import { Op, WhereOptions } from '@sequelize/core';
-import { NotificationFrequency, NotificationMethod } from '../../api/notifications';
 import { UserRole } from '../../api/user';
 import { EngineDelegator } from '../../engine/framework/engine';
 import { peek } from '../../utils/functions';
@@ -15,9 +14,9 @@ import { CreateLogModel, LogModel } from '../model/log';
 import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
-import { emailService } from '../util/email';
 import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
+import { notifyTurn } from '../util/turn_notification';
 
 export const gameApp = express();
 
@@ -101,7 +100,7 @@ const router = initServer().router(gameContract, {
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, 'cannot join started game');
     assert(!game.playerIds.includes(userId), { invalidInput: true });
-    assert(game.playerIds.length < game.toLiteApi().config.maxPlayers, {invalidInput: 'game full'});
+    assert(game.playerIds.length < game.toLiteApi().config.maxPlayers, { invalidInput: 'game full' });
 
     const originalGame = game.toApi();
     game.playerIds = [...game.playerIds, userId];
@@ -204,23 +203,11 @@ const router = initServer().router(gameContract, {
       await LogModel.bulkCreate(createLogs, { transaction });
 
       transaction.afterCommit(() => {
-        processAsync().catch(e => {
+        if (!playerChanged) return;
+        notifyTurn(newGame).catch(e => {
           console.log('Failed during processAsync');
           console.error(e);
         });
-
-        // TODO: send an email letting everyone know that the game has ended.
-        async function processAsync() {
-          if (playerChanged && newGame.activePlayerId !== null) {
-            const user = await UserModel.findByPk(newGame.activePlayerId!, { transaction: null });
-            if (user == null) return;
-            const method = user.getTurnNotificationMethod(NotificationFrequency.IMMEDIATELY);
-            if (method !== NotificationMethod.EMAIL) {
-              return;
-            }
-            emailService.sendTurnReminder(user, newGame.toApi());
-          }
-        }
       });
 
       return { status: 200, body: { game: newGame.toApi() } };
