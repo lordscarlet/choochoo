@@ -38,6 +38,6 @@ export class DoubleHeight {
   }
 
   toString(): string {
-    return `${this.toRowString}${this.toColString}`;
+    return `${this.toRowString()}${this.toColString()}`;
   }
 }
