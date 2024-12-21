@@ -53,7 +53,7 @@ function InternalActiveGame() {
     {!undoOnly && <MapSpecificMetadata />}
     {!undoOnly && <PlayerStats />}
     {!undoOnly && <GameMap />}
-    {!undoOnly && !canEmit && <GoodsTable />}
+    {!undoOnly && !canEmit && game.status === GameStatus.enum.ACTIVE && <GoodsTable />}
     {!undoOnly && <AvailableCities />}
     <MapInfo gameKey={game.gameKey} />
   </div>;
