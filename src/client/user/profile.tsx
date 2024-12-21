@@ -114,7 +114,8 @@ function NotificationSettings() {
       autoComplete="off"
       onSubmit={onSubmit}
     >
-      <FormControl>
+      {/* Disable email because it's expensive and apparently cumbersome. */}
+      <FormControl style={{ display: 'none' }}>
         <FormControlLabel sx={{ m: 1, minWidth: 80 }}
           label="Email notifications"
           control={
@@ -136,26 +137,28 @@ function NotificationSettings() {
             />}
         />
       </FormControl>
-      {enableWebHook && <FormControl>
+      <FormControl>
         <TextField
           required
           label="Webhook URL"
-          value={setting!.webHookUrl}
+          value={enableWebHook ? setting?.webHookUrl : ''}
+          disabled={!enableWebHook}
           error={webHookUrlError != null}
           helperText={webHookUrlError}
           onChange={setWebHookUrl}
         />
-      </FormControl>}
-      {enableWebHook && <FormControl>
+      </FormControl>
+      <FormControl>
         <TextField
           required
           label="Webhook User ID"
-          value={setting!.webHookUserId}
+          disabled={!enableWebHook}
+          value={enableWebHook ? setting?.webHookUserId : ''}
           error={webHookUserIdError != null}
           helperText={webHookUserIdError}
           onChange={setWebHookUserId}
         />
-      </FormControl>}
+      </FormControl>
       <div>
         <Button type="submit" disabled={isPending}>Save Preferences</Button>
         <Button onClick={sendTestNotification} disabled={isTestPending}>Test</Button>

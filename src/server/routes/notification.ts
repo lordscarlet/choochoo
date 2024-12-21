@@ -1,7 +1,7 @@
 import { createExpressEndpoints, initServer } from "@ts-rest/express";
 
 import express from 'express';
-import { notificationsContract } from "../../api/notifications";
+import { NotificationMethod, notificationsContract } from "../../api/notifications";
 import { assert } from "../../utils/validate";
 import { UserModel } from "../model/user";
 import { emailService } from "../util/email";
@@ -20,6 +20,11 @@ const router = initServer().router(notificationsContract, {
   },
   async update({ req, body }) {
     await enforceRole(req);
+
+    // For now, prevent email.
+    assert(body.preferences.turnNotifications.length <= 1);
+    assert(body.preferences.turnNotifications[0]?.method !== NotificationMethod.EMAIL);
+
     const user = await UserModel.findByPk(req.session.userId);
 
     assert(user != null);
