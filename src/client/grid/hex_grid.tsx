@@ -49,7 +49,7 @@ interface HexGridProps {
   highlightedTrack?: Track[];
   selectedGood?: { good: Good, coordinates: Coordinates };
   clickTargets?: Set<ClickTarget>;
-  allowZoom?: boolean;
+  fullMapVersion?: boolean;
 }
 
 function onClickCb(grid: Grid, zoom: number, offset: Point, size: number, onClick?: (space: Space, good?: Good) => void) {
@@ -86,10 +86,11 @@ function useZoom(allowZoom?: boolean) {
   return [zoom, setZoom] as const;
 }
 
-export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
+export function HexGrid({ onClick, fullMapVersion, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
+  const allowZoom = fullMapVersion;
   const [zoom, setZoom] = useZoom(allowZoom);
   const size = 70;
-  const coordinateWidth = 50;
+  const coordinateWidth = fullMapVersion ? 50 : 0;
   const externalPadding = 20;
   const padding = externalPadding + coordinateWidth;
 
@@ -172,7 +173,7 @@ export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, gr
         className={`bi bi-google ${hexGrid}`}
         onClick={internalOnClick}>
         {mapSpaces}
-        <DoubleHeightNumbers grid={grid} size={size} coordinateWidth={coordinateWidth} externalPadding={externalPadding} />
+        {fullMapVersion && <DoubleHeightNumbers grid={grid} size={size} coordinateWidth={coordinateWidth} externalPadding={externalPadding} />}
       </svg>
     </div>
   </>;
