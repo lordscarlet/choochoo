@@ -62,11 +62,13 @@ function NotificationSettings() {
   const webHookUrlError = findErrorInNotifications(validationError, 'webHookUrl');
   const webHookUserIdError = findErrorInNotifications(validationError, 'webHookUserId');
 
-  const setEmail = useCallback(() => {
+  const setEmail = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.checked) return setSetting(undefined);
     setSetting(emailSettings);
   }, [setSetting]);
 
-  const setEnableWebHook = useCallback(() => {
+  const setEnableWebHook = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.checked) return setSetting(undefined);
     setSetting({
       method: NotificationMethod.WEBHOOK,
       frequency: NotificationFrequency.IMMEDIATELY,
