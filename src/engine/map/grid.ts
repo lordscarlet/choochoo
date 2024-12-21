@@ -2,6 +2,7 @@ import { Map as ImmutableMap } from 'immutable';
 import { z } from "zod";
 import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
 import { deepEquals } from '../../utils/deep_equals';
+import { DoubleHeight } from '../../utils/double_height';
 import { isNotNull, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GridData } from "../state/grid";
@@ -16,7 +17,20 @@ import { Exit, TOWN, Track, tupleMap } from "./track";
 export type Space = City | Land;
 
 export class Grid {
-  private constructor(private readonly grid: ImmutableMap<Coordinates, Space>) { }
+  readonly topLeft: DoubleHeight;
+  readonly bottomRight: DoubleHeight;
+
+  private constructor(private readonly grid: ImmutableMap<Coordinates, Space>) {
+    const doubleHeights = [...this.keys()].map(coord => coord.toDoubleHeight());
+    this.topLeft = new DoubleHeight(
+      Math.min(...doubleHeights.map(({ col }) => col)),
+      Math.min(...doubleHeights.map(({ row }) => row)),
+    );
+    this.bottomRight = new DoubleHeight(
+      Math.max(...doubleHeights.map(({ col }) => col)),
+      Math.max(...doubleHeights.map(({ row }) => row)),
+    );
+  }
 
   get(coordinates: Coordinates): Space | undefined {
     return this.grid.get(coordinates);
@@ -28,6 +42,26 @@ export class Grid {
 
   keys(): Iterable<Coordinates> {
     return this.grid.keys();
+  }
+
+  *doubleHeights(): Iterable<DoubleHeight> {
+    for (const key of this.keys()) {
+      yield this.toDoubleHeightDisplay(key);
+    }
+  }
+
+  toDoubleHeightDisplay(coordinate: Coordinates): DoubleHeight {
+    return coordinate.toDoubleHeight()
+      .offset(-this.topLeft.col, -this.topLeft.row);
+  }
+
+  displayName(coordinates: Coordinates): string {
+    const space = this.get(coordinates);
+    const coordinatesString = this.toDoubleHeightDisplay(coordinates).toString();
+    if (space?.name() != null) {
+      return `${space.name()} (${coordinatesString})`;
+    }
+    return coordinatesString;
   }
 
   values(): Iterable<Space> {

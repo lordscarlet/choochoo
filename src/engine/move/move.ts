@@ -108,15 +108,15 @@ export class MoveAction implements ActionProcessor<MoveData> {
   }
 
   process(action: MoveData): boolean {
-    const coordinates = Coordinates.from(action.startingCity);
-    this.gridHelper.update(coordinates, (location) => {
+    this.gridHelper.update(action.startingCity, (location) => {
       assert(location.goods != null);
       location.goods.splice(location.goods.indexOf(action.good), 1);
     });
 
     const partitioned = partition(action.path, (step) => step.owner);
 
-    this.log.currentPlayer(`moves a ${goodToString(action.good)} good from the city at ${action.startingCity} to the city at ${peek(action.path).endingStop}`)
+    this.log.currentPlayer(
+      `moves a ${goodToString(action.good)} good from ${this.grid().displayName(action.startingCity)} to ${this.grid().displayName(peek(action.path).endingStop)}`)
 
     this.players.update((players) => {
       for (const player of players) {

@@ -6,6 +6,8 @@ import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
+import { DoubleHeight } from '../../utils/double_height';
+import { iterate } from '../../utils/functions';
 import { useTypedCallback } from "../utils/hooks";
 import { ClickTarget } from "./click_target";
 import { Hex } from "./hex";
@@ -87,7 +89,9 @@ function useZoom(allowZoom?: boolean) {
 export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
   const [zoom, setZoom] = useZoom(allowZoom);
   const size = 70;
-  const padding = 20;
+  const coordinateWidth = 50;
+  const externalPadding = 20;
+  const padding = externalPadding + coordinateWidth;
 
   const spaces = useMemo(() => [...grid.values()], [grid]);
 
@@ -168,9 +172,46 @@ export function HexGrid({ onClick, allowZoom, highlightedTrack, selectedGood, gr
         className={`bi bi-google ${hexGrid}`}
         onClick={internalOnClick}>
         {mapSpaces}
+        <DoubleHeightNumbers grid={grid} size={size} coordinateWidth={coordinateWidth} externalPadding={externalPadding} />
       </svg>
     </div>
   </>;
+}
+
+interface DoubleHeightNumbersProps {
+  grid: Grid;
+  size: number;
+  coordinateWidth: number;
+  externalPadding: number;
+}
+
+
+function DoubleHeightNumbers({ grid, size, coordinateWidth, externalPadding }: DoubleHeightNumbersProps) {
+
+  const placement = externalPadding + (coordinateWidth / 2);
+
+  return useMemo(() => {
+    return <>
+      {...iterate(grid.bottomRight.col - grid.topLeft.col + 1, (index) => {
+        const doubleHeight = new DoubleHeight(index, 0);
+        return <text x={doubleHeight.toPoint(size).x + externalPadding + coordinateWidth + size}
+          y={placement}
+          dominantBaseline="middle"
+          textAnchor="middle">
+          {doubleHeight.toColString()}
+        </text>;
+      })}
+      {...iterate(grid.bottomRight.row - grid.topLeft.row + 1, (index) => {
+        const doubleHeight = new DoubleHeight(0, index);
+        return <text x={placement}
+          y={doubleHeight.toPoint(size).y + externalPadding + coordinateWidth + size}
+          dominantBaseline="middle"
+          textAnchor="middle">
+          {doubleHeight.toRowString()}
+        </text>;
+      })}
+    </>;
+  }, [grid.topLeft.col, grid.topLeft.row, grid.bottomRight.col, grid.bottomRight.row]);
 }
 
 function hexFactory(

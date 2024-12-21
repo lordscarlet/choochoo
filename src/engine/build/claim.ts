@@ -49,7 +49,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
 
     const route = this.grid().getRoute(track);
 
-    this.log.currentPlayer(`claimes the route at ${data.coordinates.toString()}`);
+    this.log.currentPlayer(`claimes the route at ${this.grid().displayName(data.coordinates)}`);
 
     for (const t of route) {
       this.gridHelper.update(t.coordinates, (space) => {

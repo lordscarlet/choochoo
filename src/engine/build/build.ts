@@ -65,7 +65,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     const coordinates = data.coordinates;
     this.playerHelper.updateCurrentPlayer((player) => player.money -= this.costCalculator.costOf(coordinates, data.tileType));
     const newTile = this.newTile(data);
-    this.log.currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${data.coordinates}`);
+    this.log.currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${this.grid().displayName(data.coordinates)}`);
     this.gridHelper.update(coordinates, (hex) => {
       assert(hex.type !== SpaceType.CITY);
       hex.tile = newTile;

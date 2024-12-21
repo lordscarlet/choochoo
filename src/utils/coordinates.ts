@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Direction } from "../engine/state/tile";
+import { DoubleHeight } from "./double_height";
 import { assert, assertNever } from "./validate";
 
 
@@ -26,6 +27,12 @@ export class Coordinates {
     return fromOffset({ q: to.q - this.q, r: to.r - this.r });
   }
 
+  toDoubleHeight(): DoubleHeight {
+    var col = this.q;
+    var row = 2 * this.r + this.q;
+    return new DoubleHeight(col, row);
+  }
+
   static from({ q, r }: { q: number, r: number }): Coordinates {
     const key = `${q}|${r}`;
     if (Coordinates.staticMap.has(key)) {
@@ -36,7 +43,7 @@ export class Coordinates {
     return newCoordinates;
   }
 
-  static readonly ORIGIN = Coordinates.from({q: 0, r: 0});
+  static readonly ORIGIN = Coordinates.from({ q: 0, r: 0 });
 
   static fromCartesianString(str: string): Coordinates {
     const matches = str.match(/^\((\d+)\, (\d+)\)$/);
