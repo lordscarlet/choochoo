@@ -102,9 +102,10 @@ export function Layout() {
           open={Boolean(adminAnchorEl)}
           onClose={closeAdminMenu}
         >
-          <MenuItem>Dark mode: {mode ?? 'undefined'}</MenuItem>
-          <MenuItem>Prefers dark mode: {prefersDarkMode ? 'true' : 'false'}</MenuItem>
-          <MenuItem>Dark mode enabled: {darkModeEnabled ? 'true' : 'false'}</MenuItem>
+          <MenuItem component={Link} onClick={closeAdminMenu} to={`/app/users/${me?.id}`}>
+            <ListItemIcon><Person fontSize="small" /></ListItemIcon>
+            My Profile
+          </MenuItem>
           <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">Create Invitation</MenuItem>
           <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">View Feedback</MenuItem>
           <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">View users</MenuItem>
@@ -136,10 +137,6 @@ export function Layout() {
           onClose={closeMenu}
         >
           <MenuList>
-            <MenuItem component={Link} onClick={closeMenu} to={`/app/users/${me?.id}`}>
-              <ListItemIcon><Person fontSize="small" /></ListItemIcon>
-              My Profile
-            </MenuItem>
             <MenuItem onClick={() => { setMode(darkModeEnabled ? 'light' : 'dark'); closeMenu(); }}>
               <ListItemIcon>
                 {darkModeEnabled ? <DarkMode fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
