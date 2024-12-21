@@ -1,5 +1,5 @@
 import { useNotifications } from "@toolpad/core";
-import { useCallback, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, createContext, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CreateInviteApi, CreateUserApi, ForgotPasswordRequest, LoginUserApi, MyUserApi, ResendActivationCodeRequest, UpdatePasswordRequest, UserRole } from "../../api/user";
 import { assert } from "../../utils/validate";
@@ -23,8 +23,23 @@ export function useMe(): MyUserApi | undefined {
   return useAllOfMe().user;
 }
 
-export function useIsAdmin(): boolean {
+export const AdminModeEnabled = createContext<[boolean, Dispatch<SetStateAction<boolean>>]>([false, () => { }] as const);
+
+export function AdminModeProvider({ children }: { children: ReactNode }) {
+  return <AdminModeEnabled.Provider value={useState(false)}>
+    {children}
+  </AdminModeEnabled.Provider>;
+}
+
+export function useEnableAdminMode() {
+  return useContext(AdminModeEnabled);
+}
+
+export function useIsAdmin(ignoreAdminMode = false): boolean {
   const { user, adminUser } = useAllOfMe();
+  const [adminModeEnabled] = useEnableAdminMode();
+
+  if (!adminModeEnabled && !ignoreAdminMode) return false;
 
   return adminUser != null || user?.role === UserRole.enum.ADMIN;
 }

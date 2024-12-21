@@ -4,6 +4,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { default as DarkMode } from '@mui/icons-material/DarkMode';
 import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import FeedbackOutlined from '@mui/icons-material/FeedbackOutlined';
+import Group from '@mui/icons-material/Group';
+import { default as InsertInvitation } from '@mui/icons-material/InsertInvitation';
+import { default as Lock } from '@mui/icons-material/Lock';
+import LockOpen from '@mui/icons-material/LockOpen';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
 import Person from '@mui/icons-material/Person';
@@ -14,7 +18,7 @@ import { Link, Outlet } from "react-router-dom";
 import { Loading } from '../components/loading';
 import { FeedbackForm } from "../services/feedback/form";
 import { useReportError } from '../services/feedback/report_error';
-import { useIsAdmin, useLogout, useMe } from "../services/me";
+import { useEnableAdminMode, useIsAdmin, useLogout, useMe } from "../services/me";
 import { isNetworkError } from '../services/network';
 import { Banner } from "./banner";
 import * as styles from './layout.module.css';
@@ -57,7 +61,8 @@ export function Layout() {
     closeMenu();
   }, [setIsFeedbackOpen]);
 
-  const isAdmin = useIsAdmin();
+  const [enableAdminMode, setEnableAdminMode] = useEnableAdminMode();
+  const isAdmin = useIsAdmin(true);
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
@@ -103,9 +108,30 @@ export function Layout() {
           open={Boolean(adminAnchorEl)}
           onClose={closeAdminMenu}
         >
-          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">Create Invitation</MenuItem>
-          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">View Feedback</MenuItem>
-          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">View users</MenuItem>
+          <MenuItem onClick={() => { setEnableAdminMode(!enableAdminMode); closeAdminMenu(); }}>
+            <ListItemIcon>
+              {enableAdminMode ? <LockOpen fontSize="small" /> : <Lock fontSize="small" />}
+            </ListItemIcon>
+            Admin Mode
+          </MenuItem>
+          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">
+            <ListItemIcon>
+              <InsertInvitation fontSize="small" />
+            </ListItemIcon>
+            Create Invitation
+          </MenuItem>
+          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">
+            <ListItemIcon>
+              <FeedbackOutlined fontSize="small" />
+            </ListItemIcon>
+            View Feedback
+          </MenuItem>
+          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">
+            <ListItemIcon>
+              <Group fontSize="small" />
+            </ListItemIcon>
+            View users
+          </MenuItem>
         </Menu>
 
         {me != null && <IconButton

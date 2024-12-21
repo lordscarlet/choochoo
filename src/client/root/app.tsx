@@ -5,6 +5,7 @@ import { Suspense, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Loading } from "../components/loading";
 import { tsr } from '../services/client';
+import { AdminModeProvider } from "../services/me";
 import { Router } from "./routes";
 
 
@@ -23,19 +24,21 @@ export function App() {
   const { reset } = useQueryErrorResetBoundary();
 
   return <Suspense fallback={<Loading />}>
-    <ThemeProvider theme={theme}>
-      <DialogsProvider>
-        <NotificationsProvider>
-          <ErrorBoundary onReset={reset} fallbackRender={({ resetErrorBoundary }) => <ResetError resetErrorBoundary={resetErrorBoundary} />}>
-            <QueryClientProvider client={queryClient}>
-              <tsr.ReactQueryProvider>
-                <Router />
-              </tsr.ReactQueryProvider>
-            </QueryClientProvider>
-          </ErrorBoundary>
-        </NotificationsProvider>
-      </DialogsProvider>
-    </ThemeProvider>
+    <AdminModeProvider>
+      <ThemeProvider theme={theme}>
+        <DialogsProvider>
+          <NotificationsProvider>
+            <ErrorBoundary onReset={reset} fallbackRender={({ resetErrorBoundary }) => <ResetError resetErrorBoundary={resetErrorBoundary} />}>
+              <QueryClientProvider client={queryClient}>
+                <tsr.ReactQueryProvider>
+                  <Router />
+                </tsr.ReactQueryProvider>
+              </QueryClientProvider>
+            </ErrorBoundary>
+          </NotificationsProvider>
+        </DialogsProvider>
+      </ThemeProvider>
+    </AdminModeProvider>
   </Suspense>;
 }
 
