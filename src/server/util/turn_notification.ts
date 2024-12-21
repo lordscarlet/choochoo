@@ -5,6 +5,7 @@ import { assert, assertNever } from "../../utils/validate";
 import { GameModel } from "../model/game";
 import { UserModel } from "../model/user";
 import { emailService } from "./email";
+import { environment } from './environment';
 
 export async function notifyTurn(game: GameModel): Promise<void> {
   if (game.activePlayerId === null) return;
@@ -42,10 +43,14 @@ export async function sendTestMessage(userId: number, setting: TurnNotificationS
 }
 
 export async function callWebhook(message: string, setting: WebHookSetting): Promise<void> {
-  if (environment.stage !== 'production') return;
 
   const encodedMessage =
     `<${getNotifyPrefix(setting.webHookUrl)}${setting.webHookUserId}> ${message}`;
+
+  if (environment.stage !== 'production') {
+    console.log(`submitting webhook (${setting.webHookUrl}), "${encodedMessage}"`);
+    return;
+  }
 
   await axios.post(setting.webHookUrl, getPayload(setting.webHookUrl, encodedMessage));
 }
