@@ -2,11 +2,10 @@ import { Server, ServerOptions, Socket } from "socket.io";
 import { GameApi } from "../api/game";
 import { ClientToServerEvents, ServerToClientEvents } from "../api/socket";
 import { deepEquals } from "../utils/deep_equals";
-import { GameModel, toApi } from "./model/game";
-import { LogModel } from "./model/log";
+import { GameDao, toApi } from "./game/dao";
+import { LogDao } from "./messages/log_dao";
 import { environment } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
-import { DestroyOptions } from "@sequelize/core";
 
 const args: Partial<ServerOptions> = {};
 
@@ -26,7 +25,7 @@ function roomName(gameId?: number | null) {
   return gameId == undefined ? HOME_ROOM : 'gameId-' + gameId;
 }
 
-export function emitGameUpdate(oldGame: GameApi | undefined, game: GameModel): void {
+export function emitGameUpdate(oldGame: GameApi | undefined, game: GameDao): void {
   const gameApi = game.toApi();
   const gameLiteApi = game.toLiteApi();
   if (oldGame == null || !deepEquals(oldGame, gameApi)) {
@@ -35,11 +34,11 @@ export function emitGameUpdate(oldGame: GameApi | undefined, game: GameModel): v
   io.to(roomName()).emit('gameUpdateLite', game.toApi());
 }
 
-export function emitLogCreate(log: LogModel): void {
+export function emitLogCreate(log: LogDao): void {
   io.to(roomName(log.gameId)).emit('newLog', log.toApi());
 }
 
-export function emitLogDestroy(log: LogModel): void {
+export function emitLogDestroy(log: LogDao): void {
   io.to(roomName(log.gameId)).emit('destroyLog', log.id);
 }
 
@@ -77,9 +76,9 @@ function bindSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) 
 Lifecycle.singleton.onStart(() => {
   io.on('connection', bindSocket);
 
-  const previous = new WeakMap<GameModel, GameApi | undefined>();
+  const previous = new WeakMap<GameDao, GameApi | undefined>();
 
-  GameModel.hooks.addListener('beforeSave', (game: GameModel) => {
+  GameDao.hooks.addListener('beforeSave', (game: GameDao) => {
     if (game.isNewRecord) {
       previous.set(game, undefined);
     } else {
@@ -87,21 +86,21 @@ Lifecycle.singleton.onStart(() => {
     }
   });
 
-  GameModel.hooks.addListener('afterSave', (game: GameModel) => {
+  GameDao.hooks.addListener('afterSave', (game: GameDao) => {
     emitGameUpdate(previous.get(game), game);
   });
 
-  LogModel.hooks.addListener('afterDestroy', (log: LogModel) => {
+  LogDao.hooks.addListener('afterDestroy', (log: LogDao) => {
     emitLogDestroy(log);
   });
 
-  LogModel.hooks.addListener('afterBulkCreate', (logs: LogModel[]) => {
+  LogDao.hooks.addListener('afterBulkCreate', (logs: LogDao[]) => {
     for (const log of logs) {
       emitLogCreate(log);
     }
   });
 
-  LogModel.hooks.addListener('afterCreate', (log: LogModel) => {
+  LogDao.hooks.addListener('afterCreate', (log: LogDao) => {
     emitLogCreate(log);
   });
 });

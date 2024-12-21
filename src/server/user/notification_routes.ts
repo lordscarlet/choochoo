@@ -3,17 +3,17 @@ import { createExpressEndpoints, initServer } from "@ts-rest/express";
 import express from 'express';
 import { NotificationMethod, notificationsContract } from "../../api/notifications";
 import { assert } from "../../utils/validate";
-import { UserModel } from "../model/user";
 import { emailService } from "../util/email";
 import { enforceRole } from "../util/enforce_role";
 import { sendTestMessage } from "../util/turn_notification";
+import { UserDao } from "./dao";
 
 export const notificationApp = express();
 
 const router = initServer().router(notificationsContract, {
   async get({ req }) {
     await enforceRole(req);
-    const user = await UserModel.findByPk(req.session.userId);
+    const user = await UserDao.findByPk(req.session.userId);
 
     assert(user != null);
     return { status: 200, body: { preferences: user.notificationPreferences } };
@@ -25,7 +25,7 @@ const router = initServer().router(notificationsContract, {
     assert(body.preferences.turnNotifications.length <= 1);
     assert(body.preferences.turnNotifications[0]?.method !== NotificationMethod.EMAIL);
 
-    const user = await UserModel.findByPk(req.session.userId);
+    const user = await UserDao.findByPk(req.session.userId);
 
     assert(user != null);
     await user.setNotificationPreferences(body.preferences);
@@ -40,7 +40,7 @@ const router = initServer().router(notificationsContract, {
   async unsubscribe({ body }) {
     const email = await emailService.decryptUnsubscribeCode(body.unsubscribeCode);
     assert(email != null, { invalidInput: true });
-    await UserModel.unsubscribe(email);
+    await UserDao.unsubscribe(email);
     return { status: 200, body: { success: true } };
   },
 });

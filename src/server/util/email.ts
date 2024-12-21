@@ -2,7 +2,7 @@ import Mailjet from "node-mailjet";
 import z from "zod";
 import { GameApi } from "../../api/game";
 import { MyUserApi } from "../../api/user";
-import { UserModel } from "../model/user";
+import { UserDao } from "../user/dao";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
 
@@ -65,7 +65,7 @@ ${this.makeUnsubscribeLink(user.email)}
     });
   }
 
-  async sendTurnReminder(user: UserModel, game: GameApi): Promise<void> {
+  async sendTurnReminder(user: UserDao, game: GameApi): Promise<void> {
     const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
     await this.sendEmail({
       email: user.email,

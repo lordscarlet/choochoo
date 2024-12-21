@@ -1,12 +1,12 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, NonAttribute } from "@sequelize/core";
 import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from "@sequelize/core/decorators-legacy";
-import { GameModel } from "./game";
-import { UserModel } from "./user";
+import { UserDao } from "../user/dao";
+import { GameDao } from "./dao";
 
 const gameVersionIndex = 'game-history-game-id';
 
 @Table({ modelName: 'GameHistory' })
-export class GameHistoryModel extends Model<InferAttributes<GameHistoryModel>, InferCreationAttributes<GameHistoryModel>> {
+export class GameHistoryDao extends Model<InferAttributes<GameHistoryDao>, InferCreationAttributes<GameHistoryDao>> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)
@@ -42,15 +42,15 @@ export class GameHistoryModel extends Model<InferAttributes<GameHistoryModel>, I
   @NotNull
   declare gameId: number;
 
-  @BelongsTo(() => GameModel, 'gameId')
-  declare game: NonAttribute<GameModel>;
+  @BelongsTo(() => GameDao, 'gameId')
+  declare game: NonAttribute<GameDao>;
 
   @Attribute(DataTypes.INTEGER)
   @NotNull
   declare userId: number;
 
-  @BelongsTo(() => UserModel, 'userId')
-  declare user: NonAttribute<UserModel>;
+  @BelongsTo(() => UserDao, 'userId')
+  declare user: NonAttribute<UserDao>;
 
   @Version
   @NotNull

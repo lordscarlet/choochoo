@@ -4,32 +4,14 @@ import { compare, hash } from 'bcrypt';
 import { NotificationFrequency, NotificationMethod, NotificationPreferences, TurnNotificationSetting } from '../../api/notifications';
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
 import { assert, isPositiveInteger } from '../../utils/validate';
-import { redisClient } from '../redis';
 import { emailService } from '../util/email';
-import { environment, Stage } from '../util/environment';
 import { Lifecycle } from '../util/lifecycle';
+import { userCache } from './cache';
 
 const saltRounds = 10;
 
-class UserCache {
-  async get(id: number): Promise<MyUserApi | undefined> {
-    if (environment.stage == Stage.enum.development) return;
-    const result = await redisClient.get(`users:${id}`);
-    if (result == null) return undefined;
-    return JSON.parse(result);
-  }
-
-  async set(user: MyUserApi | undefined): Promise<void> {
-    if (user == null) return;
-    if (environment.stage == Stage.enum.development) return;
-    await redisClient.set(`users:${user.id}`, JSON.stringify(user), { PX: 360000 });
-  }
-}
-
-const userCache = new UserCache();
-
 @Table({ modelName: 'User' })
-export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
+export class UserDao extends Model<InferAttributes<UserDao>, InferCreationAttributes<UserDao>> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)
@@ -74,7 +56,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     const result = await userCache.get(pk);
     if (result != null) return result;
 
-    const user = await UserModel.findByPk(pk);
+    const user = await UserDao.findByPk(pk);
     if (!user) return undefined;
     const asApi = user.toMyApi();
     await userCache.set(asApi);
@@ -97,7 +79,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   }
 
   toApi(): UserApi {
-    return UserModel.toApi(this);
+    return UserDao.toApi(this);
   }
 
   toMyApi(): MyUserApi {
@@ -117,14 +99,14 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     return hash(password, saltRounds);
   }
 
-  static async findByUsernameOrEmail(usernameOrEmail: string): Promise<UserModel | null> {
+  static async findByUsernameOrEmail(usernameOrEmail: string): Promise<UserDao | null> {
     if (usernameOrEmail.indexOf('@') != -1) {
-      return UserModel.findOne({ where: { email: usernameOrEmail } });
+      return UserDao.findOne({ where: { email: usernameOrEmail } });
     }
-    return UserModel.findOne({ where: { username: usernameOrEmail } });
+    return UserDao.findOne({ where: { username: usernameOrEmail } });
   }
 
-  static async login(usernameOrEmail: string, password: string): Promise<UserModel | null> {
+  static async login(usernameOrEmail: string, password: string): Promise<UserDao | null> {
     const user = await this.findByUsernameOrEmail(usernameOrEmail);
     if (user == null) {
       return null;
@@ -135,9 +117,9 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
     return user;
   }
 
-  static async register(user: CreateUserApi, transaction?: Transaction): Promise<UserModel> {
-    const password = await UserModel.hashPassword(user.password);
-    const newUser = await UserModel.create({
+  static async register(user: CreateUserApi, transaction?: Transaction): Promise<UserDao> {
+    const password = await UserDao.hashPassword(user.password);
+    const newUser = await UserDao.create({
       username: user.username,
       email: user.email,
       password,
@@ -154,7 +136,7 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   }
 
   static async unsubscribe(email: string) {
-    const user = await UserModel.findByUsernameOrEmail(email);
+    const user = await UserDao.findByUsernameOrEmail(email);
     assert(user != null, { invalidInput: true });
     await user.setNotificationPreferences({
       turnNotifications: [],
@@ -173,9 +155,9 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
 
 
 Lifecycle.singleton.onStart(() => {
-  function updateUserCache(user: UserModel) {
+  function updateUserCache(user: UserDao) {
     userCache.set(user.toMyApi());
   }
-  return UserModel.hooks.addListener('afterSave', updateUserCache);
+  return UserDao.hooks.addListener('afterSave', updateUserCache);
 });
 

@@ -3,13 +3,13 @@ import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
 import { userContract, UserRole } from '../../api/user';
 import { assert, fail } from '../../utils/validate';
-import { InvitationModel } from '../model/invitations';
-import { UserModel } from '../model/user';
 import { sequelize } from '../sequelize';
 import '../session';
 import { badwords } from '../util/badwords';
 import { emailService } from '../util/email';
 import { enforceRole } from '../util/enforce_role';
+import { UserDao } from './dao';
+import { InvitationDao } from './invitations_dao';
 
 
 export const userApp = express();
@@ -24,8 +24,8 @@ const router = initServer().router(userContract, {
       return { status: 200, body: { user: undefined } };
     }
     const [user, adminUser] = await Promise.all([
-      UserModel.getUser(req.session.userId),
-      req.session.adminUserId != null ? UserModel.getUser(req.session.adminUserId) : undefined,
+      UserDao.getUser(req.session.userId),
+      req.session.adminUserId != null ? UserDao.getUser(req.session.adminUserId) : undefined,
     ]);
 
     assert(user != null);
@@ -33,7 +33,7 @@ const router = initServer().router(userContract, {
   },
 
   async forgotPassword({ body }) {
-    const user = await UserModel.findByUsernameOrEmail(body.usernameOrEmail);
+    const user = await UserDao.findByUsernameOrEmail(body.usernameOrEmail);
     if (user != null) {
       emailService.sendForgotPasswordMessage(user.email);
     }
@@ -41,33 +41,33 @@ const router = initServer().router(userContract, {
   },
 
   async updatePassword({ body, req }) {
-    let user: UserModel | null;
+    let user: UserDao | null;
     if (body.updateCode != null) {
       const email = emailService.getEmailFromActivationCode(body.updateCode);
       assert(email != null, { invalidInput: 'Expired activation code (1)' });
-      user = await UserModel.findByUsernameOrEmail(email);
+      user = await UserDao.findByUsernameOrEmail(email);
       assert(user != null, { invalidInput: 'Expired activation code (2)' });
     } else if (body.oldPassword != null) {
       assert(req.session.userId != null, { unauthorized: true });
-      user = await UserModel.findByPk(req.session.userId);
+      user = await UserDao.findByPk(req.session.userId);
       assert(user != null);
       assert(await user.comparePassword(body.oldPassword), { permissionDenied: 'Invalid credentials' });
     } else {
       fail({ invalidInput: true });
     }
-    user.password = await UserModel.hashPassword(body.newPassword);
+    user.password = await UserDao.hashPassword(body.newPassword);
     await user.save();
     return { status: 200, body: { success: true } };
   },
 
   async list({ req, query }) {
     await enforceRole(req, UserRole.enum.ADMIN);
-    const where: WhereOptions<UserModel> = {};
+    const where: WhereOptions<UserDao> = {};
     if (query.pageCursor != null) {
       where.id = { [Op.notIn]: query.pageCursor };
     }
     const pageSize = query.pageSize ?? 20;
-    const allUsers = await UserModel.findAll({
+    const allUsers = await UserDao.findAll({
       order: [['id', 'DESC']],
       limit: pageSize + 1,
       where,
@@ -79,9 +79,9 @@ const router = initServer().router(userContract, {
 
   async get({ req, params }) {
     await enforceRole(req);
-    const user = await UserModel.getUser(params.userId);
+    const user = await UserDao.getUser(params.userId);
     assert(user != null, { notFound: true });
-    return { status: 200, body: { user: UserModel.toApi(user) } };
+    return { status: 200, body: { user: UserDao.toApi(user) } };
   },
 
   async create({ req, body }) {
@@ -91,8 +91,8 @@ const router = initServer().router(userContract, {
       }
       const user = await sequelize.transaction(async (transaction) => {
         const [user] = await Promise.all([
-          UserModel.register(body, transaction),
-          InvitationModel.useInvitationCode(body.invitationCode, transaction),
+          UserDao.register(body, transaction),
+          InvitationDao.useInvitationCode(body.invitationCode, transaction),
         ]);
         return user;
       });
@@ -111,7 +111,7 @@ const router = initServer().router(userContract, {
 
   async activateAccount({ req, body }) {
     assert(req.session.userId != null, { invalidInput: 'Sign in first' });
-    const user = await UserModel.findByPk(req.session.userId);
+    const user = await UserDao.findByPk(req.session.userId);
 
     assert(user != null, { unauthorized: 'Sign in first' });
     const email = emailService.getEmailFromActivationCode(body.activationCode);
@@ -132,7 +132,7 @@ const router = initServer().router(userContract, {
     if (body.userId != null) {
       await enforceRole(req, UserRole.enum.ADMIN);
     }
-    const user = await UserModel.findByPk(body.userId ?? req.session.userId);
+    const user = await UserDao.findByPk(body.userId ?? req.session.userId);
     assert(user != null, { permissionDenied: true });
     assert(user.role == UserRole.enum.ACTIVATE_EMAIL, { permissionDenied: true });
     emailService.sendActivationCode(user.email);
@@ -140,7 +140,7 @@ const router = initServer().router(userContract, {
   },
 
   async login({ req, body }) {
-    const user = await UserModel.login(body.usernameOrEmail, body.password);
+    const user = await UserDao.login(body.usernameOrEmail, body.password);
     assert(user != null && user.role !== UserRole.enum.BLOCKED, { unauthorized: 'Invalid credentials' });
     if (body.activationCode != null) {
       const email = emailService.getEmailFromActivationCode(body.activationCode);
@@ -159,8 +159,8 @@ const router = initServer().router(userContract, {
     await enforceRole(req, UserRole.enum.ADMIN);
 
     const [user, adminUser] = await Promise.all([
-      UserModel.getUser(params.userId),
-      UserModel.getUser(adminUserId!),
+      UserDao.getUser(params.userId),
+      UserDao.getUser(adminUserId!),
     ]);
     assert(user != null, { notFound: true });
     assert(adminUser != null, { notFound: true });
@@ -173,8 +173,8 @@ const router = initServer().router(userContract, {
 
   async createInvite({ body, params, req }) {
     await enforceRole(req, UserRole.enum.ADMIN);
-    assert((await UserModel.getUser(params.userId)) != null, { notFound: 'user not found' });
-    await InvitationModel.upsert({
+    assert((await UserDao.getUser(params.userId)) != null, { notFound: 'user not found' });
+    await InvitationDao.upsert({
       id: body.code,
       count: body.count,
       userId: params.userId,
@@ -189,7 +189,7 @@ const router = initServer().router(userContract, {
 
   async makeAdmin({ params, req }) {
     await enforceRole(req, UserRole.enum.ADMIN);
-    const modifyUser = await UserModel.findByPk(params.userId);
+    const modifyUser = await UserDao.findByPk(params.userId);
     assert(modifyUser != null, { notFound: 'user not found' });
     modifyUser.role = UserRole.enum.ADMIN;
     await modifyUser.save();

@@ -3,7 +3,7 @@ import { SessionData } from "express-session";
 import { UserRole } from "../../api/user";
 import { UnauthorizedError } from "../../utils/error";
 import { assert } from "../../utils/validate";
-import { UserModel } from "../model/user";
+import { UserDao } from "../user/dao";
 
 interface BaseRequest {
   url: string;
@@ -23,7 +23,7 @@ export async function enforceRole(req: BaseRequest, requiredRole: UserRole = Use
     throw new UnauthorizedError('please log in');
   }
 
-  const user = await UserModel.getUser(userId);
+  const user = await UserDao.getUser(userId);
 
   if (user == null) {
     throw new UnauthorizedError('please log in');

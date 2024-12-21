@@ -1,11 +1,11 @@
 import { CreationAttributes, CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Op, Transaction } from "@sequelize/core";
 import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from "@sequelize/core/decorators-legacy";
 import { MessageApi } from "../../api/message";
-import { GameModel } from "./game";
-import { UserModel } from "./user";
+import { GameDao } from "../game/dao";
+import { UserDao } from "../user/dao";
 
 @Table({ modelName: 'Log' })
-export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttributes<LogModel>> {
+export class LogDao extends Model<InferAttributes<LogDao>, InferCreationAttributes<LogDao>> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)
@@ -17,14 +17,14 @@ export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttr
   @Attribute(DataTypes.INTEGER)
   declare userId?: number | null;
 
-  @BelongsTo(() => UserModel, 'userId')
-  declare user?: UserModel;
+  @BelongsTo(() => UserDao, 'userId')
+  declare user?: UserDao;
 
   @Attribute(DataTypes.INTEGER)
   declare gameId?: number | null;
 
-  @BelongsTo(() => GameModel, 'gameId')
-  declare game?: GameModel;
+  @BelongsTo(() => GameDao, 'gameId')
+  declare game?: GameDao;
 
   @Attribute({ columnName: 'gameVersion', type: DataTypes.INTEGER })
   declare previousGameVersion?: number | null;
@@ -46,7 +46,7 @@ export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttr
 
   static async destroyLogsBackTo(backToVersion: number, transaction: Transaction): Promise<void> {
     // Fetch all the individual logs, so that socket.ts can individually notify the user that the logs were destroyed.
-    const logs = await LogModel.findAll({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
+    const logs = await LogDao.findAll({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
     await Promise.all(logs.map((log) => log.destroy()));
   }
 
@@ -62,4 +62,4 @@ export class LogModel extends Model<InferAttributes<LogModel>, InferCreationAttr
   }
 }
 
-export type CreateLogModel = CreationAttributes<LogModel>;
+export type CreateLogModel = CreationAttributes<LogDao>;

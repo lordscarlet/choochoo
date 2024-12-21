@@ -3,7 +3,7 @@ import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Ta
 import { FeedbackApi } from '../../api/feedback';
 
 @Table({ modelName: 'Feedback' })
-export class FeedbackModel extends Model<InferAttributes<FeedbackModel>, InferCreationAttributes<FeedbackModel>> {
+export class FeedbackDao extends Model<InferAttributes<FeedbackDao>, InferCreationAttributes<FeedbackDao>> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)

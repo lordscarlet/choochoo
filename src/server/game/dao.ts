@@ -4,7 +4,7 @@ import { GameApi, GameLiteApi, GameStatus, MapConfig } from '../../api/game';
 import { EngineDelegator } from '../../engine/framework/engine';
 
 @Table({ modelName: 'Game' })
-export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAttributes<GameModel>> {
+export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttributes<GameDao>> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)
@@ -70,7 +70,7 @@ export class GameModel extends Model<InferAttributes<GameModel>, InferCreationAt
   }
 }
 
-export function toApi(game: InferAttributes<GameModel>): GameApi {
+export function toApi(game: InferAttributes<GameDao>): GameApi {
   return {
     ...toLiteApi(game),
     version: game.version,
@@ -79,7 +79,7 @@ export function toApi(game: InferAttributes<GameModel>): GameApi {
   };
 }
 
-export function toLiteApi(game: GameApi | InferAttributes<GameModel>): GameLiteApi {
+export function toLiteApi(game: GameApi | InferAttributes<GameDao>): GameLiteApi {
   return {
     id: game.id,
     gameKey: game.gameKey,
@@ -92,7 +92,7 @@ export function toLiteApi(game: GameApi | InferAttributes<GameModel>): GameLiteA
   };
 }
 
-function toSummary(game: GameApi | InferAttributes<GameModel>): string | undefined {
+function toSummary(game: GameApi | InferAttributes<GameDao>): string | undefined {
   if ('summary' in game) {
     return game.summary;
   }

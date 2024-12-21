@@ -1,12 +1,12 @@
 import Sequelize from '@sequelize/core';
 import { PostgresDialect } from '@sequelize/postgres';
 import { NextFunction, Request, Response } from 'express';
-import { FeedbackModel } from './model/feedback';
-import { GameModel } from './model/game';
-import { GameHistoryModel } from './model/history';
-import { InvitationModel } from './model/invitations';
-import { LogModel } from './model/log';
-import { UserModel } from './model/user';
+import { FeedbackDao } from './feedback/dao';
+import { GameDao } from './game/dao';
+import { GameHistoryDao } from './game/history_dao';
+import { LogDao } from './messages/log_dao';
+import { UserDao } from './user/dao';
+import { InvitationDao } from './user/invitations_dao';
 import { environment } from './util/environment';
 
 export const sequelize = new Sequelize({
@@ -14,12 +14,12 @@ export const sequelize = new Sequelize({
   url: environment.postgresUrl.toString(),
   logging: console.log,
   models: [
-    GameModel,
-    UserModel,
-    LogModel,
-    GameHistoryModel,
-    InvitationModel,
-    FeedbackModel,
+    GameDao,
+    UserDao,
+    LogDao,
+    GameHistoryDao,
+    InvitationDao,
+    FeedbackDao,
   ],
 });
 

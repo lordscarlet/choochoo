@@ -2,15 +2,15 @@ import axios from 'axios';
 import { URL } from "url";
 import { NotificationFrequency, NotificationMethod, TurnNotificationSetting, WebHookSetting } from "../../api/notifications";
 import { assert, assertNever } from "../../utils/validate";
-import { GameModel } from "../model/game";
-import { UserModel } from "../model/user";
+import { GameDao } from "../game/dao";
+import { UserDao } from "../user/dao";
 import { emailService } from "./email";
 import { environment } from './environment';
 
-export async function notifyTurn(game: GameModel): Promise<void> {
+export async function notifyTurn(game: GameDao): Promise<void> {
   if (game.activePlayerId === null) return;
 
-  const user = await UserModel.findByPk(game.activePlayerId!, { transaction: null });
+  const user = await UserDao.findByPk(game.activePlayerId!, { transaction: null });
   if (user == null) return;
   const setting = user.getTurnNotificationSetting(NotificationFrequency.IMMEDIATELY);
   switch (setting?.method) {
@@ -29,7 +29,7 @@ export async function notifyTurn(game: GameModel): Promise<void> {
 export async function sendTestMessage(userId: number, setting: TurnNotificationSetting | undefined): Promise<void> {
   switch (setting?.method) {
     case NotificationMethod.EMAIL:
-      const user = await UserModel.getUser(userId);
+      const user = await UserDao.getUser(userId);
       assert(user != null);
       return emailService.sendTestNotification(user);
     case NotificationMethod.WEBHOOK:

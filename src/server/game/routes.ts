@@ -3,20 +3,20 @@ import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
 import { gameContract, GameStatus, ListGamesApi } from '../../api/game';
 import { assert } from '../../utils/validate';
-import { GameModel } from '../model/game';
+import { GameDao } from './dao';
 
 import { Op, WhereOptions } from '@sequelize/core';
 import { UserRole } from '../../api/user';
 import { EngineDelegator } from '../../engine/framework/engine';
 import { peek } from '../../utils/functions';
-import { GameHistoryModel } from '../model/history';
-import { CreateLogModel, LogModel } from '../model/log';
-import { UserModel } from '../model/user';
+import { CreateLogModel, LogDao } from '../messages/log_dao';
 import { sequelize } from '../sequelize';
 import '../session';
+import { UserDao } from '../user/dao';
 import { enforceRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
 import { notifyTurn } from '../util/turn_notification';
+import { GameHistoryDao } from './history_dao';
 
 export const gameApp = express();
 
@@ -26,7 +26,7 @@ const router = initServer().router(gameContract, {
   async list({ query }) {
     const defaultQuery: ListGamesApi = { pageSize: 20, order: ['id', 'DESC'] };
     const { pageSize, excludeUserId, order, userId, status, pageCursor, ...rest } = { ...defaultQuery, ...query };
-    const where: WhereOptions<GameModel> = rest;
+    const where: WhereOptions<GameDao> = rest;
     if (status != null) {
       if (status.length === 1) {
         where.status = status[0];
@@ -48,7 +48,7 @@ const router = initServer().router(gameContract, {
     if (pageCursor != null) {
       where.id = { [Op.notIn]: pageCursor };
     }
-    const games = await GameModel.findAll({
+    const games = await GameDao.findAll({
       attributes: ['id', 'gameKey', 'name', 'gameData', 'config', 'status', 'activePlayerId', 'playerIds'],
       where,
       limit: pageSize! + 1,
@@ -64,7 +64,7 @@ const router = initServer().router(gameContract, {
   },
 
   async get({ params }) {
-    const game = await GameModel.findByPk(params.gameId);
+    const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
     return { status: 200, body: { game: game.toApi() } };
   },
@@ -75,10 +75,10 @@ const router = initServer().router(gameContract, {
     const playerIds = [userId];
     if (body.artificialStart) {
       assert(environment.stage === Stage.enum.development);
-      const users = await UserModel.findAll({ where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER }, limit: body.minPlayers });
+      const users = await UserDao.findAll({ where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER }, limit: body.minPlayers });
       playerIds.push(...users.map(({ id }) => id));
     }
-    const game = await GameModel.create({
+    const game = await GameDao.create({
       version: 1,
       gameKey: body.gameKey,
       name: body.name,
@@ -96,7 +96,7 @@ const router = initServer().router(gameContract, {
     const userId = req.session.userId;
     assert(userId != null, { permissionDenied: true });
 
-    const game = await GameModel.findByPk(params.gameId);
+    const game = await GameDao.findByPk(params.gameId);
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, 'cannot join started game');
     assert(!game.playerIds.includes(userId), { invalidInput: true });
@@ -112,7 +112,7 @@ const router = initServer().router(gameContract, {
     const userId = req.session.userId;
     assert(userId != null, { permissionDenied: true });
 
-    const game = await GameModel.findByPk(params.gameId);
+    const game = await GameDao.findByPk(params.gameId);
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, 'cannot leave started game');
     const index = game.playerIds.indexOf(userId);
@@ -130,7 +130,7 @@ const router = initServer().router(gameContract, {
     const userId = req.session.userId;
     assert(userId != null, { permissionDenied: true });
 
-    const game = await GameModel.findByPk(params.gameId);
+    const game = await GameDao.findByPk(params.gameId);
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, { invalidInput: 'cannot start a game that has already been started' });
     assert(game.playerIds[0] === userId, { invalidInput: 'only the owner can start the game' });
@@ -149,7 +149,7 @@ const router = initServer().router(gameContract, {
 
   async setGameData({ req, params, body }) {
     assert(environment.stage === Stage.enum.development);
-    const game = await GameModel.findByPk(params.gameId);
+    const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
     const originalGame = game.toApi();
     game.gameData = body.gameData;
@@ -162,7 +162,7 @@ const router = initServer().router(gameContract, {
       const userId = req.session.userId;
       assert(userId != null, { permissionDenied: true });
 
-      const game = await GameModel.findByPk(params.gameId, { transaction });
+      const game = await GameDao.findByPk(params.gameId, { transaction });
       assert(game != null);
       assert(game.status === GameStatus.enum.ACTIVE, 'cannot perform an action unless the game is live');
       assert(game.gameData != null);
@@ -173,7 +173,7 @@ const router = initServer().router(gameContract, {
       const { gameData, logs, activePlayerId, hasEnded, reversible } =
         EngineDelegator.singleton.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
 
-      const gameHistory = GameHistoryModel.build({
+      const gameHistory = GameHistoryDao.build({
         previousGameVersion: game.version,
         patch: '',
         previousGameData: game.gameData,
@@ -200,7 +200,7 @@ const router = initServer().router(gameContract, {
         message,
         previousGameVersion: game.version - 1,
       }));
-      await LogModel.bulkCreate(createLogs, { transaction });
+      await LogDao.bulkCreate(createLogs, { transaction });
 
       transaction.afterCommit(() => {
         if (!playerChanged) return;
@@ -216,8 +216,8 @@ const router = initServer().router(gameContract, {
 
   async undoAction({ req, params: { gameId }, body: { backToVersion } }) {
     return await sequelize.transaction(async transaction => {
-      const gameHistory = await GameHistoryModel.findOne({ where: { gameId, previousGameVersion: backToVersion }, transaction });
-      const game = await GameModel.findByPk(gameId, { transaction });
+      const gameHistory = await GameHistoryDao.findOne({ where: { gameId, previousGameVersion: backToVersion }, transaction });
+      const game = await GameDao.findByPk(gameId, { transaction });
       assert(game != null);
       assert(gameHistory != null);
       assert(gameHistory.reversible, { invalidInput: 'cannot undo reversible action' });
@@ -230,11 +230,11 @@ const router = initServer().router(gameContract, {
       game.gameData = gameHistory.previousGameData;
       game.activePlayerId = gameHistory.userId;
 
-      const versionBefore = await GameHistoryModel.findOne({ where: { gameId, previousGameVersion: backToVersion - 1 }, transaction });
+      const versionBefore = await GameHistoryDao.findOne({ where: { gameId, previousGameVersion: backToVersion - 1 }, transaction });
       game.undoPlayerId = versionBefore != null && versionBefore.reversible ? versionBefore.userId : undefined;
       const newGame = await game.save({ transaction });
-      await GameHistoryModel.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
-      await LogModel.destroyLogsBackTo(backToVersion, transaction);
+      await GameHistoryDao.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
+      await LogDao.destroyLogsBackTo(backToVersion, transaction);
 
       return { status: 200, body: { game: newGame.toApi() } };
     });
@@ -243,8 +243,8 @@ const router = initServer().router(gameContract, {
   async retryLast({ req, body, params }) {
     await enforceRole(req, UserRole.enum.ADMIN);
     const limit = 'steps' in body ? body.steps : 20;
-    const previousActions = await GameHistoryModel.findAll({ where: { gameId: params.gameId }, limit, order: [['id', 'DESC']] });
-    const game = await GameModel.findByPk(params.gameId);
+    const previousActions = await GameHistoryDao.findAll({ where: { gameId: params.gameId }, limit, order: [['id', 'DESC']] });
+    const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
     if ('steps' in body) {
       assert(previousActions.length == body.steps, { invalidInput: 'There are not that many steps to retry' });
@@ -254,18 +254,18 @@ const router = initServer().router(gameContract, {
 
     const originalGame = game.toApi();
 
-    let previousAction: GameHistoryModel | undefined;
+    let previousAction: GameHistoryDao | undefined;
     let currentGameData: string | undefined;
     let currentGameVersion: number | undefined;
     let finalActivePlayerId: number | undefined;
     let finalUndoPlayerId: number | undefined;
-    const allLogs: LogModel[] = [];
+    const allLogs: LogDao[] = [];
     if ('startOver' in body && body.startOver) {
       const { gameData, logs, activePlayerId } = EngineDelegator.singleton.start(game.playerIds, { mapKey: game.gameKey });
       currentGameData = gameData;
       currentGameVersion = 1;
       finalActivePlayerId = activePlayerId;
-      allLogs.push(...logs.map((message) => LogModel.build({
+      allLogs.push(...logs.map((message) => LogDao.build({
         gameId: game.id,
         message,
         previousGameVersion: 0,
@@ -276,12 +276,12 @@ const router = initServer().router(gameContract, {
     }
     let firstGameVersion = currentGameVersion;
     let finalHasEnded: boolean | undefined;
-    const newHistory: GameHistoryModel[] = [];
+    const newHistory: GameHistoryDao[] = [];
     while (previousAction = previousActions.pop()) {
       const { gameData, logs, activePlayerId, hasEnded, reversible } =
         EngineDelegator.singleton.processAction(game.gameKey, currentGameData, previousAction.actionName, JSON.parse(previousAction.actionData));
 
-      newHistory.push(GameHistoryModel.build({
+      newHistory.push(GameHistoryDao.build({
         previousGameVersion: currentGameVersion,
         patch: '',
         previousGameData: currentGameData,
@@ -292,7 +292,7 @@ const router = initServer().router(gameContract, {
         userId: previousAction.userId,
       }));
 
-      allLogs.push(...logs.map(message => LogModel.build({
+      allLogs.push(...logs.map(message => LogDao.build({
         gameId: game.id,
         message,
         previousGameVersion: currentGameVersion,
@@ -313,8 +313,8 @@ const router = initServer().router(gameContract, {
     await sequelize.transaction(async (transaction) => {
       await Promise.all([
         game.save({ transaction }),
-        await LogModel.destroyLogsBackTo(firstGameVersion, transaction),
-        GameHistoryModel.destroy({ where: { previousGameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
+        await LogDao.destroyLogsBackTo(firstGameVersion, transaction),
+        GameHistoryDao.destroy({ where: { previousGameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
         ...newHistory.map((history) => history.save({ transaction })),
         ...allLogs.map(log => log.save({ transaction })),
       ]);

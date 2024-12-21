@@ -3,7 +3,7 @@ import { Attribute, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt,
 import { assert } from '../../utils/validate';
 
 @Table({ modelName: 'Invitation' })
-export class InvitationModel extends Model<InferAttributes<InvitationModel>, InferCreationAttributes<InvitationModel>> {
+export class InvitationDao extends Model<InferAttributes<InvitationDao>, InferCreationAttributes<InvitationDao>> {
   @PrimaryKey
   @Attribute(DataTypes.STRING)
   declare id: string;
@@ -32,9 +32,9 @@ export class InvitationModel extends Model<InferAttributes<InvitationModel>, Inf
   declare deletedAt?: Date | null;
 
   static async useInvitationCode(invitationCode: string, transaction?: Transaction): Promise<void> {
-    const invitation = await InvitationModel.findByPk(invitationCode);
+    const invitation = await InvitationDao.findByPk(invitationCode);
     console.log(invitation, invitationCode);
-    console.log((await InvitationModel.findAll()).map(({ id, count }) => console.log('id', id, count)));
+    console.log((await InvitationDao.findAll()).map(({ id, count }) => console.log('id', id, count)));
     assert(invitation != null, { invalidInput: 'Invitation code not found' });
     assert(invitation.count > 0, { invalidInput: 'This code has expired' })
     invitation.count--;
