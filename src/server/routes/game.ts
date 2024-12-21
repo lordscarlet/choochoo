@@ -241,7 +241,7 @@ const router = initServer().router(gameContract, {
   },
 
   async retryLast({ req, body, params }) {
-    enforceRole(req, UserRole.enum.ADMIN);
+    await enforceRole(req, UserRole.enum.ADMIN);
     const limit = 'steps' in body ? body.steps : 20;
     const previousActions = await GameHistoryModel.findAll({ where: { gameId: params.gameId }, limit, order: [['id', 'DESC']] });
     const game = await GameModel.findByPk(params.gameId);

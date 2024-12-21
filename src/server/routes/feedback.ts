@@ -35,17 +35,17 @@ const router = initServer().router(feedbackContract, {
         userId: req.session.userId,
         userMessage: body.message,
         url: body.url,
-    });
+      });
     }
     return { status: 200, body: { success: true } };
   },
   async list({ req }) {
-    enforceRole(req, UserRole.enum.ADMIN);
+    await enforceRole(req, UserRole.enum.ADMIN);
     const feedback = await FeedbackModel.findAll({ order: [['id', 'ASC']], limit: 20 });
     return { status: 200, body: { feedback: feedback.map(f => f.toApi()) } };
   },
   async deleteFeedback({ req, params }) {
-    enforceRole(req, UserRole.enum.ADMIN);
+    await enforceRole(req, UserRole.enum.ADMIN);
     await FeedbackModel.destroy({ where: { id: params.feedbackId } });
     return { status: 200, body: { success: true } };
   },

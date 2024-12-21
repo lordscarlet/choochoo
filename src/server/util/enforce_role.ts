@@ -18,7 +18,6 @@ const rolesInOrder = [
 ];
 
 export async function enforceRole(req: BaseRequest, requiredRole: UserRole = UserRole.Values.USER): Promise<void> {
-  if (!req.url.startsWith('/api') || req.url.startsWith('/api/users')) return;
   const userId = req.session.userId;
   if (userId == null) {
     throw new UnauthorizedError('please log in');
@@ -35,6 +34,7 @@ export async function enforceRole(req: BaseRequest, requiredRole: UserRole = Use
 
 export function enforceRoleMiddleware() {
   return (req: Request, _: Response, next: NextFunction) => {
+    if (!req.url.startsWith('/api') || req.url.startsWith('/api/users')) return next();
     enforceRole(req).then(() => next(), next);
   };
 }

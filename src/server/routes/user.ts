@@ -128,7 +128,7 @@ const router = initServer().router(userContract, {
   async resendActivationCode({ req, body }) {
     assert(req.session.userId != null, { permissionDenied: true });
     if (body.userId != null) {
-      enforceRole(req, UserRole.enum.ADMIN);
+      await enforceRole(req, UserRole.enum.ADMIN);
     }
     const user = await UserModel.findByPk(body.userId ?? req.session.userId);
     assert(user != null, { permissionDenied: true });
