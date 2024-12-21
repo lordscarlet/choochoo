@@ -86,7 +86,7 @@ export function useLoginBypass(userId: number) {
     onSuccess: (data) => {
       tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: data.body }));
     },
-  }), []);
+  }), [userId]);
 
   const canUseLoginBypass = me?.id !== userId && isAdmin;
   return { login, isPending, error, canUseLoginBypass };

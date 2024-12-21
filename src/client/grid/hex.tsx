@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { City } from "../../engine/map/city";
 import { Space } from "../../engine/map/grid";
-import { BaseTileData, calculateTrackInfo, Land } from "../../engine/map/location";
+import { calculateTrackInfo, Land } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
 import { Track, TrackInfo } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
@@ -51,7 +51,6 @@ function colorStyles(space: Space): string[] {
 
 interface RawHexProps {
   space: Land | City;
-  tile?: BaseTileData;
   size: number;
   className?: string;
   hideGoods?: boolean;
@@ -61,7 +60,7 @@ interface RawHexProps {
   clickTargets: Set<ClickTarget>;
 }
 
-export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoods, offset, clickTargets }: RawHexProps) {
+export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, offset, clickTargets }: RawHexProps) {
   const coordinates = space.coordinates;
   const center = useMemo(() => offsetPoint(coordinatesToCenter(coordinates, size), offset), [coordinates, offset, size]);
 
@@ -72,10 +71,10 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
   const [hexColor, alternateColor] = colorStyles(space);
 
   const trackInfo = useMemo(() => {
-    const tileData = tile != null ? tile : space instanceof Land ? space.getTileData() : undefined;
+    const tileData = space instanceof Land ? space.getTileData() : undefined;
     if (tileData == null) return [];
     return calculateTrackInfo(tileData);
-  }, [space, tile]);
+  }, [space]);
 
   const highlightedTrackSet = useMemo(() => {
     if (highlightedTrack == null) return new Set<TrackInfo>();
@@ -112,7 +111,7 @@ export function Hex({ space, selectedGood, highlightedTrack, tile, size, hideGoo
     <polygon fillOpacity="0" data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
     {space instanceof Land && space.unpassableExits().map(direction => <UnpassableEdge key={direction} center={center} size={size} direction={direction} />)}
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
-    {space instanceof Land && space.hasTown() && (!tile || isTownTile(tile.tileType)) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
+    {space instanceof Land && (space.getTileType() != null ? isTownTile(space.getTileType()!) : space.hasTown()) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Land && space.hasTown() && <HexName name={space.name()!} center={center} size={size} />}
     {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} />}
     {space instanceof City && space.name() != '' && <HexName name={space.name()} center={center} size={size} />}
