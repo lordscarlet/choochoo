@@ -6,6 +6,7 @@ import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import FeedbackOutlined from '@mui/icons-material/FeedbackOutlined';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
+import Person from '@mui/icons-material/Person';
 import { AppBar, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
@@ -135,6 +136,10 @@ export function Layout() {
           onClose={closeMenu}
         >
           <MenuList>
+            <MenuItem component={Link} onClick={closeMenu} to={`/app/users/${me?.id}`}>
+              <ListItemIcon><Person fontSize="small" /></ListItemIcon>
+              My Profile
+            </MenuItem>
             <MenuItem onClick={() => { setMode(darkModeEnabled ? 'light' : 'dark'); closeMenu(); }}>
               <ListItemIcon>
                 {darkModeEnabled ? <DarkMode fontSize="small" /> : <DarkModeOutlined fontSize="small" />}

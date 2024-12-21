@@ -11,6 +11,7 @@ import { ActivatePage } from "../user/activate";
 import { ForgotPassword } from "../user/forgot_password";
 import { LoginPage } from "../user/login";
 import { LoginRequired } from "../user/login_required";
+import { UserProfilePage } from "../user/profile";
 import { RegisterPage } from "../user/register";
 import { Unsubscribe } from "../user/unsubscribe";
 import { UpdatePassword } from "../user/update_password";
@@ -79,6 +80,10 @@ export function Router() {
         {
           path: '/app/games/:gameId',
           element: <LoginRequired><GamePage /></LoginRequired>,
+        },
+        {
+          path: '/app/users/:userId',
+          element: <LoginRequired><UserProfilePage /></LoginRequired>
         },
       ],
     },
