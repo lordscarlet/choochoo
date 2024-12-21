@@ -56,6 +56,14 @@ export const notificationsContract = initContract().router({
     method: 'PUT',
     path: '/notification-preferences',
   },
+  test: {
+    body: z.object({ preferences: NotificationPreferences }),
+    responses: {
+      200: z.object({ success: z.literal(true) }),
+    },
+    method: 'PUT',
+    path: '/test',
+  },
   unsubscribe: {
     body: z.object({ unsubscribeCode: z.string() }),
     responses: {

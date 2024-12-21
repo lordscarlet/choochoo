@@ -1,6 +1,7 @@
 import Mailjet from "node-mailjet";
 import z from "zod";
 import { GameApi } from "../../api/game";
+import { MyUserApi } from "../../api/user";
 import { UserModel } from "../model/user";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
@@ -38,6 +39,32 @@ export abstract class EmailService {
     }
   }
 
+  async sendTestNotification(user: MyUserApi): Promise<void> {
+
+    await this.sendEmail({
+      email: user.email,
+      subject: `Test notification`,
+      text: `
+This is a test notification from Choo Choo Games.
+I hope it finds you well.
+
+- Nathan
+
+This email was sent by Choo Choo games. You can unsubscribe here:
+${this.makeUnsubscribeLink(user.email)}
+`,
+      html: `
+<h3>This is a test notification from Choo Choo Games.</h3>
+<p>I hope it finds you well.</p>
+
+<p>-Nathan</p>
+<p></p>
+<p>
+  This email was sent by Choo Choo games. You can unsubscribe here:
+  <a href="${this.makeUnsubscribeLink(user.email)}">Unsubscribe</a>
+</p>`,
+    });
+  }
 
   async sendTurnReminder(user: UserModel, game: GameApi): Promise<void> {
     // TODO: investigate why this doesn't work.

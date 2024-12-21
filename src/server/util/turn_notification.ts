@@ -1,11 +1,10 @@
 import axios from 'axios';
 import { URL } from "url";
-import { NotificationFrequency, NotificationMethod, WebHookSetting } from "../../api/notifications";
-import { assertNever } from "../../utils/validate";
+import { NotificationFrequency, NotificationMethod, TurnNotificationSetting, WebHookSetting } from "../../api/notifications";
+import { assert, assertNever } from "../../utils/validate";
 import { GameModel } from "../model/game";
 import { UserModel } from "../model/user";
 import { emailService } from "./email";
-import { environment } from './environment';
 
 export async function notifyTurn(game: GameModel): Promise<void> {
   if (game.activePlayerId === null) return;
@@ -17,7 +16,8 @@ export async function notifyTurn(game: GameModel): Promise<void> {
     case NotificationMethod.EMAIL:
       return emailService.sendTurnReminder(user, game.toApi());
     case NotificationMethod.WEBHOOK:
-      return callWebhook(game, setting);
+      const message = `Your turn in ${game.name} (${game.getSummary()!})\nhttps://www.choochoo.games/app/games/${game.id}`;
+      return callWebhook(message, setting);
     case undefined:
       return;
     default:
@@ -25,9 +25,24 @@ export async function notifyTurn(game: GameModel): Promise<void> {
   }
 }
 
-async function callWebhook(game: GameModel, setting: WebHookSetting): Promise<void> {
+export async function sendTestMessage(userId: number, setting: TurnNotificationSetting | undefined): Promise<void> {
+  switch (setting?.method) {
+    case NotificationMethod.EMAIL:
+      const user = await UserModel.getUser(userId);
+      assert(user != null);
+      return emailService.sendTestNotification(user);
+    case NotificationMethod.WEBHOOK:
+      const message = `Test Message from Choo Choo Games.`;
+      return callWebhook(message, setting);
+    case undefined:
+      return;
+    default:
+      assertNever(setting);
+  }
+}
+
+export async function callWebhook(message: string, setting: WebHookSetting): Promise<void> {
   if (environment.stage !== 'production') return;
-  const message = `Your turn in ${game.name} (${game.getSummary()!})\nhttps://www.choochoo.games/app/games/${game.id}`;
 
   const encodedMessage =
     `<${getNotifyPrefix(setting.webHookUrl)}${setting.webHookUserId}> ${message}`;

@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, TextField } from "@mui/material";
-import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, MouseEvent, useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { GameStatus, ListGamesApi } from "../../api/game";
@@ -9,7 +9,7 @@ import { iterate } from "../../utils/functions";
 import { Loading } from "../components/loading";
 import { GameList } from "../home/game_list";
 import { useMe } from "../services/me";
-import { useNotificationPreferences, useSetNotificationPreferences } from "../services/notifications/preferences";
+import { useNotificationPreferences, useSendTestNotification, useSetNotificationPreferences } from "../services/notifications/preferences";
 import { useUser } from "../services/user";
 import { UpdatePassword } from "./update_password";
 
@@ -43,7 +43,13 @@ function findErrorInNotifications(validationError: ValidationError | undefined, 
 
 function NotificationSettings() {
   const preferences = useNotificationPreferences();
-  const { validationError, setPreferences, isPending } = useSetNotificationPreferences();
+  const { validationError: validationErrorSet, setPreferences, isPending } = useSetNotificationPreferences();
+  const { validationError: validationErrorSend, test, isPending: isTestPending } = useSendTestNotification();
+
+  const validationError = {
+    ...validationErrorSet,
+    ...validationErrorSend,
+  }
 
   const marketing = preferences.marketing;
   const [setting, setSetting] = useState<TurnNotificationSetting | undefined>(preferences.turnNotifications[0]);
@@ -58,6 +64,14 @@ function NotificationSettings() {
       turnNotifications: setting != null ? [setting] : [],
     });
   }, [marketing, setting, setPreferences]);
+
+  const sendTestNotification = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+    test({
+      marketing,
+      turnNotifications: setting != null ? [setting] : [],
+    });
+  }, [test, marketing, setting]);
 
   const webHookUrlError = findErrorInNotifications(validationError, 'webHookUrl');
   const webHookUserIdError = findErrorInNotifications(validationError, 'webHookUserId');
@@ -144,6 +158,7 @@ function NotificationSettings() {
       </FormControl>}
       <div>
         <Button type="submit" disabled={isPending}>Save Preferences</Button>
+        <Button onClick={sendTestNotification} disabled={isTestPending}>Test</Button>
       </div>
     </Box>
   </>;
