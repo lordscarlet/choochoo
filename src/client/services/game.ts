@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { CreateGameApi, GameApi, GameLiteApi, GamePageCursor, GameStatus, ListGamesApi } from "../../api/game";
-import { UserRole } from "../../api/user";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { entries, peek } from "../../utils/functions";
@@ -12,7 +11,7 @@ import { assert, assertNever } from "../../utils/validate";
 import { useMostRecentValue } from "../utils/hooks";
 import { useInjected } from "../utils/injection_context";
 import { tsr } from "./client";
-import { useMe } from "./me";
+import { useIsAdmin, useMe } from "./me";
 import { handleError, toValidationError } from "./network";
 import { socket, useJoinRoom } from "./socket";
 import { useUsers } from "./user";
@@ -391,7 +390,7 @@ export function useRetryAction(): RetryAction {
     })
   }, [game.id, game.version]);
 
-  const canRetry = me?.role == UserRole.enum.ADMIN;
+  const canRetry = useIsAdmin();
 
   return { retry, canRetry, isPending };
 }

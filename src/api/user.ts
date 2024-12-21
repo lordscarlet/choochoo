@@ -151,7 +151,7 @@ export const userContract = c.router({
     body: z.object({}),
     pathParams: UserParams,
     responses: {
-      200: z.object({ user: MyUserApi }),
+      200: z.object({ user: MyUserApi, adminUser: MyUserApi }),
     },
     method: 'POST',
     path: '/users/:userId/login',
@@ -174,7 +174,7 @@ export const userContract = c.router({
   },
   getMe: {
     responses: {
-      200: z.object({ user: MyUserApi.optional() }),
+      200: z.object({ adminUser: MyUserApi.optional(), user: MyUserApi.optional() }),
     },
     method: 'GET',
     path: '/users/me',

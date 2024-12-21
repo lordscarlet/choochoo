@@ -10,7 +10,6 @@ import '../session';
 import { badwords } from '../util/badwords';
 import { emailService } from '../util/email';
 import { enforceRole } from '../util/enforce_role';
-import { environment, Stage } from '../util/environment';
 
 
 export const userApp = express();
@@ -24,10 +23,13 @@ const router = initServer().router(userContract, {
     if (req.session.userId == null) {
       return { status: 200, body: { user: undefined } };
     }
-    const user = await UserModel.getUser(req.session.userId);
+    const [user, adminUser] = await Promise.all([
+      UserModel.getUser(req.session.userId),
+      req.session.adminUserId != null ? UserModel.getUser(req.session.adminUserId) : undefined,
+    ]);
 
     assert(user != null);
-    return { status: 200, body: { user } };
+    return { status: 200, body: { user, adminUser } };
   },
 
   async forgotPassword({ body }) {
@@ -153,13 +155,20 @@ const router = initServer().router(userContract, {
   },
 
   async loginBypass({ req, params }) {
-    if (environment.stage !== Stage.enum.development) {
-      await enforceRole(req, UserRole.enum.ADMIN);
-    }
-    const user = await UserModel.getUser(params.userId);
+    const adminUserId = req.session.adminUserId ?? req.session.userId;
+    await enforceRole(req, UserRole.enum.ADMIN);
+
+    const [user, adminUser] = await Promise.all([
+      UserModel.getUser(params.userId),
+      UserModel.getUser(adminUserId!),
+    ]);
     assert(user != null, { notFound: true });
+    assert(adminUser != null, { notFound: true });
+
     req.session.userId = user.id;
-    return { status: 200, body: { user } };
+    req.session.adminUserId = adminUserId;
+
+    return { status: 200, body: { user, adminUser } };
   },
 
   async createInvite({ body, params, req }) {

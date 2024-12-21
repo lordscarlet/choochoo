@@ -11,11 +11,10 @@ import { AppBar, Button, Dialog, DialogContent, DialogTitle, IconButton, ListIte
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
-import { UserRole } from "../../api/user";
 import { Loading } from '../components/loading';
 import { FeedbackForm } from "../services/feedback/form";
 import { useReportError } from '../services/feedback/report_error';
-import { useLogout, useMe } from "../services/me";
+import { useIsAdmin, useLogout, useMe } from "../services/me";
 import { isNetworkError } from '../services/network';
 import { Banner } from "./banner";
 import * as styles from './layout.module.css';
@@ -58,6 +57,8 @@ export function Layout() {
     closeMenu();
   }, [setIsFeedbackOpen]);
 
+  const isAdmin = useIsAdmin();
+
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const darkModeEnabled = mode === 'dark' ||
@@ -76,7 +77,7 @@ export function Layout() {
         {me == null &&
           <Button color="inherit" component={Link} to="/app/users/login">Login</Button>}
 
-        {me?.role == UserRole.enum.ADMIN && <IconButton
+        {isAdmin && <IconButton
           size="large"
           aria-label="account of current user"
           aria-controls="menu-appbar"

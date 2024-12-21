@@ -1,16 +1,15 @@
 import { Button } from "@mui/material";
 import { ChangeEvent, useCallback, useMemo, useState } from "react";
-import { UserRole } from "../../api/user";
 import { environment, Stage } from "../services/environment";
 import { useGame, useSetGameData } from "../services/game";
-import { useMe } from "../services/me";
+import { useIsAdmin } from "../services/me";
 
 
 export function Editor() {
-  const me = useMe();
+  const isAdmin = useIsAdmin();
   const game = useGame();
   const canEdit = environment.stage === Stage.enum.development;
-  const canRead = canEdit || me?.role === UserRole.enum.ADMIN;
+  const canRead = canEdit || isAdmin;
   if (!canRead) return <></>;
   const content = useMemo(() => {
     return JSON.stringify(JSON.parse(game.gameData!), null, 2)

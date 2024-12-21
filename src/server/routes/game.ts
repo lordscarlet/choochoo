@@ -75,7 +75,7 @@ const router = initServer().router(gameContract, {
     const playerIds = [userId];
     if (body.artificialStart) {
       assert(environment.stage === Stage.enum.development);
-      const users = await UserModel.findAll({ where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER }, limit: 3 });
+      const users = await UserModel.findAll({ where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER }, limit: body.minPlayers });
       playerIds.push(...users.map(({ id }) => id));
     }
     const game = await GameModel.create({

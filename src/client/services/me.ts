@@ -4,12 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { CreateInviteApi, CreateUserApi, ForgotPasswordRequest, LoginUserApi, MyUserApi, ResendActivationCodeRequest, UpdatePasswordRequest, UserRole } from "../../api/user";
 import { assert } from "../../utils/validate";
 import { tsr } from "./client";
-import { environment, Stage } from "./environment";
 import { handleError } from "./network";
 
 const ME_KEY = ['users', 'me'];
 
-export function useMe(): MyUserApi | undefined {
+export function useAllOfMe() {
   const { data, isFetching, error } = tsr.users.getMe.useSuspenseQuery({ queryKey: ME_KEY });
 
   if (error && !isFetching) {
@@ -17,7 +16,17 @@ export function useMe(): MyUserApi | undefined {
   }
 
   assert(data.status === 200);
-  return data.body.user;
+  return data.body;
+}
+
+export function useMe(): MyUserApi | undefined {
+  return useAllOfMe().user;
+}
+
+export function useIsAdmin(): boolean {
+  const { user, adminUser } = useAllOfMe();
+
+  return adminUser != null || user?.role === UserRole.enum.ADMIN;
 }
 
 export function useCreateInvitation() {
@@ -67,6 +76,7 @@ export function useLogin() {
 }
 
 export function useLoginBypass(userId: number) {
+  const isAdmin = useIsAdmin();
   const me = useMe();
   const tsrQueryClient = tsr.useQueryClient();
   const { mutate, error, isPending } = tsr.users.loginBypass.useMutation();
@@ -74,12 +84,11 @@ export function useLoginBypass(userId: number) {
 
   const login = useCallback(() => mutate({ params: { userId } }, {
     onSuccess: (data) => {
-      tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: data.body.user } }));
+      tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: data.body }));
     },
   }), []);
 
-  const canUseLoginBypass = me?.id !== userId && (
-    environment.stage === Stage.enum.development || me?.role === UserRole.enum.ADMIN);
+  const canUseLoginBypass = me?.id !== userId && isAdmin;
   return { login, isPending, error, canUseLoginBypass };
 }
 

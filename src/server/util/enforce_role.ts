@@ -18,7 +18,7 @@ const rolesInOrder = [
 ];
 
 export async function enforceRole(req: BaseRequest, requiredRole: UserRole = UserRole.Values.USER): Promise<void> {
-  const userId = req.session.userId;
+  const userId = req.session.adminUserId ?? req.session.userId;
   if (userId == null) {
     throw new UnauthorizedError('please log in');
   }
