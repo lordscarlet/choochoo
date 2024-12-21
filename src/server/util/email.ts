@@ -8,7 +8,7 @@ import { environment } from "./environment";
 export abstract class EmailService {
   protected abstract sendEmail(email: SendEmailProps): Promise<void>;
   abstract subscribe(email: string): Promise<void>;
-  abstract unsubscribe(email: string): Promise<void>;
+  abstract setIsExcludedFromCampaigns(email: string): Promise<void>;
 
   protected makeUnsubscribeLink(email: string): string {
     return `https://www.choochoo.games/app/unsubscribe?code=${encrypt(email)}`;
@@ -166,12 +166,12 @@ class MailjetEmailService extends EmailService {
     }
   }
 
-  async unsubscribe(email: string): Promise<void> {
+  async setIsExcludedFromCampaigns(email: string, isExcluded = true): Promise<void> {
     try {
       await this.mailjet.put("contact")
         .id(email)
         .request({
-          "IsExcludedFromCampaigns": "true"
+          "IsExcludedFromCampaigns": isExcluded ? "true" : 'false',
         });
     } catch (e: any) {
       const alreadyExcluded =
@@ -219,7 +219,7 @@ interface SendEmailProps {
 }
 
 class NoopEmailService extends EmailService {
-  async unsubscribe(email: string): Promise<void> {
+  async setIsExcludedFromCampaigns(email: string): Promise<void> {
     console.log('unsubscribing', email);
   }
 

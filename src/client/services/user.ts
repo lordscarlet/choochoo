@@ -3,11 +3,24 @@ import { ListUsersApi, UserApi, UserPageCursor } from "../../api/user";
 import { tsr } from "./client";
 import { handleError } from "./network";
 
+function getQueryKey(userId: number) {
+  return ['users', userId];
+}
+
+export function useUser(userId: number): UserApi {
+  const { data } = tsr.users.get.useSuspenseQuery({
+    queryKey: getQueryKey(userId),
+    queryData: { params: { userId } },
+  });
+
+  return data.body.user;
+}
+
 export function useUsers(userIds: number[]): Array<UserApi | undefined> {
   const deduplicate = useMemo(() => [...new Set(userIds)], [userIds])
   const { data } = tsr.users.get.useQueries({
     queries: deduplicate.map((userId) => ({
-      queryKey: ['users', userId],
+      queryKey: getQueryKey(userId),
       queryData: { params: { userId } },
     })),
     combine: (results) => {

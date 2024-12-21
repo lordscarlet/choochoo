@@ -72,9 +72,9 @@ export function UpdatePassword({ updateCode, onSuccess }: UpdatePasswordProps) {
       <div>
         <Button type="submit" disabled={isPending}>Update password</Button>
       </div>
-      <p>
+      {updateCode && <p>
         <Link to="/app/users/login">Login</Link>
-      </p>
+      </p>}
     </Box>}
   </>;
 }

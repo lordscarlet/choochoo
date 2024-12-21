@@ -23,6 +23,21 @@ export const NotificationPreferences = z.object({
 export type NotificationPreferences = z.infer<typeof NotificationPreferences>;
 
 export const notificationsContract = initContract().router({
+  get: {
+    responses: {
+      200: z.object({ preferences: NotificationPreferences }),
+    },
+    method: 'GET',
+    path: '/notification-preferences',
+  },
+  update: {
+    body: z.object({ preferences: NotificationPreferences }),
+    responses: {
+      200: z.object({ preferences: NotificationPreferences }),
+    },
+    method: 'PUT',
+    path: '/notification-preferences',
+  },
   unsubscribe: {
     body: z.object({ unsubscribeCode: z.string() }),
     responses: {

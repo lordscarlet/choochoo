@@ -5,6 +5,7 @@ import { NotificationFrequency, NotificationMethod, NotificationPreferences } fr
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
 import { assert, isPositiveInteger } from '../../utils/validate';
 import { redisClient } from '../redis';
+import { emailService } from '../util/email';
 import { environment, Stage } from '../util/environment';
 import { Lifecycle } from '../util/lifecycle';
 
@@ -155,11 +156,18 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   static async unsubscribe(email: string) {
     const user = await UserModel.findByUsernameOrEmail(email);
     assert(user != null, { invalidInput: true });
-    user.notificationPreferences = {
+    await user.setNotificationPreferences({
       turnNotifications: [],
       marketing: false,
-    }
-    await user;
+    });
+  }
+
+  async setNotificationPreferences(preferences: NotificationPreferences): Promise<void> {
+    this.notificationPreferences = preferences;
+    await Promise.all([
+      emailService.setIsExcludedFromCampaigns(this.email, preferences.marketing),
+      this.save(),
+    ]);
   }
 }
 
