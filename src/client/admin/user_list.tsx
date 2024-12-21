@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 import { UserRole } from "../../api/user";
+import { LoginButton } from "../game/login_button";
 import { useResendActivationCode } from "../services/me";
 import { useUserList } from "../services/user";
 
@@ -26,6 +27,7 @@ export function UserList() {
           <td>{user.role}</td>
           <td>
             {user.role == UserRole.enum.ACTIVATE_EMAIL && <Button disabled={isPending} onClick={() => resend({ userId: user.id })}>Resend activation code</Button>}
+            <LoginButton playerId={user.id}>Act as</LoginButton>
           </td>
         </tr>)}
       </tbody>

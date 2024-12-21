@@ -1,9 +1,10 @@
 import { useNotifications } from "@toolpad/core";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreateInviteApi, CreateUserApi, ForgotPasswordRequest, LoginUserApi, MyUserApi, ResendActivationCodeRequest, UpdatePasswordRequest } from "../../api/user";
+import { CreateInviteApi, CreateUserApi, ForgotPasswordRequest, LoginUserApi, MyUserApi, ResendActivationCodeRequest, UpdatePasswordRequest, UserRole } from "../../api/user";
 import { assert } from "../../utils/validate";
 import { tsr } from "./client";
+import { environment, Stage } from "./environment";
 import { handleError } from "./network";
 
 const ME_KEY = ['users', 'me'];
@@ -65,17 +66,21 @@ export function useLogin() {
   return { login, validationError, isPending };
 }
 
-export function useLoginBypass() {
+export function useLoginBypass(userId: number) {
+  const me = useMe();
   const tsrQueryClient = tsr.useQueryClient();
   const { mutate, error, isPending } = tsr.users.loginBypass.useMutation();
   handleError(isPending, error);
 
-  const login = useCallback((userId: number) => mutate({ params: { userId } }, {
+  const login = useCallback(() => mutate({ params: { userId } }, {
     onSuccess: (data) => {
       tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({ ...r!, status: 200, body: { user: data.body.user } }));
     },
   }), []);
-  return { login, isPending, error };
+
+  const canUseLoginBypass = me?.id !== userId && (
+    environment.stage === Stage.enum.development || me?.role === UserRole.enum.ADMIN);
+  return { login, isPending, error, canUseLoginBypass };
 }
 
 export function useRegister() {

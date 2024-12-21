@@ -153,7 +153,9 @@ const router = initServer().router(userContract, {
   },
 
   async loginBypass({ req, params }) {
-    assert(environment.stage === Stage.enum.development, { permissionDenied: true });
+    if (environment.stage !== Stage.enum.development) {
+      await enforceRole(req, UserRole.enum.ADMIN);
+    }
     const user = await UserModel.getUser(params.userId);
     assert(user != null, { notFound: true });
     req.session.userId = user.id;
