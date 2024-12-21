@@ -40,16 +40,16 @@ const router = initServer().router(userContract, {
 
   async updatePassword({ body, req }) {
     let user: UserModel | null;
-    if (body.oldPassword != null) {
-      assert(req.session.userId != null, { unauthorized: true });
-      user = await UserModel.findByPk(req.session.userId);
-      assert(user != null);
-      assert(await user.comparePassword(body.oldPassword), { permissionDenied: 'Invalid credentials' });
-    } else if (body.updateCode != null) {
+    if (body.updateCode != null) {
       const email = emailService.getEmailFromActivationCode(body.updateCode);
       assert(email != null, { invalidInput: 'Expired activation code (1)' });
       user = await UserModel.findByUsernameOrEmail(email);
       assert(user != null, { invalidInput: 'Expired activation code (2)' });
+    } else if (body.oldPassword != null) {
+      assert(req.session.userId != null, { unauthorized: true });
+      user = await UserModel.findByPk(req.session.userId);
+      assert(user != null);
+      assert(await user.comparePassword(body.oldPassword), { permissionDenied: 'Invalid credentials' });
     } else {
       fail({ invalidInput: true });
     }

@@ -14,7 +14,7 @@ import { LoginRequired } from "../user/login_required";
 import { UserProfilePage } from "../user/profile";
 import { RegisterPage } from "../user/register";
 import { Unsubscribe } from "../user/unsubscribe";
-import { UpdatePassword } from "../user/update_password";
+import { UpdatePasswordWithCode } from "../user/update_password";
 import { Layout } from "./layout";
 
 export function Router() {
@@ -71,7 +71,7 @@ export function Router() {
         },
         {
           path: '/app/users/update-password',
-          element: <UpdatePassword />
+          element: <UpdatePasswordWithCode />
         },
         {
           path: '/app/games/create',
