@@ -1,8 +1,8 @@
 import { useNotifications } from "@toolpad/core";
 import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect } from "react";
-import { ValidationError, ZodErrorResponse } from "../../api/error";
 import { ZodError } from "zod";
+import { ValidationError, ZodErrorResponse } from "../../api/error";
 
 interface NetworkError {
   status: number;
@@ -32,8 +32,8 @@ export function useErrorNotifier(): (error: Error | NetworkError) => void {
 }
 
 export function toValidationError(error: ZodError): ValidationError {
-  return Object.fromEntries(error.issues.map((issue) => {
-    return [issue.path[0], issue.message];
+  return Object.fromEntries(error.issues.flatMap((issue) => {
+    return issue.path.map((_, index, path) => [path.slice(0, index + 1).join('.'), issue.message]);
   }));
 }
 
