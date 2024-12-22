@@ -47,7 +47,7 @@ export class LogDao extends Model<InferAttributes<LogDao>, InferCreationAttribut
   static async destroyLogsBackTo(gameId: number, backToVersion: number, transaction: Transaction): Promise<void> {
     // Fetch all the individual logs, so that socket.ts can individually notify the user that the logs were destroyed.
     const logs = await LogDao.findAll({ where: { gameId: gameId, previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
-    await Promise.all(logs.map((log) => log.destroy()));
+    await Promise.all(logs.map((log) => log.destroy({ transaction })));
   }
 
   toApi(): MessageApi {
