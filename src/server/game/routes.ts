@@ -233,7 +233,7 @@ const router = initServer().router(gameContract, {
       const versionBefore = await GameHistoryDao.findOne({ where: { gameId, previousGameVersion: backToVersion - 1 }, transaction });
       game.undoPlayerId = versionBefore != null && versionBefore.reversible ? versionBefore.userId : undefined;
       const newGame = await game.save({ transaction });
-      await GameHistoryDao.destroy({ where: { previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
+      await GameHistoryDao.destroy({ where: { gameId, previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
       await LogDao.destroyLogsBackTo(backToVersion, transaction);
 
       return { status: 200, body: { game: newGame.toApi() } };
@@ -314,7 +314,7 @@ const router = initServer().router(gameContract, {
       await Promise.all([
         game.save({ transaction }),
         await LogDao.destroyLogsBackTo(firstGameVersion, transaction),
-        GameHistoryDao.destroy({ where: { previousGameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
+        GameHistoryDao.destroy({ where: { gameId: game.id, previousGameVersion: { [Op.gte]: firstGameVersion } }, transaction }),
         ...newHistory.map((history) => history.save({ transaction })),
         ...allLogs.map(log => log.save({ transaction })),
       ]);

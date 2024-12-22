@@ -68,7 +68,7 @@ export function PlayerStats() {
               Income:<br />
               Shares:<br />
               Loco:<br />
-              {gameKey === SwedenRecyclingMapSettings.key && `Garbage:`}
+              {gameKey === SwedenRecyclingMapSettings.key && <>Garbage:<br /></>}
               Score:<br />
             </td>
             <td className={styles.collapsed}>
@@ -85,7 +85,7 @@ export function PlayerStats() {
             <td className={styles.expanded}>${player.income}</td>
             <td className={styles.expanded}>{player.shares}</td>
             <td className={styles.expanded}>{moveHelper.getLocomotiveDisplay(player)}</td>
-            {gameKey === SwedenRecyclingMapSettings.key && <td>{incinerator.getGarbageCountForUser(player.color)}</td>}
+            {gameKey === SwedenRecyclingMapSettings.key && <td className={styles.expanded}>{incinerator.getGarbageCountForUser(player.color)}</td>}
             <td className={styles.expanded}>{helper.getScore(player)}</td>
             <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
           </tr>)}
