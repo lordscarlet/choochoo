@@ -5,7 +5,7 @@ import { injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { getOpposite } from "../map/direction";
 import { Grid } from "../map/grid";
-import { calculateTrackInfo, Land } from "../map/location";
+import { calculateTrackInfo, Land, usesTownDisc } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";
 import { SpaceType } from "../state/location_type";
@@ -104,6 +104,25 @@ export class Validator {
     if (this.createsCircularLoop(grid, coordinates, trackToValidate)) {
       return 'cannot create a loop back to the same location';
     }
+
+    const townDiscCount = this.townDiscCount();
+    if (this.exceedsTownDiscCount(grid, townDiscCount, coordinates, buildData)) {
+      return `cannot use more than ${townDiscCount} town discs`;
+    }
+  }
+
+  protected exceedsTownDiscCount(grid: Grid, townDiscCount: number, coordinates: Coordinates, buildData: BuildInfo): boolean {
+    const requiresTownDisc = isTownTile(buildData.tileType) && usesTownDisc(buildData.tileType);
+
+    const currentTile = (grid.get(coordinates) as Land).getTileType();
+    const oldVersionRequiredTownDisc = currentTile != null && isTownTile(currentTile) && usesTownDisc(currentTile);
+
+    const atTownDiscLimit = grid.countTownDiscs() === townDiscCount;
+    return requiresTownDisc && !oldVersionRequiredTownDisc && atTownDiscLimit;
+  }
+
+  protected townDiscCount(): number {
+    return 8;
   }
 
   private createsCircularLoop(grid: Grid, coordinates: Coordinates, newTileData: TrackInfo[]): boolean {
@@ -118,7 +137,7 @@ export class Validator {
         return false;
       }
       if (firstCoordinates.neighbor(firstEndExit).equals(secondCoordinates.neighbor(secondEndExit))) {
-        return this.grid().get(firstCoordinates.neighbor(firstEndExit)) instanceof City;
+        return grid.get(firstCoordinates.neighbor(firstEndExit)) instanceof City;
       }
       return false;
     });

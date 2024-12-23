@@ -11,7 +11,8 @@ import { PlayerColor } from "../state/player";
 import { allDirections, Direction } from "../state/tile";
 import { City, isCity } from "./city";
 import { getOpposite } from "./direction";
-import { isLand, Land } from "./location";
+import { isLand, Land, usesTownDisc } from "./location";
+import { isTownTile } from './tile';
 import { Exit, TOWN, Track, tupleMap } from "./track";
 
 export type Space = City | Land;
@@ -53,6 +54,33 @@ export class Grid {
   toDoubleHeightDisplay(coordinate: Coordinates): DoubleHeight {
     return coordinate.toDoubleHeight()
       .offset(-this.topLeft.col, -this.topLeft.row);
+  }
+
+  countTownDiscs(): number {
+    return [...this.values()]
+      .filter(isLand)
+      .map((land) => land.getTileType())
+      .filter(isNotNull)
+      .filter(isTownTile)
+      .filter(usesTownDisc)
+      .length;
+  }
+
+  countOwnershipMarkers(color: PlayerColor): number {
+    const visited = new Set<Track>();
+    let count = 0;
+    for (let space of this.values()) {
+      if (space instanceof City) continue;
+      for (const startTrack of space.getTrack()) {
+        if (startTrack.getOwner() !== color) continue;
+        if (visited.has(startTrack)) continue;
+        count++;
+        for (const track of this.getRoute(startTrack)) {
+          visited.add(track);
+        }
+      }
+    }
+    return count;
   }
 
   displayName(coordinates: Coordinates): string {

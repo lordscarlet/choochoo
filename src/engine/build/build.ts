@@ -73,7 +73,6 @@ export class BuildAction implements ActionProcessor<BuildData> {
     const location = this.gridHelper.lookup(coordinates);
     assert(location instanceof Land);
 
-    const toUpdate: Array<[Track, PlayerColor | undefined]> = [];
     for (const track of location.getTrack()) {
       if (track.getOwner() === this.currentPlayer().color) {
         this.gridHelper.setRouteOwner(track, this.currentPlayer().color);
@@ -83,7 +82,20 @@ export class BuildAction implements ActionProcessor<BuildData> {
     this.buildState.update(({ previousBuilds }) => {
       previousBuilds.push(coordinates);
     });
+
+    this.checkOwnershipMarkerLimits();
+
     return this.helper.isAtEndOfTurn();
+  }
+
+  checkOwnershipMarkerLimits(): void {
+    const count = this.grid().countOwnershipMarkers(this.currentPlayer().color);
+    const ownershipMarkerLimit = this.ownershipMarkerLimit();
+    assert(count <= ownershipMarkerLimit, `cannot exceed ownership marker limit of ${ownershipMarkerLimit}`);
+  }
+
+  protected ownershipMarkerLimit(): number {
+    return 20;
   }
 
   private newTile(data: BuildData): TileData {

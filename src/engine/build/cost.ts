@@ -1,7 +1,7 @@
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { injectGrid } from "../game/state";
-import { Land, toBaseTile } from "../map/location";
+import { countExits, Land } from "../map/location";
 import { crosses, isComplexTile, isSimpleTile, isTownTile } from "../map/tile";
 import { SpaceType } from "../state/location_type";
 import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../state/tile";
@@ -46,7 +46,7 @@ export class BuildCostCalculator {
   }
 
   getTownTileCost(tileType: TownTileType): number {
-    return this.getNumberOfExits(tileType) + 1;
+    return countExits(tileType) + 1;
 
   }
 
@@ -58,9 +58,5 @@ export class BuildCostCalculator {
       return crosses(tileType) ? 2 : 1;
     }
     assertNever(tileType);
-  }
-
-  getNumberOfExits(tileType: TownTileType): number {
-    return toBaseTile(tileType).length;
   }
 }

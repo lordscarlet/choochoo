@@ -94,6 +94,37 @@ export function rotateTrackInfoClockwise(trackInfo: TrackInfo): TrackInfo {
   return { exits: trackInfo.exits.map(rotateExitClockwise) as [Exit, Exit] };
 }
 
+export function usesTownDisc(tile: TownTileType): boolean {
+  // If there are 2 or 4 exits, then it requires a town disc.
+  return countExits(tile) % 2 === 0;
+}
+
+export function countExits(tile: TownTileType): number {
+  switch (tile) {
+    case TownTileType.LOLLYPOP:
+      return 1;
+
+    case TownTileType.STRAIGHT:
+    case TownTileType.CURVE:
+    case TownTileType.TIGHT:
+      return 2;
+
+    case TownTileType.THREE_WAY:
+    case TownTileType.LEFT_LEANER:
+    case TownTileType.RIGHT_LEANER:
+    case TownTileType.TIGHT_THREE:
+      return 3;
+
+    case TownTileType.X:
+    case TownTileType.CHICKEN_FOOT:
+    case TownTileType.K:
+      return 4;
+
+    default:
+  }
+  assertNever(tile);
+}
+
 export function toBaseTile(tile: TileType): TrackInfo[] {
   const { TOP, BOTTOM, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT } = Direction;
   switch (tile) {
