@@ -11,9 +11,9 @@ import { BUILD_STATE } from "./state";
 
 
 export class BuilderHelper {
-  private readonly currentPlayer = injectCurrentPlayer();
-  private readonly buildState = injectState(BUILD_STATE);
-  private readonly grid = inject(GridHelper);
+  protected readonly currentPlayer = injectCurrentPlayer();
+  protected readonly buildState = injectState(BUILD_STATE);
+  protected readonly grid = inject(GridHelper);
 
   isAtEndOfTurn(): boolean {
     return this.buildsRemaining() === 0 && !this.canUrbanize();
