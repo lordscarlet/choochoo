@@ -7,6 +7,7 @@ import { Track, TrackInfo } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { SpaceType } from "../../engine/state/location_type";
 import { Direction } from "../../engine/state/tile";
+import { MutableCyprusSpaceData } from "../../maps/cyprus/map_data";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
 import { ClickTarget } from "./click_target";
@@ -109,13 +110,25 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, of
     <polygon className={`${space instanceof City ? styles.city : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="0" />
     {alternateColor && <HalfHex center={center} size={size} alternateColor={alternateColor} />}
     <polygon fillOpacity="0" data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
-    {space instanceof Land && space.unpassableExits().map(direction => <UnpassableEdge key={direction} center={center} size={size} direction={direction} />)}
+    {space instanceof Land && space.unpassableExits().map(direction => <EdgeBoundary key={direction} center={center} size={size} direction={direction} />)}
+    <MaybeCyprusBorder space={space} center={center} size={size} />
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Land && (space.getTileType() != null ? isTownTile(space.getTileType()!) : space.hasTown()) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Land && space.hasTown() && <HexName name={space.name()!} center={center} size={size} />}
     {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} />}
     {space instanceof City && space.name() != '' && <HexName name={space.name()} center={center} size={size} />}
     {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
+  </>;
+}
+
+function MaybeCyprusBorder({ space, center, size }: { space: Space, center: Point, size: number }) {
+  const { success, data } = MutableCyprusSpaceData.safeParse(space);
+
+  if (!success || data.mapSpecific?.borderDirection == null) return <></>;
+
+  return <>
+    {data.mapSpecific.borderDirection.map((direction) =>
+      <EdgeBoundary key={direction} center={center} size={size} direction={direction} />)}
   </>;
 }
 
@@ -132,13 +145,13 @@ function HalfHex({ center, size, alternateColor }: HalfHexProps) {
   return <polygon className={`${styles.city} ${alternateColor}`} points={corners} strokeWidth="0" />
 }
 
-interface UnpassableEdgeProps {
+interface EdgeBoundaryProps {
   center: Point;
   size: number;
   direction: Direction;
 }
 
-export function UnpassableEdge({ center, size, direction }: UnpassableEdgeProps) {
+export function EdgeBoundary({ center, size, direction }: EdgeBoundaryProps) {
   const [corner1, corner2] = useMemo(
     () => edgeCorners(center, size, direction)
     , [center.x, center.y, size, direction]);
