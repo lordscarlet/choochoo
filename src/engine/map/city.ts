@@ -42,4 +42,10 @@ export class City {
   canExit(_: Direction): boolean {
     return true;
   }
+
+  getMapSpecific<T>(parser: (t: unknown) => T): T | undefined {
+    return this.data.mapSpecific != null ?
+      parser(this.data.mapSpecific) :
+      undefined;
+  }
 }

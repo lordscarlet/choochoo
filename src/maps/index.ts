@@ -1,6 +1,7 @@
 
 import { MapSettings } from '../engine/game/map_settings';
 import { assert } from '../utils/validate';
+import { CyprusMapSettings } from './cyprus/settings';
 import { IrelandMapSettings } from './ireland/settings';
 import { ReversteamMapSettings } from './reversteam/settings';
 import { RustBeltMapSettings } from './rust_belt/settings';
@@ -16,6 +17,7 @@ export class MapRegistry {
     this.add(new ReversteamMapSettings());
     this.add(new IrelandMapSettings());
     this.add(new SwedenRecyclingMapSettings());
+    this.add(new CyprusMapSettings());
   }
 
   values(): Iterable<MapSettings> {

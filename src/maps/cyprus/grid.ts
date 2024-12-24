@@ -1,15 +1,37 @@
 import { BLUE, PURPLE, RED, YELLOW } from '../../engine/state/good';
-import { TOP, TOP_LEFT, TOP_RIGHT } from '../../engine/state/tile';
+import { CitySettingData } from '../../engine/state/map_settings';
+import { PlayerColor } from '../../engine/state/player';
+import { MutableLandData } from '../../engine/state/space';
+import { Direction, TOP, TOP_LEFT, TOP_RIGHT } from '../../engine/state/tile';
 import { duplicate } from '../../utils/functions';
-import { black, customCity, plain, PLAIN, startsLowerGrid, UNPASSABLE, white } from '../factory';
+import { black, city, PLAIN, startsLowerGrid, town, UNPASSABLE, white } from '../factory';
+import { CyprusMapData } from './map_data';
 import { GREECE, TURKEY } from './roles';
+
+function borderDirection(input: MutableLandData | CitySettingData, borderDirection: Direction[]): MutableLandData | CitySettingData {
+  return mapSpecific(input, { borderDirection });
+}
+
+function rejects(input: MutableLandData | CitySettingData, rejects: PlayerColor): MutableLandData | CitySettingData {
+  return mapSpecific(input, { rejects });
+}
+
+function mapSpecific(input: MutableLandData | CitySettingData, mapSpecific: CyprusMapData): MutableLandData | CitySettingData {
+  return {
+    ...input,
+    mapSpecific: {
+      ...input.mapSpecific,
+      ...mapSpecific,
+    },
+  };
+}
 
 export const map = startsLowerGrid([
   [
     UNPASSABLE,
     UNPASSABLE,
     UNPASSABLE,
-    customCity({ name: 'Mavroli', color: [YELLOW], onRoll: [white(1)], startingNumCubes: 2, mapSpecific: { rejects: TURKEY } }),
+    rejects(city('Mavroli', YELLOW, white(1)), TURKEY),
     PLAIN,
     PLAIN,
   ],
@@ -17,15 +39,18 @@ export const map = startsLowerGrid([
     UNPASSABLE,
     UNPASSABLE,
     UNPASSABLE,
+    UNPASSABLE,
     PLAIN,
     PLAIN,
     PLAIN,
-    customCity({ name: 'Paphos', color: [YELLOW], onRoll: [white(2)], startingNumCubes: 2, mapSpecific: { rejects: TURKEY } }),
+    rejects(city('Paphos', YELLOW, white(2)), TURKEY),
   ],
   [
+    UNPASSABLE,
+    UNPASSABLE,
     PLAIN,
-    plain({ mapSpecific: { borderDirection: [TOP, TOP_LEFT] } }),
-    plain({ townName: 'Chakistra', mapSpecific: { rejects: TURKEY } }),
+    borderDirection(PLAIN, [TOP, TOP_RIGHT]),
+    rejects(town('Chakistra'), TURKEY),
     PLAIN,
     PLAIN,
     PLAIN,
@@ -33,54 +58,54 @@ export const map = startsLowerGrid([
   [
     UNPASSABLE,
     UNPASSABLE,
-    plain({ townName: 'Xeros', mapSpecific: { rejects: GREECE } }),
+    rejects(town('Xeros'), GREECE),
     PLAIN,
-    plain({ mapSpecific: { borderDirection: [TOP, TOP_LEFT] } }),
+    borderDirection(PLAIN, [TOP, TOP_RIGHT]),
     PLAIN,
     PLAIN,
-    plain({ townName: 'Epikopi', mapSpecific: { rejects: [TURKEY] } }),
+    rejects(town('Epikopi'), TURKEY),
   ],
   [
     ...duplicate(4, PLAIN),
-    plain({ mapSpecific: { borderDirection: [TOP] } }),
+    borderDirection(PLAIN, [TOP]),
     ...duplicate(3, PLAIN),
   ],
   [
-    customCity({ name: 'Lapithos', color: [RED], onRoll: [black(1)], startingNumCubes: 2, mapSpecific: { rejects: GREECE } }),
+    rejects(city('Lapithos', RED, black(1)), GREECE),
     PLAIN,
     PLAIN,
-    customCity({ name: 'Morphou', color: [BLUE], onRoll: [black(2)], startingNumCubes: 2, mapSpecific: { rejects: GREECE } }),
-    plain({ mapSpecific: { borderDirection: [TOP_LEFT, TOP_RIGHT, TOP] } }),
+    rejects(city('Morphou', BLUE, black(2)), GREECE),
+    borderDirection(PLAIN, [TOP_LEFT, TOP_RIGHT, TOP]),
     PLAIN,
-    customCity({ name: 'Pelenétria', color: [RED], onRoll: [white(3)], startingNumCubes: 2, mapSpecific: { rejects: TURKEY } }),
-    PLAIN,
-  ],
-  [
-    UNPASSABLE,
-    PLAIN,
-    PLAIN,
-    PLAIN,
-    plain({ mapSpecific: { borderDirection: [TOP] } }),
-    PLAIN,
-    PLAIN,
+    rejects(city('Pelenétria', RED, white(3)), TURKEY),
     PLAIN,
   ],
   [
     UNPASSABLE,
+    PLAIN,
+    PLAIN,
+    PLAIN,
+    borderDirection(PLAIN, [TOP]),
+    PLAIN,
+    PLAIN,
+    PLAIN,
+  ],
+  [
     UNPASSABLE,
-    plain({ townName: 'Kyrenia', mapSpecific: { rejects: [GREECE] } }),
+    UNPASSABLE,
+    rejects(town('Kyrenia'), GREECE),
     PLAIN,
-    plain({ townName: 'Kato Lakatamia', mapSpecific: { rejects: [TURKEY], borderDirection: [TOP_LEFT, TOP, TOP_RIGHT] } }),
+    mapSpecific(town('Kato Lakatamia'), { rejects: TURKEY, borderDirection: [TOP_LEFT, TOP, TOP_RIGHT] }),
     PLAIN,
     PLAIN,
-    plain({ townName: 'Limassol', mapSpecific: { rejects: [TURKEY] } }),
+    rejects(town('Limassol'), TURKEY),
   ],
   [
     UNPASSABLE,
     UNPASSABLE,
     PLAIN,
     PLAIN,
-    plain({ mapSpecific: { borderDirection: [TOP] } }),
+    borderDirection(PLAIN, [TOP]),
     ...duplicate(3, PLAIN),
   ],
   [
@@ -88,7 +113,7 @@ export const map = startsLowerGrid([
     UNPASSABLE,
     PLAIN,
     PLAIN,
-    customCity({ name: 'Nikosia', color: [BLUE], onRoll: [white(6), black(6)], startingNumCubes: 2 }),
+    city('Nikosia', BLUE, [white(6), black(6)]),
     PLAIN,
     PLAIN,
     PLAIN,
@@ -98,47 +123,29 @@ export const map = startsLowerGrid([
     UNPASSABLE,
     PLAIN,
     PLAIN,
-    plain({ mapSpecific: { borderDirection: [TOP, TOP_RIGHT] } }),
+    borderDirection(PLAIN, [TOP, TOP_RIGHT]),
     PLAIN,
     PLAIN,
-    customCity({ name: 'Zyyl', color: [BLUE], onRoll: [white(4)], startingNumCubes: 2, mapSpecific: { rejects: [TURKEY] } }),
+    rejects(city('Zyyl', BLUE, white(4)), TURKEY),
   ],
   [
     UNPASSABLE,
     UNPASSABLE,
-    customCity({ name: 'Dhavios', color: [RED], onRoll: [black(3)], startingNumCubes: 2, mapSpecific: { rejects: [GREECE] } }),
+    rejects(city('Dhavios', RED, black(3)), GREECE),
     PLAIN,
     PLAIN,
-    plain({ mapSpecific: { boderDirection: [TOP, TOP_RIGHT] } }),
-    plain({ townName: 'Pane Lafkara', mapSpecific: { rejects: [TURKEY] } }),
-    PLAIN,
-  ],
-  [
-    UNPASSABLE,
-    UNPASSABLE,
-    PLAIN,
-    plain({ townName: 'Lefkonica', mapSpecific: { rejects: [GREECE] } }),
-    PLAIN,
-    plain({ mapSpecific: { boderDirection: [TOP, TOP_RIGHT] } }),
-    PLAIN,
+    borderDirection(PLAIN, [TOP, TOP_RIGHT]),
+    rejects(town('Pane Lafkara'), TURKEY),
     PLAIN,
   ],
   [
     UNPASSABLE,
     UNPASSABLE,
     PLAIN,
+    rejects(town('Lefkonica'), GREECE),
     PLAIN,
+    borderDirection(PLAIN, [TOP, TOP_RIGHT]),
     PLAIN,
-    PLAIN,
-    plain({ townName: 'Larnaca', mapSpecific: { rejects: [TURKEY], borderDirection: [TOP] } }),
-  ],
-  [
-    UNPASSABLE,
-    PLAIN,
-    plain({ townName: 'Akanthou', mapSpecific: { rejects: GREECE } }),
-    PLAIN,
-    plain({ townName: 'Prastie', mapSpecific: { rejects: GREECE } }),
-    plain({ mapSpecific: { borderDirection: [TOP_LEFT, TOP, TOP_RIGHT] } }),
   ],
   [
     UNPASSABLE,
@@ -147,22 +154,40 @@ export const map = startsLowerGrid([
     PLAIN,
     PLAIN,
     PLAIN,
-    plain({ mapSpecific: { borderDirection: [TOP] } }),
-  ],
-  [
-    UNPASSABLE,
-    customCity({ name: 'Yialeusa', color: [PURPLE], onRoll: [black(4)], startingNumCubes: 2, mapSpecific: { rejects: [GREECE] } }),
-    UNPASSABLE,
-    UNPASSABLE,
-    customCity({ name: 'Paralimni', color: [RED], onRoll: [white(5)], startingNumCubes: 2, mapSpecific: { rejects: [TURKEY] } }),
+    mapSpecific(town('Larnaca'), { rejects: TURKEY, borderDirection: [TOP] }),
   ],
   [
     UNPASSABLE,
     PLAIN,
+    rejects(town('Akanthou'), GREECE),
+    PLAIN,
+    rejects(town('Prastie'), GREECE),
+    borderDirection(PLAIN, [TOP_LEFT, TOP, TOP_RIGHT]),
+  ],
+  [
+    UNPASSABLE,
+    UNPASSABLE,
+    PLAIN,
+    PLAIN,
+    PLAIN,
+    PLAIN,
+    borderDirection(PLAIN, [TOP]),
+  ],
+  [
+    UNPASSABLE,
+    rejects(city('Yialeusa', PURPLE, black(4)), GREECE),
+    PLAIN,
+    UNPASSABLE,
+    UNPASSABLE,
+    mapSpecific(city('Paralimni', RED, white(5)), { borderDirection: [TOP_LEFT], rejects: TURKEY }),
+  ],
+  [
+    UNPASSABLE,
+    PLAIN,
     PLAIN,
   ],
   [
-    plain({ townName: 'Leonarisso', mapSpecific: { rejects: GREECE } }),
+    rejects(town('Leonarisso'), GREECE),
     PLAIN,
   ],
   [
@@ -170,6 +195,6 @@ export const map = startsLowerGrid([
     PLAIN,
   ],
   [
-    customCity({ name: 'Rizokarpaso', color: [PURPLE], onRoll: [black(5)], startingNumCubes: 2, mapSpecific: { rejects: [GREECE] } }),
+    rejects(city('Rizokarpaso', PURPLE, black(5)), GREECE),
   ],
 ]);

@@ -12,7 +12,7 @@ import { isNumber } from "../../utils/validate";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
 import { useUsers } from "../services/user";
-import { InjectionContextProvider, useActiveGameState, useInject, useInjectedState } from "../utils/injection_context";
+import { GameContextProvider, useActiveGameState, useInject, useInjectedState } from "../utils/injection_context";
 import { AvailableCities } from "./available_cities";
 import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
@@ -26,9 +26,9 @@ import { SwitchToActive, SwitchToUndo } from "./switch";
 
 export function ActiveGame() {
   const game = useGame();
-  return <InjectionContextProvider game={game}>
+  return <GameContextProvider game={game}>
     <InternalActiveGame />
-  </InjectionContextProvider>;
+  </GameContextProvider>;
 }
 
 function InternalActiveGame() {

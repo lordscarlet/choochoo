@@ -64,6 +64,12 @@ export class Land {
   unpassableExits(): Direction[] {
     return this.data.unpassableEdges ?? [];
   }
+
+  getMapSpecific<T>(parser: (t: unknown) => T): T | undefined {
+    return this.data.mapSpecific != null ?
+      parser(this.data.mapSpecific) :
+      undefined;
+  }
 }
 
 export type MakeOptional<T, Optional extends string> =

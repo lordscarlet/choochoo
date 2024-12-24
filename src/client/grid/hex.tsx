@@ -7,9 +7,10 @@ import { Track, TrackInfo } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { SpaceType } from "../../engine/state/location_type";
 import { Direction } from "../../engine/state/tile";
-import { MutableCyprusSpaceData } from "../../maps/cyprus/map_data";
+import { CyprusMapData } from "../../maps/cyprus/map_data";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
+import { useGameKey } from "../utils/injection_context";
 import { ClickTarget } from "./click_target";
 import { goodStyle } from "./good";
 import { GoodBlock } from "./good_block";
@@ -106,12 +107,14 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, of
     isClickableBuild ||
     isClaimableTrack;
 
+  const gameKey = useGameKey();
+
   return <>
     <polygon className={`${space instanceof City ? styles.city : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="0" />
     {alternateColor && <HalfHex center={center} size={size} alternateColor={alternateColor} />}
     <polygon fillOpacity="0" data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
     {space instanceof Land && space.unpassableExits().map(direction => <EdgeBoundary key={direction} center={center} size={size} direction={direction} />)}
-    <MaybeCyprusBorder space={space} center={center} size={size} />
+    {gameKey === 'cyprus' && <CyprusBorder space={space} center={center} size={size} />}
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Land && (space.getTileType() != null ? isTownTile(space.getTileType()!) : space.hasTown()) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
     {space instanceof Land && space.hasTown() && <HexName name={space.name()!} center={center} size={size} />}
@@ -121,13 +124,13 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, of
   </>;
 }
 
-function MaybeCyprusBorder({ space, center, size }: { space: Space, center: Point, size: number }) {
-  const { success, data } = MutableCyprusSpaceData.safeParse(space);
+function CyprusBorder({ space, center, size }: { space: Space, center: Point, size: number }) {
+  const parseResult = space.getMapSpecific(CyprusMapData.parse);
 
-  if (!success || data.mapSpecific?.borderDirection == null) return <></>;
+  if (parseResult == null || parseResult.borderDirection == null) return <></>;
 
   return <>
-    {data.mapSpecific.borderDirection.map((direction) =>
+    {parseResult.borderDirection.map((direction) =>
       <EdgeBoundary key={direction} center={center} size={size} direction={direction} />)}
   </>;
 }

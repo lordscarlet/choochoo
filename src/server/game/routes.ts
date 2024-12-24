@@ -75,7 +75,7 @@ const router = initServer().router(gameContract, {
     const playerIds = [userId];
     if (body.artificialStart) {
       assert(environment.stage === Stage.enum.development);
-      const users = await UserDao.findAll({ where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER }, limit: body.minPlayers });
+      const users = await UserDao.findAll({ where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER }, limit: body.minPlayers - 1 });
       playerIds.push(...users.map(({ id }) => id));
     }
     const game = await GameDao.create({

@@ -15,6 +15,7 @@ import { assert } from "../../utils/validate";
 import { useGame } from "../services/game";
 
 export const InjectionContextContext = createContext<InjectionContext | undefined>(undefined);
+export const MapKeyContext = createContext<string>('');
 
 function useInjectionContext(): InjectionContext {
   const ctx = useContext(InjectionContextContext);
@@ -59,7 +60,7 @@ export function useInject<T>(fn: () => T, deps: unknown[]): T {
   return value;
 }
 
-export function InjectionContextProvider({ game, children }: InjectionContextProps) {
+export function GameContextProvider({ game, children }: InjectionContextProps) {
   const ctx = useMemo(() => {
     const ctx = new InjectionContext(game.gameKey);
     setInjectionContext(ctx);
@@ -76,8 +77,14 @@ export function InjectionContextProvider({ game, children }: InjectionContextPro
   }, [ctx, game.gameData]);
 
   return <InjectionContextContext.Provider value={ctx}>
-    {children}
+    <MapKeyContext.Provider value={game.gameKey}>
+      {children}
+    </MapKeyContext.Provider>
   </InjectionContextContext.Provider>;
+}
+
+export function useGameKey(): string {
+  return useContext(MapKeyContext);
 }
 
 export function usePhaseState<T>(phase: Phase, key: Key<T>): Immutable<T> | undefined {
