@@ -13,6 +13,7 @@ export const MutableCityData = z.object({
   goods: z.array(z.nativeEnum(Good)),
   urbanized: z.boolean().optional(),
   onRoll: z.array(OnRollData),
+  mapSpecific: z.any().optional(),
 });
 
 export type MutableCityData = z.infer<typeof MutableCityData>;
@@ -32,6 +33,7 @@ export const MutableLandData = z.object({
   terrainCost: z.number().optional(),
   goods: z.array(z.number()).optional(),
   unpassableEdges: z.array(DirectionZod).optional(),
+  mapSpecific: z.any().optional(),
 });
 
 export type MutableLandData = z.infer<typeof MutableLandData>;

@@ -51,6 +51,14 @@ export enum Direction {
   BOTTOM,
   BOTTOM_LEFT,
 }
+export const {
+  TOP_LEFT,
+  TOP,
+  TOP_RIGHT,
+  BOTTOM_RIGHT,
+  BOTTOM,
+  BOTTOM_LEFT,
+} = Direction;
 
 export const DirectionZod = z.nativeEnum(Direction);
 
