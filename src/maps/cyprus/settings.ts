@@ -7,7 +7,8 @@ import { CyprusStarter } from './starter';
 
 
 export class CyprusMapSettings implements MapSettings {
-  readonly key = 'cyprus';
+  static readonly key = 'cyprus';
+  readonly key = CyprusMapSettings.key;
   readonly name = 'Cyprus';
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
