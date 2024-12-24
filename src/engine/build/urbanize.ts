@@ -66,6 +66,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
       goods: [],
       urbanized: true,
       onRoll: city.onRoll,
+      mapSpecific: location.data.mapSpecific,
     });
 
     // Take ownership of connecting unowned track.
