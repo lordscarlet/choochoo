@@ -1,7 +1,7 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Transaction } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { compare, hash } from 'bcrypt';
-import { NotificationFrequency, NotificationMethod, NotificationPreferences, TurnNotificationSetting } from '../../api/notifications';
+import { NotificationFrequency, NotificationPreferences, TurnNotificationSetting } from '../../api/notifications';
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
 import { assert, isPositiveInteger } from '../../utils/validate';
 import { emailService } from '../util/email';
@@ -125,10 +125,7 @@ export class UserDao extends Model<InferAttributes<UserDao>, InferCreationAttrib
       password,
       role: UserRole.enum.ACTIVATE_EMAIL,
       notificationPreferences: {
-        turnNotifications: [{
-          method: NotificationMethod.EMAIL,
-          frequency: NotificationFrequency.IMMEDIATELY,
-        }],
+        turnNotifications: [],
         marketing: true,
       },
     }, { transaction });
