@@ -34,7 +34,7 @@ export const MutablePlayerData = z.object({
 export type MutablePlayerData = z.infer<typeof MutablePlayerData>;
 export type PlayerData = Immutable<MutablePlayerData>;
 
-export function getPlayerColor(playerColor?: PlayerColor): 'red' | 'yellow' | 'green' | 'purple' | 'black' | 'blue' | 'brown' | 'grey' {
+export function playerColorToString(playerColor?: PlayerColor): 'red' | 'yellow' | 'green' | 'purple' | 'black' | 'blue' | 'brown' | 'grey' {
   switch (playerColor) {
     case PlayerColor.RED:
       return 'red';

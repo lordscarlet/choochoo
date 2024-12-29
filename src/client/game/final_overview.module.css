@@ -1,0 +1,33 @@
+.finalOverview {
+  margin-bottom: 32px;
+}
+
+.tableContainer {
+  max-width: 100%;
+  overflow-x: scroll;
+}
+
+.tableContainer table {
+  border-collapse: collapse;
+}
+
+.tableContainer tr {
+  padding: 4px 0;
+  border-bottom: 1px solid black;
+}
+
+.tableContainer thead tr {
+  border-bottom: 0;
+}
+
+.tableContainer th,
+.tableContainer td {
+  text-align: center;
+  padding: 8px 16px;
+}
+
+.tableContainer th.label {
+  text-align: right;
+  text-wrap: nowrap;
+  border-right: 1px solid black;
+}

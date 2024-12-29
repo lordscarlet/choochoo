@@ -1,6 +1,7 @@
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRightTwoTone';
 import Circle from '@mui/icons-material/Circle';
 import { useMemo } from "react";
+import { GameStatus } from '../../api/game';
 import { UserApi } from "../../api/user";
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
@@ -14,6 +15,7 @@ import { getPlayerColorCss } from '../components/player_color';
 import { useGame } from '../services/game';
 import { useUsers } from "../services/user";
 import { useActiveGameState, useInjected, useInjectedState } from "../utils/injection_context";
+import { FinalOverview } from './final_overview';
 import { LoginButton } from "./login_button";
 import * as styles from './player_stats.module.css';
 
@@ -32,10 +34,14 @@ export function PlayerStats() {
     const user = playerUsers.find(user => user?.id === player.playerId);
     return { player, user };
   }), [playerOrder, playerData, playerUsers]);
-  const gameKey = useGame().gameKey;
+  const game = useGame();
+  const gameKey = game.gameKey;
   const incinerator = useInjected(Incinerator);
-  // TODO: Render the locomotive addition for Ireland.
+
+  if (game.status === GameStatus.enum.ENDED) return <FinalOverview />;
+
   return <div className={styles.playerStats}>
+    <h2>Player overview</h2>
     <table>
       <thead>
         <tr className={styles.tableRow}>

@@ -40,8 +40,26 @@ export class PlayerHelper {
     return this.calculateScore(player);
   }
 
+
   protected calculateScore(player: PlayerData): number {
-    return 3 * (player.income - player.shares) + this.countTrack(player.color);
+    return this.getScoreFromIncome(player) +
+      this.getScoreFromShares(player) +
+      this.getScoreFromTrack(player);
+  }
+
+  getScoreFromIncome(player: PlayerData): number {
+    if (player.outOfGame) return 0;
+    return 3 * player.income;
+  }
+
+  getScoreFromShares(player: PlayerData): number {
+    if (player.outOfGame) return 0;
+    return -3 * player.shares;
+  }
+
+  getScoreFromTrack(player: PlayerData): number {
+    if (player.outOfGame) return 0;
+    return this.countTrack(player.color);
   }
 
   countTrack(color: PlayerColor): number {

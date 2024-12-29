@@ -1,5 +1,5 @@
 import { inject } from "../framework/execution_context";
-import { getPlayerColor, PlayerColor } from "../state/player";
+import { PlayerColor, playerColorToString } from "../state/player";
 import { Memory } from "./memory";
 import { injectCurrentPlayer } from "./state";
 
@@ -12,7 +12,7 @@ export class Log {
   }
 
   player(player: PlayerColor, entry: string): void {
-    this.log(getPlayerColor(player) + ' ' + entry);
+    this.log(playerColorToString(player) + ' ' + entry);
 
   }
 
