@@ -24,7 +24,7 @@ export async function buildApp({ watch }: { watch?: boolean } = {}): Promise<voi
     treeShaking: true,
     sourcemap: true,
     loader: {
-      '.svg': 'dataurl',
+      '.svg': 'text',
     },
     define: Object.fromEntries(environmentVariables.map(v =>
       [`process.env.${v}`, process.env[v] != null ? `"${process.env[v]}"` : 'undefined'])),
