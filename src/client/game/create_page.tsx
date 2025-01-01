@@ -1,5 +1,5 @@
 
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import { FormEvent, useCallback, useMemo } from "react";
 import { ReleaseStage, releaseStageToString } from "../../engine/game/map_settings";
 import { MapRegistry } from "../../maps";
@@ -16,21 +16,39 @@ export function CreateGamePage() {
       .filter((map) => environment.stage === 'development' || map.stage !== ReleaseStage.DEVELOPMENT)
     , []);
   const [name, setName] = useTextInputState('');
-  const [gameKey, setGameKey] = useSelectState(maps[0].key);
+  const [gameKey, _, setGameKeyState] = useSelectState(maps[0].key);
+
+  const map = MapRegistry.singleton.get(gameKey);
+  const allowPlayerSelections = map.minPlayers !== map.maxPlayers;
 
   const selectedMap = useMemo(() => {
     return MapRegistry.singleton.get(gameKey);
   }, []);
 
   const [artificialStart, setArtificialStart] = useCheckboxState();
-  const [minPlayers, setMinPlayers] = useNumberInputState(selectedMap.minPlayers);
-  const [maxPlayers, setMaxPlayers] = useNumberInputState(selectedMap.maxPlayers);
+  const [minPlayersS, setMinPlayers, setMinPlayersRaw] = useNumberInputState(selectedMap.minPlayers);
+  const [maxPlayersS, setMaxPlayers, setMaxPlayersRaw] = useNumberInputState(selectedMap.maxPlayers);
   const { validateGame, createGame, validationError, isPending } = useCreateGame();
+
+  const minPlayers = allowPlayerSelections ? minPlayersS : map.minPlayers;
+  const maxPlayers = allowPlayerSelections ? maxPlayersS : map.maxPlayers;
+
+  const setGameKey = useCallback((e: SelectChangeEvent<string>) => {
+    const gameKey = e.target.value as string;
+    setGameKeyState(gameKey);
+    const map = MapRegistry.singleton.get(gameKey);
+    if (typeof minPlayers === 'number') {
+      setMinPlayersRaw(Math.max(minPlayers, map.minPlayers));
+    }
+    if (typeof maxPlayers === 'number') {
+      setMaxPlayersRaw(Math.min(maxPlayers, map.maxPlayers));
+    }
+  }, [minPlayers, maxPlayers, setMinPlayersRaw, setMaxPlayersRaw, setGameKeyState]);
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     createGame({ name, gameKey, artificialStart, minPlayers, maxPlayers });
-  }, [name, gameKey, artificialStart, createGame, minPlayers, maxPlayers]);
+  }, [name, gameKey, allowPlayerSelections, artificialStart, createGame, minPlayers, maxPlayers]);
 
   const validateGameInternal = useCallback(() => {
     validateGame({ name, gameKey, artificialStart, minPlayers, maxPlayers });
@@ -78,8 +96,9 @@ export function CreateGamePage() {
     <FormControl>
       <TextField
         required
-        label="Min Players"
+        label={allowPlayerSelections ? 'Min Players' : 'Num Players'}
         type="number"
+        disabled={!allowPlayerSelections}
         value={minPlayers}
         error={validationError?.minPlayers != null}
         helperText={validationError?.minPlayers}
@@ -87,7 +106,7 @@ export function CreateGamePage() {
         onBlur={validateGameInternal}
       />
     </FormControl>
-    <FormControl>
+    {allowPlayerSelections && <FormControl>
       <TextField
         required
         label="Max Players"
@@ -98,7 +117,7 @@ export function CreateGamePage() {
         onChange={setMaxPlayers}
         onBlur={validateGameInternal}
       />
-    </FormControl>
+    </FormControl>}
     {environment.stage == Stage.enum.development && <FormControl error={validationError?.artificialStart != null}>
       <FormControlLabel sx={{ m: 1, minWidth: 80 }}
         label="Artificial Start"

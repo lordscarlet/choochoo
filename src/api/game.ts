@@ -52,7 +52,7 @@ function numPlayersMessage(gameKey: string): string {
 
   const range = minPlayers === maxPlayers ? `${minPlayers}` : `${minPlayers}-${maxPlayers}`;
 
-  return `${name} only supports ${minPlayers}-${maxPlayers} players`;
+  return `${name} only supports ${range} players`;
 }
 
 export const CreateGameApi = z.object({
