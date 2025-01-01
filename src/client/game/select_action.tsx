@@ -4,7 +4,6 @@ import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
-import { PLAYERS } from "../../engine/game/state";
 import { LocoAction } from "../../engine/move/loco";
 import { MovePassAction } from "../../engine/move/pass";
 import { MOVE_STATE } from "../../engine/move/state";
@@ -21,15 +20,15 @@ import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { PassAction as DeurbanizationPassAction } from "../../maps/ireland/deurbanization";
 import { iterate } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
-import { DropdownMenu } from "../components/dropdown_menu";
+import { DropdownMenu, DropdownMenuItem } from "../components/dropdown_menu";
 import { useAction, useEmptyAction } from "../services/game";
-import { useActiveGameState, useCurrentPlayer, useInject, useInjected, useInjectedState, usePhaseState } from "../utils/injection_context";
+import { useActiveGameState, useCurrentPlayer, useInject, useInjected, usePhaseState } from "../utils/injection_context";
 
 
-const PASS_ACTION = 'Pass';
+const PASS_ACTION = 'Pass' as const;
 type PassActionString = typeof PASS_ACTION;
 
-const TURN_ORDER_PASS_ACTION = 'Turn Order Pass';
+const TURN_ORDER_PASS_ACTION = 'Turn Order Pass' as const;
 type TurnOrderPassActionString = typeof TURN_ORDER_PASS_ACTION;
 
 export function SelectAction() {
@@ -81,7 +80,6 @@ export function MoveGoods() {
 
 export function SpecialActionSelector() {
   const { emit, canEmit, canEmitUsername, isPending } = useAction(ActionSelectionSelectAction);
-  const players = useInjectedState(PLAYERS);
   const actions = useInjected(AllowedActions);
 
   const chooseAction = useCallback((action: Action) => emit({ action }), [emit]);
@@ -96,7 +94,12 @@ export function SpecialActionSelector() {
 
   return <div>
     <p>You must select an action.</p>
-    <DropdownMenu title='Select action' options={actions.getAvailableActions()} toString={getSelectedActionString} disabled={isPending} onClick={chooseAction} />
+    <DropdownMenu title='Select action' disabled={isPending}>
+      {actions.getAvailableActions().map(option =>
+        <DropdownMenuItem key={option} onClick={() => chooseAction(option)} disabled={isPending}>
+          {getSelectedActionString(option)}
+        </DropdownMenuItem>)}
+    </DropdownMenu>
   </div>;
 }
 
@@ -141,7 +144,7 @@ export function Bid() {
 
   const minBid = helper.getMinBid();
   const maxBid = helper.getMaxBid();
-  const bids = [
+  const bids: Array<number | PassActionString | TurnOrderPassActionString> = [
     ...(helper.canUseTurnOrderPass() ? [TURN_ORDER_PASS_ACTION] : []),
     PASS_ACTION,
     ...iterate(maxBid - minBid + 1, (i) => i + minBid),
@@ -149,7 +152,12 @@ export function Bid() {
 
   return <div>
     <p>You must bid.</p>
-    <DropdownMenu title='Place bid' options={bids} toString={dollarFormat} disabled={isPending} onClick={placeBid} />
+    <DropdownMenu title='Place bid' disabled={isPending}>
+      {bids.map(option =>
+        <DropdownMenuItem key={option} onClick={() => placeBid(option)} disabled={isPending}>
+          {dollarFormat(option)}
+        </DropdownMenuItem>)}
+    </DropdownMenu>
   </div >;
 }
 
@@ -174,7 +182,12 @@ export function TakeShares() {
 
   return <div>
     <p>Choose how many shares you would like to take out.</p>
-    <DropdownMenu title='Choose shares' options={options} toString={numberFormat} disabled={isPending} onClick={chooseValue} />
+    <DropdownMenu title='Choose shares' disabled={isPending}>
+      {options.map(option =>
+        <DropdownMenuItem key={option} onClick={() => chooseValue(option)} disabled={isPending}>
+          {numberFormat(option)}
+        </DropdownMenuItem>)}
+    </DropdownMenu>
   </div>;
 }
 

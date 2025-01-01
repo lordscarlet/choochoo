@@ -1,6 +1,6 @@
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { alpha, Button, Menu, MenuItem, MenuProps, styled } from "@mui/material";
-import { useState } from "react";
+import { alpha, Button, Menu, MenuItem, MenuItemProps, MenuProps, styled } from "@mui/material";
+import { createContext, MouseEvent, ReactNode, useCallback, useContext, useState } from "react";
 
 
 
@@ -50,13 +50,13 @@ const StyledMenu = styled((props: MenuProps) => (
 
 interface DropdownMenuProps<T> {
   title: string;
-  options: Iterable<T>;
-  toString(t: T): string;
-  onClick(t: T): void;
   disabled?: boolean;
+  children: ReactNode;
 }
 
-export function DropdownMenu<T>({ options, title, disabled, onClick, toString }: DropdownMenuProps<T>) {
+const DropdownCloser = createContext<(() => void) | undefined>(undefined);
+
+export function DropdownMenu<T>({ title, disabled, children }: DropdownMenuProps<T>) {
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const open = anchorEl != null;
 
@@ -67,7 +67,7 @@ export function DropdownMenu<T>({ options, title, disabled, onClick, toString }:
     setAnchorEl(undefined);
   };
 
-  return <>
+  return <DropdownCloser.Provider value={handleClose}>
     <Button
       id="demo-customized-button"
       aria-controls={open ? 'demo-customized-menu' : undefined}
@@ -77,6 +77,7 @@ export function DropdownMenu<T>({ options, title, disabled, onClick, toString }:
       disableElevation
       onClick={handleClick}
       endIcon={<KeyboardArrowDownIcon />}
+      disabled={disabled}
     >
       {title}
     </Button>
@@ -89,7 +90,16 @@ export function DropdownMenu<T>({ options, title, disabled, onClick, toString }:
       open={open}
       onClose={handleClose}
     >
-      {[...options].map(option => <MenuItem key={toString(option)} onClick={() => { onClick(option); handleClose(); }} disabled={disabled}>{toString(option)}</MenuItem>)}
+      {children}
     </StyledMenu>
-  </>;
+  </DropdownCloser.Provider>;
+}
+
+export function DropdownMenuItem({ onClick, ...rest }: MenuItemProps) {
+  const dropdownCloser = useContext(DropdownCloser);
+  const internalOnClick = useCallback((e: MouseEvent<HTMLLIElement>) => {
+    dropdownCloser && dropdownCloser();
+    onClick && onClick(e);
+  }, [onClick]);
+  return <MenuItem onClick={internalOnClick} {...rest} />;
 }
