@@ -74,7 +74,7 @@ export class GameStarter {
   }
 
   initializePlayers(playerIds: number[]) {
-    const shuffledColors = this.random.shuffle(allPlayerColors);
+    const shuffledColors = this.random.shuffle(this.allPlayerColors());
     const players = playerIds.map((id, index) => this.buildPlayer(id, shuffledColors[index]));
 
     this.players.initState(players);
