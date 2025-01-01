@@ -13,6 +13,7 @@ import { ClickTarget } from "./click_target";
 import { Hex } from "./hex";
 import { fabs, floatingFabs, hexGrid, hexGridContainer } from './hex_grid.module.css';
 import { coordinatesToCenter, getCorners, Point } from "./point";
+import { SwedenProgressionGraphic } from '../game/sweden/progression_graphic';
 
 
 function cubeRound(qFrac: number, rFrac: number): Coordinates {
@@ -174,6 +175,7 @@ export function HexGrid({ onClick, fullMapVersion, highlightedTrack, selectedGoo
         onClick={internalOnClick}>
         {mapSpaces}
         {fullMapVersion && <DoubleHeightNumbers grid={grid} size={size} coordinateWidth={coordinateWidth} externalPadding={externalPadding} />}
+        {fullMapVersion && <SwedenProgressionGraphic />}
       </svg>
     </div>
   </>;

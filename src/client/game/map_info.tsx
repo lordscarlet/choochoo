@@ -1,7 +1,7 @@
 import { MapRegistry } from "../../maps";
 import { SwedenRecyclingMapSettings } from "../../maps/sweden/settings";
 import { IrelandRules } from "./maps/ireland";
-import { SwedenRecyclingRules } from "./maps/sweden_recycling";
+import { SwedenRecyclingRules } from "./sweden/rules";
 
 export function MapInfo({ gameKey }: { gameKey: string }) {
   const selectedMap = MapRegistry.singleton.get(gameKey);
