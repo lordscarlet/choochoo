@@ -1,6 +1,5 @@
 
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import CloseIcon from '@mui/icons-material/Close';
 import { default as DarkMode } from '@mui/icons-material/DarkMode';
 import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import FeedbackOutlined from '@mui/icons-material/FeedbackOutlined';
@@ -11,7 +10,7 @@ import LockOpen from '@mui/icons-material/LockOpen';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
 import Person from '@mui/icons-material/Person';
-import { AppBar, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
+import { AppBar, Button, ListItemIcon, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
@@ -30,14 +29,6 @@ export function Layout() {
   const { mode, setMode } = useColorScheme();
   const me = useMe();
   const { logout, isPending: isLogoutPending } = useLogout();
-  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const closeFeedback = useCallback(() => {
-    setIsFeedbackOpen(false);
-  }, [setIsFeedbackOpen]);
-
-  const openFeedback = useCallback(() => {
-    setIsFeedbackOpen(true);
-  }, [setIsFeedbackOpen]);
 
   const [enableAdminMode, setEnableAdminMode] = useEnableAdminMode();
   const isAdmin = useIsAdmin(true);
@@ -108,7 +99,7 @@ export function Layout() {
               </ListItemIcon>
               Dark Mode
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={openFeedback}>
+            <DropdownMenuItem component={Link} to={'https://github.com/YourDeveloperFriend/choochoo/issues'} target="_blank">
               <ListItemIcon>
                 <FeedbackOutlined fontSize="small" />
               </ListItemIcon>
@@ -134,7 +125,6 @@ export function Layout() {
       </Suspense>
     </main>
     <Footer />
-    <FeedbackDialog isOpen={isFeedbackOpen} close={closeFeedback} />
   </>;
 }
 
@@ -176,37 +166,4 @@ function ResetError({ error, resetErrorBoundary }: { error: unknown, resetErrorB
     {submittedForm && <p>Thanks! We'll look into it ASAP!</p>}
     <Button onClick={resetErrorBoundary}>Reload</Button>
   </div>;
-}
-
-interface FeedbackDialog {
-  isOpen: boolean;
-  close(): void;
-}
-
-export function FeedbackDialog({ isOpen, close }: FeedbackDialog) {
-  return <Dialog
-    open={isOpen}
-    onClose={close}
-    aria-labelledby="alert-dialog-title"
-    aria-describedby="alert-dialog-description"
-  >
-    <DialogTitle>
-      Submit feedback
-    </DialogTitle>
-    <IconButton
-      aria-label="close"
-      onClick={close}
-      sx={() => ({
-        position: 'absolute',
-        right: 8,
-        top: 8,
-        color: 'grey',
-      })}
-    >
-      <CloseIcon />
-    </IconButton>
-    <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
-      <FeedbackForm onSubmit={close} />
-    </DialogContent>
-  </Dialog>;
 }
