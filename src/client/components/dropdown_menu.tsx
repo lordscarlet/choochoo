@@ -1,5 +1,5 @@
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { alpha, Button, Menu, MenuItem, MenuItemProps, MenuProps, styled } from "@mui/material";
+import { alpha, Button, IconButton, Menu, MenuItem, MenuItemProps, MenuItemTypeMap, MenuProps, styled } from "@mui/material";
 import { createContext, MouseEvent, ReactNode, useCallback, useContext, useState } from "react";
 
 
@@ -48,15 +48,26 @@ const StyledMenu = styled((props: MenuProps) => (
   },
 }));
 
-interface DropdownMenuProps<T> {
-  title: string;
+interface BaseDropdownMenuProps {
+  id: string;
   disabled?: boolean;
+  ariaLabel?: string;
   children: ReactNode;
 }
 
+interface TitleDropdownMenuProps extends BaseDropdownMenuProps {
+  title: string;
+}
+
+interface IconDropdownMenuProps extends BaseDropdownMenuProps {
+  icon: ReactNode;
+}
+
+type DropdownMenuProps = TitleDropdownMenuProps | IconDropdownMenuProps;
+
 const DropdownCloser = createContext<(() => void) | undefined>(undefined);
 
-export function DropdownMenu<T>({ title, disabled, children }: DropdownMenuProps<T>) {
+export function DropdownMenu({ id, ariaLabel, disabled, children, ...rest }: DropdownMenuProps) {
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const open = anchorEl != null;
 
@@ -67,24 +78,38 @@ export function DropdownMenu<T>({ title, disabled, children }: DropdownMenuProps
     setAnchorEl(undefined);
   };
 
+  const menuId = id + '-menu';
+  const buttonId = id + '-button';
+
   return <DropdownCloser.Provider value={handleClose}>
-    <Button
-      id="demo-customized-button"
-      aria-controls={open ? 'demo-customized-menu' : undefined}
+    {'title' in rest && <Button
+      id={buttonId}
+      aria-controls={open ? menuId : undefined}
       aria-haspopup="true"
       aria-expanded={open ? 'true' : undefined}
       variant="contained"
       disableElevation
       onClick={handleClick}
+      aria-label={ariaLabel}
       endIcon={<KeyboardArrowDownIcon />}
       disabled={disabled}
     >
-      {title}
-    </Button>
+      {rest.title}
+    </Button>}
+    {'icon' in rest && <IconButton
+      size="large"
+      aria-label={ariaLabel}
+      aria-controls={open ? menuId : undefined}
+      aria-haspopup="true"
+      onClick={handleClick}
+      color="inherit"
+    >
+      {rest.icon}
+    </IconButton>}
     <StyledMenu
-      id="demo-customized-menu"
+      id={menuId}
       MenuListProps={{
-        'aria-labelledby': 'demo-customized-button',
+        'aria-labelledby': buttonId,
       }}
       anchorEl={anchorEl}
       open={open}
@@ -95,7 +120,7 @@ export function DropdownMenu<T>({ title, disabled, children }: DropdownMenuProps
   </DropdownCloser.Provider>;
 }
 
-export function DropdownMenuItem({ onClick, ...rest }: MenuItemProps) {
+export function DropdownMenuItem<T extends React.ElementType = MenuItemTypeMap['defaultComponent'], R = {}>({ onClick, ...rest }: MenuItemProps<T, R> & { onClick?: (e: MouseEvent<HTMLLIElement>) => void }) {
   const dropdownCloser = useContext(DropdownCloser);
   const internalOnClick = useCallback((e: MouseEvent<HTMLLIElement>) => {
     dropdownCloser && dropdownCloser();

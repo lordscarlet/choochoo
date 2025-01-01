@@ -94,7 +94,7 @@ export function SpecialActionSelector() {
 
   return <div>
     <p>You must select an action.</p>
-    <DropdownMenu title='Select action' disabled={isPending}>
+    <DropdownMenu id='select-action' title='Select action' disabled={isPending}>
       {actions.getAvailableActions().map(option =>
         <DropdownMenuItem key={option} onClick={() => chooseAction(option)} disabled={isPending}>
           {getSelectedActionString(option)}
@@ -152,7 +152,7 @@ export function Bid() {
 
   return <div>
     <p>You must bid.</p>
-    <DropdownMenu title='Place bid' disabled={isPending}>
+    <DropdownMenu id='bid' title='Place bid' disabled={isPending}>
       {bids.map(option =>
         <DropdownMenuItem key={option} onClick={() => placeBid(option)} disabled={isPending}>
           {dollarFormat(option)}
@@ -182,7 +182,7 @@ export function TakeShares() {
 
   return <div>
     <p>Choose how many shares you would like to take out.</p>
-    <DropdownMenu title='Choose shares' disabled={isPending}>
+    <DropdownMenu id='shares' title='Choose shares' disabled={isPending}>
       {options.map(option =>
         <DropdownMenuItem key={option} onClick={() => chooseValue(option)} disabled={isPending}>
           {numberFormat(option)}

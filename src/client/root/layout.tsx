@@ -11,10 +11,11 @@ import LockOpen from '@mui/icons-material/LockOpen';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
 import Person from '@mui/icons-material/Person';
-import { AppBar, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, Menu, MenuItem, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
+import { AppBar, Button, Dialog, DialogContent, DialogTitle, IconButton, ListItemIcon, MenuList, styled, Toolbar, Typography, useColorScheme, useMediaQuery } from "@mui/material";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
+import { DropdownMenu, DropdownMenuItem } from '../components/dropdown_menu';
 import { Loading } from '../components/loading';
 import { FeedbackForm } from "../services/feedback/form";
 import { useReportError } from '../services/feedback/report_error';
@@ -27,8 +28,6 @@ const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
 export function Layout() {
   const { mode, setMode } = useColorScheme();
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>(undefined);
-  const [adminAnchorEl, setAdminAnchorEl] = useState<HTMLElement | undefined>(undefined);
   const me = useMe();
   const { logout, isPending: isLogoutPending } = useLogout();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -36,29 +35,8 @@ export function Layout() {
     setIsFeedbackOpen(false);
   }, [setIsFeedbackOpen]);
 
-  const openMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  }, [setAnchorEl]);
-
-  const closeMenu = useCallback(() => {
-    setAnchorEl(undefined);
-  }, [setAnchorEl]);
-
-  const openAdminMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setAdminAnchorEl(event.currentTarget);
-  }, [setAdminAnchorEl]);
-
-  const closeAdminMenu = useCallback(() => {
-    setAdminAnchorEl(undefined);
-  }, [setAdminAnchorEl]);
-
-  const logoutClick = useCallback(() => {
-    logout();
-    closeMenu();
-  }, [logout, closeMenu]);
   const openFeedback = useCallback(() => {
     setIsFeedbackOpen(true);
-    closeMenu();
   }, [setIsFeedbackOpen]);
 
   const [enableAdminMode, setEnableAdminMode] = useEnableAdminMode();
@@ -82,108 +60,68 @@ export function Layout() {
         {me == null &&
           <Button color="inherit" component={Link} to="/app/users/login">Login</Button>}
 
-        {isAdmin && <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="menu-appbar"
-          aria-haspopup="true"
-          onClick={openAdminMenu}
-          color="inherit"
+        {isAdmin && <DropdownMenu
+          id='admin-menu'
+          icon={<ManageAccounts />}
+          ariaLabel='Admin'
         >
-          <ManageAccounts />
-        </IconButton>}
-
-        <Menu
-          id="menu-appbar"
-          anchorEl={adminAnchorEl}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          keepMounted
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          open={Boolean(adminAnchorEl)}
-          onClose={closeAdminMenu}
-        >
-          <MenuItem onClick={() => { setEnableAdminMode(!enableAdminMode); closeAdminMenu(); }}>
+          <DropdownMenuItem onClick={() => { setEnableAdminMode(!enableAdminMode); }}>
             <ListItemIcon>
               {enableAdminMode ? <LockOpen fontSize="small" /> : <Lock fontSize="small" />}
             </ListItemIcon>
             Admin Mode
-          </MenuItem>
-          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/create-invite">
+          </DropdownMenuItem>
+          <DropdownMenuItem component={Link} to="/app/admin/create-invite">
             <ListItemIcon>
               <InsertInvitation fontSize="small" />
             </ListItemIcon>
             Create Invitation
-          </MenuItem>
-          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/feedback">
+          </DropdownMenuItem>
+          <DropdownMenuItem component={Link} to="/app/admin/feedback">
             <ListItemIcon>
               <FeedbackOutlined fontSize="small" />
             </ListItemIcon>
             View Feedback
-          </MenuItem>
-          <MenuItem component={Link} onClick={closeAdminMenu} to="/app/admin/users">
+          </DropdownMenuItem>
+          <DropdownMenuItem component={Link} to="/app/admin/users">
             <ListItemIcon>
               <Group fontSize="small" />
             </ListItemIcon>
             View users
-          </MenuItem>
-        </Menu>
+          </DropdownMenuItem>
+        </DropdownMenu>}
 
-        {me != null && <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="menu-appbar"
-          aria-haspopup="true"
-          onClick={openMenu}
-          color="inherit"
+        {me != null && <DropdownMenu
+          id='user-menu'
+          icon={<AccountCircle />}
+          ariaLabel='Account of current user'
         >
-          <AccountCircle />
-        </IconButton>}
-        <Menu
-          id="menu-appbar"
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          keepMounted
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          open={Boolean(anchorEl)}
-          onClose={closeMenu}
-        >
+
           <MenuList>
-            <MenuItem component={Link} onClick={closeMenu} to={`/app/users/${me?.id}`}>
+            <DropdownMenuItem component={Link} to={`/app/users/${me?.id}`}>
               <ListItemIcon><Person fontSize="small" /></ListItemIcon>
               My Profile
-            </MenuItem>
-            <MenuItem onClick={() => { setMode(darkModeEnabled ? 'light' : 'dark'); closeMenu(); }}>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setMode(darkModeEnabled ? 'light' : 'dark'); }}>
               <ListItemIcon>
                 {darkModeEnabled ? <DarkMode fontSize="small" /> : <DarkModeOutlined fontSize="small" />}
               </ListItemIcon>
               Dark Mode
-            </MenuItem>
-            <MenuItem onClick={openFeedback}>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={openFeedback}>
               <ListItemIcon>
                 <FeedbackOutlined fontSize="small" />
               </ListItemIcon>
               Submit feedback
-            </MenuItem>
-            <MenuItem onClick={logoutClick} disabled={isLogoutPending}>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={logout} disabled={isLogoutPending}>
               <ListItemIcon>
                 <LogoutOutlined fontSize="small" />
               </ListItemIcon>
               Logout
-            </MenuItem>
+            </DropdownMenuItem>
           </MenuList>
-        </Menu>
+        </DropdownMenu>}
       </Toolbar>
     </AppBar>
     <Offset />
