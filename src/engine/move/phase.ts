@@ -13,8 +13,8 @@ import { MOVE_STATE } from "./state";
 export class MovePhase extends PhaseModule {
   static readonly phase = Phase.MOVING;
 
-  private readonly moveState = injectState(MOVE_STATE);
-  private readonly players = injectState(PLAYERS);
+  protected readonly moveState = injectState(MOVE_STATE);
+  protected readonly players = injectState(PLAYERS);
 
   configureActions() {
     this.installAction(LocoAction);
