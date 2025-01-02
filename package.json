@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "nodemon -V --watch src/ --ignore src/client src/server/index.ts",
-    "build-server": "tsc -p tsconfig.json",
+    "build-server": "tsc -b",
     "build-client": "NODE_ENV=production API_HOST=\"https://api.choochoo.games\" SOCKET_HOST=\"https://api.choochoo.games\" node bin/scripts/client_build.js",
     "prod": "node bin/server/index.js",
     "deploy": "./src/scripts/deploy.sh",
