@@ -18,7 +18,7 @@ export class IncomeReductionPhase extends PhaseModule {
         const lostIncome = this.calculateIncomeReduction(player.income);
         player.income -= lostIncome;
         if (lostIncome > 0) {
-          this.log.player(player.color, `loses ${lostIncome} income`);
+          this.log.player(player, `loses ${lostIncome} income`);
         }
       }
     });

@@ -57,9 +57,9 @@ export class TurnOrderHelper {
     const cost = Math.ceil(previousBid * costMultiplier);
 
     if (cost === 0) {
-      this.log.player(player.color, `becomes player ${playerOrder} for free`);
+      this.log.player(player, `becomes player ${playerOrder} for free`);
     } else {
-      this.log.player(player.color, `pays ${cost} and becomes player ${playerOrder}`)
+      this.log.player(player, `pays ${cost} and becomes player ${playerOrder}`)
     }
     this.turnOrderState.update((state) => {
       delete state.previousBids[player.color];

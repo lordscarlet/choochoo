@@ -55,8 +55,7 @@ export class GoodsGrowthPhase extends PhaseModule {
 
   getPlayerOrder(): PlayerColor[] {
     const productionPlayer = this.players()
-      .find((player) => player.selectedAction === Action.PRODUCTION)
-      ?.color;
+      .find((player) => player.selectedAction === Action.PRODUCTION);
     if (productionPlayer == null) {
       return [];
     }
@@ -64,7 +63,7 @@ export class GoodsGrowthPhase extends PhaseModule {
       this.log.player(productionPlayer, 'has to forfeit production due to no openings');
       return [];
     }
-    return [productionPlayer];
+    return [productionPlayer.color];
   }
 
   onEnd(): void {

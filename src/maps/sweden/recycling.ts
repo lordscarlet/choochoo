@@ -51,7 +51,7 @@ export class SwedenMovePhase extends MovePhase {
       ({ selectedAction }) => selectedAction === Action.WTE_PLANT_OPERATOR);
     if (player != null) {
       const count = this.incinerator.getGarbageCount();
-      this.log.player(player.color, `takes ${count} black cubes, scoring ${count * 2} points.`)
+      this.log.player(player, `takes ${count} black cubes, scoring ${count * 2} points.`)
       this.incinerator.takeCubes(player.color);
     }
   }

@@ -5,7 +5,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
 import { PlayerHelper } from "../game/player";
-import { injectCurrentPlayer, TURN_ORDER } from "../game/state";
+import { injectCurrentPlayer, PLAYERS, TURN_ORDER } from "../game/state";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { BidAction } from "./bid";
@@ -17,6 +17,7 @@ import { TurnOrderPassAction } from "./turn_order_pass";
 export class TurnOrderPhase extends PhaseModule {
   static readonly phase = Phase.TURN_ORDER;
 
+  private readonly players = injectState(PLAYERS);
   private readonly currentOrder = injectState(TURN_ORDER);
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly helper = inject(TurnOrderHelper);
@@ -74,7 +75,8 @@ export class TurnOrderPhase extends PhaseModule {
       const previousIndex = currentOrder.indexOf(nextPlayer);
       nextPlayer = currentOrder[previousIndex === currentOrder.length - 1 ? 0 : previousIndex + 1];
       if (nextPlayer === maxBidPlayer) {
-        this.log.player(nextPlayer, 'does not have to bid against themselves');
+        const nextPlayerData = this.players().find(({ color }) => color === nextPlayer)!;
+        this.log.player(nextPlayerData, 'does not have to bid against themselves');
       }
     } while (nextPlayer === maxBidPlayer || passedPlayers.has(nextPlayer));
     return nextPlayer;

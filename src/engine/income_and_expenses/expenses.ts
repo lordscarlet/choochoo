@@ -30,19 +30,19 @@ export class ExpensesPhase extends PhaseModule {
           player.money -= expenses;
           const profit = this.profitHelper.getProfit(player);
           if (profit > 0) {
-            this.log.player(player.color, `earns $${profit}`);
+            this.log.player(player, `earns $${profit}`);
           } else {
-            this.log.player(player.color, `loses ${-profit}`);
+            this.log.player(player, `loses ${-profit}`);
           }
         } else {
           const lostIncome = expenses - player.money;
           player.money = 0;
           player.income -= lostIncome;
-          this.log.player(player.color, `cannot afford expenses and loses ${lostIncome} income`);
+          this.log.player(player, `cannot afford expenses and loses ${lostIncome} income`);
           if (player.income < 0) {
             player.outOfGame = true;
             outOfGamePlayers.add(player.color);
-            this.log.player(player.color, `drops out of the game`);
+            this.log.player(player, `drops out of the game`);
           }
         }
       }

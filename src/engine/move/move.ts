@@ -123,7 +123,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
         assert(!player.outOfGame, 'unexpected out of game player still owns track');
         if (!partitioned.has(player.color)) continue;
         const incomeBonus = partitioned.get(player.color)?.length ?? 0;
-        this.log.player(player.color, `earns ${incomeBonus} income`);
+        this.log.player(player, `earns ${incomeBonus} income`);
         player.income += incomeBonus;
       }
     });
