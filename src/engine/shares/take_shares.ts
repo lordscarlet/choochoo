@@ -28,12 +28,19 @@ export class TakeSharesAction implements ActionProcessor<TakeSharesData> {
   }
 
   process({ numShares }: TakeSharesData): boolean {
+    if (this.helper.getSharesTheyCanTake() === 0) {
+      this.log.currentPlayer(`cannot take out anymore shares`);
+    } else if (numShares === 0) {
+      this.log.currentPlayer('does not take out any shares');
+    } else {
+      this.log.currentPlayer(`takes out ${numShares} shares and receives $${5 * numShares}`);
+    }
+
     this.playerHelper.updateCurrentPlayer((player) => {
       player.shares += numShares;
       player.money += 5 * numShares;
     });
 
-    this.log.currentPlayer(`takes out ${numShares} shares and receives $${5 * numShares}`);
     return true;
   }
 }
