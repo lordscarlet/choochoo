@@ -1,7 +1,7 @@
 import { inject } from "../../engine/framework/execution_context";
 import { Log } from "../../engine/game/log";
 import { PhaseEngine } from "../../engine/game/phase";
-import { injectGrid } from "../../engine/game/state";
+import { injectGrid, injectPlayerAction } from "../../engine/game/state";
 import { City } from "../../engine/map/city";
 import { GridHelper } from "../../engine/map/grid_helper";
 import { MoveAction, MoveData } from "../../engine/move/move";
@@ -28,6 +28,7 @@ export class SwedenMovePhase extends MovePhase {
   private readonly grid = injectGrid();
   private readonly gridHelper = inject(GridHelper);
   private readonly log = inject(Log);
+  private readonly wtePlayer = injectPlayerAction(Action.WTE_PLANT_OPERATOR);
 
   onEnd(): void {
     super.onEnd();
@@ -47,11 +48,10 @@ export class SwedenMovePhase extends MovePhase {
         city.onRoll[0].goods = [];
       });
     }
-    const player = this.players().find(
-      ({ selectedAction }) => selectedAction === Action.WTE_PLANT_OPERATOR);
+    const player = this.wtePlayer();
     if (player != null) {
       const count = this.incinerator.getGarbageCount();
-      this.log.player(player, `takes ${count} black cubes, scoring ${count * 2} points.`)
+      this.log.player(player, `operated the WTE Plant, taking ${count} black cubes and scoring ${count * 2} points.`)
       this.incinerator.takeCubes(player.color);
     }
   }

@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import { GameStatus } from "../../api/game";
 import { isEliminated, PlayerHelper } from "../../engine/game/player";
-import { PLAYERS } from "../../engine/game/state";
+import { injectAllPlayersUnsafe } from "../../engine/game/state";
 import { playerColorToString } from "../../engine/state/player";
 import { Username } from "../components/username";
 import { useGame } from "../services/game";
-import { useInjected, useInjectedState } from "../utils/injection_context";
+import { useInject, useInjected } from "../utils/injection_context";
 import * as styles from './final_overview.module.css';
 
 export function FinalOverview() {
@@ -16,7 +16,7 @@ export function FinalOverview() {
 }
 
 export function FinalOverviewInternal() {
-  const players = useInjectedState(PLAYERS);
+  const players = useInject(() => injectAllPlayersUnsafe()(), []);
   const playerHelper = useInjected(PlayerHelper);
   const playersOrdered = useMemo(() => {
     const playerData = players.map((player) => ({

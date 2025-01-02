@@ -6,7 +6,7 @@ import { InjectionContext } from "../../engine/framework/inject";
 import { Key } from "../../engine/framework/key";
 import { StateStore } from "../../engine/framework/state";
 import { PHASE } from "../../engine/game/phase";
-import { CURRENT_PLAYER, injectGrid, PLAYERS } from "../../engine/game/state";
+import { injectCurrentPlayer, injectGrid } from "../../engine/game/state";
 import { Grid } from "../../engine/map/grid";
 import { Phase } from "../../engine/state/phase";
 import { PlayerData } from "../../engine/state/player";
@@ -123,9 +123,7 @@ export function useInjectedState<T>(key: Key<T>): Immutable<T> {
 }
 
 export function useCurrentPlayer(): PlayerData | undefined {
-  const playerColor = useActiveGameState(CURRENT_PLAYER);
-  const players = useInjectedState(PLAYERS);
-  return players.find((player) => player.color === playerColor);
+  return useInject(() => injectCurrentPlayer()(), []);
 }
 
 export function useGrid(): Grid {

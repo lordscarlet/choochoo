@@ -12,12 +12,12 @@ import { allPlayerColors, PlayerColor, PlayerData } from '../state/player';
 import { OnRoll } from '../state/roll';
 import { SpaceData } from '../state/space';
 import { Random } from './random';
-import { AVAILABLE_CITIES, BAG, GRID, PLAYERS, TURN_ORDER } from './state';
+import { AVAILABLE_CITIES, BAG, GRID, injectAllPlayersUnsafe, TURN_ORDER } from './state';
 
 export class GameStarter {
   protected readonly grid = injectState(GRID);
   protected readonly turnOrder = injectState(TURN_ORDER);
-  protected readonly players = injectState(PLAYERS);
+  protected readonly players = injectAllPlayersUnsafe();
   protected readonly bag = injectState(BAG);
   protected readonly availableCities = injectState(AVAILABLE_CITIES);
   protected readonly gridHelper = inject(GridHelper);

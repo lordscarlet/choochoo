@@ -1,11 +1,11 @@
 import { injectState } from "../framework/execution_context";
 import { Land } from "../map/location";
 import { MutablePlayerData, PlayerColor, PlayerData } from "../state/player";
-import { CURRENT_PLAYER, injectGrid, PLAYERS } from "./state";
+import { CURRENT_PLAYER, injectAllPlayersUnsafe, injectGrid } from "./state";
 
 export class PlayerHelper {
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
-  private readonly players = injectState(PLAYERS);
+  private readonly players = injectAllPlayersUnsafe();
   private readonly grid = injectGrid();
 
   update(playerColor: PlayerColor, updateFn: (data: MutablePlayerData) => void): void {

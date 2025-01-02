@@ -4,7 +4,7 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
-import { injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
+import { injectCurrentPlayer, injectGrid, injectPlayerAction } from "../game/state";
 import { DanglerInfo } from "../map/grid";
 import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
@@ -27,7 +27,7 @@ export class BuildPhase extends PhaseModule {
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly grid = injectGrid();
   private readonly log = inject(Log);
-  private readonly players = injectState(PLAYERS);
+  private readonly firstBuildPlayer = injectPlayerAction(Action.FIRST_BUILD);
 
   configureActions() {
     this.installAction(BuildAction);
@@ -80,7 +80,7 @@ export class BuildPhase extends PhaseModule {
 
   getPlayerOrder(): PlayerColor[] {
     const playerOrder = super.getPlayerOrder();
-    const firstMove = this.players().find(player => player.selectedAction === Action.FIRST_BUILD);
+    const firstMove = this.firstBuildPlayer();
     if (firstMove != null) {
       return [firstMove.color, ...remove(playerOrder, firstMove.color)];
     }

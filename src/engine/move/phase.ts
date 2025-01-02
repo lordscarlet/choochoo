@@ -1,7 +1,7 @@
 import { remove } from "../../utils/functions";
 import { injectState } from "../framework/execution_context";
 import { PhaseModule } from "../game/phase_module";
-import { PLAYERS } from "../game/state";
+import { injectPlayerAction } from "../game/state";
 import { Action } from "../state/action";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
@@ -14,7 +14,7 @@ export class MovePhase extends PhaseModule {
   static readonly phase = Phase.MOVING;
 
   protected readonly moveState = injectState(MOVE_STATE);
-  protected readonly players = injectState(PLAYERS);
+  protected readonly firstMovePlayer = injectPlayerAction(Action.FIRST_MOVE);
 
   configureActions() {
     this.installAction(LocoAction);
@@ -44,7 +44,7 @@ export class MovePhase extends PhaseModule {
 
   getPlayerOrder(): PlayerColor[] {
     const playerOrder = super.getPlayerOrder();
-    const firstMove = this.players().find(player => player.selectedAction === Action.FIRST_MOVE);
+    const firstMove = this.firstMovePlayer();
     if (firstMove != null) {
       return [firstMove.color, ...remove(playerOrder, firstMove.color)];
     }

@@ -2,11 +2,11 @@
 
 import { z } from "zod";
 import { assert } from "../../utils/validate";
-import { inject, injectState } from "../framework/execution_context";
+import { inject } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
-import { injectCurrentPlayer, PLAYERS } from "../game/state";
+import { injectCurrentPlayer } from "../game/state";
 import { Action, getSelectedActionString } from "../state/action";
 import { AllowedActions } from "./allowed_actions";
 
@@ -20,7 +20,6 @@ export class SelectAction implements ActionProcessor<SelectData> {
   static readonly action = 'select';
   protected readonly currentPlayer = injectCurrentPlayer();
   protected readonly helper = inject(PlayerHelper);
-  protected readonly players = injectState(PLAYERS);
   protected readonly log = inject(Log);
   private readonly actions = inject(AllowedActions);
 

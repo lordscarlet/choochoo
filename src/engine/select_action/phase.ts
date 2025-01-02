@@ -1,13 +1,12 @@
-import { injectState } from "../framework/execution_context";
 import { PhaseModule } from "../game/phase_module";
-import { PLAYERS } from "../game/state";
+import { injectAllPlayersUnsafe } from "../game/state";
 import { Phase } from "../state/phase";
 import { SelectAction } from "./select";
 
 export class SelectActionPhase extends PhaseModule {
   static readonly phase = Phase.ACTION_SELECTION;
 
-  private readonly players = injectState(PLAYERS);
+  private readonly players = injectAllPlayersUnsafe();
 
   configureActions() {
     this.installAction(SelectAction);

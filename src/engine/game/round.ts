@@ -3,13 +3,13 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Key } from "../framework/key";
 import { Log } from "./log";
-import { PLAYERS } from "./state";
+import { injectInitialPlayerCount } from "./state";
 
 export const ROUND = new Key('roundNumber', { parse: z.number().parse });
 
 export class RoundEngine {
   protected readonly log = inject(Log);
-  protected readonly players = injectState(PLAYERS);
+  protected readonly playerCount = injectInitialPlayerCount();
   protected readonly currentRound = injectState(ROUND);
 
   startFirstRound(): void {
@@ -29,7 +29,7 @@ export class RoundEngine {
   }
 
   maxRounds(): number {
-    const numPlayers = this.players().length;
+    const numPlayers = this.playerCount();
 
     switch (numPlayers) {
       case 3: return 10;

@@ -6,7 +6,7 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
-import { BAG, injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
+import { BAG, injectAllPlayersUnsafe, injectCurrentPlayer, injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
@@ -41,7 +41,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
   protected readonly grid = injectGrid();
   protected readonly log = inject(Log);
   protected readonly bag = injectState(BAG);
-  protected readonly players = injectState(PLAYERS);
+  protected readonly players = injectAllPlayersUnsafe();
   protected readonly moveHelper = inject(MoveHelper);
 
   readonly assertInput = MoveData.parse;

@@ -3,7 +3,7 @@ import Circle from '@mui/icons-material/Circle';
 import { useMemo } from "react";
 import { GameStatus } from '../../api/game';
 import { PlayerHelper } from "../../engine/game/player";
-import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
+import { CURRENT_PLAYER, injectAllPlayersUnsafe, TURN_ORDER } from "../../engine/game/state";
 import { ProfitHelper } from '../../engine/income_and_expenses/helper';
 import { MoveHelper } from '../../engine/move/helper';
 import { getSelectedActionString } from "../../engine/state/action";
@@ -13,14 +13,14 @@ import { SwedenRecyclingMapSettings } from '../../maps/sweden/settings';
 import { getPlayerColorCss } from '../components/player_color';
 import { Username } from '../components/username';
 import { useGame } from '../services/game';
-import { useActiveGameState, useInjected, useInjectedState } from "../utils/injection_context";
+import { useActiveGameState, useInject, useInjected, useInjectedState } from "../utils/injection_context";
 import { FinalOverview } from './final_overview';
 import { LoginButton } from "./login_button";
 import * as styles from './player_stats.module.css';
 
 
 export function PlayerStats() {
-  const playerData = useInjectedState(PLAYERS);
+  const playerData = useInject(() => injectAllPlayersUnsafe()(), []);
   const playerOrder = useInjectedState(TURN_ORDER);
   const currentPlayer = useActiveGameState(CURRENT_PLAYER);
   const profitHelper = useInjected(ProfitHelper);

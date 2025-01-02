@@ -1,10 +1,10 @@
 import { Button } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { GameStatus } from "../../api/game";
-import { inject, injectState } from "../../engine/framework/execution_context";
+import { inject } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
 import { PlayerHelper } from "../../engine/game/player";
-import { PLAYERS } from "../../engine/game/state";
+import { injectAllPlayersUnsafe } from "../../engine/game/state";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { MOVE_STATE } from "../../engine/move/state";
 import { Phase } from "../../engine/state/phase";
@@ -70,7 +70,7 @@ export function CurrentPhase() {
 export function GameOver() {
   const winnerIds = useInject(() => {
     const helper = inject(PlayerHelper);
-    const players = injectState(PLAYERS);
+    const players = injectAllPlayersUnsafe();
     const scores = players().map((player) => [player.playerId, helper.getScore(player)] as const);
     const bestScore = Math.max(...scores.map(([_, score]) => score).filter(isNumber));
     return scores.filter(([_, score]) => score === bestScore).map(([id]) => id);

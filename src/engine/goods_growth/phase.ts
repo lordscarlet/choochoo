@@ -4,7 +4,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
 import { Random } from "../game/random";
-import { BAG, PLAYERS } from "../game/state";
+import { BAG, injectInitialPlayerCount, injectPlayerAction } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
@@ -22,7 +22,8 @@ export class GoodsGrowthPhase extends PhaseModule {
 
   private readonly log = inject(Log);
   private readonly grid = inject(GridHelper);
-  private readonly players = injectState(PLAYERS);
+  private readonly playerCount = injectInitialPlayerCount();
+  private readonly productionPlayer = injectPlayerAction(Action.PRODUCTION);
   private readonly bag = injectState(BAG);
   private readonly turnState = injectState(GOODS_GROWTH_STATE);
   private readonly helper = inject(GoodsHelper);
@@ -54,8 +55,7 @@ export class GoodsGrowthPhase extends PhaseModule {
   }
 
   getPlayerOrder(): PlayerColor[] {
-    const productionPlayer = this.players()
-      .find((player) => player.selectedAction === Action.PRODUCTION);
+    const productionPlayer = this.productionPlayer();
     if (productionPlayer == null) {
       return [];
     }
@@ -68,8 +68,8 @@ export class GoodsGrowthPhase extends PhaseModule {
 
   onEnd(): void {
     const rolls = new Map<CityGroup, number[]>([
-      [CityGroup.WHITE, this.random.rollDice(this.players().length).sort()],
-      [CityGroup.BLACK, this.random.rollDice(this.players().length).sort()],
+      [CityGroup.WHITE, this.random.rollDice(this.playerCount()).sort()],
+      [CityGroup.BLACK, this.random.rollDice(this.playerCount()).sort()],
     ]);
     this.log.log(`White rolled ${rolls.get(CityGroup.WHITE)!.join(', ')}`);
     this.log.log(`Black rolled ${rolls.get(CityGroup.BLACK)!.join(', ')}`);

@@ -5,7 +5,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
 import { PlayerHelper } from "../game/player";
-import { injectCurrentPlayer, PLAYERS, TURN_ORDER } from "../game/state";
+import { injectCurrentPlayer, injectInGamePlayers, TURN_ORDER } from "../game/state";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { BidAction } from "./bid";
@@ -17,7 +17,7 @@ import { TurnOrderPassAction } from "./turn_order_pass";
 export class TurnOrderPhase extends PhaseModule {
   static readonly phase = Phase.TURN_ORDER;
 
-  private readonly players = injectState(PLAYERS);
+  private readonly players = injectInGamePlayers();
   private readonly currentOrder = injectState(TURN_ORDER);
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly helper = inject(TurnOrderHelper);

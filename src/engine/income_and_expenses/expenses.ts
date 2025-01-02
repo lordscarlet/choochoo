@@ -3,7 +3,7 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
-import { PLAYERS, TURN_ORDER } from "../game/state";
+import { injectAllPlayersUnsafe, TURN_ORDER } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
 import { isLand, Land } from "../map/location";
 import { SpaceType } from "../state/location_type";
@@ -17,7 +17,7 @@ export class ExpensesPhase extends PhaseModule {
   private readonly profitHelper = inject(ProfitHelper);
   private readonly grid = inject(GridHelper);
   private readonly log = inject(Log);
-  private readonly players = injectState(PLAYERS);
+  private readonly players = injectAllPlayersUnsafe();
   private readonly order = injectState(TURN_ORDER);
 
   onStart(): void {

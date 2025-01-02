@@ -5,7 +5,7 @@ import { Log } from "../../engine/game/log";
 import { PhaseEngine } from "../../engine/game/phase";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { PhaseModule } from "../../engine/game/phase_module";
-import { BAG, injectGrid, PLAYERS } from "../../engine/game/state";
+import { BAG, injectGrid, injectPlayerAction } from "../../engine/game/state";
 import { GridHelper } from "../../engine/map/grid_helper";
 import { Action } from "../../engine/state/action";
 import { goodToString, GoodZod } from "../../engine/state/good";
@@ -17,7 +17,7 @@ import { assert } from "../../utils/validate";
 export class DeurbanizationPhase extends PhaseModule {
   static readonly phase = Phase.DEURBANIZATION;
 
-  private readonly players = injectState(PLAYERS);
+  private readonly deurbanizationPlayer = injectPlayerAction(Action.DEURBANIZATION);
 
   configureActions() {
     this.installAction(PassAction);
@@ -25,9 +25,11 @@ export class DeurbanizationPhase extends PhaseModule {
   }
 
   getPlayerOrder(): PlayerColor[] {
-    return this.players()
-      .filter(player => player.selectedAction === Action.DEURBANIZATION)
-      .map((player) => player.color);
+    const player = this.deurbanizationPlayer();
+    if (player != null) {
+      return [player.color];
+    }
+    return [];
   }
 }
 

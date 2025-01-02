@@ -1,7 +1,7 @@
-import { inject, injectState } from "../framework/execution_context";
+import { inject } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
-import { PLAYERS } from "../game/state";
+import { injectAllPlayersUnsafe } from "../game/state";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 
@@ -9,7 +9,7 @@ export class IncomeReductionPhase extends PhaseModule {
   static readonly phase = Phase.INCOME_REDUCTION;
 
   private readonly log = inject(Log);
-  private readonly players = injectState(PLAYERS);
+  private readonly players = injectAllPlayersUnsafe();
 
   onStart(): void {
     this.players.update((players) => {

@@ -1,7 +1,6 @@
 import { Set as ImmutableSet } from 'immutable';
 import { isNotNull } from '../../utils/functions';
-import { injectState } from "../framework/execution_context";
-import { PLAYERS } from "../game/state";
+import { injectInGamePlayers } from "../game/state";
 import { Action } from "../state/action";
 
 const defaultActions = ImmutableSet([
@@ -15,7 +14,7 @@ const defaultActions = ImmutableSet([
 ]);
 
 export class AllowedActions {
-  protected readonly players = injectState(PLAYERS);
+  protected readonly players = injectInGamePlayers();
 
   getAvailableActions(): ImmutableSet<Action> {
     const selectedActions = this.players().map((player) => player.selectedAction).filter(isNotNull);
