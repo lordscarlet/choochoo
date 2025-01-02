@@ -22,6 +22,6 @@ export function UsernameList({ userIds }: UsernameListProps) {
   const users = useUsers(userIds);
 
   return <>
-    {users.filter(isNotNull).map(({ username }) => <span key={username}>username</span>).join(', ')}
+    {users.filter(isNotNull).map(({ username }, index) => <span key={username}>{index !== 0 && ', '}{username}</span>)}
   </>
 }
