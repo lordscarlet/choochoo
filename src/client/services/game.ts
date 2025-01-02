@@ -149,8 +149,22 @@ export function useGameList(baseQuery: ListGamesApi) {
   return { games, hasNextPage: !isOnLastPage, nextPage, hasPrevPage, prevPage, isLoading };
 }
 
-export function useGame(): GameApi {
+export function useSetGame() {
   const tsrQueryClient = tsr.useQueryClient();
+  return (game: GameApi) => {
+    tsrQueryClient.games.get.setQueryData(getQueryKey(game.id), (r) => r && ({ ...r, status: 200, body: { game } }));
+  };
+}
+
+export function useSetGameSuccess() {
+  const setGame = useSetGame();
+  return ({ body }: { status: 200, body: { game: GameApi } }) => {
+    setGame(body.game);
+  };
+}
+
+export function useGame(): GameApi {
+  const setGame = useSetGame();
 
   const gameId = parseInt(useParams().gameId!);
   const { data } = tsr.games.get.useSuspenseQuery({ queryKey: getQueryKey(gameId), queryData: { params: { gameId } } });
@@ -158,9 +172,6 @@ export function useGame(): GameApi {
   useJoinRoom();
 
   useEffect(() => {
-    function setGame(game: GameApi) {
-      tsrQueryClient.games.get.setQueryData(getQueryKey(game.id), (r) => r && ({ ...r, status: 200, body: { game } }));
-    }
     socket.on('gameUpdate', setGame);
     return () => {
       socket.off('gameUpdate', setGame);
@@ -214,11 +225,13 @@ interface GameAction {
 }
 
 export function useJoinGame(game: GameLiteApi): GameAction {
+  const onSuccess = useSetGameSuccess();
   const me = useMe();
   const { mutate, error, isPending } = tsr.games.join.useMutation();
   handleError(isPending, error);
 
-  const perform = useCallback(() => mutate({ params: { gameId: game.id } }), [game.id]);
+  const perform = useCallback(() => mutate({ params: { gameId: game.id } },
+    { onSuccess }), [game.id]);
 
   const canPerform = me != null &&
     game.status == GameStatus.enum.LOBBY &&
@@ -229,11 +242,12 @@ export function useJoinGame(game: GameLiteApi): GameAction {
 }
 
 export function useLeaveGame(game: GameLiteApi): GameAction {
+  const onSuccess = useSetGameSuccess();
   const me = useMe();
   const { mutate, error, isPending } = tsr.games.leave.useMutation();
   handleError(isPending, error);
 
-  const perform = useCallback(() => mutate({ params: { gameId: game.id } }), [game.id]);
+  const perform = useCallback(() => mutate({ params: { gameId: game.id } }, { onSuccess }), [game.id]);
 
   const canPerform = me != null && game.status == GameStatus.enum.LOBBY && game.playerIds.includes(me.id) && game.playerIds[0] !== me.id;
 
@@ -241,21 +255,23 @@ export function useLeaveGame(game: GameLiteApi): GameAction {
 }
 
 export function useSetGameData() {
+  const onSuccess = useSetGameSuccess();
   const game = useGame();
   const { mutate, error, isPending } = tsr.games.setGameData.useMutation();
   handleError(isPending, error);
 
-  const setGameData = useCallback((gameData: string) => mutate({ params: { gameId: game.id }, body: { gameData } }), [game.id]);
+  const setGameData = useCallback((gameData: string) => mutate({ params: { gameId: game.id }, body: { gameData } }, { onSuccess }), [game.id]);
 
   return { setGameData, isPending };
 }
 
 export function useStartGame(game: GameLiteApi): GameAction {
+  const onSuccess = useSetGameSuccess();
   const me = useMe();
   const { mutate, error, isPending } = tsr.games.start.useMutation();
   handleError(isPending, error);
 
-  const perform = useCallback(() => mutate({ params: { gameId: game.id } }), [game.id]);
+  const perform = useCallback(() => mutate({ params: { gameId: game.id } }, { onSuccess }), [game.id]);
 
   const canPerform = me != null &&
     game.status == GameStatus.enum.LOBBY &&
@@ -300,6 +316,7 @@ export function useGameVersionState<T>(initialValue: T): [T, (t: T) => void] {
 export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHandler<T> {
   const me = useMe();
   const game = useGame();
+  const onSuccess = useSetGameSuccess();
   const phaseDelegator = useInjected(PhaseDelegator);
   const notifications = useNotifications();
   const { mutate, isPending, error } = tsr.games.performAction.useMutation();
@@ -313,7 +330,9 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
       throw new Error('Cannot use event as actionData. You likely want to use useEmptyAction');
     }
     mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
-      onSuccess() {
+      onSuccess(r) {
+        onSuccess(r);
+
         notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
       }
     });
@@ -335,6 +354,7 @@ export interface UndoAction {
 
 export function useUndoAction(): UndoAction {
   const game = useGame();
+  const onSuccess = useSetGameSuccess();
   const me = useMe();
   const notifications = useNotifications();
   const { mutate, error, isPending } = tsr.games.undoAction.useMutation();
@@ -342,7 +362,9 @@ export function useUndoAction(): UndoAction {
 
   const undo = useCallback(() =>
     mutate({ params: { gameId: game.id }, body: { backToVersion: game.version - 1 } }, {
-      onSuccess() {
+      onSuccess(r) {
+        onSuccess(r);
+
         notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
       },
     })
@@ -361,7 +383,7 @@ export interface RetryAction {
 
 export function useRetryAction(): RetryAction {
   const game = useGame();
-  const me = useMe();
+  const onSuccess = useSetGameSuccess();
   const notifications = useNotifications();
   const { mutate, isPending, error } = tsr.games.retryLast.useMutation();
   handleError(isPending, error);
@@ -382,7 +404,8 @@ export function useRetryAction(): RetryAction {
         { startOver: true } :
         { steps },
     }, {
-      onSuccess() {
+      onSuccess(r) {
+        onSuccess(r);
         notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
       },
     })
