@@ -120,8 +120,8 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
     this.players.update((players) => {
       for (const player of players) {
-        assert(!player.outOfGame, 'unexpected out of game player still owns track');
         if (!partitioned.has(player.color)) continue;
+        assert(!player.outOfGame, 'unexpected out of game player still owns track');
         const incomeBonus = partitioned.get(player.color)?.length ?? 0;
         this.log.player(player, `earns ${incomeBonus} income`);
         player.income += incomeBonus;
