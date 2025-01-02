@@ -1,6 +1,6 @@
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { Fab, Tooltip } from '@mui/material';
-import { FormEvent, Fragment, useCallback, useLayoutEffect, useRef, useState } from "react";
+import { FormEvent, Fragment, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { timeFormat } from "../../utils/functions";
 import { useMessages, useSendChat } from "../services/socket";
 import { useTextInputState } from "../utils/form_state";
@@ -52,7 +52,7 @@ export function GameLog({ gameId }: GameLogProps) {
               {' '}
               <span className={styles['username']}>{log.userId != null ? <Username userId={log.userId} /> : 'System'}</span>:
               {' '}
-              <span className={styles['message']}>{log.message}</span>
+              <span className={styles['message']}><LogMessage message={log.message} /></span>
             </p>
           </Fragment>;
         })}
@@ -70,4 +70,24 @@ export function GameLog({ gameId }: GameLogProps) {
       <input type="submit" value="Send" disabled={isPending} />
     </form>
   </div>;
+}
+
+const MESSAGE_PARSER = /<@user\-(\d+)>/g;
+
+function LogMessage({ message }: { message: string }) {
+  const messageParsed = useMemo(() => {
+    const parts: Array<string | number> = [];
+    let lastIndex = 0;
+    for (const match of message.matchAll(MESSAGE_PARSER)) {
+      parts.push(message.substring(lastIndex, match.index));
+      parts.push(Number(match[1]));
+      lastIndex = match.index + match[0].length;
+    }
+    parts.push(message.substring(lastIndex));
+    return parts;
+  }, [message]);
+
+  return <>
+    {messageParsed.map((part) => typeof part === 'string' ? part : <Username userId={part} />)}
+  </>;
 }
