@@ -88,6 +88,6 @@ function LogMessage({ message }: { message: string }) {
   }, [message]);
 
   return <>
-    {messageParsed.map((part) => typeof part === 'string' ? part : <Username userId={part} />)}
+    {messageParsed.map((part, index) => <span key={index}>{typeof part === 'string' ? part : <Username userId={part} />}</span>)}
   </>;
 }
