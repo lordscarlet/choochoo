@@ -7,12 +7,14 @@ import { PlayerHelper } from "../../engine/game/player";
 import { injectAllPlayersUnsafe } from "../../engine/game/state";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { MOVE_STATE } from "../../engine/move/state";
+import { SelectAction } from "../../engine/select_action/select";
 import { Phase } from "../../engine/state/phase";
 import { isNumber } from "../../utils/validate";
 import { Username, UsernameList } from "../components/username";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
 import { GameContextProvider, useActiveGameState, useInject, useInjectedState } from "../utils/injection_context";
+import { ActionSummary } from "./action_summary";
 import { AvailableCities } from "./available_cities";
 import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
@@ -20,7 +22,7 @@ import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
 import { MapInfo } from "./map_info";
 import { PlayerStats } from "./player_stats";
-import { SelectAction } from "./select_action";
+import { SpecialActionTable } from "./special_action_table";
 import { SwitchToActive, SwitchToUndo } from "./switch";
 
 
@@ -33,6 +35,7 @@ export function ActiveGame() {
 
 function InternalActiveGame() {
   const { canEmit } = useAction(ProductionAction);
+  const { canEmit: canEmitSelectAction } = useAction(SelectAction);
   const game = useGame();
   const [searchParams] = useSearchParams();
   const undoOnly = searchParams.get('undoOnly') != null;
@@ -44,13 +47,15 @@ function InternalActiveGame() {
     <UndoButton />
     <SwitchToActive />
     <SwitchToUndo />
-    {!undoOnly && <SelectAction />}
+    {!undoOnly && <CurrentPhase />}
+    {!undoOnly && <ActionSummary />}
     {!undoOnly && canEmit && <GoodsTable />}
     {!undoOnly && <BiddingInfo />}
+    {!undoOnly && canEmitSelectAction && <SpecialActionTable />}
     <RetryButton />
-    {!undoOnly && <CurrentPhase />}
     {!undoOnly && <PlayerStats />}
     {!undoOnly && <GameMap />}
+    {!undoOnly && !canEmitSelectAction && <SpecialActionTable />}
     {!undoOnly && !canEmit && game.status === GameStatus.enum.ACTIVE && <GoodsTable />}
     {!undoOnly && <AvailableCities />}
     <MapInfo gameKey={game.gameKey} />

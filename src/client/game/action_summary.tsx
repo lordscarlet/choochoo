@@ -7,11 +7,9 @@ import { PHASE } from "../../engine/game/phase";
 import { LocoAction } from "../../engine/move/loco";
 import { MovePassAction } from "../../engine/move/pass";
 import { MOVE_STATE } from "../../engine/move/state";
-import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
 import { ShareHelper } from "../../engine/shares/share_helper";
 import { TakeSharesAction } from "../../engine/shares/take_shares";
-import { Action, getSelectedActionString } from "../../engine/state/action";
 import { Phase } from "../../engine/state/phase";
 import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
@@ -32,7 +30,7 @@ type PassActionString = typeof PASS_ACTION;
 const TURN_ORDER_PASS_ACTION = 'Turn Order Pass' as const;
 type TurnOrderPassActionString = typeof TURN_ORDER_PASS_ACTION;
 
-export function SelectAction() {
+export function ActionSummary() {
   const currentPhase = useActiveGameState(PHASE);
   switch (currentPhase) {
     case Phase.SHARES: return <TakeShares />;
@@ -53,6 +51,20 @@ export function SelectAction() {
     default:
       assertNever(currentPhase);
   }
+}
+
+
+export function SpecialActionSelector() {
+  const { canEmit, canEmitUserId } = useAction(ActionSelectionSelectAction);
+
+  if (canEmitUserId == null) {
+    return <></>;
+  }
+
+  if (!canEmit) {
+    return <GenericMessage><Username userId={canEmitUserId} /> must select a special action.</GenericMessage>;
+  }
+  return <GenericMessage>You must select a special action.</GenericMessage>;
 }
 
 export function EndGame() {
@@ -77,31 +89,6 @@ export function MoveGoods() {
     {!state!.locomotive.includes(player!.color) && <Button onClick={emitLoco}>Locomotive</Button>}
     <Button onClick={emitPass}>Pass</Button>
   </div>
-}
-
-export function SpecialActionSelector() {
-  const { emit, canEmit, canEmitUserId, isPending } = useAction(ActionSelectionSelectAction);
-  const actions = useInjected(AllowedActions);
-
-  const chooseAction = useCallback((action: Action) => emit({ action }), [emit]);
-
-  if (canEmitUserId == null) {
-    return <></>;
-  }
-
-  if (!canEmit) {
-    return <GenericMessage><Username userId={canEmitUserId} /> must select an action.</GenericMessage>;
-  }
-
-  return <div>
-    <p>You must select an action.</p>
-    <DropdownMenu id='select-action' title='Select action' disabled={isPending}>
-      {actions.getAvailableActions().map(option =>
-        <DropdownMenuItem key={option} onClick={() => chooseAction(option)} disabled={isPending}>
-          {getSelectedActionString(option)}
-        </DropdownMenuItem>)}
-    </DropdownMenu>
-  </div>;
 }
 
 function numberFormat(num: number): string {

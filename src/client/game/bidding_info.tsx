@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { CURRENT_PLAYER, TURN_ORDER } from "../../engine/game/state";
 import { Phase } from "../../engine/state/phase";
 import { PlayerColor } from "../../engine/state/player";
@@ -48,7 +48,7 @@ interface PlayerCircleProps {
   color?: PlayerColor;
   underlined?: boolean;
   bid?: number;
-  caption?: string;
+  caption?: ReactNode;
 }
 
 export function PlayerCircle({ color, bid, underlined, caption }: PlayerCircleProps) {

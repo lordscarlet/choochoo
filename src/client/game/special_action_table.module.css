@@ -1,0 +1,33 @@
+.specialActionTable {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.specialAction {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  padding: 12px;
+  gap: 12px;
+  width: 200px;
+  border: 1px solid black;
+  border-radius: 12px;
+}
+
+.specialAction.clickable {
+  cursor: pointer;
+}
+
+:global(.dark-mode) .specialAction {
+  border-color: white;
+}
+
+.name {
+  font-weight: bold;
+}
+
+.description {
+  flex: 1;
+}

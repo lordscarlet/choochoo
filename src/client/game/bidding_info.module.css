@@ -29,9 +29,11 @@
 
 .playerCircleContainer {
   margin: 4px;
-  width: 64px;
 }
 
 .captionContainer {
   text-align: center;
+  --line-height: 20px;
+  line-height: var(--line-height);
+  height: var(--line-height);
 }
