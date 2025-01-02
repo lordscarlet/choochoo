@@ -10,7 +10,8 @@ import { IrelandStarter } from './starter';
 
 
 export class IrelandMapSettings implements MapSettings {
-  readonly key = 'ireland';
+  static readonly key = 'ireland';
+  readonly key = IrelandMapSettings.key;
   readonly name = 'Ireland';
   readonly minPlayers = 3;
   readonly maxPlayers = 4;

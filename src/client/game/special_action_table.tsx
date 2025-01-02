@@ -3,10 +3,11 @@ import { injectPlayerAction } from "../../engine/game/state";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
 import { Action, getSelectedActionString } from "../../engine/state/action";
+import { IrelandMapSettings } from "../../maps/ireland/settings";
 import { assertNever } from "../../utils/validate";
 import { Username } from "../components/username";
 import { useAction } from "../services/game";
-import { useInject, useInjected } from "../utils/injection_context";
+import { useGameKey, useInject, useInjected } from "../utils/injection_context";
 import { PlayerCircle } from "./bidding_info";
 import * as styles from './special_action_table.module.css';
 
@@ -23,6 +24,7 @@ export function SpecialActionTable() {
 }
 
 function SpecialAction({ action }: { action: Action }) {
+  const gameKey = useGameKey();
   const { emit, canEmit, isPending } = useAction(ActionSelectionSelectAction);
   const player = useInject(() => injectPlayerAction(action)(), [action]);
 
@@ -37,12 +39,12 @@ function SpecialAction({ action }: { action: Action }) {
 
   return <div className={className} onClick={chooseAction}>
     <div className={styles.name}>{getSelectedActionString(action)}</div>
-    <div className={styles.description}>{getSelectedActionDescription(action)}</div>
+    <div className={styles.description}>{getSelectedActionDescription(action, gameKey)}</div>
     <div><PlayerCircle color={player?.color} caption={player != null && <Username userId={player.playerId} />} /></div>
   </div>;
 }
 
-function getSelectedActionDescription(action: Action): string {
+function getSelectedActionDescription(action: Action, gameKey: string): string {
   switch (action) {
     case Action.ENGINEER:
       return 'Build an additional track during the Building step.';
@@ -51,6 +53,9 @@ function getSelectedActionDescription(action: Action): string {
     case Action.FIRST_MOVE:
       return 'Go first during the Move Goods step.';
     case Action.LOCOMOTIVE:
+      if (gameKey === IrelandMapSettings.key) {
+        return 'Temporarily increase your locomotive by one for the round. Does not increase your expenses.'
+      }
       return 'Immediately, increase your locomotive by one.';
     case Action.PRODUCTION:
       return 'Before the Goods Growth step, draw two cubes and place them on the Goods Growth chart';
