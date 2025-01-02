@@ -3,7 +3,7 @@ import { remove } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
-import { PhaseModule } from "../game/phase_module";
+import { ActionBundle, PhaseModule } from "../game/phase_module";
 import { injectCurrentPlayer, injectGrid, PLAYERS } from "../game/state";
 import { DanglerInfo } from "../map/grid";
 import { GridHelper } from "../map/grid_helper";
@@ -14,12 +14,14 @@ import { PlayerColor } from "../state/player";
 import { BuildAction } from "./build";
 import { ClaimAction } from "./claim";
 import { DoneAction } from "./done";
+import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
 import { UrbanizeAction } from "./urbanize";
 
 export class BuildPhase extends PhaseModule {
   static readonly phase = Phase.BUILDING;
 
+  private readonly helper = inject(BuilderHelper);
   private readonly turnState = injectState(BUILD_STATE);
   private readonly gridHelper = inject(GridHelper);
   private readonly currentPlayer = injectCurrentPlayer();
@@ -83,5 +85,12 @@ export class BuildPhase extends PhaseModule {
       return [firstMove.color, ...remove(playerOrder, firstMove.color)];
     }
     return playerOrder;
+  }
+
+  autoAction(): ActionBundle<{}> | undefined {
+    if (this.helper.shouldAutoPass()) {
+      return { action: DoneAction, data: {} };
+    }
+    return undefined;
   }
 }

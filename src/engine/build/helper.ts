@@ -45,6 +45,16 @@ export class BuilderHelper {
     return manifest;
   }
 
+  shouldAutoPass(): boolean {
+    if (this.canUrbanize()) return false;
+    return this.currentPlayer().money < this.minimumBuildCost();
+  }
+
+  protected minimumBuildCost(): number {
+    // The base game, you need at least $2 for any build.
+    return 2;
+  }
+
   private calculateManifest(newTile?: TileType): Map<TileType, number> {
     const manifest = new Map<TileType, number>([
       [SimpleTileType.STRAIGHT, 48],
