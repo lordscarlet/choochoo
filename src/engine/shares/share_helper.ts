@@ -4,7 +4,7 @@ export class ShareHelper {
   private readonly currentPlayer = injectCurrentPlayer();
 
   getMaxShares(): number {
-    return 16;
+    return 15;
   }
 
   getSharesTheyCanTake(): number {

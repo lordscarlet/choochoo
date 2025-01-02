@@ -169,7 +169,7 @@ export function GenericMessage({ children }: { children: ReactNode }) {
 export function TakeShares() {
   const { canEmit, canEmitUserId, emit, isPending } = useAction(TakeSharesAction);
   const numShares = useInjected(ShareHelper).getSharesTheyCanTake();
-  const options = iterate(numShares, (i) => i);
+  const options = iterate(numShares + 1, (i) => i);
 
   const chooseValue = useCallback((numShares: number) => emit({ numShares }), [emit]);
 
