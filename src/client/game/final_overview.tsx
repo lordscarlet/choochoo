@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { GameStatus } from "../../api/game";
-import { DISQUALIFIED, PlayerHelper } from "../../engine/game/player";
+import { isEliminated, PlayerHelper } from "../../engine/game/player";
 import { PLAYERS } from "../../engine/game/state";
 import { playerColorToString } from "../../engine/state/player";
 import { Username } from "../components/username";
@@ -24,8 +24,8 @@ export function FinalOverviewInternal() {
       score: playerHelper.getScore(player),
     }));
     return playerData.sort((p1, p2) => {
-      if (p1.score === DISQUALIFIED) return 1;
-      if (p2.score === DISQUALIFIED) return -1;
+      if (isEliminated(p1.score)) return 1;
+      if (isEliminated(p2.score)) return -1;
       return p2.score - p1.score;
     });
   }, [players, playerHelper]);

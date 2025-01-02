@@ -33,9 +33,9 @@ export class PlayerHelper {
     return this.update(playerColor, (player) => player.money += num);
   }
 
-  getScore(player: PlayerData): number | Disqualified {
+  getScore(player: PlayerData): Score {
     if (player.outOfGame) {
-      return DISQUALIFIED;
+      return ELIMINATED;
     }
     return this.calculateScore(player);
   }
@@ -84,5 +84,15 @@ export class PlayerHelper {
   }
 }
 
-export const DISQUALIFIED = 'DISQUALIFIED';
-export type Disqualified = typeof DISQUALIFIED;
+export const ELIMINATED = 'Eliminated';
+export type Eliminated = typeof ELIMINATED;
+
+export type Score = Eliminated | number;
+
+export function isEliminated(score: Score): score is Eliminated {
+  return score === ELIMINATED;
+}
+
+export function isNotEliminated(score: Score): score is number {
+  return !isEliminated(score);
+}
