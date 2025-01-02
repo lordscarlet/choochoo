@@ -23,6 +23,10 @@
   color: var(--player-color-text);
 }
 
+.playerCircle.disabled {
+  background-color: #505050;
+}
+
 .underlined {
   border-bottom: solid 1px black;
 }

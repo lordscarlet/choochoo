@@ -49,11 +49,14 @@ interface PlayerCircleProps {
   underlined?: boolean;
   bid?: number;
   caption?: ReactNode;
+  disabled?: boolean;
 }
 
-export function PlayerCircle({ color, bid, underlined, caption }: PlayerCircleProps) {
+export function PlayerCircle({ color, bid, underlined, caption, disabled }: PlayerCircleProps) {
   return <div className={`${styles.playerCircleContainer} ${underlined ? styles.underlined : ''}`}>
-    <div className={`${styles.playerCircle}  ${getPlayerColorCss(color)}`}>{bid && `$${bid}`}</div>
+    <div className={`${styles.playerCircle}  ${getPlayerColorCss(color)}  ${disabled ? styles.disabled : ''}`}>
+      {bid != null ? `$${bid}` : disabled ? 'X' : ''}
+    </div>
     <div className={styles.captionContainer}>{caption}</div>
   </div>;
 }

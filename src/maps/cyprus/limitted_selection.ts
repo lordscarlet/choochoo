@@ -3,18 +3,21 @@ import { ROUND } from "../../engine/game/round";
 import { CURRENT_PLAYER } from "../../engine/game/state";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { Action } from "../../engine/state/action";
-import { ImmutableSet } from "../../utils/immutable";
 import { UN } from "./roles";
 
 export class CyprusAllowedActions extends AllowedActions {
   protected readonly round = injectState(ROUND);
   protected readonly currentPlayer = injectState(CURRENT_PLAYER);
 
-  getActions(): ImmutableSet<Action> {
-    const actions = super.getActions().remove(this.round() % 2 === 0 ? Action.ENGINEER : Action.LOCOMOTIVE);
-    if (this.currentPlayer() === UN) {
-      return actions.remove(Action.URBANIZATION);
+  getDisabledActionReason(action: Action): string | undefined {
+    const disabledAction = this.round() % 2 === 0 ? Action.ENGINEER : Action.LOCOMOTIVE;
+    if (disabledAction === action) {
+      return `This action is disabled on ${action === Action.ENGINEER ? 'even' : 'odd'} rounds.`;
     }
-    return actions;
+
+    if (this.currentPlayer() === UN && action === Action.URBANIZATION) {
+      return 'The UN is not allowed to select the Urbanization action';
+    }
+    return undefined;
   }
 }

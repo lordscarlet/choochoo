@@ -34,8 +34,8 @@ export function ActiveGame() {
 }
 
 function InternalActiveGame() {
-  const { canEmit } = useAction(ProductionAction);
-  const { canEmit: canEmitSelectAction } = useAction(SelectAction);
+  const { canEmitUserId: canEmitProduction } = useAction(ProductionAction);
+  const { canEmitUserId: canEmitSelectAction } = useAction(SelectAction);
   const game = useGame();
   const [searchParams] = useSearchParams();
   const undoOnly = searchParams.get('undoOnly') != null;
@@ -49,14 +49,14 @@ function InternalActiveGame() {
     <SwitchToUndo />
     {!undoOnly && <CurrentPhase />}
     {!undoOnly && <ActionSummary />}
-    {!undoOnly && canEmit && <GoodsTable />}
+    {!undoOnly && canEmitProduction && <GoodsTable />}
     {!undoOnly && <BiddingInfo />}
     {!undoOnly && canEmitSelectAction && <SpecialActionTable />}
     <RetryButton />
     {!undoOnly && <PlayerStats />}
     {!undoOnly && <GameMap />}
     {!undoOnly && !canEmitSelectAction && <SpecialActionTable />}
-    {!undoOnly && !canEmit && game.status === GameStatus.enum.ACTIVE && <GoodsTable />}
+    {!undoOnly && !canEmitProduction && game.status === GameStatus.enum.ACTIVE && <GoodsTable />}
     {!undoOnly && <AvailableCities />}
     <MapInfo gameKey={game.gameKey} />
   </div>;

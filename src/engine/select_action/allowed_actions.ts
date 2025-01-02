@@ -18,7 +18,15 @@ export class AllowedActions {
 
   getAvailableActions(): ImmutableSet<Action> {
     const selectedActions = this.players().map((player) => player.selectedAction).filter(isNotNull);
-    return this.getActions().subtract(selectedActions);
+    return this.getActions().filter(action => !this.isActionDisabled(action)).subtract(selectedActions);
+  }
+
+  isActionDisabled(action: Action): boolean {
+    return this.getDisabledActionReason(action) != null;
+  }
+
+  getDisabledActionReason(action: Action): string | undefined {
+    return undefined;
   }
 
   getActions(): ImmutableSet<Action> {

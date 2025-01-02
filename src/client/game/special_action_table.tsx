@@ -1,3 +1,4 @@
+import { Tooltip } from "@mui/material";
 import { useCallback } from "react";
 import { injectPlayerAction } from "../../engine/game/state";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
@@ -26,22 +27,31 @@ export function SpecialActionTable() {
 function SpecialAction({ action }: { action: Action }) {
   const gameKey = useGameKey();
   const { emit, canEmit, isPending } = useAction(ActionSelectionSelectAction);
+  const allowed = useInjected(AllowedActions);
   const player = useInject(() => injectPlayerAction(action)(), [action]);
 
   const isClickable = canEmit && player == null && !isPending;
+  const disabledReason = isClickable ? allowed.getDisabledActionReason(action) : undefined;
+  const isEmittable = isClickable && disabledReason == null;
 
-  const chooseAction = useCallback(() => isClickable && emit({ action }), [emit, isClickable, action]);
+  const chooseAction = useCallback(() => isEmittable && emit({ action }), [emit, isClickable, action]);
 
   const className = [
     styles.specialAction,
     isClickable ? styles.clickable : '',
   ].join(' ');
 
-  return <div className={className} onClick={chooseAction}>
+  const render = <div className={className} onClick={chooseAction}>
     <div className={styles.name}>{getSelectedActionString(action)}</div>
     <div className={styles.description}>{getSelectedActionDescription(action, gameKey)}</div>
-    <div><PlayerCircle color={player?.color} caption={player != null && <Username userId={player.playerId} />} /></div>
+    <div><PlayerCircle disabled={disabledReason != null} color={player?.color} caption={player != null && <Username userId={player.playerId} />} /></div>
   </div>;
+
+  if (disabledReason != null) {
+    return <Tooltip title={disabledReason} placement="bottom">{render}</Tooltip>;
+  } else {
+    return render;
+  }
 }
 
 function getSelectedActionDescription(action: Action, gameKey: string): string {
