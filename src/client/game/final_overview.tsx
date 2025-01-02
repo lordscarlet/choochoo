@@ -3,8 +3,8 @@ import { GameStatus } from "../../api/game";
 import { DISQUALIFIED, PlayerHelper } from "../../engine/game/player";
 import { PLAYERS } from "../../engine/game/state";
 import { playerColorToString } from "../../engine/state/player";
+import { Username } from "../components/username";
 import { useGame } from "../services/game";
-import { useUsers } from "../services/user";
 import { useInjected, useInjectedState } from "../utils/injection_context";
 import * as styles from './final_overview.module.css';
 
@@ -17,20 +17,18 @@ export function FinalOverview() {
 
 export function FinalOverviewInternal() {
   const players = useInjectedState(PLAYERS);
-  const users = useUsers(players.map(({ playerId }) => playerId));
   const playerHelper = useInjected(PlayerHelper);
   const playersOrdered = useMemo(() => {
     const playerData = players.map((player) => ({
       player,
       score: playerHelper.getScore(player),
-      user: users.find((user) => player.playerId === user?.id),
     }));
     return playerData.sort((p1, p2) => {
       if (p1.score === DISQUALIFIED) return 1;
       if (p2.score === DISQUALIFIED) return -1;
       return p2.score - p1.score;
     });
-  }, [players, users, playerHelper]);
+  }, [players, playerHelper]);
   const placement = useMemo(() => {
     return playersOrdered.map((({ score }, index) => {
       while (index > 0 && playersOrdered[index - 1].score === score) {
@@ -46,9 +44,9 @@ export function FinalOverviewInternal() {
         <thead>
           <tr>
             <th></th>
-            {playersOrdered.map(({ user, player }, index) => <th key={player.playerId}>
+            {playersOrdered.map(({ player }, index) => <th key={player.playerId}>
               {placement[index] === 1 ? '☆ ' : ''}
-              {user?.username ?? 'Unknown user'}
+              <Username userId={player.playerId} />
               {placement[index] === 1 ? ' ☆' : ''}
             </th>)}
           </tr>

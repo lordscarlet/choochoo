@@ -14,7 +14,6 @@ import { tsr } from "./client";
 import { useIsAdmin, useMe } from "./me";
 import { handleError, toValidationError } from "./network";
 import { socket, useJoinRoom } from "./socket";
-import { useUsers } from "./user";
 
 function getQueryKey(gameId: number | string): string[] {
   return ['games', `${gameId}`];
@@ -270,7 +269,7 @@ interface ActionHandler<T> {
   emit(data: T): void;
   canEmit: boolean;
   isPending: boolean;
-  canEmitUsername?: string;
+  canEmitUserId?: number;
 }
 
 type EmptyActionHandler = Omit<ActionHandler<unknown>, 'emit'> & {
@@ -278,11 +277,11 @@ type EmptyActionHandler = Omit<ActionHandler<unknown>, 'emit'> & {
 };
 
 export function useEmptyAction(action: ActionConstructor<Record<string, never>>): EmptyActionHandler {
-  const { emit: oldEmit, canEmit, canEmitUsername, isPending } = useAction(action);
+  const { emit: oldEmit, ...rest } = useAction(action);
   const emit = useCallback(() => {
     oldEmit({});
   }, [oldEmit]);
-  return { emit, canEmit, canEmitUsername, isPending };
+  return { emit, ...rest };
 }
 
 /** Like `useState` but it resets when the game version changes. */
@@ -305,7 +304,6 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
   const notifications = useNotifications();
   const { mutate, isPending, error } = tsr.games.performAction.useMutation();
   handleError(isPending, error);
-  const users = useUsers(game.activePlayerId != null ? [game.activePlayerId] : []);
 
   const actionName = action.action;
 
@@ -323,10 +321,10 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
 
   const actionCanBeEmitted = game.status == GameStatus.enum.ACTIVE && phaseDelegator.get().canEmit(action);
 
-  const canEmitUsername = actionCanBeEmitted ? users?.[0]?.username : undefined;
+  const canEmitUserId = actionCanBeEmitted ? game.activePlayerId : undefined;
   const canEmit = me?.id === game.activePlayerId && actionCanBeEmitted;
 
-  return { emit, canEmit, canEmitUsername, isPending };
+  return { emit, canEmit, canEmitUserId, isPending };
 }
 
 export interface UndoAction {

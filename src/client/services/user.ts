@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ListUsersApi, UserApi, UserPageCursor } from "../../api/user";
 import { tsr } from "./client";
 import { handleError } from "./network";
@@ -7,11 +7,19 @@ function getQueryKey(userId: number) {
   return ['users', userId];
 }
 
-export function useUser(userId: number): UserApi {
-  const { data } = tsr.users.get.useSuspenseQuery({
+function userQuery(userId: number) {
+  return {
     queryKey: getQueryKey(userId),
     queryData: { params: { userId } },
-  });
+  };
+}
+
+export function useUserUnsuspended(userId: number) {
+  return tsr.users.get.useQuery(userQuery(userId));
+}
+
+export function useUser(userId: number): UserApi {
+  const { data } = tsr.users.get.useSuspenseQuery(userQuery(userId));
 
   return data.body.user;
 }
@@ -19,10 +27,7 @@ export function useUser(userId: number): UserApi {
 export function useUsers(userIds: number[]): Array<UserApi | undefined> {
   const deduplicate = useMemo(() => [...new Set(userIds)], [userIds])
   const { data } = tsr.users.get.useQueries({
-    queries: deduplicate.map((userId) => ({
-      queryKey: getQueryKey(userId),
-      queryData: { params: { userId } },
-    })),
+    queries: deduplicate.map(userQuery),
     combine: (results) => {
       return {
         data: results.map((result) => result.data),

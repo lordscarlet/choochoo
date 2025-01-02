@@ -9,9 +9,9 @@ import { ProductionAction } from "../../engine/goods_growth/production";
 import { MOVE_STATE } from "../../engine/move/state";
 import { Phase } from "../../engine/state/phase";
 import { isNumber } from "../../utils/validate";
+import { Username, UsernameList } from "../components/username";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
-import { useUsers } from "../services/user";
 import { GameContextProvider, useActiveGameState, useInject, useInjectedState } from "../utils/injection_context";
 import { AvailableCities } from "./available_cities";
 import { BiddingInfo } from "./bidding_info";
@@ -75,13 +75,12 @@ export function GameOver() {
     const bestScore = Math.max(...scores.map(([_, score]) => score).filter(isNumber));
     return scores.filter(([_, score]) => score === bestScore).map(([id]) => id);
   }, []);
-  const winners = useUsers(winnerIds);
   return <>
     <p>Game over.</p>
     <p>
-      {winners.length === 0 ? 'No one wins.' :
-        winners.length === 1 ? `${winners[0]?.username ?? 'Unknown'} wins!` :
-          `Winners: ${winners.map((u) => u?.username ?? 'Unknown').join(', ')}`
+      {winnerIds.length === 0 ? 'No one wins.' :
+        winnerIds.length === 1 ? <><Username userId={winnerIds[0]} /> wins!</> :
+          <>Winners: <UsernameList userIds={winnerIds} /></>
       }
     </p>
   </>;

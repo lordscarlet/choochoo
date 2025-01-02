@@ -2,7 +2,6 @@ import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRightTwoTone';
 import Circle from '@mui/icons-material/Circle';
 import { useMemo } from "react";
 import { GameStatus } from '../../api/game';
-import { UserApi } from "../../api/user";
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, PLAYERS, TURN_ORDER } from "../../engine/game/state";
 import { ProfitHelper } from '../../engine/income_and_expenses/helper';
@@ -12,8 +11,8 @@ import { PlayerColor, PlayerData } from "../../engine/state/player";
 import { Incinerator } from '../../maps/sweden/incinerator';
 import { SwedenRecyclingMapSettings } from '../../maps/sweden/settings';
 import { getPlayerColorCss } from '../components/player_color';
+import { Username } from '../components/username';
 import { useGame } from '../services/game';
-import { useUsers } from "../services/user";
 import { useActiveGameState, useInjected, useInjectedState } from "../utils/injection_context";
 import { FinalOverview } from './final_overview';
 import { LoginButton } from "./login_button";
@@ -27,13 +26,10 @@ export function PlayerStats() {
   const profitHelper = useInjected(ProfitHelper);
   const moveHelper = useInjected(MoveHelper);
   const helper = useInjected(PlayerHelper);
-  const playerUsers = useUsers(playerData.map((player) => player.playerId));
   const outOfGamePlayers = playerData.filter((p) => p.outOfGame).map((p) => p.color);
-  const players = useMemo<Array<{ player: PlayerData, user?: UserApi }>>(() => playerOrder.concat(outOfGamePlayers).map(color => {
-    const player = playerData.find((player) => player.color === color)!;
-    const user = playerUsers.find(user => user?.id === player.playerId);
-    return { player, user };
-  }), [playerOrder, playerData, playerUsers]);
+  const players = useMemo<PlayerData[]>(() => playerOrder.concat(outOfGamePlayers).map(color => {
+    return playerData.find((player) => player.color === color)!;
+  }), [playerOrder, playerData]);
   const game = useGame();
   const gameKey = game.gameKey;
   const incinerator = useInjected(Incinerator);
@@ -60,13 +56,13 @@ export function PlayerStats() {
         </tr>
       </thead>
       <tbody>
-        {players.map(({ player, user }) =>
+        {players.map((player) =>
           <tr key={player.playerId} className={styles.tableRow}>
             <td>
               <PlayerColorIndicator playerColor={player.color} currentTurn={player.color === currentPlayer} />
             </td>
             <td>
-              {user?.username}
+              <Username userId={player.playerId} />
             </td>
             <td className={styles.collapsed}>
               Action:<br />

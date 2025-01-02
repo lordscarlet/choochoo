@@ -1,14 +1,14 @@
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { Fab, Tooltip } from '@mui/material';
-import { FormEvent, Fragment, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { isNotNull, timeFormat } from "../../utils/functions";
+import { FormEvent, Fragment, useCallback, useLayoutEffect, useRef, useState } from "react";
+import { timeFormat } from "../../utils/functions";
 import { useMessages, useSendChat } from "../services/socket";
-import { useUsers } from "../services/user";
 import { useTextInputState } from "../utils/form_state";
 import * as styles from "./game_log.module.css";
 
 // @ts-ignore-next
 import useStayScrolled from 'react-stay-scrolled';
+import { Username } from '../components/username';
 
 interface GameLogProps {
   gameId?: number;
@@ -20,12 +20,6 @@ export function GameLog({ gameId }: GameLogProps) {
   const [canScrollToBottom, setCanScrollToBottom] = useState(false);
   const [newMessage, setNewMessage, setNewMessageRaw] = useTextInputState('');
   const { sendChat, isPending } = useSendChat(gameId);
-
-  const users = useUsers(messages.map((log) => log.userId).filter(isNotNull));
-
-  const usernames = useMemo(() => {
-    return new Map(users.filter(isNotNull).map((user) => [user.id, user.username]));
-  }, [users]);
 
   const { stayScrolled, isScrolled, scrollBottom } = useStayScrolled(ref);
 
@@ -56,7 +50,7 @@ export function GameLog({ gameId }: GameLogProps) {
             <p>
               <span className={styles['time']}>{timeFormat(log.date)}</span>
               {' '}
-              <span className={styles['username']}>{log.userId != null ? usernames.get(log.userId) ?? 'Unknown user' : 'System'}</span>:
+              <span className={styles['username']}>{log.userId != null ? <Username userId={log.userId} /> : 'System'}</span>:
               {' '}
               <span className={styles['message']}>{log.message}</span>
             </p>

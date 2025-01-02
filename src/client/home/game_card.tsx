@@ -2,11 +2,10 @@ import { Button, Card, CardActions, CardContent, CardHeader, Typography } from "
 import { Link } from "react-router-dom";
 import { GameLiteApi, GameStatus, gameStatusToString } from "../../api/game";
 import { MapRegistry } from "../../maps";
-import { isNotNull } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
+import { Username, UsernameList } from "../components/username";
 import { useJoinGame, useLeaveGame, useStartGame } from "../services/game";
 import { useMe } from "../services/me";
-import { useUsers } from "../services/user";
 import * as styles from "./game_card.module.css";
 
 interface GameCardProps {
@@ -16,7 +15,6 @@ interface GameCardProps {
 
 export function GameCard({ game, hideStatus }: GameCardProps) {
   const me = useMe();
-  const players = useUsers(game.playerIds);
 
   return <Card className={styles.gameCard}>
     <CardHeader title={game.name}
@@ -27,10 +25,10 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
         Game: {MapRegistry.singleton.get(game.gameKey)!.name}
       </Typography>
       {game.activePlayerId && <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        Active Player: {players && players.find((player) => player?.id === game.activePlayerId)?.username}
+        Active Player: <Username userId={game.activePlayerId} />
       </Typography>}
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        Players: {players && players.filter(isNotNull).map((player) => player.username).join(', ')}
+        Players: <UsernameList userIds={game.playerIds} />
       </Typography>
       {game.status === GameStatus.enum.LOBBY && <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         Seats: {seats(game)}

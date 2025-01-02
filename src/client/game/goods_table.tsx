@@ -13,6 +13,7 @@ import { SwedenRecyclingMapSettings } from "../../maps/sweden/settings";
 import { iterate } from "../../utils/functions";
 import { ImmutableMap } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
+import { Username } from "../components/username";
 import { goodStyle } from "../grid/good";
 import { useAction, useEmptyAction, useGame, useGameVersionState } from "../services/game";
 import { useGrid, useInjectedState, usePhaseState } from "../utils/injection_context";
@@ -108,15 +109,15 @@ export function GoodsTable() {
 }
 
 export function PlaceGood({ good, toggleSelectedGood }: { good?: Good, toggleSelectedGood(): void }) {
-  const { canEmit, canEmitUsername } = useAction(ProductionAction);
+  const { canEmit, canEmitUserId } = useAction(ProductionAction);
   const { emit: emitPass } = useEmptyAction(PassAction);
   const state = usePhaseState(Phase.GOODS_GROWTH, GOODS_GROWTH_STATE);
-  if (canEmitUsername == null) {
+  if (canEmitUserId == null) {
     return <></>;
   }
 
   return <div>
-    <p>{canEmit ? 'You' : canEmitUsername} drew {state!.goods.map(goodToString).join(', ')}</p>
+    <p>{canEmit ? 'You' : <Username userId={canEmitUserId} />} drew {state!.goods.map(goodToString).join(', ')}</p>
     {canEmit && <div>
       Select where to place {goodToString(good!)}.
       {state!.goods.length > 1 && <Button onClick={toggleSelectedGood}>Switch selected good</Button>}

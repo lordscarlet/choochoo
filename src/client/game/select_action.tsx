@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
@@ -21,6 +21,7 @@ import { PassAction as DeurbanizationPassAction } from "../../maps/ireland/deurb
 import { iterate } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
 import { DropdownMenu, DropdownMenuItem } from "../components/dropdown_menu";
+import { Username } from "../components/username";
 import { useAction, useEmptyAction } from "../services/game";
 import { useActiveGameState, useCurrentPlayer, useInject, useInjected, usePhaseState } from "../utils/injection_context";
 
@@ -59,17 +60,17 @@ export function EndGame() {
 }
 
 export function MoveGoods() {
-  const { emit: emitLoco, canEmit, canEmitUsername } = useEmptyAction(LocoAction);
+  const { emit: emitLoco, canEmit, canEmitUserId } = useEmptyAction(LocoAction);
   const { emit: emitPass } = useEmptyAction(MovePassAction);
   const player = useCurrentPlayer();
   const state = usePhaseState(Phase.MOVING, MOVE_STATE);
 
-  if (canEmitUsername == null) {
+  if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage>{canEmitUsername} must move a good.</GenericMessage>;
+    return <GenericMessage><Username userId={canEmitUserId} /> must move a good.</GenericMessage>;
   }
 
   return <div>
@@ -79,17 +80,17 @@ export function MoveGoods() {
 }
 
 export function SpecialActionSelector() {
-  const { emit, canEmit, canEmitUsername, isPending } = useAction(ActionSelectionSelectAction);
+  const { emit, canEmit, canEmitUserId, isPending } = useAction(ActionSelectionSelectAction);
   const actions = useInjected(AllowedActions);
 
   const chooseAction = useCallback((action: Action) => emit({ action }), [emit]);
 
-  if (canEmitUsername == null) {
+  if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage>{canEmitUsername} must select an action.</GenericMessage>;
+    return <GenericMessage><Username userId={canEmitUserId} /> must select an action.</GenericMessage>;
   }
 
   return <div>
@@ -116,7 +117,7 @@ function dollarFormat(num: number | string): string {
 }
 
 export function Bid() {
-  const { emit: emitBid, canEmit, canEmitUsername, isPending: isBidPending } = useAction(BidAction);
+  const { emit: emitBid, canEmit, canEmitUserId, isPending: isBidPending } = useAction(BidAction);
   const { emit: emitTurnOrderPass, isPending: isTurnOrderPending } = useEmptyAction(TurnOrderPassAction);
   const { emit: emitPass, isPending: isPassPending } = useEmptyAction(PassAction);
   const helper = useInjected(TurnOrderHelper);
@@ -133,12 +134,12 @@ export function Bid() {
     }
   }, [emitBid, emitPass, emitTurnOrderPass]);
 
-  if (canEmitUsername == null) {
+  if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage>{canEmitUsername} must bid.</GenericMessage>;
+    return <GenericMessage><Username userId={canEmitUserId} /> must bid.</GenericMessage>;
   }
 
 
@@ -161,23 +162,23 @@ export function Bid() {
   </div >;
 }
 
-export function GenericMessage({ children }: { children: string | string[] }) {
+export function GenericMessage({ children }: { children: ReactNode }) {
   return <div>{children}</div>
 }
 
 export function TakeShares() {
-  const { canEmit, canEmitUsername, emit, isPending } = useAction(TakeSharesAction);
+  const { canEmit, canEmitUserId, emit, isPending } = useAction(TakeSharesAction);
   const numShares = useInjected(ShareHelper).getSharesTheyCanTake();
   const options = iterate(numShares, (i) => i);
 
   const chooseValue = useCallback((numShares: number) => emit({ numShares }), [emit]);
 
-  if (canEmitUsername == null) {
+  if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage>{canEmitUsername} must take out shares.</GenericMessage>;
+    return <GenericMessage><Username userId={canEmitUserId} /> must take out shares.</GenericMessage>;
   }
 
   return <div>
@@ -192,14 +193,14 @@ export function TakeShares() {
 }
 
 export function Deurbanization() {
-  const { emit: emitPass, canEmit, isPending, canEmitUsername } = useEmptyAction(DeurbanizationPassAction);
+  const { emit: emitPass, canEmit, isPending, canEmitUserId } = useEmptyAction(DeurbanizationPassAction);
 
-  if (canEmitUsername == null) {
+  if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage>{canEmitUsername} must select a good to deurbanize.</GenericMessage>;
+    return <GenericMessage><Username userId={canEmitUserId} /> must select a good to deurbanize.</GenericMessage>;
   }
 
   return <div>
@@ -209,19 +210,19 @@ export function Deurbanization() {
 }
 
 export function Build() {
-  const { emit: emitPass, canEmit, canEmitUsername } = useEmptyAction(DoneAction);
+  const { emit: emitPass, canEmit, canEmitUserId } = useEmptyAction(DoneAction);
   const [buildsRemaining, canUrbanize] = useInject(() => {
     const helper = inject(BuilderHelper);
     if (!canEmit) return [undefined, undefined];
     return [helper.buildsRemaining(), helper.canUrbanize()];
   }, [canEmit]);
 
-  if (canEmitUsername == null) {
+  if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage>{canEmitUsername} must build.</GenericMessage>;
+    return <GenericMessage><Username userId={canEmitUserId} /> must build.</GenericMessage>;
   }
 
   return <div>
