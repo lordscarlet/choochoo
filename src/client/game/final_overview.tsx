@@ -58,7 +58,7 @@ export function FinalOverviewInternal() {
           <tr>
             <th></th>
             {playersOrdered.map(({ player }) => <td key={player.playerId}>
-              ({playerColorToString(player.color)})
+              {playerColorToString(player.color)}
             </td>)}
           </tr>
           <tr>
