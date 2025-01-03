@@ -31,7 +31,7 @@ export const map = startsLowerGrid([
     PLAIN,
   ],
   [
-    ...duplicate(2, PLAIN),
+    ...duplicate(3, PLAIN),
     HILL,
     town('Ihosy'),
     PLAIN,
