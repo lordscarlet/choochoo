@@ -44,6 +44,8 @@ function colorStyles(space: Space): string[] {
         return [styles.swamp];
       case SpaceType.UNPASSABLE:
         return [styles.unpassable];
+      case SpaceType.HILL:
+        return [styles.mountain];
       default:
         assertNever(type);
     }

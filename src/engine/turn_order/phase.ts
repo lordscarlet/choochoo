@@ -17,13 +17,13 @@ import { TurnOrderPassAction } from "./turn_order_pass";
 export class TurnOrderPhase extends PhaseModule {
   static readonly phase = Phase.TURN_ORDER;
 
-  private readonly players = injectInGamePlayers();
-  private readonly currentOrder = injectState(TURN_ORDER);
-  private readonly turnOrderState = injectState(TURN_ORDER_STATE);
-  private readonly helper = inject(TurnOrderHelper);
-  private readonly log = inject(Log);
-  private readonly playerHelper = inject(PlayerHelper);
-  private readonly currentPlayer = injectCurrentPlayer();
+  protected readonly players = injectInGamePlayers();
+  protected readonly currentOrder = injectState(TURN_ORDER);
+  protected readonly turnOrderState = injectState(TURN_ORDER_STATE);
+  protected readonly helper = inject(TurnOrderHelper);
+  protected readonly log = inject(Log);
+  protected readonly playerHelper = inject(PlayerHelper);
+  protected readonly currentPlayer = injectCurrentPlayer();
 
   configureActions() {
     this.installAction(BidAction);

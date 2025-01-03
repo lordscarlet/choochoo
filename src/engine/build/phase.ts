@@ -21,13 +21,13 @@ import { UrbanizeAction } from "./urbanize";
 export class BuildPhase extends PhaseModule {
   static readonly phase = Phase.BUILDING;
 
-  private readonly helper = inject(BuilderHelper);
-  private readonly turnState = injectState(BUILD_STATE);
-  private readonly gridHelper = inject(GridHelper);
-  private readonly currentPlayer = injectCurrentPlayer();
-  private readonly grid = injectGrid();
-  private readonly log = inject(Log);
-  private readonly firstBuildPlayer = injectPlayerAction(Action.FIRST_BUILD);
+  protected readonly helper = inject(BuilderHelper);
+  protected readonly turnState = injectState(BUILD_STATE);
+  protected readonly gridHelper = inject(GridHelper);
+  protected readonly currentPlayer = injectCurrentPlayer();
+  protected readonly grid = injectGrid();
+  protected readonly log = inject(Log);
+  protected readonly firstBuildPlayer = injectPlayerAction(Action.FIRST_BUILD);
 
   configureActions() {
     this.installAction(BuildAction);
@@ -80,9 +80,9 @@ export class BuildPhase extends PhaseModule {
 
   getPlayerOrder(): PlayerColor[] {
     const playerOrder = super.getPlayerOrder();
-    const firstMove = this.firstBuildPlayer();
-    if (firstMove != null) {
-      return [firstMove.color, ...remove(playerOrder, firstMove.color)];
+    const firstBuild = this.firstBuildPlayer();
+    if (firstBuild != null) {
+      return [firstBuild.color, ...remove(playerOrder, firstBuild.color)];
     }
     return playerOrder;
   }

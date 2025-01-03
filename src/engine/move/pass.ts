@@ -6,7 +6,7 @@ import { Log } from "../game/log";
 
 export class MovePassAction implements ActionProcessor<{}> {
   static readonly action = 'pass';
-  private readonly log = inject(Log);
+  protected readonly log = inject(Log);
 
   readonly assertInput = z.object({}).parse;
   validate(_: {}): void { }

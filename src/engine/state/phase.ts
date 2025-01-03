@@ -4,18 +4,18 @@ import { assertNever } from "../../utils/validate";
 
 export enum Phase {
   SHARES = 1,
-  TURN_ORDER,
-  ACTION_SELECTION,
-  BUILDING,
-  MOVING,
-  INCOME,
-  EXPENSES,
-  INCOME_REDUCTION,
-  GOODS_GROWTH,
-  END_GAME,
+  TURN_ORDER = 2,
+  ACTION_SELECTION = 3,
+  BUILDING = 4,
+  MOVING = 5,
+  INCOME = 6,
+  EXPENSES = 7,
+  INCOME_REDUCTION = 8,
+  GOODS_GROWTH = 9,
+  END_GAME = 10,
 
   // Ireland
-  DEURBANIZATION,
+  DEURBANIZATION = 11,
 };
 
 export const PhaseZod = z.nativeEnum(Phase);

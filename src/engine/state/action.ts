@@ -2,30 +2,30 @@ import z from "zod";
 import { assertNever } from "../../utils/validate";
 
 export enum Action {
-  LOCOMOTIVE,
-  FIRST_BUILD,
-  FIRST_MOVE,
-  ENGINEER,
-  TURN_ORDER_PASS,
-  URBANIZATION,
-  PRODUCTION,
+  LOCOMOTIVE = 0,
+  FIRST_BUILD = 1,
+  FIRST_MOVE = 2,
+  ENGINEER = 3,
+  TURN_ORDER_PASS = 4,
+  URBANIZATION = 5,
+  PRODUCTION = 6,
 
   // Montreal metro
-  REPOPULATION,
+  REPOPULATION = 7,
 
   // Ireland
-  DEURBANIZATION,
+  DEURBANIZATION = 8,
 
   // Sweden Recycling
-  WTE_PLANT_OPERATOR,
+  WTE_PLANT_OPERATOR = 9,
 
   // Madagascar
-  LAST_BUILD,
-  LAST_MOVE,
-  SLOW_ENGINEER,
-  LAST_PLAYER,
-  HIGH_COSTS,
-  ONE_MOVE,
+  LAST_BUILD = 10,
+  LAST_MOVE = 11,
+  SLOW_ENGINEER = 11,
+  LAST_PLAYER = 12,
+  HIGH_COSTS = 13,
+  ONE_MOVE = 14,
 }
 
 export const ActionZod = z.nativeEnum(Action);

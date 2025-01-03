@@ -3,11 +3,11 @@ import { assertNever } from "../../utils/validate";
 
 
 export enum Good {
-  BLUE,
-  BLACK,
-  RED,
-  PURPLE,
-  YELLOW,
+  BLUE = 0,
+  BLACK = 1,
+  RED = 2,
+  PURPLE = 3,
+  YELLOW = 4,
 }
 
 
