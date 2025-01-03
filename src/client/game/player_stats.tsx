@@ -8,6 +8,8 @@ import { ProfitHelper } from '../../engine/income_and_expenses/helper';
 import { MoveHelper } from '../../engine/move/helper';
 import { getSelectedActionString } from "../../engine/state/action";
 import { PlayerColor, PlayerData } from "../../engine/state/player";
+import { countryName } from '../../maps/cyprus/roles';
+import { CyprusMapSettings } from '../../maps/cyprus/settings';
 import { Incinerator } from '../../maps/sweden/incinerator';
 import { SwedenRecyclingMapSettings } from '../../maps/sweden/settings';
 import { getPlayerColorCss } from '../components/player_color';
@@ -23,20 +25,17 @@ export function PlayerStats() {
   const playerData = useInject(() => injectAllPlayersUnsafe()(), []);
   const playerOrder = useInjectedState(TURN_ORDER);
   const currentPlayer = useActiveGameState(CURRENT_PLAYER);
-  const profitHelper = useInjected(ProfitHelper);
-  const moveHelper = useInjected(MoveHelper);
-  const helper = useInjected(PlayerHelper);
   const outOfGamePlayers = playerData.filter((p) => p.outOfGame).map((p) => p.color);
   const players = useMemo<PlayerData[]>(() => playerOrder.concat(outOfGamePlayers).map(color => {
     return playerData.find((player) => player.color === color)!;
   }), [playerOrder, playerData]);
   const game = useGame();
   const gameKey = game.gameKey;
-  const incinerator = useInjected(Incinerator);
 
   if (game.status === GameStatus.enum.ENDED) return <FinalOverview />;
 
   const columns = [
+    ...(gameKey === CyprusMapSettings.key ? [cyprusRoleColumn] : []),
     actionColumn,
     moneyColumn,
     incomeColumn,
@@ -165,6 +164,15 @@ const scoreColumn = {
 function ScoreCell({ player }: PlayerStatColumnProps) {
   const helper = useInjected(PlayerHelper);
   return <>{helper.getScore(player)}</>;
+}
+
+const cyprusRoleColumn = {
+  header: 'Role',
+  cell: RoleCell,
+};
+
+function RoleCell({ player }: PlayerStatColumnProps) {
+  return <>{countryName(player.color)}</>;
 }
 
 interface PlayerColorIndicatorProps {
