@@ -22,10 +22,10 @@ export enum Action {
   // Madagascar
   LAST_BUILD = 10,
   LAST_MOVE = 11,
-  SLOW_ENGINEER = 11,
-  LAST_PLAYER = 12,
-  HIGH_COSTS = 13,
-  ONE_MOVE = 14,
+  SLOW_ENGINEER = 12,
+  LAST_PLAYER = 13,
+  HIGH_COSTS = 14,
+  ONE_MOVE = 15,
 }
 
 export const ActionZod = z.nativeEnum(Action);
