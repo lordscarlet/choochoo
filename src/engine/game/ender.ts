@@ -11,7 +11,7 @@ export class Ender {
   private readonly phase = injectState(PHASE);
 
   endGame(): void {
-    this.phase.set(Phase.END_GAME);
+    this.phase.initState(Phase.END_GAME);
 
     const danglers = this.grid().getDanglers();
     for (const dangler of danglers) {
