@@ -13,7 +13,7 @@ export class MadagascarMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly stage = ReleaseStage.ALPHA;
 
   getOverrides(): Array<SimpleConstructor<unknown>> {
     return [
