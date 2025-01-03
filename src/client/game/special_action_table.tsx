@@ -32,10 +32,10 @@ function SpecialAction({ action }: { action: Action }) {
   const player = useInject(() => injectPlayerAction(action)(), [action]);
 
   const isClickable = canEmit && player == null && !isPending;
-  const disabledReason = isClickable ? allowed.getDisabledActionReason(action) : undefined;
+  const disabledReason = allowed.getDisabledActionReason(action);
   const isEmittable = isClickable && disabledReason == null;
 
-  const chooseAction = useCallback(() => isEmittable && emit({ action }), [emit, isClickable, action]);
+  const chooseAction = useCallback(() => isEmittable && emit({ action }), [emit, isEmittable, action]);
 
   const className = [
     styles.specialAction,
