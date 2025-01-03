@@ -18,6 +18,14 @@ export enum Action {
 
   // Sweden Recycling
   WTE_PLANT_OPERATOR,
+
+  // Madagascar
+  LAST_BUILD,
+  LAST_MOVE,
+  SLOW_ENGINEER,
+  LAST_PLAYER,
+  HIGH_COSTS,
+  ONE_MOVE,
 }
 
 export const ActionZod = z.nativeEnum(Action);
@@ -35,6 +43,12 @@ export function getSelectedActionString(action?: Action) {
     case Action.REPOPULATION: return 'Repopulation';
     case Action.DEURBANIZATION: return 'Deurbanization';
     case Action.WTE_PLANT_OPERATOR: return 'WTE Plant Operator';
+    case Action.LAST_BUILD: return 'Last Build';
+    case Action.LAST_MOVE: return 'Last Move';
+    case Action.SLOW_ENGINEER: return 'Slow Engineer';
+    case Action.LAST_PLAYER: return 'Last Player';
+    case Action.HIGH_COSTS: return 'High Costs';
+    case Action.ONE_MOVE: return 'One Move';
     default:
       assertNever(action);
   }

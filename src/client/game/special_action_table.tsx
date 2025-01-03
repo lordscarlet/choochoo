@@ -5,6 +5,7 @@ import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
 import { Action, getSelectedActionString } from "../../engine/state/action";
 import { IrelandMapSettings } from "../../maps/ireland/settings";
+import { MadagascarMapSettings } from "../../maps/madagascar/settings";
 import { assertNever } from "../../utils/validate";
 import { Username } from "../components/username";
 import { useAction } from "../services/game";
@@ -65,6 +66,8 @@ function getSelectedActionDescription(action: Action, gameKey: string): string {
     case Action.LOCOMOTIVE:
       if (gameKey === IrelandMapSettings.key) {
         return 'Temporarily increase your locomotive by one for the round. Does not increase your expenses.'
+      } else if (gameKey === MadagascarMapSettings.key) {
+        return 'Immediately, increase your locomotive by one, but you cannot build track this turn.';
       }
       return 'Immediately, increase your locomotive by one.';
     case Action.PRODUCTION:
@@ -72,6 +75,9 @@ function getSelectedActionDescription(action: Action, gameKey: string): string {
     case Action.TURN_ORDER_PASS:
       return 'Next auction, pass without dropping out of the bidding.';
     case Action.URBANIZATION:
+      if (gameKey === MadagascarMapSettings.key) {
+        return 'Place a new city on any town during the build step, but may only build one track tile.';
+      }
       return 'Place a new city on any town during the build step.';
     case Action.REPOPULATION:
       return 'Immediately, draw three cubes from the bag and place one on any station.'
@@ -79,6 +85,13 @@ function getSelectedActionDescription(action: Action, gameKey: string): string {
       return 'Before the Move Goods step, remove a goods cube of your choice from the map.';
     case Action.WTE_PLANT_OPERATOR:
       return 'After the Move Goods step, take all black cubes from the WTE Plant space. Each cube is worth 2 points.';
+
+    case Action.LAST_BUILD: return 'Go last during the Building step.';
+    case Action.LAST_MOVE: return 'Go last during the Moving step.';
+    case Action.SLOW_ENGINEER: return 'Build one less track during the Building step.';
+    case Action.LAST_PLAYER: return 'Next auction, you must pass when it is your turn.';
+    case Action.HIGH_COSTS: return 'Each tile you build this turn costs an additional $4.';
+    case Action.ONE_MOVE: return 'Skip one of your move goods actions.';
     default:
       assertNever(action);
   }
