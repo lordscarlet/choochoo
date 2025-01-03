@@ -7,7 +7,10 @@ export class SwedenPlayerHelper extends PlayerHelper {
   private readonly incinerator = inject(Incinerator);
 
   calculateScore(playerData: PlayerData): number {
-    return super.calculateScore(playerData) +
-      (2 * this.incinerator.getGarbageCountForUser(playerData.color));
+    return super.calculateScore(playerData) + this.getScoreFromGarbage(playerData);
+  }
+
+  getScoreFromGarbage(playerData: PlayerData): number {
+    return 2 * this.incinerator.getGarbageCountForUser(playerData.color);
   }
 }

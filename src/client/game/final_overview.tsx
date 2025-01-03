@@ -3,9 +3,11 @@ import { GameStatus } from "../../api/game";
 import { isEliminated, PlayerHelper } from "../../engine/game/player";
 import { injectAllPlayersUnsafe } from "../../engine/game/state";
 import { playerColorToString } from "../../engine/state/player";
+import { SwedenPlayerHelper } from "../../maps/sweden/score";
+import { SwedenRecyclingMapSettings } from "../../maps/sweden/settings";
 import { Username } from "../components/username";
 import { useGame } from "../services/game";
-import { useInject, useInjected } from "../utils/injection_context";
+import { useGameKey, useInject, useInjected } from "../utils/injection_context";
 import * as styles from './final_overview.module.css';
 
 export function FinalOverview() {
@@ -16,6 +18,7 @@ export function FinalOverview() {
 }
 
 export function FinalOverviewInternal() {
+  const gameKey = useGameKey();
   const players = useInject(() => injectAllPlayersUnsafe()(), []);
   const playerHelper = useInjected(PlayerHelper);
   const playersOrdered = useMemo(() => {
@@ -83,6 +86,11 @@ export function FinalOverviewInternal() {
             {playersOrdered.map(({ player }) =>
               <td key={player.playerId}>{playerHelper.getScoreFromTrack(player)}</td>)}
           </tr>
+          {gameKey === SwedenRecyclingMapSettings.key && <tr>
+            <th className={styles.label}>Garbage VPs</th>
+            {playersOrdered.map(({ player }) =>
+              <td key={player.playerId}>{(playerHelper as SwedenPlayerHelper).getScoreFromGarbage(player)}</td>)}
+          </tr>}
           <tr>
             <th className={styles.label}>Income</th>
             {playersOrdered.map(({ player }) =>
