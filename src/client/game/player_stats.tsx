@@ -1,6 +1,6 @@
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRightTwoTone';
 import Circle from '@mui/icons-material/Circle';
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { GameStatus } from '../../api/game';
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, injectAllPlayersUnsafe, TURN_ORDER } from "../../engine/game/state";
@@ -36,6 +36,16 @@ export function PlayerStats() {
 
   if (game.status === GameStatus.enum.ENDED) return <FinalOverview />;
 
+  const columns = [
+    actionColumn,
+    moneyColumn,
+    incomeColumn,
+    sharesColumn,
+    locoColumn,
+    ...(gameKey === SwedenRecyclingMapSettings.key ? [garbageColumn] : []),
+    scoreColumn,
+  ];
+
   return <div className={styles.playerStats}>
     <h2>Player overview</h2>
     <table>
@@ -45,13 +55,8 @@ export function PlayerStats() {
           <th>Player</th>
           <th className={styles.collapsed}>Stats</th>
           <th className={styles.collapsed}></th>
-          <th className={styles.expanded}>Selected Action</th>
-          <th className={styles.expanded}>Money</th>
-          <th className={styles.expanded}>Income</th>
-          <th className={styles.expanded}>Shares</th>
-          <th className={styles.expanded}>Locomotive</th>
-          {gameKey === SwedenRecyclingMapSettings.key && <th className={styles.expanded}>Garbage</th>}
-          <th className={styles.expanded}>Score</th>
+          {columns.map((column) =>
+            <th key={column.header} className={styles.expanded}>{column.header}</th>)}
           <th></th>
         </tr>
       </thead>
@@ -65,35 +70,101 @@ export function PlayerStats() {
               <Username userId={player.playerId} />
             </td>
             <td className={styles.collapsed}>
-              Action:<br />
-              Money:<br />
-              Income:<br />
-              Shares:<br />
-              Loco:<br />
-              {gameKey === SwedenRecyclingMapSettings.key && <>Garbage:<br /></>}
-              Score:<br />
+              {columns.map((column) =>
+                <div key={column.header} className={styles.inplace}>{column.header}:</div>)}
             </td>
             <td className={styles.collapsed}>
-              {getSelectedActionString(player.selectedAction)}<br />
-              ${player.money} ({toNet(profitHelper.getProfit(player))})<br />
-              ${player.income}<br />
-              {player.shares}<br />
-              {moveHelper.getLocomotiveDisplay(player)}<br />
-              {gameKey === SwedenRecyclingMapSettings.key && <>{incinerator.getGarbageCountForUser(player.color)}<br /></>}
-              {helper.getScore(player)}<br />
+              {columns.map((column) => {
+                const Cell = column.cell;
+                return <div key={column.header} className={styles.inplace}><Cell player={player} /></div>;
+              })}
             </td>
-            <td className={styles.expanded}>{getSelectedActionString(player.selectedAction)}</td>
-            <td className={styles.expanded}>${player.money} ({toNet(profitHelper.getProfit(player))})</td>
-            <td className={styles.expanded}>${player.income}</td>
-            <td className={styles.expanded}>{player.shares}</td>
-            <td className={styles.expanded}>{moveHelper.getLocomotiveDisplay(player)}</td>
-            {gameKey === SwedenRecyclingMapSettings.key && <td className={styles.expanded}>{incinerator.getGarbageCountForUser(player.color)}</td>}
-            <td className={styles.expanded}>{helper.getScore(player)}</td>
+            {columns.map((column) => {
+              const Cell = column.cell;
+              return <td key={column.header} className={styles.expanded}><Cell player={player} /></td>;
+            })}
             <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
           </tr>)}
       </tbody>
     </table>
   </div>;
+}
+
+interface PlayerStatColumnProps {
+  player: PlayerData;
+}
+
+interface PlayerStatColumn {
+  header: string;
+  cell(props: PlayerStatColumnProps): ReactNode;
+}
+
+const actionColumn = {
+  header: 'Action',
+  cell: ActionCell,
+}
+
+function ActionCell({ player }: PlayerStatColumnProps) {
+  return <>{getSelectedActionString(player.selectedAction)}</>;
+}
+
+const moneyColumn = {
+  header: 'Money',
+  cell: MoneyCell,
+}
+
+function MoneyCell({ player }: PlayerStatColumnProps) {
+  const profitHelper = useInjected(ProfitHelper);
+
+  return <>${player.money} ({toNet(profitHelper.getProfit(player))})</>;
+}
+
+const incomeColumn = {
+  header: 'Income',
+  cell: IncomeCell,
+};
+
+function IncomeCell({ player }: PlayerStatColumnProps) {
+  return <>${player.income}</>;
+}
+
+const sharesColumn = {
+  header: 'Shares',
+  cell: SharesCell,
+};
+
+function SharesCell({ player }: PlayerStatColumnProps) {
+  return <>{player.shares}</>;
+}
+
+const locoColumn = {
+  header: 'Loco',
+  cell: LocoCell,
+};
+
+function LocoCell({ player }: PlayerStatColumnProps) {
+  const moveHelper = useInjected(MoveHelper);
+  return <>{moveHelper.getLocomotiveDisplay(player)}</>;
+}
+
+const garbageColumn = {
+  header: 'Garbage',
+  cell: GarbageCell,
+};
+
+function GarbageCell({ player }: PlayerStatColumnProps) {
+  const incinerator = useInjected(Incinerator);
+  return <>{incinerator.getGarbageCountForUser(player.color)}</>;
+}
+
+const scoreColumn = {
+  header: 'Score',
+  cell: ScoreCell,
+};
+
+function ScoreCell({ player }: PlayerStatColumnProps) {
+  const helper = useInjected(PlayerHelper);
+  return <>{helper.getScore(player)}</>;
 }
 
 interface PlayerColorIndicatorProps {
