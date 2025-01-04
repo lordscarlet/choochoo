@@ -123,7 +123,11 @@ export function useInjectedState<T>(key: Key<T>): Immutable<T> {
 }
 
 export function useCurrentPlayer(): PlayerData | undefined {
-  return useInject(() => injectCurrentPlayer()(), []);
+  return useInject(() => {
+    const phase = injectState(PHASE)();
+    if (phase === Phase.END_GAME) return undefined;
+    return injectCurrentPlayer()();
+  }, []);
 }
 
 export function useGrid(): Grid {
