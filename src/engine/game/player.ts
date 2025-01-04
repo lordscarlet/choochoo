@@ -19,10 +19,17 @@ export class PlayerHelper {
     return this.update(this.currentPlayer(), updateFn);
   }
 
-  atMostOnePlayerRemaining(): boolean {
-    const checkFor = this.players().length === 1 ? 0 : 1;
-    const playersRemaining = this.players().filter(p => p.outOfGame !== true).length;
-    return playersRemaining <= checkFor;
+  enoughPlayersEliminatedToEndGame(): boolean {
+    const checkFor = this.isSoloGame() ? 0 : 1;
+    return this.getPlayersRemaining() <= checkFor;
+  }
+
+  getPlayersRemaining(): number {
+    return this.players().filter(p => p.outOfGame !== true).length;
+  }
+
+  isSoloGame(): boolean {
+    return this.players().length === 1;
   }
 
   addMoneyForCurrentPlayer(num: number): void {

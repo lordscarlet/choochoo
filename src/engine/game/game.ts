@@ -3,7 +3,7 @@ import { infiniteLoopCheck } from "../../utils/functions";
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { InitialMapGrid } from "../state/map_settings";
-import { Ender } from "./ender";
+import { Ender, EndGameReason } from "./ender";
 import { CheckAutoAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
 import { Memory } from "./memory";
 import { PHASE, PhaseEngine } from "./phase";
@@ -39,8 +39,8 @@ export class GameEngine {
     this.runLifecycle();
   }
 
-  private shouldGameEndPrematurely(): boolean {
-    return this.playerHelper.atMostOnePlayerRemaining();
+  private shouldGameEndPrematurely(): EndGameReason | undefined {
+    return this.playerHelper.enoughPlayersEliminatedToEndGame() ? EndGameReason.PLAYERS_ELIMINATED : undefined;
   }
 
   private runLifecycle(): void {
@@ -52,8 +52,9 @@ export class GameEngine {
   }
 
   private stepLifecycle(): void {
-    if (this.shouldGameEndPrematurely()) {
-      this.end();
+    const endGameReason = this.shouldGameEndPrematurely();
+    if (endGameReason != null) {
+      this.end(endGameReason);
       return;
     }
 
@@ -109,7 +110,7 @@ export class GameEngine {
     } else if (lifecycle instanceof EndRound) {
       this.roundEngine.end();
       if (lifecycle.round >= this.roundEngine.maxRounds()) {
-        this.end();
+        this.end(EndGameReason.ROUNDS_ENDED);
         return;
       }
       this.lifecycle.set(lifecycle.startNextRound());
@@ -118,8 +119,8 @@ export class GameEngine {
     }
   }
 
-  end(): void {
-    this.ender.endGame();
+  end(endGameReason: EndGameReason): void {
+    this.ender.endGame(endGameReason);
     this.hasEnded.set(true);
   }
 }
