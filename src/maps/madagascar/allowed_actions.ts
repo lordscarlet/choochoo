@@ -15,7 +15,7 @@ export class MadagascarAllowedActions extends AllowedActions {
   private readonly disabledActions = injectState(DISABLED_ACTIONS);
 
   getDisabledActionReason(action: Action): string | undefined {
-    return this.disabledActions().get(action) ? 'This action has been randomly disabled' : undefined;
+    return this.disabledActions().has(action) ? 'This action has been randomly disabled' : undefined;
   }
 
   getLastDisabledAction(): Action {
