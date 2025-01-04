@@ -83,6 +83,7 @@ export function GoodsTable() {
   }
 
   return <div>
+    <h2>Goods Growth Table</h2>
     <PlaceGood good={good} toggleSelectedGood={toggleSelectedGood} />
     <div className={styles.goodsContainer}>
       <div className={styles.row}>

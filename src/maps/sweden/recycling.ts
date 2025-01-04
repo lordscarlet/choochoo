@@ -40,7 +40,7 @@ export class SwedenMovePhase extends MovePhase {
         for (const good of city.onRoll[0].goods) {
           if (good === Good.BLACK) {
             this.incinerator.addCube();
-            return;
+            continue;
           }
 
           city.goods.push(this.getNextGood(good));
