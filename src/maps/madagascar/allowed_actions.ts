@@ -18,6 +18,10 @@ export class MadagascarAllowedActions extends AllowedActions {
     return this.disabledActions().get(action) ? 'This action has been randomly disabled' : undefined;
   }
 
+  getLastDisabledAction(): Action {
+    return peek([...this.disabledActions()]);
+  }
+
   getActions(): ImmutableSet<Action> {
     return ImmutableSet([
       Action.LAST_BUILD,
@@ -49,7 +53,7 @@ export class MadagascarRoundEngine extends RoundEngine {
   start(round: number) {
     super.start(round);
     const allActions = [...this.allowedActions.getActions()];
-    let nextActionIndex = allActions.indexOf(peek([...this.disabledActions()]));
+    let nextActionIndex = round === 1 ? allActions.indexOf((this.allowedActions as MadagascarAllowedActions).getLastDisabledAction()) : -1;
     const newActions: Action[] = [];
     iterate(7 - this.playerCount(), () => {
       for (let i = this.random.rollDie(); i > 0;) {

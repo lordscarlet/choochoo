@@ -5,6 +5,7 @@ import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
 import { Action, getSelectedActionString } from "../../engine/state/action";
 import { IrelandMapSettings } from "../../maps/ireland/settings";
+import { MadagascarAllowedActions } from "../../maps/madagascar/allowed_actions";
 import { MadagascarMapSettings } from "../../maps/madagascar/settings";
 import { assertNever } from "../../utils/validate";
 import { Username } from "../components/username";
@@ -41,6 +42,10 @@ function SpecialAction({ action }: { action: Action }) {
     styles.specialAction,
     isClickable ? styles.clickable : '',
   ].join(' ');
+
+  const caption = player != null ? <Username userId={player.playerId} /> :
+    gameKey === MadagascarMapSettings.key && (allowed as MadagascarAllowedActions).getLastDisabledAction() === action ? 'Stack' :
+      undefined;
 
   const render = <div className={className} onClick={chooseAction}>
     <div className={styles.name}>{getSelectedActionString(action)}</div>
