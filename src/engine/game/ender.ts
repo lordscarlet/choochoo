@@ -38,6 +38,7 @@ export class Ender {
 
   endGame(reason: EndGameReason): void {
     this.phase.initState(Phase.END_GAME);
+    this.onEndGame();
 
     this.logEndGame(reason);
     const danglers = this.grid().getDanglers();
@@ -45,4 +46,6 @@ export class Ender {
       this.gridHelper.setRouteOwner(dangler, undefined);
     }
   }
+
+  protected onEndGame() { }
 }

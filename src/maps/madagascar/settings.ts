@@ -1,6 +1,6 @@
 import { SimpleConstructor } from "../../engine/framework/dependency_stack";
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
-import { MadagascarAllowedActions } from "./allowed_actions";
+import { MadagascarAllowedActions, MadagascarGameEnder, MadagascarRoundEngine, MadagascarStarter } from "./allowed_actions";
 import { MadagascarBuildCostCalculator, MadagascarBuilderHelper, MadagascarBuildPhase, MadagascarDoneAction } from "./build";
 import { map } from "./grid";
 import { MadagascarMovePassAction, MadagascarMovePhase } from "./move";
@@ -23,7 +23,10 @@ export class MadagascarMapSettings implements MapSettings {
       MadagascarBuilderHelper,
       MadagascarBuildCostCalculator,
       MadagascarDoneAction,
+      MadagascarGameEnder,
       MadagascarMovePassAction,
+      MadagascarStarter,
+      MadagascarRoundEngine,
       MadagascarTurnOrderPhase,
       MadagascarTurnOrderPass,
     ];
