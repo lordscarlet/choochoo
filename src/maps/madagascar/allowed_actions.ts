@@ -9,7 +9,7 @@ import { Action, ActionZod, getSelectedActionString } from "../../engine/state/a
 import { iterate, peek } from "../../utils/functions";
 import { ImmutableSet } from "../../utils/immutable";
 
-const DISABLED_ACTIONS = new SetKey('DISABLED_ACTIONS', { parse: ActionZod.parse });
+const DISABLED_ACTIONS = new SetKey('disabledActions', { parse: ActionZod.parse });
 
 export class MadagascarAllowedActions extends AllowedActions {
   private readonly disabledActions = injectState(DISABLED_ACTIONS);

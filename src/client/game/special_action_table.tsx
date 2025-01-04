@@ -50,7 +50,7 @@ function SpecialAction({ action }: { action: Action }) {
   const render = <div className={className} onClick={chooseAction}>
     <div className={styles.name}>{getSelectedActionString(action)}</div>
     <div className={styles.description}>{getSelectedActionDescription(action, gameKey)}</div>
-    <div><PlayerCircle disabled={disabledReason != null} color={player?.color} caption={player != null && <Username userId={player.playerId} />} /></div>
+    <div><PlayerCircle disabled={disabledReason != null} color={player?.color} caption={caption} /></div>
   </div>;
 
   if (disabledReason != null) {
