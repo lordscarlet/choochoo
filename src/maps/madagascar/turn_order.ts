@@ -17,8 +17,11 @@ export class MadagascarTurnOrderPhase extends TurnOrderPhase {
 
 export class MadagascarTurnOrderPass extends PassAction {
   private readonly log = inject(Log);
+
   process(data: {}): boolean {
-    this.log.currentPlayer('autopasses due to the last player action');
+    if (this.currentPlayer().selectedAction === Action.LAST_PLAYER) {
+      this.log.currentPlayer('autopasses due to the last player action');
+    }
     return super.process(data);
   }
 }

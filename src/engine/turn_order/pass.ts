@@ -7,8 +7,8 @@ import { TurnOrderHelper } from "./helper";
 
 export class PassAction implements ActionProcessor<{}> {
   static readonly action = 'pass';
-  private readonly helper = inject(TurnOrderHelper);
-  private readonly currentPlayer = injectCurrentPlayer();
+  protected readonly helper = inject(TurnOrderHelper);
+  protected readonly currentPlayer = injectCurrentPlayer();
 
   readonly assertInput = z.object({}).parse;
   validate(_: {}): void { }
