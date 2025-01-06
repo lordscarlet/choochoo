@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const UserRole = z.enum(['ACTIVATE_EMAIL', 'USER', 'ADMIN', 'BLOCKED']);
 export type UserRole = z.infer<typeof UserRole>;
 
+const UsernameOrEmail = z.string().trim().toLowerCase().min(1);
 const Password = z.string().min(8).max(32);
 
 export const CreateUserApi = z.object({
@@ -15,7 +16,7 @@ export const CreateUserApi = z.object({
 export type CreateUserApi = z.infer<typeof CreateUserApi>;
 
 export const LoginUserApi = z.object({
-  usernameOrEmail: z.string().trim().toLowerCase().min(1),
+  usernameOrEmail: UsernameOrEmail,
   activationCode: z.string().optional(),
   password: Password,
 });
@@ -64,7 +65,7 @@ export const ResendActivationCodeRequest = z.object({
 export type ResendActivationCodeRequest = z.infer<typeof ResendActivationCodeRequest>;
 
 export const ForgotPasswordRequest = z.object({
-  usernameOrEmail: z.string(),
+  usernameOrEmail: UsernameOrEmail,
 });
 export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequest>;
 

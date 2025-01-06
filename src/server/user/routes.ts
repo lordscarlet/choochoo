@@ -34,7 +34,6 @@ const router = initServer().router(userContract, {
 
   async forgotPassword({ body }) {
     const user = await UserDao.findByUsernameOrEmail(body.usernameOrEmail);
-    console.log(`forgot password request for user ${body.usernameOrEmail}. found=${user != null}`);
     if (user != null) {
       emailService.sendForgotPasswordMessage(user.email);
     }
