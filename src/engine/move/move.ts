@@ -57,12 +57,12 @@ export class MoveAction implements ActionProcessor<MoveData> {
 
     const startingCity = grid.get(action.startingCity);
     assert(startingCity != null);
-    assert(startingCity.getGoods().includes(action.good), `${action.good} good not found at the indicated location`);
+    assert(startingCity.getGoods().includes(action.good), `${goodToString(action.good)} good not found at the indicated location`);
 
     const endingLocation = grid.get(peek(action.path).endingStop);
 
     if (!(endingLocation instanceof City)) {
-      throw new InvalidInputError(`${action.good} good cannot be delivered to non city`);
+      throw new InvalidInputError(`${goodToString(action.good)} good cannot be delivered to non city`);
     }
     if (!endingLocation.accepts(action.good)) {
       throw new InvalidInputError(`${goodToString(action.good)} good cannot be delivered to ${endingLocation.goodColors().map(goodToString).join('/')} city`);

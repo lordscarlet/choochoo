@@ -7,7 +7,7 @@ import { Log } from "../game/log";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { CityGroup } from "../state/city_group";
-import { Good } from "../state/good";
+import { Good, goodToString } from "../state/good";
 import { SpaceType } from "../state/location_type";
 import { OnRoll, OnRollData } from "../state/roll";
 import { GoodsHelper } from "./helper";
@@ -58,7 +58,7 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
       assert(city.type === SpaceType.CITY);
       const onRoll = this.findOnRoll(city.onRoll, data);
       onRoll!.goods.push(data.good);
-      this.log.currentPlayer(`puts ${data.good} in $${city.name}`);
+      this.log.currentPlayer(`puts ${goodToString(data.good)} in ${city.name}`);
     });
 
     this.turnState.update((state) => {
