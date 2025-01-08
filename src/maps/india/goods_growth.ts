@@ -3,7 +3,8 @@ import { UrbanizeAction, UrbanizeData } from "../../engine/build/urbanize";
 import { inject } from "../../engine/framework/execution_context";
 import { GoodsHelper } from "../../engine/goods_growth/helper";
 import { City } from "../../engine/map/city";
-import { Track } from "../../engine/map/track";
+import { calculateTrackInfo } from "../../engine/map/location";
+import { TOWN, Track } from "../../engine/map/track";
 import { PlayerColor } from "../../engine/state/player";
 import { allDirections } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
@@ -21,7 +22,20 @@ export class IndiaBuildAction extends BuildAction {
   }
 
   private getNewConnectedCities(data: BuildData): City[] {
-    return [];
+    const currentColor = this.currentPlayer().color;
+    return calculateTrackInfo(data)
+      .flatMap(({ exits }) => exits)
+      .filter((exit) => exit !== TOWN)
+      .map((exit) => this.grid().connection(data.coordinates, exit))
+      .filter((connection) => connection instanceof City)
+      .filter((city) => {
+        for (const direction of allDirections) {
+          const cityConnection = this.grid().connection(city.coordinates, direction);
+          if (!(cityConnection instanceof Track)) continue;
+          if (cityConnection.getOwner() === currentColor) return false;
+        }
+        return true;
+      });
   }
 }
 

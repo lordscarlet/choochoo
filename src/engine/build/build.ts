@@ -30,16 +30,16 @@ export class BuildAction implements ActionProcessor<BuildData> {
   static readonly action = 'build';
   readonly assertInput = BuildData.parse;
 
-  private readonly buildState = injectState(BUILD_STATE);
-  private readonly currentPlayer = injectCurrentPlayer();
-  private readonly grid = injectGrid();
-  private readonly gridHelper = inject(GridHelper);
-  private readonly helper = inject(BuilderHelper);
-  private readonly costCalculator = inject(BuildCostCalculator);
-  private readonly playerHelper = inject(PlayerHelper);
-  private readonly validator = inject(Validator);
-  private readonly moneyManager = inject(MoneyManager);
-  private readonly log = inject(Log);
+  protected readonly buildState = injectState(BUILD_STATE);
+  protected readonly currentPlayer = injectCurrentPlayer();
+  protected readonly grid = injectGrid();
+  protected readonly gridHelper = inject(GridHelper);
+  protected readonly helper = inject(BuilderHelper);
+  protected readonly costCalculator = inject(BuildCostCalculator);
+  protected readonly playerHelper = inject(PlayerHelper);
+  protected readonly validator = inject(Validator);
+  protected readonly moneyManager = inject(MoneyManager);
+  protected readonly log = inject(Log);
 
   validate(data: BuildData): void {
     const coordinates: Coordinates = data.coordinates;
@@ -99,7 +99,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     return 20;
   }
 
-  private newTile(data: BuildData): TileData {
+  protected newTile(data: BuildData): TileData {
     const newTileData = calculateTrackInfo(data);
     const oldTrack = this.gridHelper.lookup(data.coordinates);
     assert(oldTrack instanceof Land);
