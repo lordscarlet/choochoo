@@ -16,6 +16,10 @@
   color: black;
 }
 
+.logLine {
+  margin: 2px;
+}
+
 .scroll-to-bottom-container {
   position: absolute;
   width: 100%;

@@ -47,10 +47,10 @@ export function GameLog({ gameId }: GameLogProps) {
           const isNewDay = index == 0 || dateString !== messages[index - 1].date.toLocaleDateString();
           return <Fragment key={log.id}>
             {isNewDay && <p>-- {dateString} --</p>}
-            <p>
+            <p className={styles.logLine}>
               <span className={styles['time']}>{timeFormat(log.date)}</span>
               {' '}
-              <span className={styles['username']}>{log.userId != null ? <Username userId={log.userId} /> : 'System'}</span>:
+              {log.userId != null && <><span className={styles['username']}><Username userId={log.userId} /></span>:</>}
               {' '}
               <span className={styles['message']}><LogMessage message={log.message} /></span>
             </p>
