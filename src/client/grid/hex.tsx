@@ -121,10 +121,20 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, of
     {gameKey === 'cyprus' && <CyprusBorder space={space} center={center} size={size} />}
     {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
     {space instanceof Land && (space.getTileType() != null ? isTownTile(space.getTileType()!) : space.hasTown()) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
+    {space instanceof Land && space.getTileType() == null && space.getTerrainCost() != null && <TerrainCost space={space} center={center} size={size} />}
     {space instanceof Land && space.hasTown() && <HexName name={space.name()!} center={center} size={size} />}
     {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} />}
     {space instanceof City && space.name() != '' && <HexName name={space.name()} center={center} size={size} />}
     {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
+  </>;
+}
+
+function TerrainCost({ space, center, size }: { space: Land, center: Point, size: number }) {
+  return <>
+    <circle cx={center.x} cy={center.y} fill="#E0E0E0" r={size / 2.5} />
+    <text x={center.x} y={center.y} dominantBaseline="middle" textAnchor="middle">
+      ${space.getTerrainCost()!}
+    </text>
   </>;
 }
 
