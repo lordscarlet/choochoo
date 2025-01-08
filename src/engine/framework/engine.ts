@@ -7,7 +7,8 @@ import { PHASE } from "../game/phase";
 import { Random } from "../game/random";
 import { ROUND, RoundEngine } from "../game/round";
 import { injectCurrentPlayer } from "../game/state";
-import { getPhaseString } from "../state/phase";
+import { MOVE_STATE } from "../move/state";
+import { getPhaseString, Phase } from "../state/phase";
 import { SimpleConstructor } from "./dependency_stack";
 import { inject, injectState, setInjectionContext } from "./execution_context";
 import { InjectionContext } from "./inject";
@@ -68,6 +69,7 @@ export class EngineProcessor {
   private readonly round = injectState(ROUND);
   private readonly roundEngine = inject(RoundEngine);
   private readonly phase = injectState(PHASE);
+  private readonly moveState = injectState(MOVE_STATE);
 
   start(playerIds: number[], mapConfig: MapConfig): GameState {
     return this.process(undefined, () => {
@@ -87,7 +89,12 @@ export class EngineProcessor {
 
   readSummary(gameData: string): string {
     return this.process(gameData, () => {
-      return `${getPhaseString(this.phase())}. Round ${this.round()}/${this.roundEngine.maxRounds()}.`;
+      return [
+        `Turn ${this.round()}/${this.roundEngine.maxRounds()}`,
+        this.phase() === Phase.MOVING
+          ? `Move goods round ${this.moveState().moveRound + 1}`
+          : getPhaseString(this.phase()),
+      ].join(' - ');
     });
   }
 

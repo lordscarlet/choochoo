@@ -1,9 +1,10 @@
-.currentPhase {
-  font-size: 14px;
+.header {
+  font-size: 1.0rem;
 }
 
 .currentPlayer {
   font-weight: bold;
+  text-decoration: underline;
 }
 
 .turnOrder {

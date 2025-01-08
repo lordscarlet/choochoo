@@ -2,18 +2,16 @@ import { Button } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { GameStatus } from "../../api/game";
 import { inject } from "../../engine/framework/execution_context";
-import { PHASE } from "../../engine/game/phase";
 import { PlayerHelper } from "../../engine/game/player";
 import { injectAllPlayersUnsafe, injectPlayersByTurnOrder } from "../../engine/game/state";
 import { ProductionAction } from "../../engine/goods_growth/production";
-import { MOVE_STATE } from "../../engine/move/state";
 import { SelectAction } from "../../engine/select_action/select";
-import { Phase } from "../../engine/state/phase";
+import { MapRegistry } from "../../maps";
 import { isNumber } from "../../utils/validate";
 import { Username, UsernameList } from "../components/username";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
-import { GameContextProvider, useActiveGameState, useCurrentPlayer, useInject, useInjectedState } from "../utils/injection_context";
+import { GameContextProvider, useCurrentPlayer, useInject } from "../utils/injection_context";
 import { ActionSummary } from "./action_summary";
 import * as styles from './active_game.module.css';
 import { AvailableCities } from "./available_cities";
@@ -42,8 +40,7 @@ function InternalActiveGame() {
   const undoOnly = searchParams.get('undoOnly') != null;
 
   return <div>
-    <h2>{game.name}</h2>
-    {!undoOnly && <CurrentPhase />}
+    {!undoOnly && <Header />}
     <GameLog gameId={game.id} />
     <TurnOrder />
     <Editor />
@@ -78,26 +75,26 @@ export function TurnOrder() {
   </div>;
 }
 
-export function CurrentPhase() {
+export function Header() {
   const game = useGame();
-  const phase = useActiveGameState(PHASE);
-  return <div>
-    {game.status === GameStatus.enum.ENDED && <GameOver />}
-    {game.summary && <p className={styles.currentPhase}>
-      {game.summary}
-      {phase === Phase.MOVING && <MovingMetadata />}
-    </p>}
-  </div>;
+  return <h1 className={styles.header}>
+    [{game.name}] {MapRegistry.singleton.get(game.gameKey).name} - {game.summary}
+  </h1>;
 }
 
 export function GameOver() {
+  const game = useGame();
   const winnerIds = useInject(() => {
+    if (game.status !== GameStatus.enum.ENDED) return;
     const helper = inject(PlayerHelper);
     const players = injectAllPlayersUnsafe();
     const scores = players().map((player) => [player.playerId, helper.getScore(player)] as const);
     const bestScore = Math.max(...scores.map(([_, score]) => score).filter(isNumber));
     return scores.filter(([_, score]) => score === bestScore).map(([id]) => id);
-  }, []);
+  }, [game]);
+
+  if (winnerIds == null) return <></>;
+
   return <>
     <p>Game over.</p>
     <p>
@@ -107,11 +104,6 @@ export function GameOver() {
       }
     </p>
   </>;
-}
-
-export function MovingMetadata() {
-  const state = useInjectedState(MOVE_STATE);
-  return <> Move round {state.moveRound + 1}</>;
 }
 
 export function UndoButton() {
