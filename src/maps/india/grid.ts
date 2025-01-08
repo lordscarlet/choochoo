@@ -22,6 +22,7 @@ export const map = grid([
     PLAIN,
     ...duplicate(4, DESERT),
     RIVER,
+    PLAIN,
     city('Bombay', PURPLE, white(3), 3),
     PLAIN,
   ],
@@ -76,6 +77,7 @@ export const map = grid([
     city('Nagpur', RED, white(4), 3),
     PLAIN,
     RIVER,
+    PLAIN,
     PLAIN,
   ],
   [
