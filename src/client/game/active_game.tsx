@@ -4,7 +4,7 @@ import { GameStatus } from "../../api/game";
 import { inject } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
 import { PlayerHelper } from "../../engine/game/player";
-import { injectAllPlayersUnsafe } from "../../engine/game/state";
+import { injectAllPlayersUnsafe, injectPlayersByTurnOrder } from "../../engine/game/state";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { MOVE_STATE } from "../../engine/move/state";
 import { SelectAction } from "../../engine/select_action/select";
@@ -13,7 +13,7 @@ import { isNumber } from "../../utils/validate";
 import { Username, UsernameList } from "../components/username";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
-import { GameContextProvider, useActiveGameState, useInject, useInjectedState } from "../utils/injection_context";
+import { GameContextProvider, useActiveGameState, useCurrentPlayer, useInject, useInjectedState } from "../utils/injection_context";
 import { ActionSummary } from "./action_summary";
 import * as styles from './active_game.module.css';
 import { AvailableCities } from "./available_cities";
@@ -45,6 +45,7 @@ function InternalActiveGame() {
     <h2>{game.name}</h2>
     {!undoOnly && <CurrentPhase />}
     <GameLog gameId={game.id} />
+    <TurnOrder />
     <Editor />
     <UndoButton />
     <SwitchToActive />
@@ -60,6 +61,20 @@ function InternalActiveGame() {
     {!undoOnly && !canEmitProduction && game.status === GameStatus.enum.ACTIVE && <GoodsTable />}
     {!undoOnly && <AvailableCities />}
     <MapInfo gameKey={game.gameKey} />
+  </div>;
+}
+
+export function TurnOrder() {
+  const turnOrder = useInject(() => injectPlayersByTurnOrder()(), []);
+  const current = useCurrentPlayer();
+
+  return <div className={styles.turnOrder}>
+    {turnOrder.map((player, index) => <>
+      {index !== 0 && ' | '}
+      <span className={player.color === current?.color ? styles.currentPlayer : ''}>
+        <Username userId={player.playerId} />
+      </span>
+    </>)}
   </div>;
 }
 

@@ -1,3 +1,11 @@
 .currentPhase {
   font-size: 14px;
 }
+
+.currentPlayer {
+  font-weight: bold;
+}
+
+.turnOrder {
+  margin: 8px 0;
+}
