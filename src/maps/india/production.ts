@@ -19,12 +19,18 @@ import { CoordinatesZod } from "../../utils/coordinates";
 import { remove } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 
-const ProductionState = z.object({
+export const InProgressProduction = z.object({
   coordinates: CoordinatesZod,
   goods: GoodZod.array(),
 });
+export type InProgressProduction = z.infer<typeof InProgressProduction>;
 
-const PRODUCTION_STATE = new Key('productionState', { parse: ProductionState.parse });
+export const ProductionState = z.object({
+  production: InProgressProduction.optional(),
+});
+export type ProductionState = z.infer<typeof ProductionState>;
+
+export const PRODUCTION_STATE = new Key('productionState', { parse: ProductionState.parse });
 
 export class IndiaPhaseEngine extends PhaseEngine {
   phaseOrder(): Phase[] {
@@ -44,12 +50,23 @@ export class IndiaPhaseDelegator extends PhaseDelegator {
 
 export class IndiaGoodsGrowthPhase extends PhaseModule {
   static readonly phase = Phase.MANUAL_GOODS_GROWTH;
+  private readonly state = injectState(PRODUCTION_STATE);
 
   protected readonly productionPlayer = injectPlayerAction(Action.PRODUCTION);
 
   configureActions(): void {
     this.installAction(SelectCityAction);
     this.installAction(SelectGoodAction);
+  }
+
+  onStart(): void {
+    super.onStart();
+    this.state.initState({});
+  }
+
+  onEnd(): void {
+    super.onEnd();
+    this.state.delete();
   }
 
   getPlayerOrder(): PlayerColor[] {
@@ -75,19 +92,21 @@ export class SelectCityAction implements ActionProcessor<SelectCityData> {
   private readonly goodsHelper = inject(GoodsHelper);
 
   validate({ coordinates }: SelectCityData) {
-    assert(!this.state.isInitialized, { invalidInput: 'cannot change selected city' });
+    assert(!this.state().production == null, { invalidInput: 'cannot change selected city' });
     assert(this.grid().get(coordinates) instanceof City, { invalidInput: 'Must choose a city' });
   }
 
   process({ coordinates }: SelectCityData): boolean {
-    this.state.initState({
-      coordinates,
-      goods: this.goodsHelper.drawGoods(2),
+    const goods = this.goodsHelper.drawGoods(2);
+    this.state.set({
+      production: {
+        coordinates,
+        goods,
+      },
     });
     const city = this.grid().get(coordinates);
     assert(city instanceof City);
-    this.log.currentPlayer(`selects ${city.name()
-      }, draws ${this.state().goods.map(goodToString).join(', ')}`);
+    this.log.currentPlayer(`selects ${city.name()}, draws ${goods.map(goodToString).join(', ')}`);
     return false;
   }
 }
@@ -107,26 +126,25 @@ export class SelectGoodAction implements ActionProcessor<SelectGoodData> {
   private readonly gridHelper = inject(GridHelper);
 
   validate({ good }: SelectGoodData) {
-    assert(this.state.isInitialized(), { invalidInput: 'must select city first' });
-    assert(this.state().goods.includes(good), { invalidInput: 'invalid good' });
+    const { production } = this.state();
+    assert(production != null, { invalidInput: 'must select city first' });
+    assert(production.goods.includes(good), { invalidInput: 'invalid good' });
   }
 
   process({ good }: SelectGoodData): boolean {
-    const otherGoods = remove(this.state().goods, good);
+    const { goods, coordinates } = this.state().production!;
+    const otherGoods = remove(goods, good);
     this.bag.update((bag) => bag.push(...otherGoods));
-    this.gridHelper.update(this.state().coordinates, (city) => {
+    this.gridHelper.update(coordinates, (city) => {
       assert(city.type === SpaceType.CITY);
 
       city.goods.push(good);
     });
 
-    const city = this.gridHelper.lookup(this.state().coordinates);
+    const city = this.gridHelper.lookup(coordinates);
     assert(city instanceof City);
 
-    this.log.currentPlayer(`places ${goodToString(good)} in ${city.name()
-      }, draws ${this.state().goods.map(goodToString).join(', ')}`);
-
-    this.state.delete();
+    this.log.currentPlayer(`places ${goodToString(good)} in ${city.name()}`);
     return true;
   }
 }

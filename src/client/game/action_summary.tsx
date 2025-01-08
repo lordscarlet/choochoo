@@ -22,6 +22,7 @@ import { DropdownMenu, DropdownMenuItem } from "../components/dropdown_menu";
 import { Username } from "../components/username";
 import { useAction, useEmptyAction } from "../services/game";
 import { useActiveGameState, useCurrentPlayer, useInject, useInjected, usePhaseState } from "../utils/injection_context";
+import { ManualGoodsGrowth } from "./india/goods_growth";
 
 
 const PASS_ACTION = 'Pass' as const;
@@ -42,6 +43,8 @@ export function ActionSummary() {
       return <EndGame />
     case Phase.DEURBANIZATION:
       return <Deurbanization />;
+    case Phase.MANUAL_GOODS_GROWTH:
+      return <ManualGoodsGrowth />;
     case Phase.GOODS_GROWTH:
     case Phase.INCOME:
     case Phase.EXPENSES:
@@ -89,7 +92,7 @@ export function MoveGoods() {
     <GenericMessage>You must move a good.</GenericMessage>
     {!state!.locomotive.includes(player!.color) && <Button onClick={emitLoco}>Locomotive</Button>}
     <Button onClick={emitPass}>Pass</Button>
-  </div>
+  </div>;
 }
 
 function numberFormat(num: number): string {
