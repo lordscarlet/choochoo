@@ -10,7 +10,6 @@ export function Editor() {
   const game = useGame();
   const canEdit = environment.stage === Stage.enum.development;
   const canRead = canEdit || isAdmin;
-  if (!canRead) return <></>;
   const content = useMemo(() => {
     return JSON.stringify(JSON.parse(game.gameData!), null, 2)
   }, [game]);
@@ -33,6 +32,8 @@ export function Editor() {
     if (!confirmed) return;
     setGameData(JSON.stringify(JSON.parse(actualContent)));
   }, [actualContent, setGameData]);
+
+  if (!canRead) return <></>;
 
   return <>
     <Button onClick={toggle}>{isOpen ? 'Close editor' : 'Edit'}</Button>
