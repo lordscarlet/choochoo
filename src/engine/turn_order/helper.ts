@@ -1,6 +1,6 @@
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
-import { PlayerHelper } from "../game/player";
+import { MoneyManager } from "../game/money_manager";
 import { injectCurrentPlayer, TURN_ORDER } from "../game/state";
 import { Action } from "../state/action";
 import { PlayerColor, PlayerData, stringToPlayerColor } from "../state/player";
@@ -10,7 +10,7 @@ export class TurnOrderHelper {
   private readonly turnOrder = injectState(TURN_ORDER);
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly currentPlayer = injectCurrentPlayer();
-  private readonly playerHelper = inject(PlayerHelper);
+  private readonly moneyManager = inject(MoneyManager);
   private readonly log = inject(Log);
 
   getMinBid(): number {
@@ -65,6 +65,6 @@ export class TurnOrderHelper {
       delete state.previousBids[player.color];
       state.nextTurnOrder.unshift(player.color);
     });
-    this.playerHelper.addMoney(player.color, -cost);
+    this.moneyManager.addMoney(player.color, -cost);
   }
 }

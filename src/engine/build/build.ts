@@ -5,6 +5,7 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
+import { MoneyManager } from "../game/money_manager";
 import { PlayerHelper } from "../game/player";
 import { injectCurrentPlayer, injectGrid } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
@@ -37,6 +38,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
   private readonly costCalculator = inject(BuildCostCalculator);
   private readonly playerHelper = inject(PlayerHelper);
   private readonly validator = inject(Validator);
+  private readonly moneyManager = inject(MoneyManager);
   private readonly log = inject(Log);
 
   validate(data: BuildData): void {
@@ -62,7 +64,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
 
   process(data: BuildData): boolean {
     const coordinates = data.coordinates;
-    this.playerHelper.updateCurrentPlayer((player) => player.money -= this.costCalculator.costOf(coordinates, data.tileType));
+    this.moneyManager.addMoneyForCurrentPlayer(-this.costCalculator.costOf(coordinates, data.tileType));
     const newTile = this.newTile(data);
     this.log.currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${this.grid().displayName(data.coordinates)}`);
     this.gridHelper.update(coordinates, (hex) => {

@@ -13,7 +13,7 @@ export class PassAction implements ActionProcessor<{}> {
   validate(_: {}) { }
 
   process(): boolean {
-    this.log.currentPlayer('skips goods growth phase');
+    this.log.currentPlayer('skips production action');
     return true;
   }
 }

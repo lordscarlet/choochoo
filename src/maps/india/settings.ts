@@ -1,5 +1,8 @@
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import { ExpensiveMountains } from "./costs";
 import { map } from "./grid";
+import { IndiaIncomePhase } from "./monsoon";
+import { IndiaPhaseDelegator, IndiaPhaseEngine } from "./production";
 
 export class IndiaMapSettings implements MapSettings {
   static readonly key = 'india';
@@ -11,6 +14,11 @@ export class IndiaMapSettings implements MapSettings {
   readonly stage = ReleaseStage.ALPHA;
 
   getOverrides() {
-    return [];
+    return [
+      ExpensiveMountains,
+      IndiaIncomePhase,
+      IndiaPhaseEngine,
+      IndiaPhaseDelegator,
+    ];
   }
 }

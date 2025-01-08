@@ -8,6 +8,15 @@ export class PlayerHelper {
   private readonly players = injectAllPlayersUnsafe();
   private readonly grid = injectGrid();
 
+  updateInGamePlayers(updateFn: (data: MutablePlayerData) => void): void {
+    this.players.update((players) => {
+      for (const player of players) {
+        if (player.outOfGame) continue;
+        updateFn(player);
+      }
+    });
+  }
+
   update(playerColor: PlayerColor, updateFn: (data: MutablePlayerData) => void): void {
     this.players.update((players) => {
       const player = players.find((player) => player.color === playerColor);
@@ -30,14 +39,6 @@ export class PlayerHelper {
 
   isSoloGame(): boolean {
     return this.players().length === 1;
-  }
-
-  addMoneyForCurrentPlayer(num: number): void {
-    return this.addMoney(this.currentPlayer(), num);
-  }
-
-  addMoney(playerColor: PlayerColor, num: number): void {
-    return this.update(playerColor, (player) => player.money += num);
   }
 
   getScore(player: PlayerData): Score {

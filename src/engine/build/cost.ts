@@ -4,6 +4,7 @@ import { injectGrid } from "../game/state";
 import { countExits, Land } from "../map/location";
 import { crosses, isComplexTile, isSimpleTile, isTownTile } from "../map/tile";
 import { SpaceType } from "../state/location_type";
+import { LandType } from "../state/space";
 import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../state/tile";
 
 
@@ -29,9 +30,12 @@ export class BuildCostCalculator {
     }
   }
 
-  getTerrainCost(location: Land): number {
-    if (location.hasTown()) return 0;
-    const type = location.getLandType();
+  protected getTerrainCost(location: Land): number {
+    assert(!location.hasTown());
+    return location.getTerrainCost() ?? this.getCostOfLandType(location.getLandType());
+  }
+
+  protected getCostOfLandType(type: LandType): number {
     switch (type) {
       case SpaceType.MOUNTAIN: return 4;
       case SpaceType.RIVER: return 3;
@@ -47,12 +51,12 @@ export class BuildCostCalculator {
     }
   }
 
-  getTownTileCost(tileType: TownTileType): number {
+  protected getTownTileCost(tileType: TownTileType): number {
     return countExits(tileType) + 1;
 
   }
 
-  getTileCost(tileType: SimpleTileType | ComplexTileType): number {
+  protected getTileCost(tileType: SimpleTileType | ComplexTileType): number {
     if (isSimpleTile(tileType)) {
       return 0;
     }

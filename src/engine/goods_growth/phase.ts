@@ -1,4 +1,3 @@
-import { iterate } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
@@ -8,7 +7,7 @@ import { BAG, injectInitialPlayerCount, injectPlayerAction } from "../game/state
 import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
-import { Good, goodToString } from "../state/good";
+import { goodToString } from "../state/good";
 import { SpaceType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
@@ -20,14 +19,14 @@ import { GOODS_GROWTH_STATE } from "./state";
 export class GoodsGrowthPhase extends PhaseModule {
   static readonly phase = Phase.GOODS_GROWTH;
 
-  private readonly log = inject(Log);
-  private readonly grid = inject(GridHelper);
-  private readonly playerCount = injectInitialPlayerCount();
-  private readonly productionPlayer = injectPlayerAction(Action.PRODUCTION);
-  private readonly bag = injectState(BAG);
-  private readonly turnState = injectState(GOODS_GROWTH_STATE);
-  private readonly helper = inject(GoodsHelper);
-  private readonly random = inject(Random);
+  protected readonly log = inject(Log);
+  protected readonly grid = inject(GridHelper);
+  protected readonly playerCount = injectInitialPlayerCount();
+  protected readonly productionPlayer = injectPlayerAction(Action.PRODUCTION);
+  protected readonly bag = injectState(BAG);
+  protected readonly goodsGrowthState = injectState(GOODS_GROWTH_STATE);
+  protected readonly helper = inject(GoodsHelper);
+  protected readonly random = inject(Random);
 
   configureActions(): void {
     this.installAction(ProductionAction);
@@ -36,21 +35,17 @@ export class GoodsGrowthPhase extends PhaseModule {
 
   onStartTurn(): void {
     super.onStartTurn();
-    const goods: Good[] = [];
-    this.bag.update((bag) => {
-      iterate(2, () => {
-        if (bag.length === 0) return;
-        const index = this.random.random(bag.length);
-        goods.push(...bag.splice(index, 1));
-      });
-    });
-    const asColors = goods.map((good) => goodToString(good));
+    const goods = this.helper.drawGoods(2);
+    const asColors = goods.map(goodToString);
     this.log.currentPlayer(`draws ${asColors.join(', ')}`);
-    this.turnState.initState({ goods });
+    this.goodsGrowthState.initState({ goods });
   }
 
   onEndTurn(): void {
-    this.turnState.delete();
+    if (this.goodsGrowthState().goods.length > 0) {
+      this.bag.update((bag) => bag.push(...this.goodsGrowthState().goods));
+    }
+    this.goodsGrowthState.delete();
     super.onEndTurn();
   }
 

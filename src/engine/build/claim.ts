@@ -4,6 +4,7 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
+import { MoneyManager } from "../game/money_manager";
 import { PlayerHelper } from "../game/player";
 import { CURRENT_PLAYER, injectCurrentPlayer, injectGrid } from "../game/state";
 import { City } from "../map/city";
@@ -31,6 +32,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
   protected readonly currentPlayerColor = injectState(CURRENT_PLAYER);
   protected readonly currentPlayer = injectCurrentPlayer();
   protected readonly playerHelper = inject(PlayerHelper);
+  protected readonly moneyManager = inject(MoneyManager);
 
   validate(data: ClaimData): void {
     const space = this.grid().get(data.coordinates);
@@ -62,7 +64,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
       previousBuilds.push(data.coordinates);
     });
 
-    this.playerHelper.addMoneyForCurrentPlayer(-track.claimCost());
+    this.moneyManager.addMoneyForCurrentPlayer(-track.claimCost());
     return this.helper.isAtEndOfTurn();
   }
 }

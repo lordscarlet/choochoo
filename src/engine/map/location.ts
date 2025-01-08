@@ -25,6 +25,10 @@ export class Land {
     return this.data.tile != null;
   }
 
+  getTerrainCost(): number | undefined {
+    return this.data.terrainCost;
+  }
+
   getTileType(): TileType | undefined {
     return this.data.tile?.tileType;
   }
