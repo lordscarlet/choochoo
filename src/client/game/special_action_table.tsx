@@ -4,6 +4,7 @@ import { injectPlayerAction } from "../../engine/game/state";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
 import { Action, getSelectedActionString } from "../../engine/state/action";
+import { IndiaMapSettings } from "../../maps/india/settings";
 import { IrelandMapSettings } from "../../maps/ireland/settings";
 import { MadagascarAllowedActions } from "../../maps/madagascar/allowed_actions";
 import { MadagascarMapSettings } from "../../maps/madagascar/settings";
@@ -76,6 +77,9 @@ function getSelectedActionDescription(action: Action, gameKey: string): string {
       }
       return 'Immediately, increase your locomotive by one.';
     case Action.PRODUCTION:
+      if (gameKey === IndiaMapSettings.key) {
+        return 'During the Goods Growth step, select a city, draw 2 goods, then place one of those goods in the selected city.';
+      }
       return 'Before the Goods Growth step, draw two cubes and place them on the Goods Growth chart';
     case Action.TURN_ORDER_PASS:
       return 'Next auction, pass without dropping out of the bidding.';
