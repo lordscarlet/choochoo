@@ -128,6 +128,10 @@ export class SelectGoodAction implements ActionProcessor<SelectGoodData> {
   private readonly bag = injectState(BAG);
   private readonly gridHelper = inject(GridHelper);
 
+  canEmit(): boolean {
+    return this.state().production != null;
+  }
+
   validate({ good }: SelectGoodData) {
     const { production } = this.state();
     assert(production != null, { invalidInput: 'must select city first' });
