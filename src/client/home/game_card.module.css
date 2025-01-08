@@ -27,9 +27,5 @@
 }
 
 .active.activePlayer {
-  background-color: lightgreen;
-}
-
-:global(.dark-mode) .active.activePlayer {
-  background-color: darkgreen;
+  background-color: orangered;
 }

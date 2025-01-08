@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@t
 import { DialogsProvider, NotificationsProvider } from "@toolpad/core";
 import { Suspense, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { AwaitingContextProvider } from "../components/awaiting_player";
 import { Loading } from "../components/loading";
 import { tsr } from '../services/client';
 import { AdminModeProvider } from "../services/me";
@@ -28,13 +29,15 @@ export function App() {
       <ThemeProvider theme={theme}>
         <DialogsProvider>
           <NotificationsProvider>
-            <ErrorBoundary onReset={reset} fallbackRender={({ resetErrorBoundary }) => <ResetError resetErrorBoundary={resetErrorBoundary} />}>
-              <QueryClientProvider client={queryClient}>
-                <tsr.ReactQueryProvider>
-                  <Router />
-                </tsr.ReactQueryProvider>
-              </QueryClientProvider>
-            </ErrorBoundary>
+            <AwaitingContextProvider>
+              <ErrorBoundary onReset={reset} fallbackRender={({ resetErrorBoundary }) => <ResetError resetErrorBoundary={resetErrorBoundary} />}>
+                <QueryClientProvider client={queryClient}>
+                  <tsr.ReactQueryProvider>
+                    <Router />
+                  </tsr.ReactQueryProvider>
+                </QueryClientProvider>
+              </ErrorBoundary>
+            </AwaitingContextProvider>
           </NotificationsProvider>
         </DialogsProvider>
       </ThemeProvider>

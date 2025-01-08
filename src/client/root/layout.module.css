@@ -8,3 +8,7 @@
   padding: 8px;
   margin: 0 auto;
 }
+
+.appBar.appBarActive {
+  background-color: orangered;
+}

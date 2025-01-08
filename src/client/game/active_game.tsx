@@ -8,6 +8,7 @@ import { ProductionAction } from "../../engine/goods_growth/production";
 import { SelectAction } from "../../engine/select_action/select";
 import { MapRegistry } from "../../maps";
 import { isNumber } from "../../utils/validate";
+import { useAwaitingPlayer } from "../components/awaiting_player";
 import { Username, UsernameList } from "../components/username";
 import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
@@ -38,6 +39,8 @@ function InternalActiveGame() {
   const game = useGame();
   const [searchParams] = useSearchParams();
   const undoOnly = searchParams.get('undoOnly') != null;
+
+  useAwaitingPlayer(game.activePlayerId);
 
   return <div>
     {!undoOnly && <Header />}

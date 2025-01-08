@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { GameLiteApi, GameStatus, gameStatusToString } from "../../api/game";
 import { MapRegistry } from "../../maps";
 import { assertNever } from "../../utils/validate";
+import { useAwaitingPlayer } from "../components/awaiting_player";
 import { Username, UsernameList } from "../components/username";
 import { useJoinGame, useLeaveGame, useStartGame } from "../services/game";
 import { useMe } from "../services/me";
@@ -15,6 +16,8 @@ interface GameCardProps {
 
 export function GameCard({ game, hideStatus }: GameCardProps) {
   const me = useMe();
+
+  useAwaitingPlayer(game.activePlayerId);
 
   return <Card className={styles.gameCard}>
     <CardHeader title={game.name}

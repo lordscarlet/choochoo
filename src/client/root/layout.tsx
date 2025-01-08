@@ -14,6 +14,7 @@ import { AppBar, Button, ListItemIcon, MenuList, styled, Toolbar, Typography, us
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from 'react-error-boundary';
 import { Link, Outlet } from "react-router-dom";
+import { useIsAwaitingPlayer } from '../components/awaiting_player';
 import { DropdownMenu, DropdownMenuItem } from '../components/dropdown_menu';
 import { Loading } from '../components/loading';
 import { FeedbackForm } from "../services/feedback/form";
@@ -32,6 +33,7 @@ export function Layout() {
 
   const [enableAdminMode, setEnableAdminMode] = useEnableAdminMode();
   const isAdmin = useIsAdmin(true);
+  const isAwaiting = useIsAwaitingPlayer();
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
@@ -43,7 +45,7 @@ export function Layout() {
   }, [darkModeEnabled]);
 
   return <>
-    <AppBar position="fixed">
+    <AppBar position="fixed" className={`${styles.appBar} ${isAwaiting ? styles.appBarActive : ''}`}>
       <Toolbar>
         <Typography color="white" style={{ textDecoration: 'none' }} variant="h6" sx={{ flexGrow: 1 }} component={Link} to="/">
           Choo Choo Games
