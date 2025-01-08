@@ -24,7 +24,6 @@ export class RoundEngine {
   }
 
   end(): void {
-    this.log.log(`End round #${this.currentRound()}`);
     this.currentRound.delete();
   }
 
