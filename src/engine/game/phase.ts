@@ -1,7 +1,7 @@
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Key } from "../framework/key";
-import { getPhaseString, Phase, PhaseZod } from "../state/phase";
+import { Phase, PhaseZod } from "../state/phase";
 import { Log } from "./log";
 import { PhaseDelegator } from "./phase_delegator";
 
@@ -14,7 +14,6 @@ export class PhaseEngine {
 
   start(phase: Phase): void {
     this.phase.initState(phase);
-    this.log.log(`Starting ${getPhaseString(phase)}`);
     const phaseProcessor = this.delegator.get();
     phaseProcessor.onStart();
   }
@@ -23,7 +22,6 @@ export class PhaseEngine {
     const currentPhase = this.phase();
     this.delegator.get().onEnd();
     this.phase.delete();
-    this.log.log(`Ending ${getPhaseString(currentPhase)}`);
   }
 
   getFirstPhase(): Phase {

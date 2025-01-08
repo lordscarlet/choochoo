@@ -22,17 +22,17 @@ export const PhaseZod = z.nativeEnum(Phase);
 
 export function getPhaseString(phase: Phase): string {
   switch (phase) {
-    case Phase.SHARES: return 'Issue shares phase';
-    case Phase.TURN_ORDER: return 'Bid for turn order phase';
-    case Phase.ACTION_SELECTION: return 'Select actions phase';
-    case Phase.BUILDING: return 'Build track phase';
-    case Phase.MOVING: return 'Move goods phase';
-    case Phase.INCOME: return 'Collect income phase';
-    case Phase.EXPENSES: return 'Pay expenses phase';
-    case Phase.INCOME_REDUCTION: return 'Income reduction phase';
-    case Phase.GOODS_GROWTH: return 'Goods growth phase';
+    case Phase.SHARES: return 'Issue shares';
+    case Phase.TURN_ORDER: return 'Bid for turn order';
+    case Phase.ACTION_SELECTION: return 'Select actions';
+    case Phase.BUILDING: return 'Build track';
+    case Phase.MOVING: return 'Move goods';
+    case Phase.INCOME: return 'Collect income';
+    case Phase.EXPENSES: return 'Pay expenses';
+    case Phase.INCOME_REDUCTION: return 'Income reduction';
+    case Phase.GOODS_GROWTH: return 'Goods growth';
     case Phase.END_GAME: return 'End Game';
-    case Phase.DEURBANIZATION: return 'Deurbanization phase';
+    case Phase.DEURBANIZATION: return 'Deurbanization';
     default:
       assertNever(phase);
   }
