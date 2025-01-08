@@ -96,7 +96,7 @@ export function GameOver() {
 
 export function MovingMetadata() {
   const state = useInjectedState(MOVE_STATE);
-  return <> Move round #{state.moveRound + 1}</>;
+  return <> Move round {state.moveRound + 1}</>;
 }
 
 export function UndoButton() {
