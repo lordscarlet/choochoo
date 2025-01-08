@@ -220,7 +220,7 @@ const router = initServer().router(gameContract, {
       const game = await GameDao.findByPk(gameId, { transaction });
       assert(game != null);
       assert(gameHistory != null);
-      assert(gameHistory.reversible, { invalidInput: 'cannot undo reversible action' });
+      assert(gameHistory.reversible, { invalidInput: 'cannot undo irreversible action' });
       assert(game.version === gameHistory.previousGameVersion + 1, 'can only undo one step');
       assert(gameHistory.userId === req.session.userId, { permissionDenied: true });
 
