@@ -30,7 +30,8 @@ export class PhaseModule {
   }
 
   canEmitAction(actionName: string): boolean {
-    return this.actionRegistry.has(actionName);
+    const action = this.actionRegistry.get(actionName);
+    return action != null && (action.canEmit == null || action.canEmit());
   }
 
   processAction(actionName: string, data: unknown): boolean {

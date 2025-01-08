@@ -12,6 +12,7 @@ import { MoveAction, MoveData, Path } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";
 import { PlayerData } from "../../engine/state/player";
 import { isDirection } from "../../engine/state/tile";
+import { SelectCityAction, SelectCityData } from "../../maps/india/production";
 import { DeurbanizeAction, DeurbanizeData } from "../../maps/ireland/deurbanization";
 import { Coordinates } from "../../utils/coordinates";
 import { peek } from "../../utils/functions";
@@ -133,9 +134,25 @@ function getSelectedGood(moveActionProgress: MoveData | undefined): { good: Good
   };
 }
 
-function onClickCb(isPending: boolean, canEmitClaim: boolean, emitClaim: (data: ClaimData) => void, canEmitBuild: boolean, canEmitDeurbanize: boolean, emitDeurbanize: (data: DeurbanizeData) => void, canEmitMove: boolean, onSelectGood: (city: City, good: Good) => boolean, setBuildingSpace: (space: Land) => void, onMoveToSpace: (space: Space) => void) {
+function onClickCb(
+  isPending: boolean,
+  canEmitClaim: boolean,
+  emitClaim: (data: ClaimData) => void,
+  canEmitBuild: boolean,
+  canEmitDeurbanize: boolean,
+  emitDeurbanize: (data: DeurbanizeData) => void,
+  canEmitSelectCity: boolean,
+  emitSelectCity: (data: SelectCityData) => void,
+  canEmitMove: boolean,
+  onSelectGood: (city: City, good: Good) => boolean,
+  setBuildingSpace: (space: Land) => void,
+  onMoveToSpace: (space: Space) => void) {
   return (space: Space, good?: Good) => {
     if (isPending) return;
+    if (canEmitSelectCity) {
+      emitSelectCity({ coordinates: space.coordinates });
+      return;
+    }
     if (canEmitClaim) {
       if (space instanceof Land && space.getTrack().some(track => track.isClaimable())) {
         emitClaim({ coordinates: space.coordinates });
@@ -187,12 +204,13 @@ export function GameMap() {
   const { canEmit: canEmitMove, emit: emitMove, isPending: isMovePending } = useAction(MoveAction);
   const { canEmit: canEmitClaim, emit: emitClaim, isPending: isClaimPending } = useAction(ClaimAction);
   const { canEmit: canEmitDeurbanize, emit: emitDeurbanize, isPending: isDeurbanizePending } = useAction(DeurbanizeAction);
+  const { canEmit: canEmitSelectCity, emit: emitSelectCity, isPending: isSelectCityPending } = useAction(SelectCityAction);
   const player = useCurrentPlayer();
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Land | undefined>(undefined);
   const moveHelper = useInjected(MoveHelper);
 
-  const isPending = isBuildPending || isMovePending || isDeurbanizePending || isClaimPending;
+  const isPending = isBuildPending || isMovePending || isDeurbanizePending || isClaimPending || isSelectCityPending;
 
   const dialogs = useDialogs();
 
@@ -216,6 +234,8 @@ export function GameMap() {
       canEmitBuild,
       canEmitDeurbanize,
       emitDeurbanize,
+      canEmitSelectCity,
+      emitSelectCity,
       canEmitMove,
       onSelectGood,
       setBuildingSpace,
@@ -234,8 +254,11 @@ export function GameMap() {
     if (canEmitBuild) {
       return new Set([ClickTarget.LOCATION]);
     }
+    if (canEmitSelectCity) {
+      return new Set([ClickTarget.CITY]);
+    }
     return new Set();
-  }, [canEmitMove, canEmitDeurbanize, canEmitBuild, isPending]);
+  }, [canEmitMove, canEmitDeurbanize, canEmitBuild, isPending, canEmitSelectCity]);
 
   return <>
     <HexGrid onClick={onClick} fullMapVersion={true} highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />

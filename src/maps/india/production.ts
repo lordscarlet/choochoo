@@ -91,8 +91,11 @@ export class SelectCityAction implements ActionProcessor<SelectCityData> {
   private readonly state = injectState(PRODUCTION_STATE);
   private readonly goodsHelper = inject(GoodsHelper);
 
+  canEmit(): boolean {
+    return this.state().production == null;
+  }
+
   validate({ coordinates }: SelectCityData) {
-    assert(!this.state().production == null, { invalidInput: 'cannot change selected city' });
     assert(this.grid().get(coordinates) instanceof City, { invalidInput: 'Must choose a city' });
   }
 
