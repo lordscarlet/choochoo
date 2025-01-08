@@ -4,12 +4,12 @@ import { z } from 'zod';
 export const UserRole = z.enum(['ACTIVATE_EMAIL', 'USER', 'ADMIN', 'BLOCKED']);
 export type UserRole = z.infer<typeof UserRole>;
 
-const UsernameOrEmail = z.string().trim().toLowerCase().min(1);
+const UsernameOrEmail = z.string().trim().min(1);
 const Password = z.string().min(8).max(32);
 
 export const CreateUserApi = z.object({
-  email: z.string().trim().toLowerCase().email(),
-  username: z.string().toLowerCase().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, lowercase letters, and underscores'),
+  email: z.string().trim().email(),
+  username: z.string().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, lowercase letters, and underscores'),
   password: Password,
   invitationCode: z.string(),
 });
