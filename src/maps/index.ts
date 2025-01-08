@@ -2,6 +2,7 @@
 import { MapSettings } from '../engine/game/map_settings';
 import { assert } from '../utils/validate';
 import { CyprusMapSettings } from './cyprus/settings';
+import { IndiaMapSettings } from './india/settings';
 import { IrelandMapSettings } from './ireland/settings';
 import { MadagascarMapSettings } from './madagascar/settings';
 import { ReversteamMapSettings } from './reversteam/settings';
@@ -20,6 +21,7 @@ export class MapRegistry {
     this.add(new SwedenRecyclingMapSettings());
     this.add(new CyprusMapSettings());
     this.add(new MadagascarMapSettings());
+    this.add(new IndiaMapSettings());
   }
 
   values(): Iterable<MapSettings> {

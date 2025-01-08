@@ -1,8 +1,10 @@
 import { MapRegistry } from "../../maps";
 import { CyprusMapSettings } from "../../maps/cyprus/settings";
+import { IndiaMapSettings } from "../../maps/india/settings";
 import { MadagascarMapSettings } from "../../maps/madagascar/settings";
 import { SwedenRecyclingMapSettings } from "../../maps/sweden/settings";
 import { CyprusRules } from "./maps/cyprus";
+import { IndiaRules } from "./maps/india";
 import { IrelandRules } from "./maps/ireland";
 import { MadagascarRules } from "./maps/madagascar";
 import { SwedenRecyclingRules } from "./sweden/rules";
@@ -32,6 +34,8 @@ export function AlternateRules({ gameKey }: { gameKey: string }) {
       return <CyprusRules />;
     case MadagascarMapSettings.key:
       return <MadagascarRules />;
+    case IndiaMapSettings.key:
+      return <IndiaRules />;
     default:
       return <p>No changes from base game.</p>;
   }

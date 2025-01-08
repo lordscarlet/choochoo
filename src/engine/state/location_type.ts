@@ -11,6 +11,7 @@ export enum SpaceType {
   LAKE = 7,
   UNPASSABLE = 8,
   HILL = 9,
+  DESERT = 10,
 }
 
 export const SpaceTypeZod = z.nativeEnum(SpaceType);
