@@ -15,6 +15,7 @@ import { GameMap } from "../grid/game_map";
 import { useAction, useGame, useRetryAction, useUndoAction } from "../services/game";
 import { GameContextProvider, useActiveGameState, useInject, useInjectedState } from "../utils/injection_context";
 import { ActionSummary } from "./action_summary";
+import * as styles from './active_game.module.css';
 import { AvailableCities } from "./available_cities";
 import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
@@ -67,7 +68,7 @@ export function CurrentPhase() {
   const phase = useActiveGameState(PHASE);
   return <div>
     {game.status === GameStatus.enum.ENDED && <GameOver />}
-    {game.summary && <p>
+    {game.summary && <p className={styles.currentPhase}>
       {game.summary}
       {phase === Phase.MOVING && <MovingMetadata />}
     </p>}

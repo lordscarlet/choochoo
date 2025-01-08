@@ -86,6 +86,7 @@ export function MoveGoods() {
   }
 
   return <div>
+    <GenericMessage>You must move a good.</GenericMessage>
     {!state!.locomotive.includes(player!.color) && <Button onClick={emitLoco}>Locomotive</Button>}
     <Button onClick={emitPass}>Pass</Button>
   </div>
