@@ -42,12 +42,12 @@ function InternalActiveGame() {
 
   return <div>
     <h2>{game.name}</h2>
+    {!undoOnly && <CurrentPhase />}
     <GameLog gameId={game.id} />
     <Editor />
     <UndoButton />
     <SwitchToActive />
     <SwitchToUndo />
-    {!undoOnly && <CurrentPhase />}
     {!undoOnly && <ActionSummary />}
     {!undoOnly && canEmitProduction && <GoodsTable />}
     {!undoOnly && <BiddingInfo />}
@@ -67,8 +67,10 @@ export function CurrentPhase() {
   const phase = useActiveGameState(PHASE);
   return <div>
     {game.status === GameStatus.enum.ENDED && <GameOver />}
-    {game.summary && <p>{game.summary}</p>}
-    {phase === Phase.MOVING && <MovingMetadata />}
+    {game.summary && <p>
+      {game.summary}
+      {phase === Phase.MOVING && <MovingMetadata />}
+    </p>}
   </div>;
 }
 
@@ -93,7 +95,7 @@ export function GameOver() {
 
 export function MovingMetadata() {
   const state = useInjectedState(MOVE_STATE);
-  return <p>Move round #{state.moveRound + 1}</p>;
+  return <> Move round #{state.moveRound + 1}</>;
 }
 
 export function UndoButton() {
