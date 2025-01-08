@@ -1,4 +1,3 @@
-import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
@@ -8,7 +7,6 @@ import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
 import { goodToString } from "../state/good";
-import { SpaceType } from "../state/location_type";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { GoodsHelper } from "./helper";
@@ -72,12 +70,7 @@ export class GoodsGrowthPhase extends PhaseModule {
     for (const city of cities) {
       for (const [index, { group, onRoll }] of city.onRoll().entries()) {
         const numRolled = rolls.get(group)!.filter((r) => r === onRoll).length;
-        if (numRolled === 0) continue;
-        this.grid.update(city.coordinates, (location) => {
-          assert(location.type === SpaceType.CITY);
-          const newGoods = location.onRoll[index].goods.splice(-numRolled, numRolled);
-          location.goods.push(...newGoods);
-        });
+        this.helper.moveGoodsToCity(city.coordinates, index, numRolled);
       }
     }
   }

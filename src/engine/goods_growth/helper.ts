@@ -1,10 +1,13 @@
+import { Coordinates } from "../../utils/coordinates";
 import { iterate } from "../../utils/functions";
+import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Random } from "../game/random";
 import { BAG } from "../game/state";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Good } from "../state/good";
+import { SpaceType } from "../state/location_type";
 
 export class GoodsHelper {
   private readonly bag = injectState(BAG);
@@ -26,6 +29,16 @@ export class GoodsHelper {
       }
     }
     return false;
+  }
+
+  moveGoodsToCity(coordinates: Coordinates, onRollIndex: number, count: number): void {
+    if (count === 0) return;
+
+    this.grid.update(coordinates, (location) => {
+      assert(location.type === SpaceType.CITY);
+      const newGoods = location.onRoll[onRollIndex].goods.splice(-count, count);
+      location.goods.push(...newGoods);
+    });
   }
 
   drawGood(): Good {
