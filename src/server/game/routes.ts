@@ -142,7 +142,7 @@ const router = initServer().router(gameContract, {
     // TODO: save the logs
     game.gameData = gameData;
     game.status = GameStatus.enum.ACTIVE;
-    game.activePlayerId = activePlayerId;
+    game.activePlayerId = activePlayerId ?? null;
     const newGame = await game.save();
     return { status: 200, body: { game: newGame.toApi() } };
   },
@@ -188,9 +188,9 @@ const router = initServer().router(gameContract, {
 
       game.version = game.version + 1;
       game.gameData = gameData;
-      game.activePlayerId = activePlayerId;
+      game.activePlayerId = activePlayerId ?? null;
       game.status = hasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
-      game.undoPlayerId = reversible ? userId : undefined;
+      game.undoPlayerId = reversible ? userId : null;
       const newGame = await game.save({ transaction });
       const newGameHistory = await gameHistory.save({ transaction });
       console.log(`Game action id=${newGameHistory.id} reversible=${reversible} actionName=${body.actionName}`);
@@ -228,10 +228,10 @@ const router = initServer().router(gameContract, {
 
       game.version = backToVersion;
       game.gameData = gameHistory.previousGameData;
-      game.activePlayerId = gameHistory.userId;
+      game.activePlayerId = gameHistory.userId ?? null;
 
       const versionBefore = await GameHistoryDao.findOne({ where: { gameId, previousGameVersion: backToVersion - 1 }, transaction });
-      game.undoPlayerId = versionBefore != null && versionBefore.reversible ? versionBefore.userId : undefined;
+      game.undoPlayerId = versionBefore != null && versionBefore.reversible ? versionBefore.userId : null;
       const newGame = await game.save({ transaction });
       await GameHistoryDao.destroy({ where: { gameId, previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
       await LogDao.destroyLogsBackTo(gameId, backToVersion, transaction);
@@ -307,9 +307,9 @@ const router = initServer().router(gameContract, {
 
     game.version = currentGameVersion;
     game.gameData = currentGameData;
-    game.activePlayerId = finalActivePlayerId;
+    game.activePlayerId = finalActivePlayerId ?? null;
     game.status = finalHasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
-    game.undoPlayerId = finalUndoPlayerId;
+    game.undoPlayerId = finalUndoPlayerId ?? null;
     await sequelize.transaction(async (transaction) => {
       await Promise.all([
         game.save({ transaction }),
