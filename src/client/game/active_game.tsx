@@ -69,12 +69,12 @@ export function TurnOrder() {
   const current = useCurrentPlayer();
 
   return <div className={styles.turnOrder}>
-    {turnOrder.map((player, index) => <>
+    {turnOrder.map((player, index) => <span key={index}>
       {index !== 0 && ' | '}
       <span className={player.color === current?.color ? styles.currentPlayer : ''}>
         <Username userId={player.playerId} />
       </span>
-    </>)}
+    </span>)}
   </div>;
 }
 
