@@ -1,5 +1,7 @@
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRightTwoTone';
 import Circle from '@mui/icons-material/Circle';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
 import { ReactNode, useMemo } from "react";
 import { GameStatus } from '../../api/game';
 import { PlayerHelper } from "../../engine/game/player";
@@ -18,6 +20,7 @@ import { useGame } from '../services/game';
 import { useActiveGameState, useInject, useInjected, useInjectedState } from "../utils/injection_context";
 import { FinalOverview } from './final_overview';
 import { LoginButton } from "./login_button";
+
 import * as styles from './player_stats.module.css';
 
 
@@ -45,47 +48,55 @@ export function PlayerStats() {
     scoreColumn,
   ];
 
-  return <div className={styles.playerStats}>
-    <h2>Player overview</h2>
-    <table>
-      <thead>
-        <tr className={styles.tableRow}>
-          <th></th>
-          <th>Player</th>
-          <th className={styles.collapsed}>Stats</th>
-          <th className={styles.collapsed}></th>
-          {columns.map((column) =>
-            <th key={column.header} className={styles.expanded}>{column.header}</th>)}
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {players.map((player) =>
-          <tr key={player.playerId} className={styles.tableRow}>
-            <td>
-              <PlayerColorIndicator playerColor={player.color} currentTurn={player.color === currentPlayer} />
-            </td>
-            <td>
-              <Username userId={player.playerId} />
-            </td>
-            <td className={styles.collapsed}>
-              {columns.map((column) =>
-                <div key={column.header} className={styles.inplace}>{column.header}:</div>)}
-            </td>
-            <td className={styles.collapsed}>
-              {columns.map((column) => {
-                const Cell = column.cell;
-                return <div key={column.header} className={styles.inplace}><Cell player={player} /></div>;
-              })}
-            </td>
-            {columns.map((column) => {
-              const Cell = column.cell;
-              return <td key={column.header} className={styles.expanded}><Cell player={player} /></td>;
-            })}
-            <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
-          </tr>)}
-      </tbody>
-    </table>
+  return <div className={styles.playerStatsContainer}>
+    <Accordion defaultExpanded>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography component="h2">Player overview</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <div className={styles.playerStats}>
+          <table>
+            <thead>
+              <tr className={styles.tableRow}>
+                <th></th>
+                <th>Player</th>
+                <th className={styles.collapsed}>Stats</th>
+                <th className={styles.collapsed}></th>
+                {columns.map((column) =>
+                  <th key={column.header} className={styles.expanded}>{column.header}</th>)}
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {players.map((player) =>
+                <tr key={player.playerId} className={styles.tableRow}>
+                  <td>
+                    <PlayerColorIndicator playerColor={player.color} currentTurn={player.color === currentPlayer} />
+                  </td>
+                  <td>
+                    <Username userId={player.playerId} />
+                  </td>
+                  <td className={styles.collapsed}>
+                    {columns.map((column) =>
+                      <div key={column.header} className={styles.inplace}>{column.header}:</div>)}
+                  </td>
+                  <td className={styles.collapsed}>
+                    {columns.map((column) => {
+                      const Cell = column.cell;
+                      return <div key={column.header} className={styles.inplace}><Cell player={player} /></div>;
+                    })}
+                  </td>
+                  {columns.map((column) => {
+                    const Cell = column.cell;
+                    return <td key={column.header} className={styles.expanded}><Cell player={player} /></td>;
+                  })}
+                  <td><LoginButton playerId={player.playerId}>Switch</LoginButton></td>
+                </tr>)}
+            </tbody>
+          </table>
+        </div>
+      </AccordionDetails>
+    </Accordion>
   </div>;
 }
 

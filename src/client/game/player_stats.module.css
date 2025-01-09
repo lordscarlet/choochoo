@@ -1,3 +1,7 @@
+.playerStatsContainer {
+  margin: 8px 0;
+}
+
 .playerStats {
   overflow-y: auto;
 }
