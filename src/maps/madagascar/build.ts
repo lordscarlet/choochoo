@@ -1,4 +1,3 @@
-import { remove } from "lodash";
 import { BuildCostCalculator } from "../../engine/build/cost";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
@@ -9,6 +8,7 @@ import { Action } from "../../engine/state/action";
 import { PlayerColor } from "../../engine/state/player";
 import { TileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
+import { remove } from "../../utils/functions";
 
 
 export class MadagascarBuildPhase extends BuildPhase {

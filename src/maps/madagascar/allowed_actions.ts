@@ -53,7 +53,7 @@ export class MadagascarRoundEngine extends RoundEngine {
   start(round: number) {
     super.start(round);
     const allActions = [...this.allowedActions.getActions()];
-    let nextActionIndex = round === 1 ? allActions.indexOf((this.allowedActions as MadagascarAllowedActions).getLastDisabledAction()) : -1;
+    let nextActionIndex = round !== 1 ? allActions.indexOf((this.allowedActions as MadagascarAllowedActions).getLastDisabledAction()) : -1;
     const newActions: Action[] = [];
     iterate(7 - this.playerCount(), () => {
       const dieRoll = this.random.rollDie();
