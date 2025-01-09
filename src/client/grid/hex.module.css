@@ -30,6 +30,14 @@
   fill: #654321;
 }
 
+.location.desert {
+  fill: #FFFFCC;
+}
+
+:global(.dark-mode) .location.desert {
+  fill: #666600;
+}
+
 .location.swamp {
   fill: green;
 }

@@ -45,7 +45,7 @@ function colorStyles(space: Space): string[] {
       case SpaceType.UNPASSABLE:
         return [styles.unpassable];
       case SpaceType.DESERT:
-      // TODO: add a style for Desert.
+        return [styles.desert];
       case SpaceType.HILL:
         return [styles.mountain];
       default:

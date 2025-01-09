@@ -13,6 +13,7 @@ export function Pallet() {
   const plain = new Land(Coordinates.from({ q: 0, r: 0 }), { type: SpaceType.PLAIN, townName: 'Foo bar' });
   const river = new Land(Coordinates.from({ q: 0, r: 0 }), { type: SpaceType.RIVER, townName: 'Foo bar' });
   const mountain = new Land(Coordinates.from({ q: 0, r: 0 }), { type: SpaceType.MOUNTAIN, townName: 'Foo bar' });
+  const desert = new Land(Coordinates.from({ q: 0, r: 0 }), { type: SpaceType.DESERT, townName: 'Foo bar' });
 
   const allColors = useMemo(() => [
     undefined,
@@ -25,7 +26,7 @@ export function Pallet() {
           <PlayerCircle color={playerColor} bid={5} />
           <PlayerColorIndicator playerColor={playerColor} currentTurn={true} />
           {[SimpleTileType.CURVE, TownTileType.STRAIGHT].map((tileType) => <>
-            {[plain, river, mountain].map((space) =>
+            {[plain, river, mountain, desert].map((space) =>
               <ModifiedSpace space={space} tile={{ tileType, orientation: Direction.TOP, owners: [playerColor, playerColor] }} />
             )}
           </>)}
