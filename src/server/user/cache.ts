@@ -14,7 +14,7 @@ class UserCache {
   async set(user: MyUserApi | undefined): Promise<void> {
     if (user == null) return;
     if (environment.stage == Stage.enum.development) return;
-    await redisClient.set(`users:${user.id}`, JSON.stringify(user), { PX: 360000 });
+    await redisClient.set(`users:${user.id}`, JSON.stringify(user), 'PX', 360000);
   }
 }
 

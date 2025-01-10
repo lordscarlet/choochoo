@@ -1,13 +1,17 @@
+import { createAdapter } from "@socket.io/redis-adapter";
 import { Server, ServerOptions, Socket } from "socket.io";
 import { GameApi } from "../api/game";
 import { ClientToServerEvents, ServerToClientEvents } from "../api/socket";
 import { deepEquals } from "../utils/deep_equals";
 import { GameDao, toApi } from "./game/dao";
 import { LogDao } from "./messages/log_dao";
+import { redisClient, subClient } from "./redis";
 import { environment } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
 
-const args: Partial<ServerOptions> = {};
+const args: Partial<ServerOptions> = {
+  adapter: createAdapter(redisClient, subClient),
+};
 
 if (environment.clientOrigin != null) {
   args.cors = {

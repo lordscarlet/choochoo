@@ -2,18 +2,19 @@
 import RedisStore from "connect-redis";
 import express from 'express';
 import session from 'express-session';
-import { createClient } from "redis";
+import { Redis } from "ioredis";
 import { environment } from "./util/environment";
 
-export const redisClient = createClient({
-  url: environment.redisUrl.toString(),
-  socket: {
-    connectTimeout: 10000,
-  },
+export const redisClient = new Redis({
+  host: environment.redisUrl.hostname,
+  port: Number(environment.redisUrl.port),
+  username: environment.redisUrl.username,
+  password: environment.redisUrl.password,
 });
+export const subClient = redisClient.duplicate();
 
-redisClient.connect().catch((e) => {
-  console.log('failed to connect to redis');
+redisClient.on('error', (e) => {
+  console.log('redis connection error');
   console.error(e);
   process.exit();
 });
