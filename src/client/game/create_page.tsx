@@ -2,7 +2,9 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import { FormEvent, useCallback, useMemo } from "react";
 import { ReleaseStage, releaseStageToString } from "../../engine/game/map_settings";
+import { Grid } from "../../engine/map/grid";
 import { MapRegistry } from "../../maps";
+import { HexGrid } from "../grid/hex_grid";
 import { environment, Stage } from "../services/environment";
 import { useCreateGame } from "../services/game";
 import { useCheckboxState, useNumberInputState, useSelectState, useTextInputState } from "../utils/form_state";
@@ -53,6 +55,12 @@ export function CreateGamePage() {
   const validateGameInternal = useCallback(() => {
     validateGame({ name, gameKey, artificialStart, minPlayers, maxPlayers });
   }, [name, gameKey, artificialStart, minPlayers, maxPlayers]);
+
+  const grid = useMemo(() => {
+    if (gameKey == null) return undefined;
+    const settings = MapRegistry.singleton.get(gameKey);
+    return Grid.fromData(settings.startingGrid);
+  }, [gameKey]);
 
   return <Box
     component="form"
@@ -134,5 +142,6 @@ export function CreateGamePage() {
       <Button type="submit" disabled={isPending}>Create</Button>
     </div>
     <MapInfo gameKey={gameKey} />
+    {grid && <HexGrid key={gameKey} grid={grid} fullMapVersion={true} />}
   </Box>;
 }

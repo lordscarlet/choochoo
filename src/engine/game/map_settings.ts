@@ -1,7 +1,7 @@
 
 import { assertNever } from "../../utils/validate";
 import { SimpleConstructor } from "../framework/dependency_stack";
-import { InitialMapGrid } from "../state/map_settings";
+import { GridData } from "../state/grid";
 
 export enum ReleaseStage {
   DEVELOPMENT = 1,
@@ -30,7 +30,7 @@ export interface MapSettings {
   readonly maxPlayers: number;
   readonly bestAt?: string;
   readonly recommendedPlayerCount?: string;
-  readonly startingGrid: InitialMapGrid;
+  readonly startingGrid: GridData;
   readonly stage: ReleaseStage;
 
   getOverrides(): Array<SimpleConstructor<unknown>>;

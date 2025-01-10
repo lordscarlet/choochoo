@@ -1,22 +1,21 @@
 import { BLUE, PURPLE, RED, YELLOW } from '../../engine/state/good';
-import { CitySettingData } from '../../engine/state/map_settings';
 import { PlayerColor } from '../../engine/state/player';
-import { MutableLandData } from '../../engine/state/space';
+import { CityData, MutableLandData } from '../../engine/state/space';
 import { Direction, TOP, TOP_LEFT, TOP_RIGHT } from '../../engine/state/tile';
 import { duplicate } from '../../utils/functions';
 import { black, city, PLAIN, startsLowerGrid, town, UNPASSABLE, white } from '../factory';
 import { CyprusMapData } from './map_data';
 import { GREECE, TURKEY } from './roles';
 
-function borderDirection(input: MutableLandData | CitySettingData, borderDirection: Direction[]): MutableLandData | CitySettingData {
+function borderDirection(input: MutableLandData | CityData, borderDirection: Direction[]): MutableLandData | CityData {
   return mapSpecific(input, { borderDirection });
 }
 
-function rejects(input: MutableLandData | CitySettingData, rejects: PlayerColor): MutableLandData | CitySettingData {
+function rejects(input: MutableLandData | CityData, rejects: PlayerColor): MutableLandData | CityData {
   return mapSpecific(input, { rejects });
 }
 
-function mapSpecific(input: MutableLandData | CitySettingData, mapSpecific: CyprusMapData): MutableLandData | CitySettingData {
+function mapSpecific(input: MutableLandData | CityData, mapSpecific: CyprusMapData): MutableLandData | CityData {
   return {
     ...input,
     mapSpecific: {

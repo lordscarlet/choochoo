@@ -2,7 +2,7 @@
 import { infiniteLoopCheck } from "../../utils/functions";
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
-import { InitialMapGrid } from "../state/map_settings";
+import { GridData } from "../state/grid";
 import { Ender, EndGameReason } from "./ender";
 import { CheckAutoAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
 import { Memory } from "./memory";
@@ -28,7 +28,7 @@ export class GameEngine {
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
   readonly hasEnded = inject(Memory).remember(false);
 
-  start(playerIds: number[], startingMap: InitialMapGrid) {
+  start(playerIds: number[], startingMap: GridData) {
     this.starter.startGame(playerIds, startingMap);
     this.lifecycle.set(new StartRound(1));
     this.runLifecycle();

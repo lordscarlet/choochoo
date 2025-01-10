@@ -14,6 +14,7 @@ export const MutableCityData = z.object({
   urbanized: z.boolean().optional(),
   onRoll: z.array(OnRollData),
   mapSpecific: z.any().optional(),
+  startingNumCubes: z.number().optional(),
 });
 
 export type MutableCityData = z.infer<typeof MutableCityData>;

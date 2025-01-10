@@ -2,9 +2,8 @@ import { Map as ImmutableMap } from 'immutable';
 import { BLACK, WHITE } from "../engine/state/city_group";
 import { Good } from "../engine/state/good";
 import { SpaceType } from "../engine/state/location_type";
-import { CitySettingData, OnRollSettingData } from "../engine/state/map_settings";
-import { OnRoll } from "../engine/state/roll";
-import { LandData } from '../engine/state/space';
+import { OnRoll, OnRollData } from "../engine/state/roll";
+import { CityData, LandData } from '../engine/state/space';
 import { Coordinates } from "../utils/coordinates";
 import { duplicate } from '../utils/functions';
 
@@ -30,21 +29,21 @@ export const MOUNTAIN: LandData = {
   type: SpaceType.MOUNTAIN,
 };
 
-export function black(onRoll: OnRoll): OnRollSettingData {
-  return { group: BLACK, onRoll };
+export function black(onRoll: OnRoll): OnRollData {
+  return { group: BLACK, onRoll, goods: [] };
 }
 
-export function white(onRoll: OnRoll): OnRollSettingData {
-  return { group: WHITE, onRoll };
+export function white(onRoll: OnRoll): OnRollData {
+  return { group: WHITE, onRoll, goods: [] };
 }
 
-export function city(name: string, cityColor?: Good | Good[], onRollData?: OnRollSettingData | OnRollSettingData[], startingNumCubes = 2): CitySettingData {
+export function city(name: string, cityColor?: Good | Good[], onRollData?: OnRollData | OnRollData[], startingNumCubes = 2): CityData {
   const onRoll = Array.isArray(onRollData) ? onRollData : onRollData != null ? [onRollData] : [];
   const color = Array.isArray(cityColor) ? cityColor : cityColor != null ? [cityColor] : [];
-  return customCity({ name, color: Array.isArray(color) ? color : [color], startingNumCubes, onRoll });
+  return customCity({ name, color: Array.isArray(color) ? color : [color], startingNumCubes, onRoll, goods: [] });
 }
 
-export function customCity(city: Omit<CitySettingData, 'type'>): CitySettingData {
+export function customCity(city: Omit<CityData, 'type'>): CityData {
   return { ...city, type: SpaceType.CITY };
 }
 

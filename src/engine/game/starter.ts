@@ -6,8 +6,8 @@ import { GridHelper } from "../map/grid_helper";
 import { AvailableCity } from '../state/available_city';
 import { CityGroup } from '../state/city_group';
 import { Good } from '../state/good';
+import { GridData } from '../state/grid';
 import { SpaceType } from '../state/location_type';
-import { InitialMapGrid, SpaceSettingData } from '../state/map_settings';
 import { allPlayerColors, PlayerColor, PlayerData } from '../state/player';
 import { OnRoll } from '../state/roll';
 import { SpaceData } from '../state/space';
@@ -23,7 +23,7 @@ export class GameStarter {
   protected readonly gridHelper = inject(GridHelper);
   protected readonly random = inject(Random);
 
-  startGame(playerIds: number[], startingMap: InitialMapGrid) {
+  startGame(playerIds: number[], startingMap: GridData) {
     this.onBeginStartGame();
     this.initializeStartingCubes();
     this.drawCubesForCities(startingMap);
@@ -46,7 +46,7 @@ export class GameStarter {
     ]));
   }
 
-  drawCubesForCities(startingMap: InitialMapGrid) {
+  drawCubesForCities(startingMap: GridData) {
     const bag = [...this.bag()];
     this.grid.initState(new Map());
     for (const [coordinates, location] of startingMap.entries()) {
@@ -55,11 +55,11 @@ export class GameStarter {
     this.bag.set(bag);
   }
 
-  protected drawCubesFor(bag: Good[], location: SpaceSettingData): SpaceData {
+  protected drawCubesFor(bag: Good[], location: SpaceData): SpaceData {
     if (location.type !== SpaceType.CITY) return location;
     return {
       ...location,
-      goods: draw(location.startingNumCubes, bag),
+      goods: draw(location.startingNumCubes ?? 0, bag),
       onRoll: location.onRoll.map(
         (onRollData) => ({
           ...onRollData,

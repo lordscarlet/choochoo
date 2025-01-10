@@ -1,18 +1,17 @@
-import { FactoryYellow } from './factory_yellow';
-import { FactoryRed } from './factory_red';
-import { FactoryBlue } from './factory_blue';
-import { FactoryBlack } from './factory_black';
-import { FactoryEmpty } from './factory_empty';
-import { useGame } from '../../services/game';
-import { SwedenRecyclingMapSettings } from '../../../maps/sweden/settings';
-import { useInject } from '../../utils/injection_context';
-import { Incinerator } from '../../../maps/sweden/incinerator';
 import { inject } from '../../../engine/framework/execution_context';
+import { Incinerator } from '../../../maps/sweden/incinerator';
+import { SwedenRecyclingMapSettings } from '../../../maps/sweden/settings';
+import { useGameKey, useInject } from '../../utils/injection_context';
+import { FactoryBlack } from './factory_black';
+import { FactoryBlue } from './factory_blue';
+import { FactoryEmpty } from './factory_empty';
+import { FactoryRed } from './factory_red';
+import { FactoryYellow } from './factory_yellow';
 
 
 export function SwedenProgressionGraphic() {
-  const game = useGame();
-  if (game.gameKey !== SwedenRecyclingMapSettings.key) return <></>;
+  const gameKey = useGameKey();
+  if (gameKey !== SwedenRecyclingMapSettings.key) return <></>;
 
   return <ProgressionGraphic />;
 }
