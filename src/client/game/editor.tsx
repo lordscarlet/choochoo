@@ -36,7 +36,7 @@ export function Editor() {
   return <>
     <Button onClick={toggle}>{isOpen ? 'Close editor' : 'Edit'}</Button>
 
-    {isOpen && <textarea value={actualContent} onChange={setNewContentFromTextArea} disabled={!isPending} />}
+    {isOpen && <textarea value={actualContent} onChange={setNewContentFromTextArea} disabled={isPending} />}
     {isOpen && <Button onClick={submit} disabled={isPending}>Submit</Button>}
   </>;
 }
