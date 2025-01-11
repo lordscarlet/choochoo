@@ -1,10 +1,9 @@
-import { Box, Button, FormControl, TextField } from "@mui/material";
+import { Button } from "@mui/material";
 
-import { FormEvent, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { UserRole } from "../../api/user";
-import { useLogout, useMe, useResendActivationCode, useSubscribe } from "../services/me";
-import { useTextInputState } from "../utils/form_state";
+import { useLogout, useMe, useResendActivationCode } from "../services/me";
+import * as styles from './login_required.module.css';
 
 
 interface LoginRequiredParams {
@@ -14,7 +13,7 @@ interface LoginRequiredParams {
 export function LoginRequired({ children }: LoginRequiredParams) {
   const me = useMe();
 
-  if (me == null) return <WaitlistPage />;
+  if (me == null) return <LoginRequiredPage />;
   if (me.role === UserRole.enum.ACTIVATE_EMAIL) return <ActivateEmailPage />
   return children;
 }
@@ -30,46 +29,21 @@ function ActivateEmailPage() {
 }
 
 
-function WaitlistPage() {
-  const [email, setEmail] = useTextInputState('');
-  const { subscribe, isSuccess, isPending, validationError } = useSubscribe();
-
-  const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    subscribe(email);
-  }, [email, subscribe]);
-
-  return <Box
-    component="form"
-    sx={{ '& .MuiTextField-root': { m: 1, width: '25ch' } }}
-    noValidate
-    autoComplete="off"
-    onSubmit={onSubmit}
-  >
+function LoginRequiredPage() {
+  return <div className={styles.loginRequired}>
     <h1>Welcome!</h1>
-    <p>This is a hobby project, and we are being careful about how many users we onboard.</p>
-    <p>Please enter your email and we'll let you know when there are openings for sign ups.</p>
-    {!isSuccess && <div>
-      <FormControl>
-        <TextField
-          required
-          label="Email"
-          value={email}
-          error={validationError?.email != null}
-          helperText={validationError?.email}
-          onChange={setEmail}
-        />
-      </FormControl>
-      <div>
-        <Button type="submit" disabled={isPending}>Subscribe</Button>
-      </div>
-    </div>}
-    {isSuccess && <p>Thanks! We'll be in touch :).</p>}
     <p>
-      <Link to="/app/users/register">I have an invite link</Link>
+      This is a hobby project dedicated to playing a game that involves building track on geographic maps with the intent of delivering goods cubes.
+      This application is in Beta, and we are prioritizing functionality over stability, meaning that you may experience bugs as you engage with the platform,
+      and some level of patience with those bugs will be necessary.
     </p>
     <p>
-      <Link to="/app/users/login">Login</Link>
+      Please provide feedback as we will certainly prioritize things people ask for over things
+      in our backlog. If the amount of bugs becomes intolerable, let us know! There are things we can do to improve the stability, it's just not a priority right
+      now.
     </p>
-  </Box>;
+    <div className={styles.links}>
+      <Button component={Link} variant="contained" to="/app/users/register">Create account</Button>
+    </div>
+  </div>;
 }

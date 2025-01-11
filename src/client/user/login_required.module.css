@@ -1,0 +1,10 @@
+.loginRequired {
+  margin: auto;
+  max-width: 70em;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

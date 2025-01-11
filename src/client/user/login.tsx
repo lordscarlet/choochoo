@@ -32,6 +32,7 @@ export function LoginPage() {
     autoComplete="off"
     onSubmit={onSubmit}
   >
+    <h1>Login</h1>
     <FormControl>
       <TextField
         required

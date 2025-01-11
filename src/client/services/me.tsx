@@ -1,7 +1,7 @@
 import { useNotifications } from "@toolpad/core";
 import { Dispatch, ReactNode, SetStateAction, createContext, useCallback, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreateInviteApi, CreateUserApi, ForgotPasswordRequest, LoginUserApi, MyUserApi, ResendActivationCodeRequest, UpdatePasswordRequest, UserRole } from "../../api/user";
+import { CreateUserApi, ForgotPasswordRequest, LoginUserApi, MyUserApi, ResendActivationCodeRequest, UpdatePasswordRequest, UserRole } from "../../api/user";
 import { assert } from "../../utils/validate";
 import { tsr } from "./client";
 import { handleError } from "./network";
@@ -42,20 +42,6 @@ export function useIsAdmin(ignoreAdminMode = false): boolean {
   if (!adminModeEnabled && !ignoreAdminMode) return false;
 
   return adminUser != null || user?.role === UserRole.enum.ADMIN;
-}
-
-export function useCreateInvitation() {
-  const me = useMe();
-  const notifications = useNotifications();
-  const { mutate, error, isPending } = tsr.users.createInvite.useMutation();
-  const validationError = handleError(isPending, error);
-
-  const createInvite = useCallback((body: CreateInviteApi) => mutate({ params: { userId: me!.id }, body }, {
-    onSuccess: (_) => {
-      notifications.show('Code Created', { autoHideDuration: 2000, severity: 'success' });
-    },
-  }), [me]);
-  return { createInvite, validationError, isPending };
 }
 
 export function useSubscribe() {

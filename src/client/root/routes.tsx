@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { CreateInvitePage } from "../admin/create_invite";
 import { FeedbackPage } from "../admin/feedback";
 import { UserList } from "../admin/user_list";
 import { Pallet } from "../components/pallet";
@@ -48,10 +47,6 @@ export function Router() {
         {
           path: '/app/admin/users',
           element: <UserList />,
-        },
-        {
-          path: '/app/admin/create-invite',
-          element: <CreateInvitePage />,
         },
         {
           path: '/app/users/activate',

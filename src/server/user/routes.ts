@@ -3,13 +3,11 @@ import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import express from 'express';
 import { userContract, UserRole } from '../../api/user';
 import { assert, fail } from '../../utils/validate';
-import { sequelize } from '../sequelize';
 import '../session';
 import { badwords } from '../util/badwords';
 import { emailService } from '../util/email';
 import { assertRole } from '../util/enforce_role';
 import { UserDao } from './dao';
-import { InvitationDao } from './invitations_dao';
 
 
 export const userApp = express();
@@ -89,13 +87,7 @@ const router = initServer().router(userContract, {
       for (const badword of badwords) {
         assert(!body.username.includes(badword), { invalidInput: 'cannot use bad words in username' });
       }
-      const user = await sequelize.transaction(async (transaction) => {
-        const [user] = await Promise.all([
-          UserDao.register(body, transaction),
-          InvitationDao.useInvitationCode(body.invitationCode, transaction),
-        ]);
-        return user;
-      });
+      const user = await UserDao.register(body);
       req.session.userId = user.id;
       // Don't await this, just let it go.
       emailService.sendActivationCode(user.email);
@@ -169,17 +161,6 @@ const router = initServer().router(userContract, {
     req.session.adminUserId = adminUserId;
 
     return { status: 200, body: { user, adminUser } };
-  },
-
-  async createInvite({ body, params, req }) {
-    await assertRole(req, UserRole.enum.ADMIN);
-    assert((await UserDao.getUser(params.userId)) != null, { notFound: 'user not found' });
-    await InvitationDao.upsert({
-      id: body.code,
-      count: body.count,
-      userId: params.userId,
-    });
-    return { status: 200, body: { success: true } };
   },
 
   async subscribe({ body }) {

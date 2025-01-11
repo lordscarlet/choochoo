@@ -9,7 +9,6 @@ export function RegisterPage() {
   const [email, setEmail] = useTextInputState('');
   const [username, setUsername] = useTextInputState('');
   const [password, setPassword] = useTextInputState('');
-  const [invitationCode, setInvitationCode] = useTextInputState(searchParams.has('invitationCode') ? searchParams.get('invitationCode')! : '');
   const { register, validationError, isPending } = useRegister();
   const navigate = useNavigate();
   const me = useMe();
@@ -21,8 +20,8 @@ export function RegisterPage() {
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    register({ username, email, password, invitationCode });
-  }, [register, username, email, password, invitationCode]);
+    register({ username, email, password });
+  }, [register, username, email, password]);
 
   return <Box
     component="form"
@@ -31,6 +30,7 @@ export function RegisterPage() {
     autoComplete="off"
     onSubmit={onSubmit}
   >
+    <h1>Register</h1>
     <FormControl>
       <TextField
         required
@@ -62,17 +62,6 @@ export function RegisterPage() {
         onChange={setPassword}
       />
     </FormControl>
-    <FormControl>
-      <TextField
-        required
-        label="Invite Code"
-        type="text"
-        value={invitationCode}
-        error={validationError?.invitationCode != null}
-        helperText={validationError?.invitationCode}
-        onChange={setInvitationCode}
-      />
-    </FormControl>
     <div>
       <Button type="submit" disabled={isPending}>Register</Button>
     </div>
@@ -80,7 +69,7 @@ export function RegisterPage() {
       By registering, you are agreeing to the <a href="/terms.html" target="_blank">Terms of Service</a>.
     </p>
     <p>
-      <Link to="/">Get added to waitlist</Link>
+      <Link to="/app/users/login">Login</Link>
     </p>
   </Box>;
 }

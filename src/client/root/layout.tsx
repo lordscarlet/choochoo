@@ -4,7 +4,6 @@ import { default as DarkMode } from '@mui/icons-material/DarkMode';
 import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import FeedbackOutlined from '@mui/icons-material/FeedbackOutlined';
 import Group from '@mui/icons-material/Group';
-import { default as InsertInvitation } from '@mui/icons-material/InsertInvitation';
 import { default as Lock } from '@mui/icons-material/Lock';
 import LockOpen from '@mui/icons-material/LockOpen';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
@@ -63,12 +62,6 @@ export function Layout() {
               {enableAdminMode ? <LockOpen fontSize="small" /> : <Lock fontSize="small" />}
             </ListItemIcon>
             Admin Mode
-          </DropdownMenuItem>
-          <DropdownMenuItem component={Link} to="/app/admin/create-invite">
-            <ListItemIcon>
-              <InsertInvitation fontSize="small" />
-            </ListItemIcon>
-            Create Invitation
           </DropdownMenuItem>
           <DropdownMenuItem component={Link} to="/app/admin/feedback">
             <ListItemIcon>

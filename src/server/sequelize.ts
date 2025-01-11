@@ -6,7 +6,6 @@ import { GameDao } from './game/dao';
 import { GameHistoryDao } from './game/history_dao';
 import { LogDao } from './messages/log_dao';
 import { UserDao } from './user/dao';
-import { InvitationDao } from './user/invitations_dao';
 import { environment } from './util/environment';
 
 export const sequelize = new Sequelize({
@@ -18,7 +17,6 @@ export const sequelize = new Sequelize({
     UserDao,
     LogDao,
     GameHistoryDao,
-    InvitationDao,
     FeedbackDao,
   ],
 });

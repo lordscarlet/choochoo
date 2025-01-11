@@ -11,7 +11,6 @@ export const CreateUserApi = z.object({
   email: z.string().trim().email(),
   username: z.string().trim().min(3).max(16).regex(/^[a-z0-9_]*$/, 'Can only use numbers, lowercase letters, and underscores'),
   password: Password,
-  invitationCode: z.string(),
 });
 export type CreateUserApi = z.infer<typeof CreateUserApi>;
 
@@ -44,17 +43,6 @@ export const ListUsersApi = z.object({
   pageCursor: UserPageCursor.optional(),
 });
 export type ListUsersApi = z.infer<typeof ListUsersApi>;
-
-export const InviteApi = z.object({
-  code: z.string().min(1),
-});
-export type InviteApi = z.infer<typeof InviteApi>;
-
-export const CreateInviteApi = z.object({
-  code: z.string().min(1).regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, underscores and dashes are allowed'),
-  count: z.number().gte(1),
-});
-export type CreateInviteApi = z.infer<typeof CreateInviteApi>;
 
 export const UserParams = z.object({ userId: z.coerce.number() });
 export type UserParams = z.infer<typeof UserParams>;
@@ -104,15 +92,6 @@ export const userContract = c.router({
     },
     method: 'POST',
     path: '/users/update-password',
-  },
-  createInvite: {
-    body: CreateInviteApi,
-    pathParams: UserParams,
-    responses: {
-      200: z.object({ success: z.literal(true) }),
-    },
-    method: 'POST',
-    path: '/users/:userId/invite',
   },
   makeAdmin: {
     body: z.object({}),
