@@ -47,7 +47,7 @@ function colorStyles(space: Space): string[] {
       case SpaceType.DESERT:
         return [styles.desert];
       case SpaceType.HILL:
-        return [styles.mountain];
+        return [styles.hill];
       default:
         assertNever(type);
     }

@@ -22,8 +22,16 @@
   fill: darkblue;
 }
 
-.location.mountain {
+.location.hill {
   fill: #F5DEB3;
+}
+
+:global(.dark-mode) .location.hill {
+  fill: #82572c;
+}
+
+.location.mountain {
+  fill: #c8b593;
 }
 
 :global(.dark-mode) .location.mountain {
