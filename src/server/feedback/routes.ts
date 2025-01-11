@@ -3,9 +3,9 @@ import express from 'express';
 import { feedbackContract } from '../../api/feedback';
 import { UserRole } from '../../api/user';
 import { assert } from '../../utils/validate';
-import { FeedbackDao } from './dao';
 import '../session';
-import { enforceRole } from '../util/enforce_role';
+import { assertRole } from '../util/enforce_role';
+import { FeedbackDao } from './dao';
 
 
 export const feedbackApp = express();
@@ -40,12 +40,12 @@ const router = initServer().router(feedbackContract, {
     return { status: 200, body: { success: true } };
   },
   async list({ req }) {
-    await enforceRole(req, UserRole.enum.ADMIN);
+    await assertRole(req, UserRole.enum.ADMIN);
     const feedback = await FeedbackDao.findAll({ order: [['id', 'ASC']], limit: 20 });
     return { status: 200, body: { feedback: feedback.map(f => f.toApi()) } };
   },
   async deleteFeedback({ req, params }) {
-    await enforceRole(req, UserRole.enum.ADMIN);
+    await assertRole(req, UserRole.enum.ADMIN);
     await FeedbackDao.destroy({ where: { id: params.feedbackId } });
     return { status: 200, body: { success: true } };
   },

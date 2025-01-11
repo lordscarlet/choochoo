@@ -1,6 +1,5 @@
 import { Button } from "@mui/material";
 import { ChangeEvent, useCallback, useMemo, useState } from "react";
-import { environment, Stage } from "../services/environment";
 import { useGame, useSetGameData } from "../services/game";
 import { useIsAdmin } from "../services/me";
 
@@ -8,8 +7,7 @@ import { useIsAdmin } from "../services/me";
 export function Editor() {
   const isAdmin = useIsAdmin();
   const game = useGame();
-  const canEdit = environment.stage === Stage.enum.development;
-  const canRead = canEdit || isAdmin;
+  const canRead = isAdmin;
   const content = useMemo(() => {
     return JSON.stringify(JSON.parse(game.gameData!), null, 2)
   }, [game]);
@@ -38,7 +36,7 @@ export function Editor() {
   return <>
     <Button onClick={toggle}>{isOpen ? 'Close editor' : 'Edit'}</Button>
 
-    {isOpen && <textarea value={actualContent} onChange={setNewContentFromTextArea} disabled={!canEdit} />}
-    {isOpen && canEdit && <Button onClick={submit} disabled={isPending}>Submit</Button>}
+    {isOpen && <textarea value={actualContent} onChange={setNewContentFromTextArea} disabled={!isPending} />}
+    {isOpen && <Button onClick={submit} disabled={isPending}>Submit</Button>}
   </>;
 }

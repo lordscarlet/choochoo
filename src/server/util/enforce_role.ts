@@ -17,7 +17,7 @@ const rolesInOrder = [
   UserRole.enum.ADMIN,
 ];
 
-export async function enforceRole(req: BaseRequest, requiredRole: UserRole = UserRole.Values.USER): Promise<void> {
+export async function assertRole(req: BaseRequest, requiredRole: UserRole = UserRole.Values.USER): Promise<void> {
   const userId = req.session.adminUserId ?? req.session.userId;
   if (userId == null) {
     throw new UnauthorizedError('please log in');
@@ -35,6 +35,6 @@ export async function enforceRole(req: BaseRequest, requiredRole: UserRole = Use
 export function enforceRoleMiddleware() {
   return (req: Request, _: Response, next: NextFunction) => {
     if (!req.url.startsWith('/api') || req.url.startsWith('/api/users')) return next();
-    enforceRole(req).then(() => next(), next);
+    assertRole(req).then(() => next(), next);
   };
 }

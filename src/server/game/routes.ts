@@ -13,7 +13,7 @@ import { CreateLogModel, LogDao } from '../messages/log_dao';
 import { sequelize } from '../sequelize';
 import '../session';
 import { UserDao } from '../user/dao';
-import { enforceRole } from '../util/enforce_role';
+import { assertRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
 import { notifyTurn } from '../util/turn_notification';
 import { GameHistoryDao } from './history_dao';
@@ -148,10 +148,9 @@ const router = initServer().router(gameContract, {
   },
 
   async setGameData({ req, params, body }) {
-    assert(environment.stage === Stage.enum.development);
+    await assertRole(req, UserRole.enum.ADMIN);
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
-    const originalGame = game.toApi();
     game.gameData = body.gameData;
     await game.save();
     return { status: 200, body: { game: game.toApi() } };
@@ -241,7 +240,7 @@ const router = initServer().router(gameContract, {
   },
 
   async retryLast({ req, body, params }) {
-    await enforceRole(req, UserRole.enum.ADMIN);
+    await assertRole(req, UserRole.enum.ADMIN);
     const limit = 'steps' in body ? body.steps : 20;
     const previousActions = await GameHistoryDao.findAll({ where: { gameId: params.gameId }, limit, order: [['id', 'DESC']] });
     const game = await GameDao.findByPk(params.gameId);

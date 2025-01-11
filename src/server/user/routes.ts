@@ -7,7 +7,7 @@ import { sequelize } from '../sequelize';
 import '../session';
 import { badwords } from '../util/badwords';
 import { emailService } from '../util/email';
-import { enforceRole } from '../util/enforce_role';
+import { assertRole } from '../util/enforce_role';
 import { UserDao } from './dao';
 import { InvitationDao } from './invitations_dao';
 
@@ -61,7 +61,7 @@ const router = initServer().router(userContract, {
   },
 
   async list({ req, query }) {
-    await enforceRole(req, UserRole.enum.ADMIN);
+    await assertRole(req, UserRole.enum.ADMIN);
     const where: WhereOptions<UserDao> = {};
     if (query.pageCursor != null) {
       where.id = { [Op.notIn]: query.pageCursor };
@@ -78,7 +78,7 @@ const router = initServer().router(userContract, {
   },
 
   async get({ req, params }) {
-    await enforceRole(req);
+    await assertRole(req);
     const user = await UserDao.getUser(params.userId);
     assert(user != null, { notFound: true });
     return { status: 200, body: { user: UserDao.toApi(user) } };
@@ -130,7 +130,7 @@ const router = initServer().router(userContract, {
   async resendActivationCode({ req, body }) {
     assert(req.session.userId != null, { permissionDenied: true });
     if (body.userId != null) {
-      await enforceRole(req, UserRole.enum.ADMIN);
+      await assertRole(req, UserRole.enum.ADMIN);
     }
     const user = await UserDao.findByPk(body.userId ?? req.session.userId);
     assert(user != null, { permissionDenied: true });
@@ -156,7 +156,7 @@ const router = initServer().router(userContract, {
 
   async loginBypass({ req, params }) {
     const adminUserId = req.session.adminUserId ?? req.session.userId;
-    await enforceRole(req, UserRole.enum.ADMIN);
+    await assertRole(req, UserRole.enum.ADMIN);
 
     const [user, adminUser] = await Promise.all([
       UserDao.getUser(params.userId),
@@ -172,7 +172,7 @@ const router = initServer().router(userContract, {
   },
 
   async createInvite({ body, params, req }) {
-    await enforceRole(req, UserRole.enum.ADMIN);
+    await assertRole(req, UserRole.enum.ADMIN);
     assert((await UserDao.getUser(params.userId)) != null, { notFound: 'user not found' });
     await InvitationDao.upsert({
       id: body.code,
@@ -188,7 +188,7 @@ const router = initServer().router(userContract, {
   },
 
   async makeAdmin({ params, req }) {
-    await enforceRole(req, UserRole.enum.ADMIN);
+    await assertRole(req, UserRole.enum.ADMIN);
     const modifyUser = await UserDao.findByPk(params.userId);
     assert(modifyUser != null, { notFound: 'user not found' });
     modifyUser.role = UserRole.enum.ADMIN;
