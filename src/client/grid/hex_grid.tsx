@@ -48,6 +48,7 @@ function pixelToCoordinates(point: Point, size: number): Coordinates {
 interface HexGridProps {
   grid: Grid;
   onClick?: (space: Space, good?: Good) => void;
+  onClickInterCity?: (connects: Coordinates[]) => void;
   highlightedTrack?: Track[];
   selectedGood?: { good: Good, coordinates: Coordinates };
   clickTargets?: Set<ClickTarget>;
@@ -88,7 +89,7 @@ function useZoom(allowZoom?: boolean) {
   return [zoom, setZoom] as const;
 }
 
-export function HexGrid({ onClick, fullMapVersion, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
+export function HexGrid({ onClick, onClickInterCity, fullMapVersion, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
   const allowZoom = fullMapVersion;
   const [zoom, setZoom] = useZoom(allowZoom);
   const size = 70;
@@ -176,7 +177,7 @@ export function HexGrid({ onClick, fullMapVersion, highlightedTrack, selectedGoo
         onClick={internalOnClick}>
         {mapSpaces}
         {fullMapVersion && <DoubleHeightNumbers grid={grid} size={size} coordinateWidth={coordinateWidth} externalPadding={externalPadding} />}
-        {grid.connections.map((connection, index) => <InterCityConnectionRender key={index} offset={offset} size={size} connection={connection} />)}
+        {grid.connections.map((connection, index) => <InterCityConnectionRender key={index} clickTargets={clickTargetsNormalized} onClick={onClickInterCity} offset={offset} size={size} connection={connection} />)}
         {fullMapVersion && <SwedenProgressionGraphic />}
       </svg>
     </div>

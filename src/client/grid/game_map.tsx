@@ -1,7 +1,8 @@
 import { DialogHook, useDialogs } from "@toolpad/core";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { ClaimAction, ClaimData } from "../../engine/build/claim";
+import { ConnectCitiesAction } from "../../engine/build/connect_cities";
 import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
 import { Grid, Space } from "../../engine/map/grid";
@@ -205,12 +206,13 @@ export function GameMap() {
   const { canEmit: canEmitClaim, emit: emitClaim, isPending: isClaimPending } = useAction(ClaimAction);
   const { canEmit: canEmitDeurbanize, emit: emitDeurbanize, isPending: isDeurbanizePending } = useAction(DeurbanizeAction);
   const { canEmit: canEmitSelectCity, emit: emitSelectCity, isPending: isSelectCityPending } = useAction(SelectCityAction);
+  const { canEmit: canEmitConnectCity, emit: emitConnectCity, isPending: isConnectCityPending } = useAction(ConnectCitiesAction);
   const player = useCurrentPlayer();
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Land | undefined>(undefined);
   const moveHelper = useInjected(MoveHelper);
 
-  const isPending = isBuildPending || isMovePending || isDeurbanizePending || isClaimPending || isSelectCityPending;
+  const isPending = isBuildPending || isMovePending || isDeurbanizePending || isClaimPending || isSelectCityPending || isConnectCityPending;
 
   const dialogs = useDialogs();
 
@@ -252,7 +254,7 @@ export function GameMap() {
       return new Set([ClickTarget.GOOD]);
     }
     if (canEmitBuild) {
-      return new Set([ClickTarget.LOCATION]);
+      return new Set([ClickTarget.LOCATION, ClickTarget.INTER_CITY_CONNECTION]);
     }
     if (canEmitSelectCity) {
       return new Set([ClickTarget.CITY]);
@@ -260,8 +262,12 @@ export function GameMap() {
     return new Set();
   }, [canEmitMove, canEmitDeurbanize, canEmitBuild, isPending, canEmitSelectCity]);
 
+  const onClickInterCity = useCallback((connect: Coordinates[]) => {
+    emitConnectCity({ connect });
+  }, []);
+
   return <>
-    <HexGrid onClick={onClick} fullMapVersion={true} highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
+    <HexGrid onClick={onClick} onClickInterCity={onClickInterCity} fullMapVersion={true} highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
     <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
   </>;
 }

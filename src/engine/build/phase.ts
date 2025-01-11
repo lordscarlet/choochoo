@@ -13,6 +13,7 @@ import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { BuildAction } from "./build";
 import { ClaimAction } from "./claim";
+import { ConnectCitiesAction } from "./connect_cities";
 import { DoneAction } from "./done";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
@@ -33,6 +34,7 @@ export class BuildPhase extends PhaseModule {
     this.installAction(BuildAction);
     this.installAction(ClaimAction);
     this.installAction(UrbanizeAction);
+    this.installAction(ConnectCitiesAction);
     this.installAction(DoneAction);
   }
 
@@ -40,6 +42,7 @@ export class BuildPhase extends PhaseModule {
     super.onStartTurn();
     this.turnState.initState({
       previousBuilds: [],
+      buildCount: 0,
       hasUrbanized: false,
       danglers: this.getDanglersAsInfo(this.currentPlayer().color).concat(this.getDanglersAsInfo(undefined)),
     });

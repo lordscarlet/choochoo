@@ -35,6 +35,9 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
   protected readonly moneyManager = inject(MoneyManager);
 
   validate(data: ClaimData): void {
+    const maxTrack = this.helper.getMaxBuilds();
+    assert(this.helper.buildsRemaining() > 0, `You can only build at most ${maxTrack} track`);
+
     const space = this.grid().get(data.coordinates);
     assert(!(space instanceof City), { invalidInput: 'cannot claim on a city' });
     assert(space != null, { invalidInput: 'cannot call claim on an invalid space' });
@@ -60,8 +63,10 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
       });
     }
 
-    this.buildState.update(({ previousBuilds }) => {
-      previousBuilds.push(data.coordinates);
+    this.buildState.update((buildState) => {
+      buildState.previousBuilds.push(data.coordinates);
+      // TODO: remove the call to previousBuilds and just rely on buildCount, once all games have migrated.
+      buildState.buildCount = (buildState.buildCount ?? buildState.previousBuilds.length) + 1;
     });
 
     this.moneyManager.addMoneyForCurrentPlayer(-track.claimCost());

@@ -28,8 +28,13 @@ export class BuilderHelper {
     return this.currentPlayer().selectedAction === Action.ENGINEER ? 4 : 3;
   }
 
+  buildCount(): number {
+    // TODO: remove the call to previousBuilds and just rely on buildCount, once all games have migrated.
+    return this.buildState().buildCount ?? this.buildState().previousBuilds.length;
+  }
+
   buildsRemaining(): number {
-    return this.getMaxBuilds() - this.buildState().previousBuilds.length;
+    return this.getMaxBuilds() - this.buildCount();
   }
 
   tileAvailableInManifest(newTile: TileType): boolean {

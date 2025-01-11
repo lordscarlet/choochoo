@@ -6,6 +6,7 @@ import { DanglerInfo } from "../map/grid";
 
 export const MutableBuildState = z.object({
   previousBuilds: z.array(CoordinatesZod),
+  buildCount: z.number().optional(),
   hasUrbanized: z.boolean(),
   danglers: z.array(DanglerInfo),
 });

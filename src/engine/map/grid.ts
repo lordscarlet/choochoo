@@ -34,6 +34,11 @@ export class Grid {
     );
   }
 
+  findConnection(connection: Coordinates[]): InterCityConnection | undefined {
+    const set = new Set(connection);
+    return this.connections.find(({ connects }) => connects.every((c) => set.has(c)));
+  }
+
   get(coordinates: Coordinates): Space | undefined {
     return this.grid.get(coordinates);
   }
