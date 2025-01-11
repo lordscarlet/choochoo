@@ -1,7 +1,8 @@
 import { SpaceType } from "../../engine/state/location_type";
 import { LandData } from "../../engine/state/space";
+import { BOTTOM, BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT } from "../../engine/state/tile";
 import { duplicate } from "../../utils/functions";
-import { black, city, grid, MOUNTAIN, PLAIN, town, UNPASSABLE, white } from "../factory";
+import { black, city, grid, MOUNTAIN, plain, PLAIN, town, UNPASSABLE, white } from "../factory";
 
 const HILL: LandData = {
   type: SpaceType.HILL,
@@ -20,7 +21,7 @@ export const map = grid([
     ...duplicate(3, UNPASSABLE),
     town('Taean'),
     ...duplicate(7, UNPASSABLE),
-    PLAIN,
+    plain({ unpassableEdges: [TOP_RIGHT, BOTTOM_RIGHT] }),
   ],
   [
     city('Pyongyang', [], [], 4),
@@ -30,7 +31,7 @@ export const map = grid([
     city('Inchon', [], white(3), 3),
     UNPASSABLE,
     PLAIN,
-    HILL,
+    { ...HILL, unpassableEdges: [TOP_LEFT] },
     ...duplicate(3, UNPASSABLE),
     ...duplicate(4, PLAIN),
     town('Wando'),
@@ -41,7 +42,7 @@ export const map = grid([
     PLAIN,
     PLAIN,
     city('Suwon', [], [], 0),
-    PLAIN,
+    plain({ unpassableEdges: [BOTTOM_LEFT, BOTTOM] }),
     HILL,
     HILL,
     town('Kunsan'),
@@ -89,7 +90,7 @@ export const map = grid([
     town('Anui'),
     HILL,
     HILL,
-    PLAIN,
+    plain({ unpassableEdges: [BOTTOM_LEFT, TOP_RIGHT] }),
   ],
   [
     MOUNTAIN,
@@ -104,7 +105,7 @@ export const map = grid([
     HILL,
     HILL,
     town('Chinju'),
-    PLAIN,
+    plain({ unpassableEdges: [BOTTOM_RIGHT] }),
   ],
   [
     HILL,
