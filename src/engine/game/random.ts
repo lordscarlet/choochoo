@@ -29,7 +29,7 @@ export class Random {
 
   draw<T>(number: number, arr: T[], failOnOverflow: boolean): T[] {
     assert(!failOnOverflow || number <= arr.length, 'cannot pull too many items from array');
-    return iterate(Math.max(number, arr.length), () => {
+    return iterate(Math.min(number, arr.length), () => {
       const index = this.random(arr.length);
       return arr.splice(index, 1)[0];
     });
