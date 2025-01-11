@@ -2,7 +2,7 @@ import { city, plain, town } from "../../testing/factory";
 import { InjectionHelper } from "../../testing/injection_helper";
 import { resettable } from "../../testing/resettable";
 import { Coordinates } from "../../utils/coordinates";
-import { GRID } from "../game/state";
+import { GRID, INTER_CITY_CONNECTIONS } from "../game/state";
 import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { MutableSpaceData, SpaceData } from "../state/space";
@@ -26,6 +26,7 @@ describe('BuildValidator', () => {
       [townCoordinates.neighbor(Direction.TOP), plain()],
     ]);
     injector.state().init(GRID, grid);
+    injector.state().init(INTER_CITY_CONNECTIONS, []);
     return {
       cityCoordinates,
       plainCoordinates,

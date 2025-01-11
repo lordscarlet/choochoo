@@ -1,7 +1,7 @@
 import 'jasmine';
 import { InjectionHelper } from '../../testing/injection_helper';
 import { Coordinates } from '../../utils/coordinates';
-import { GRID } from '../game/state';
+import { GRID, INTER_CITY_CONNECTIONS } from '../game/state';
 import { isTownTile } from '../map/tile';
 import { SpaceType } from '../state/location_type';
 import { LandData, SpaceData } from '../state/space';
@@ -42,6 +42,7 @@ describe(BuildCostCalculator.name, () => {
   }
 
   injector.initResettableState(GRID, new Map());
+  injector.initResettableState(INTER_CITY_CONNECTIONS, []);
 
   function calculateCost({ from, to, type }: CalculateCostProps) {
     const coordinates = Coordinates.from({ q: 0, r: 0 });
