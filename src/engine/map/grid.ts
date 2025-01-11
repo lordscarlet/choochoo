@@ -74,7 +74,7 @@ export class Grid {
   countOwnershipMarkers(color: PlayerColor): number {
     const visited = new Set<Track>();
     let count = 0;
-    for (let space of this.values()) {
+    for (const space of this.values()) {
       if (space instanceof City) continue;
       for (const startTrack of space.getTrack()) {
         if (startTrack.getOwner() !== color) continue;
@@ -84,6 +84,9 @@ export class Grid {
           visited.add(track);
         }
       }
+    }
+    for (const connection of this.connections) {
+      if (connection.owner?.color === color) count++;
     }
     return count;
   }
