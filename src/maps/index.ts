@@ -4,6 +4,7 @@ import { assert } from '../utils/validate';
 import { CyprusMapSettings } from './cyprus/settings';
 import { IndiaMapSettings } from './india/settings';
 import { IrelandMapSettings } from './ireland/settings';
+import { KoreaMapSettings } from './korea/settings';
 import { MadagascarMapSettings } from './madagascar/settings';
 import { ReversteamMapSettings } from './reversteam/settings';
 import { RustBeltMapSettings } from './rust_belt/settings';
@@ -22,6 +23,7 @@ export class MapRegistry {
     this.add(new CyprusMapSettings());
     this.add(new MadagascarMapSettings());
     this.add(new IndiaMapSettings());
+    this.add(new KoreaMapSettings());
   }
 
   values(): Iterable<MapSettings> {

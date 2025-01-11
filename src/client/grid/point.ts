@@ -99,23 +99,26 @@ export function getExitPoint(center: Point, exit: Exit, size: number): Point {
 export function directionToRad(direction: Direction): number {
   switch (direction) {
     case Direction.TOP_RIGHT:
-      return Math.PI / 6;
-    case Direction.TOP:
-      return Math.PI / 2;
-    case Direction.TOP_LEFT:
-      return Math.PI * 5 / 6;
-    case Direction.BOTTOM_LEFT:
-      return Math.PI * 7 / 6;
-    case Direction.BOTTOM:
-      return Math.PI * 3 / 2;
-    case Direction.BOTTOM_RIGHT:
       return Math.PI * 11 / 6;
+    case Direction.TOP:
+      return Math.PI * 3 / 2;
+    case Direction.TOP_LEFT:
+      return Math.PI * 7 / 6;
+    case Direction.BOTTOM_LEFT:
+      return Math.PI * 5 / 6;
+    case Direction.BOTTOM:
+      return Math.PI / 2;
+    case Direction.BOTTOM_RIGHT:
+      return Math.PI / 6;
     default:
       assertNever(direction);
   }
 }
 
 export function movePointInDirection(point: Point, size: number, direction: Direction): Point {
-  return movePointInRadDirection(point, size, directionToRad(direction));
+  // Size refers to the space between the center and a corner. As such, the space between the center and
+  // a side is different.
+  const distance = Math.cos(Math.PI / 6) * size;
+  return movePointInRadDirection(point, distance, directionToRad(direction));
 }
 

@@ -1,6 +1,8 @@
 import { Map as ImmutableMap } from 'immutable';
 import { BLACK, WHITE } from "../engine/state/city_group";
 import { Good } from "../engine/state/good";
+import { GridData } from '../engine/state/grid';
+import { InterCityConnection } from '../engine/state/inter_city_connection';
 import { SpaceType } from "../engine/state/location_type";
 import { OnRoll, OnRollData } from "../engine/state/roll";
 import { CityData, LandData } from '../engine/state/space';
@@ -88,3 +90,14 @@ export function town(townName: string): LandData {
   };
 }
 
+export function interCityConnections(grid: GridData, connections: string[][]): InterCityConnection[] {
+  const cities = new Map([...grid.entries()].map(([coordinates, space]) => {
+    const name = space.type === SpaceType.CITY ? space.name : undefined;
+    return [name, coordinates];
+  }));
+  return connections.map((connects) => ({
+    connects: connects.map((name) => cities.get(name)!),
+    cost: 2,
+    owner: undefined,
+  }));
+}

@@ -19,9 +19,9 @@ export function InterCityConnectionRender({ connection, offset, size }: InterCit
   const connectionCenter = useMemo(() => {
     const center = offsetPoint(coordinatesToCenter(first, size), offset);
     return movePointInDirection(center, size, first.getDirection(second));
-  }, [offset.x, first, second, offset.y, size]);
+  }, [offset.x, offset.y, first, second, size]);
 
-  console.log('rendering connection', connectionCenter);
+  console.log('rendering connection', connectionCenter, offsetPoint(coordinatesToCenter(first, size), offset), first.getDirection(second));
 
   return <circle cx={connectionCenter.x} cy={connectionCenter.y} r={size / 3} className={`${styles.interCityConnection} ${getPlayerColorCss(connection.owner)}`} />;
 }
