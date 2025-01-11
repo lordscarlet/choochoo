@@ -238,8 +238,7 @@ export class Grid {
           return this.endsWith(connection, coordinates) &&
             this.canMoveGoodsAcrossTrack(connection);
         } else {
-          // InterCityConnection wouldn't be returned from .connection unless it was owned.
-          return true;
+          return connection.connects.includes(coordinates);
         }
       });
   }
