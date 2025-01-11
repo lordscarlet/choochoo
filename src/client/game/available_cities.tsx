@@ -32,7 +32,7 @@ export function AvailableCity({ city }: { city: MutableAvailableCity }) {
       urbanized: true,
       onRoll: city.onRoll,
     });
-    return Grid.fromSpaces([newCity]);
+    return Grid.fromSpaces([newCity], []);
   }, [city]);
 
   return <div><HexGrid grid={grid} /></div>;

@@ -2,6 +2,7 @@
 import { assertNever } from "../../utils/validate";
 import { SimpleConstructor } from "../framework/dependency_stack";
 import { GridData } from "../state/grid";
+import { InterCityConnection } from "../state/inter_city_connection";
 
 export enum ReleaseStage {
   DEVELOPMENT = 1,
@@ -31,6 +32,7 @@ export interface MapSettings {
   readonly bestAt?: string;
   readonly recommendedPlayerCount?: string;
   readonly startingGrid: GridData;
+  readonly interCityConnections?: InterCityConnection[];
   readonly stage: ReleaseStage;
 
   getOverrides(): Array<SimpleConstructor<unknown>>;

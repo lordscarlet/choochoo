@@ -3,7 +3,7 @@ import { Direction } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { assertNever } from "../../utils/validate";
 
-export function movePointInDirection(point: Point, size: number, rad: number): Point {
+export function movePointInRadDirection(point: Point, size: number, rad: number): Point {
   return {
     x: Math.round(point.x + Math.cos(rad) * size),
     y: Math.round(point.y + Math.sin(rad) * size),
@@ -61,13 +61,13 @@ const allCornerLocations = [
 
 /** Returns corners, starting with the right corner and rotating clockwise. */
 export function getCorners(center: Point, size: number): Point[] {
-  return allCornerLocations.map((cornerLocation) => movePointInDirection(center, size, cornerLocation));
+  return allCornerLocations.map((cornerLocation) => movePointInRadDirection(center, size, cornerLocation));
 }
 
 export function getHalfCorners(center: Point, size: number): Point[] {
   const [topRight, right, bottomRight] =
     [TOP_RIGHT, RIGHT, BOTTOM_RIGHT].map(
-      cornerLocation => movePointInDirection(center, size, cornerLocation));
+      cornerLocation => movePointInRadDirection(center, size, cornerLocation));
 
   const top = { x: center.x, y: topRight.y };
   const bottom = { x: center.x, y: bottomRight.y };
@@ -76,7 +76,7 @@ export function getHalfCorners(center: Point, size: number): Point[] {
 
 /** Returns corners of an edge of a hex. */
 export function edgeCorners(center: Point, size: number, direction: Direction): Point[] {
-  return edgeAngles(direction).map(angle => movePointInDirection(center, size, angle));
+  return edgeAngles(direction).map(angle => movePointInRadDirection(center, size, angle));
 }
 
 export function edgeAngles(direction: Direction): number[] {
@@ -91,24 +91,31 @@ export function edgeAngles(direction: Direction): number[] {
 }
 
 export function getExitPoint(center: Point, exit: Exit, size: number): Point {
-  const [right, bottomRight, bottomLeft, left, topLeft, topRight] = getCorners(center, size);
+  if (exit === TOWN) return center;
 
-  switch (exit) {
-    case TOWN: return center;
-    case Direction.BOTTOM:
-      return pointBetween(bottomLeft, bottomRight);
-    case Direction.BOTTOM_LEFT:
-      return pointBetween(bottomLeft, left);
-    case Direction.BOTTOM_RIGHT:
-      return pointBetween(bottomRight, right);
-    case Direction.TOP_LEFT:
-      return pointBetween(topLeft, left);
+  return movePointInDirection(center, size, exit);
+}
+
+export function directionToRad(direction: Direction): number {
+  switch (direction) {
     case Direction.TOP_RIGHT:
-      return pointBetween(topRight, right);
+      return Math.PI / 6;
     case Direction.TOP:
-      return pointBetween(topRight, topLeft);
+      return Math.PI / 2;
+    case Direction.TOP_LEFT:
+      return Math.PI * 5 / 6;
+    case Direction.BOTTOM_LEFT:
+      return Math.PI * 7 / 6;
+    case Direction.BOTTOM:
+      return Math.PI * 3 / 2;
+    case Direction.BOTTOM_RIGHT:
+      return Math.PI * 11 / 6;
     default:
-      assertNever(exit);
+      assertNever(direction);
   }
+}
+
+export function movePointInDirection(point: Point, size: number, direction: Direction): Point {
+  return movePointInRadDirection(point, size, directionToRad(direction));
 }
 

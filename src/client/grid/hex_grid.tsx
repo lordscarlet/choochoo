@@ -8,12 +8,13 @@ import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
 import { DoubleHeight } from '../../utils/double_height';
 import { iterate } from '../../utils/functions';
+import { SwedenProgressionGraphic } from '../game/sweden/progression_graphic';
 import { useTypedCallback } from "../utils/hooks";
 import { ClickTarget } from "./click_target";
 import { Hex } from "./hex";
 import { fabs, floatingFabs, hexGrid, hexGridContainer } from './hex_grid.module.css';
+import { InterCityConnectionRender } from './inter_city_connection';
 import { coordinatesToCenter, getCorners, Point } from "./point";
-import { SwedenProgressionGraphic } from '../game/sweden/progression_graphic';
 
 
 function cubeRound(qFrac: number, rFrac: number): Coordinates {
@@ -175,6 +176,7 @@ export function HexGrid({ onClick, fullMapVersion, highlightedTrack, selectedGoo
         onClick={internalOnClick}>
         {mapSpaces}
         {fullMapVersion && <DoubleHeightNumbers grid={grid} size={size} coordinateWidth={coordinateWidth} externalPadding={externalPadding} />}
+        {grid.connections.map((connection, index) => <InterCityConnectionRender key={index} offset={offset} size={size} connection={connection} />)}
         {fullMapVersion && <SwedenProgressionGraphic />}
       </svg>
     </div>

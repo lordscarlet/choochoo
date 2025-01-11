@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import * as styles from './hex_name.module.css';
-import { Point, movePointInDirection, pointBetween } from "./point";
+import { Point, movePointInRadDirection, pointBetween } from "./point";
 
 export function HexName({ name, center, size }: { name: string; center: Point; size: number; }) {
-  const right = movePointInDirection(center, size, 0);
-  const bottomRight = movePointInDirection(center, size, Math.PI / 3);
-  const bottomLeft = movePointInDirection(center, size, Math.PI * 2 / 3);
-  const left = movePointInDirection(center, size, Math.PI);
-  const topLeft = movePointInDirection(center, size, Math.PI * 4 / 3);
-  const topRight = movePointInDirection(center, size, Math.PI * 5 / 3);
+  const right = movePointInRadDirection(center, size, 0);
+  const bottomRight = movePointInRadDirection(center, size, Math.PI / 3);
+  const bottomLeft = movePointInRadDirection(center, size, Math.PI * 2 / 3);
+  const left = movePointInRadDirection(center, size, Math.PI);
+  const topLeft = movePointInRadDirection(center, size, Math.PI * 4 / 3);
+  const topRight = movePointInRadDirection(center, size, Math.PI * 5 / 3);
   const townCorners = useMemo(() => [
     left,
     pointBetween(topLeft, left, hexNameDiff),

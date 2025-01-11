@@ -59,7 +59,7 @@ export function CreateGamePage() {
   const grid = useMemo(() => {
     if (gameKey == null) return undefined;
     const settings = MapRegistry.singleton.get(gameKey);
-    return Grid.fromData(settings.startingGrid);
+    return Grid.fromData(settings.startingGrid, settings.interCityConnections ?? []);
   }, [gameKey]);
 
   return <Box

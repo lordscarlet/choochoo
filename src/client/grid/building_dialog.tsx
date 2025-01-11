@@ -141,7 +141,7 @@ export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpacePro
       return new Land(space.coordinates, newLocationData);
     }
   }, [space, tile, asCity]);
-  const grid = useMemo(() => Grid.fromSpaces([newSpace]), [newSpace]);
+  const grid = useMemo(() => Grid.fromSpaces([newSpace], []), [newSpace]);
   const clickTargets = useMemo(() => new Set([ClickTarget.TOWN, ClickTarget.LOCATION, ClickTarget.CITY]), []);
   return <HexGrid grid={grid} onClick={onClick} clickTargets={clickTargets} />
 }

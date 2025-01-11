@@ -6,6 +6,7 @@ import { DoubleHeight } from '../../utils/double_height';
 import { isNotNull, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GridData } from "../state/grid";
+import { InterCityConnection } from '../state/inter_city_connection';
 import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { allDirections, Direction } from "../state/tile";
@@ -21,7 +22,7 @@ export class Grid {
   readonly topLeft: DoubleHeight;
   readonly bottomRight: DoubleHeight;
 
-  private constructor(private readonly grid: ImmutableMap<Coordinates, Space>) {
+  private constructor(private readonly grid: ImmutableMap<Coordinates, Space>, readonly connections: InterCityConnection[]) {
     const doubleHeights = [...this.keys()].map(coord => coord.toDoubleHeight());
     this.topLeft = new DoubleHeight(
       Math.min(...doubleHeights.map(({ col }) => col)),
@@ -236,7 +237,7 @@ export class Grid {
     return this.getRoute(track).every((track) => !track.isClaimable());
   }
 
-  merge(gridData: GridData): Grid {
+  merge(gridData: GridData, connections: InterCityConnection[]): Grid {
     let map = this.grid;
     const toDeleteKeys = new Set([...this.grid.keys()]);
     for (const [coordinates, spaceData] of gridData) {
@@ -257,15 +258,15 @@ export class Grid {
 
     if (map === this.grid) return this;
 
-    return new Grid(map);
+    return new Grid(map, connections);
   }
 
-  static fromData(gridData: GridData): Grid {
-    return new Grid(ImmutableMap()).merge(gridData);
+  static fromData(gridData: GridData, connections: InterCityConnection[]): Grid {
+    return new Grid(ImmutableMap(), []).merge(gridData, connections);
   }
 
-  static fromSpaces(spaces: Space[]): Grid {
-    return new Grid(ImmutableMap(spaces.map(s => [s.coordinates, s])));
+  static fromSpaces(spaces: Space[], connections: InterCityConnection[]): Grid {
+    return new Grid(ImmutableMap(spaces.map(s => [s.coordinates, s])), connections);
   }
 }
 

@@ -7,6 +7,7 @@ import { Action } from "../state/action";
 import { MutableAvailableCity } from '../state/available_city';
 import { GoodZod } from '../state/good';
 import { GridData } from "../state/grid";
+import { InterCityConnection } from "../state/inter_city_connection";
 import { MutablePlayerData, PlayerColor, PlayerColorZod, PlayerData } from "../state/player";
 import { MutableSpaceData } from "../state/space";
 
@@ -17,6 +18,7 @@ export const AVAILABLE_CITIES = new Key('availableCities', { parse: z.array(Muta
 
 export const GRID = new MapKey<Coordinates, MutableSpaceData>('grid', CoordinatesZod.parse, MutableSpaceData.parse);
 
+export const INTER_CITY_CONNECTIONS = new Key('interCityConnections', { parse: InterCityConnection.array().parse });
 
 const PLAYERS = new Key('players', { parse: z.array(MutablePlayerData).parse });
 
@@ -46,9 +48,9 @@ export const injectCurrentPlayer = composeState([CURRENT_PLAYER, PLAYERS], (_: P
   return players.find(player => player.color === playerColor)!;
 });
 
-export const injectGrid = composeState([GRID], (previousGrid: Grid | undefined, gridData: GridData): Grid => {
+export const injectGrid = composeState([GRID, INTER_CITY_CONNECTIONS], (previousGrid: Grid | undefined, gridData: GridData, connections?: InterCityConnection[]): Grid => {
   if (previousGrid) {
-    return previousGrid.merge(gridData);
+    return previousGrid.merge(gridData, connections ?? []);
   }
-  return Grid.fromData(gridData);
+  return Grid.fromData(gridData, connections ?? []);
 });
