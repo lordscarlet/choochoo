@@ -2,7 +2,7 @@ import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 import { injectState } from "../framework/execution_context";
 import { GRID, injectGrid, INTER_CITY_CONNECTIONS } from "../game/state";
-import { InterCityConnection } from "../state/inter_city_connection";
+import { InterCityConnection, interCityConnectionEquals } from "../state/inter_city_connection";
 import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { MutableSpaceData, SpaceData } from "../state/space";
@@ -39,7 +39,7 @@ export class GridHelper {
   setInterCityOwner(owner: PlayerColor, connection: InterCityConnection): void {
     this.interCityConnections.update((connections) => {
       const set = new Set(connection.connects);
-      const matching = connections.find((c) => c.connects.every(a => set.has(a)))!;
+      const matching = connections.find((c) => interCityConnectionEquals(connection, c))!;
       matching.owner = { color: owner };
     });
   }

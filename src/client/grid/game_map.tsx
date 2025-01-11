@@ -11,6 +11,7 @@ import { Track } from "../../engine/map/track";
 import { MoveHelper } from "../../engine/move/helper";
 import { MoveAction, MoveData, Path } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";
+import { OwnedInterCityConnection } from "../../engine/state/inter_city_connection";
 import { PlayerData } from "../../engine/state/player";
 import { isDirection } from "../../engine/state/tile";
 import { SelectCityAction, SelectCityData } from "../../maps/india/production";
@@ -20,26 +21,36 @@ import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { useAction, useGameVersionState } from "../services/game";
 import { useTypedCallback, useTypedMemo } from "../utils/hooks";
-import { useCurrentPlayer, useGrid, useInjected } from "../utils/injection_context";
+import { Memoized, useCurrentPlayer, useGrid, useInjectedMemo } from "../utils/injection_context";
 import { BuildingDialog } from "./building_dialog";
 import { ClickTarget } from "./click_target";
 import { HexGrid } from "./hex_grid";
 
 function buildPaths(grid: Grid, startingStop: Coordinates, endingStop: Coordinates): Path[] {
-  return [...grid.findRoutesToLocation(startingStop, endingStop)].map((track) => {
-    if (track.coordinates.equals(startingStop)) {
-      // Town track, return non-town exit.
+  return [...grid.findRoutesToLocation(startingStop, endingStop)].map((connection) => {
+    if (connection instanceof Track) {
+      const track = connection;
+      if (track.coordinates.equals(startingStop)) {
+        // Town track, return non-town exit.
+        return {
+          owner: track.getOwner(),
+          endingStop,
+          startingExit: track.getExits().find(isDirection)!,
+        };
+      }
       return {
         owner: track.getOwner(),
         endingStop,
-        startingExit: track.getExits().find(isDirection)!,
+        startingExit: getOpposite(track.getExits().filter(isDirection).find(e => track.coordinates.neighbor(e).equals(startingStop))!),
+      };
+    } else {
+      // InterCityConnection
+      return {
+        owner: connection.owner!.color,
+        endingStop,
+        startingExit: startingStop.getDirection(endingStop),
       };
     }
-    return {
-      owner: track.getOwner(),
-      endingStop,
-      startingExit: getOpposite(track.getExits().filter(isDirection).find(e => track.coordinates.neighbor(e).equals(startingStop))!),
-    };
   });
 }
 
@@ -59,7 +70,7 @@ function onSelectGoodCb(moveActionProgress: MoveData | undefined, setMoveActionP
   }
 }
 
-function onMoveToSpaceCb(moveHelper: MoveHelper, moveActionProgress: MoveData | undefined, setMoveActionProgress: (data: MoveData | undefined) => void, grid: Grid, player: PlayerData | undefined, maybeConfirmDelivery: (data: MoveData) => void) {
+function onMoveToSpaceCb(moveHelper: Memoized<MoveHelper>, moveActionProgress: MoveData | undefined, setMoveActionProgress: (data: MoveData | undefined) => void, grid: Grid, player: PlayerData | undefined, maybeConfirmDelivery: (data: MoveData) => void) {
   return (space?: Space) => {
     if (space == null || moveActionProgress == null || player == null) return;
     const entirePath = [moveActionProgress.startingCity, ...moveActionProgress.path.map(p => p.endingStop)];
@@ -95,7 +106,7 @@ function onMoveToSpaceCb(moveHelper: MoveHelper, moveActionProgress: MoveData | 
       return;
     }
     const fromSpace = grid.get(peek(entirePath))!;
-    if (entirePath.length > 1 && fromSpace instanceof City && fromSpace.accepts(moveActionProgress.good)) return;
+    if (entirePath.length > 1 && fromSpace instanceof City && !moveHelper.value.canMoveThrough(fromSpace, moveActionProgress.good)) return;
     const paths = buildPaths(grid, fromSpace.coordinates, space.coordinates);
     if (paths.length === 0) return;
 
@@ -105,24 +116,30 @@ function onMoveToSpaceCb(moveHelper: MoveHelper, moveActionProgress: MoveData | 
       ...moveActionProgress,
       path: moveActionProgress.path.concat([path]),
     };
-    if (!moveHelper.isWithinLocomotive(player, newData)) return;
+    if (!moveHelper.value.isWithinLocomotive(player, newData)) return;
     setMoveActionProgress(newData);
     maybeConfirmDelivery(newData);
   };
+}
+
+function getHighlightedConnections(grid: Grid, moveActionProgress: MoveData | undefined): OwnedInterCityConnection[] {
+  if (moveActionProgress == null) return [];
+  return moveActionProgress.path.flatMap((p, index) => {
+    const startingStop = index === 0 ? moveActionProgress.startingCity : moveActionProgress.path[index - 1].endingStop;
+    const connection = grid.connection(startingStop, p.startingExit);
+    if (connection == null || connection instanceof City || connection instanceof Track) {
+      return [];
+    }
+    return [connection];
+  });
 }
 
 function getHighlightedTrack(grid: Grid, moveActionProgress: MoveData | undefined): Track[] {
   if (moveActionProgress == null) return [];
   return moveActionProgress.path.flatMap((p, index) => {
     const startingStop = index === 0 ? moveActionProgress.startingCity : moveActionProgress.path[index - 1].endingStop;
-    const space = grid.get(startingStop);
-    if (space instanceof Land) {
-      const track = space.trackExiting(p.startingExit);
-      assert(track != null);
-      return grid.getRoute(track);
-    }
     const connection = grid.connection(startingStop, p.startingExit);
-    assert(connection instanceof Track);
+    if (!(connection instanceof Track)) return [];
     return grid.getRoute(connection);
   });
 }
@@ -183,12 +200,12 @@ function onClickCb(
   };
 }
 
-function maybeConfirmDeliveryCb(dialogs: DialogHook, grid: Grid, emitMove: (moveData: MoveData) => void) {
+function maybeConfirmDeliveryCb(moveHelper: Memoized<MoveHelper>, dialogs: DialogHook, grid: Grid, emitMove: (moveData: MoveData) => void) {
   return (moveActionProgress: MoveData | undefined) => {
     if (moveActionProgress == null) return;
     if (moveActionProgress.path.length === 0) return;
     const endingStop = grid.get(peek(moveActionProgress.path).endingStop);
-    if (endingStop instanceof City && endingStop.accepts(moveActionProgress.good)) {
+    if (endingStop instanceof City && moveHelper.value.canDeliverTo(endingStop, moveActionProgress.good)) {
       dialogs.confirm('Deliver to ' + endingStop.name(), {
         okText: 'Confirm Delivery',
         cancelText: 'Cancel',
@@ -210,7 +227,7 @@ export function GameMap() {
   const player = useCurrentPlayer();
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Land | undefined>(undefined);
-  const moveHelper = useInjected(MoveHelper);
+  const moveHelper = useInjectedMemo(MoveHelper);
 
   const isPending = isBuildPending || isMovePending || isDeurbanizePending || isClaimPending || isSelectCityPending || isConnectCityPending;
 
@@ -220,11 +237,12 @@ export function GameMap() {
 
   const onSelectGood = useTypedCallback(onSelectGoodCb, [moveActionProgress, setMoveActionProgress]);
 
-  const maybeConfirmDelivery = useTypedCallback(maybeConfirmDeliveryCb, [dialogs, grid, emitMove]);
+  const maybeConfirmDelivery = useTypedCallback(maybeConfirmDeliveryCb, [moveHelper, dialogs, grid, emitMove]);
 
   const onMoveToSpace = useTypedCallback(onMoveToSpaceCb, [moveHelper, moveActionProgress, setMoveActionProgress, grid, player, maybeConfirmDelivery]);
 
   const highlightedTrack = useTypedMemo(getHighlightedTrack, [grid, moveActionProgress]);
+  const highlightedConnections = useTypedMemo(getHighlightedConnections, [grid, moveActionProgress]);
 
   const selectedGood = useTypedMemo(getSelectedGood, [moveActionProgress]);
 
@@ -266,7 +284,7 @@ export function GameMap() {
   }, []);
 
   return <>
-    <HexGrid onClick={onClick} onClickInterCity={onClickInterCity} fullMapVersion={true} highlightedTrack={highlightedTrack} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
+    <HexGrid onClick={onClick} onClickInterCity={onClickInterCity} fullMapVersion={true} highlightedTrack={highlightedTrack} highlightedConnections={highlightedConnections} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
     <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
   </>;
 }

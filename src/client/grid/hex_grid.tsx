@@ -5,6 +5,7 @@ import { MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
+import { interCityConnectionEquals, OwnedInterCityConnection } from '../../engine/state/inter_city_connection';
 import { Coordinates } from "../../utils/coordinates";
 import { DoubleHeight } from '../../utils/double_height';
 import { iterate } from '../../utils/functions';
@@ -50,6 +51,7 @@ interface HexGridProps {
   onClick?: (space: Space, good?: Good) => void;
   onClickInterCity?: (connects: Coordinates[]) => void;
   highlightedTrack?: Track[];
+  highlightedConnections?: OwnedInterCityConnection[];
   selectedGood?: { good: Good, coordinates: Coordinates };
   clickTargets?: Set<ClickTarget>;
   fullMapVersion?: boolean;
@@ -89,7 +91,7 @@ function useZoom(allowZoom?: boolean) {
   return [zoom, setZoom] as const;
 }
 
-export function HexGrid({ onClick, onClickInterCity, fullMapVersion, highlightedTrack, selectedGood, grid, clickTargets }: HexGridProps) {
+export function HexGrid({ onClick, onClickInterCity, fullMapVersion, highlightedTrack, highlightedConnections, selectedGood, grid, clickTargets }: HexGridProps) {
   const allowZoom = fullMapVersion;
   const [zoom, setZoom] = useZoom(allowZoom);
   const size = 70;
@@ -177,7 +179,7 @@ export function HexGrid({ onClick, onClickInterCity, fullMapVersion, highlighted
         onClick={internalOnClick}>
         {mapSpaces}
         {fullMapVersion && <DoubleHeightNumbers grid={grid} size={size} coordinateWidth={coordinateWidth} externalPadding={externalPadding} />}
-        {grid.connections.map((connection, index) => <InterCityConnectionRender key={index} clickTargets={clickTargetsNormalized} onClick={onClickInterCity} offset={offset} size={size} connection={connection} />)}
+        {grid.connections.map((connection, index) => <InterCityConnectionRender key={index} highlighted={highlightedConnections?.some(c => interCityConnectionEquals(connection, c))} clickTargets={clickTargetsNormalized} onClick={onClickInterCity} offset={offset} size={size} connection={connection} />)}
         {fullMapVersion && <SwedenProgressionGraphic />}
       </svg>
     </div>

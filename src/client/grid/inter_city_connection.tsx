@@ -12,10 +12,11 @@ interface InterCityConnectionRenderProps {
   size: number;
   offset: Point;
   clickTargets: Set<ClickTarget>;
+  highlighted?: boolean;
   onClick?: (connects: Coordinates[]) => void;
 }
 
-export function InterCityConnectionRender({ connection, offset, size, clickTargets, onClick }: InterCityConnectionRenderProps) {
+export function InterCityConnectionRender({ connection, offset, size, clickTargets, highlighted, onClick }: InterCityConnectionRenderProps) {
   // For now, assume that the connection can only be rendered if it is between two cities.
   if (connection.connects.length !== 2) return <></>;
 
@@ -33,6 +34,6 @@ export function InterCityConnectionRender({ connection, offset, size, clickTarge
     cx={connectionCenter.x}
     cy={connectionCenter.y}
     r={size / 3}
-    stroke="black"
+    stroke={highlighted ? 'yellow' : 'black'}
     className={`${styles.interCityConnection} ${clickable} ${connection.owner ? getPlayerColorCss(connection.owner.color) : ''}`} />;
 }

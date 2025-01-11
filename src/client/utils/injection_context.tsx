@@ -35,6 +35,17 @@ export function useInjected<T>(factory: SimpleConstructor<T>): T {
   }, [factory]).value;
 }
 
+export interface Memoized<T> {
+  value: T;
+}
+
+export function useInjectedMemo<T>(factory: SimpleConstructor<T>): Memoized<T> {
+  return useInject(() => {
+    // Wrap in an object so the value changes every time (notifying react of the diff).
+    return { value: inject(factory) };
+  }, [factory]);
+}
+
 export function useInject<T>(fn: () => T, deps: unknown[]): T {
   const ctx = useInjectionContext();
 

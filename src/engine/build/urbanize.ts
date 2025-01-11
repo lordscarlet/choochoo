@@ -69,7 +69,6 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
     });
 
     // Take ownership of connecting unowned track.
-    const toUpdate: Track[] = [];
     for (const direction of allDirections) {
       const connection = this.grid().connection(data.coordinates, direction);
       if (!(connection instanceof Track) || connection.getOwner() != null) continue;

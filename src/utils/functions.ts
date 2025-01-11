@@ -100,3 +100,14 @@ export function isNotNull<T>(t: T): t is NonNullable<T> {
 export function entries<T extends {}>(obj: T): Array<Entry<T>> {
   return Object.entries(obj) as Array<Entry<T>>;
 }
+
+export function arrayEqualsIgnoreOrder<T>(arr1: T[], arr2: T[]): boolean {
+  if (arr1.length !== arr2.length) return false;
+  const toFind = [...arr2];
+  for (const value of arr1) {
+    const index = toFind.indexOf(value);
+    if (index === -1) return false;
+    toFind.splice(index, 1);
+  }
+  return true;
+}

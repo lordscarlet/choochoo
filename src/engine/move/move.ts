@@ -105,7 +105,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
           { invalidInput: `indicated track does not end with ${step.endingStop}` });
       } else {
         // InterCityConnection
-        assert(startingRouteTrackOrConnection.owner?.color === step.owner, { invalidInput: `route not owned by ${step.owner}` });
+        assert(startingRouteTrackOrConnection.owner.color === step.owner, { invalidInput: `route not owned by ${step.owner}` });
       }
 
       fromCity = grid.get(toCoordinates)!;

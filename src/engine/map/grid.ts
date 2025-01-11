@@ -3,10 +3,10 @@ import { z } from "zod";
 import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
 import { deepEquals } from '../../utils/deep_equals';
 import { DoubleHeight } from '../../utils/double_height';
-import { isNotNull, peek } from "../../utils/functions";
+import { arrayEqualsIgnoreOrder, isNotNull, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GridData } from "../state/grid";
-import { InterCityConnection } from '../state/inter_city_connection';
+import { InterCityConnection, OwnedInterCityConnection } from '../state/inter_city_connection';
 import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { allDirections, Direction } from "../state/tile";
@@ -34,9 +34,8 @@ export class Grid {
     );
   }
 
-  findConnection(connection: Coordinates[]): InterCityConnection | undefined {
-    const set = new Set(connection);
-    return this.connections.find(({ connects }) => connects.every((c) => set.has(c)));
+  findConnection(coordinates: Coordinates[]): InterCityConnection | undefined {
+    return this.connections.find((connection) => arrayEqualsIgnoreOrder(connection.connects, coordinates));
   }
 
   get(coordinates: Coordinates): Space | undefined {
@@ -142,7 +141,7 @@ export class Grid {
     });
   }
 
-  connection(fromCoordinates: Coordinates, direction: Direction): City | Track | InterCityConnection | undefined {
+  connection(fromCoordinates: Coordinates, direction: Direction): City | Track | OwnedInterCityConnection | undefined {
     const current = this.grid.get(fromCoordinates);
     const neighbor = this.grid.get(fromCoordinates.neighbor(direction));
     if (neighbor == null) return undefined;
@@ -150,7 +149,7 @@ export class Grid {
     if (neighbor instanceof City) {
       if (current instanceof City) {
         const connection = this.findConnection([fromCoordinates, neighbor.coordinates]);
-        return connection?.owner != null ? connection : undefined;
+        return connection?.owner != null ? connection as OwnedInterCityConnection : undefined;
       }
       return neighbor;
     }
@@ -215,7 +214,7 @@ export class Grid {
     }
   }
 
-  findRoutesToLocation(fromCoordinates: Coordinates, toCoordinates: Coordinates): Track[] {
+  findRoutesToLocation(fromCoordinates: Coordinates, toCoordinates: Coordinates): Array<Track | OwnedInterCityConnection> {
     const space = this.grid.get(fromCoordinates);
     assert(space != null, 'cannot call findRoutes from null location');
     if (space instanceof City) {
@@ -224,23 +223,25 @@ export class Grid {
     return this.findRoutesToLocationFromTown(space, toCoordinates);
   }
 
-  findRoutesToLocationFromTown(location: Land, coordinates: Coordinates): Track[] {
+  private findRoutesToLocationFromTown(location: Land, coordinates: Coordinates): Track[] {
     assert(location.hasTown(), 'cannot call findRoutesToLocation from a non-town hex');
     return location.getTrack().filter((track) => this.endsWith(track, coordinates))
       .filter((track) => this.canMoveGoodsAcrossTrack(track));
   }
 
-  findRoutesToLocationFromCity(city: City, coordinates: Coordinates): Track[] {
-    return allDirections.map((direction) => {
-      const neighbor = this.get(city.coordinates.neighbor(direction));
-      if (neighbor == null || neighbor instanceof City) {
-        return undefined;
-      }
-      return neighbor.trackExiting(getOpposite(direction));
-    })
+  private findRoutesToLocationFromCity(city: City, coordinates: Coordinates): Array<Track | OwnedInterCityConnection> {
+    return allDirections.map((direction) => this.connection(city.coordinates, direction))
       .filter(isNotNull)
-      .filter((track) => this.endsWith(track, coordinates))
-      .filter((track) => this.canMoveGoodsAcrossTrack(track));
+      .filter((connection): connection is Track | OwnedInterCityConnection => !(connection instanceof City))
+      .filter((connection) => {
+        if (connection instanceof Track) {
+          return this.endsWith(connection, coordinates) &&
+            this.canMoveGoodsAcrossTrack(connection);
+        } else {
+          // InterCityConnection wouldn't be returned from .connection unless it was owned.
+          return true;
+        }
+      });
   }
 
   canMoveGoodsAcrossTrack(track: Track): boolean {
