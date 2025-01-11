@@ -1,5 +1,6 @@
 import { Tooltip } from "@mui/material";
 import { useCallback } from "react";
+import { GameStatus } from "../../api/game";
 import { injectPlayerAction } from "../../engine/game/state";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
@@ -10,8 +11,8 @@ import { MadagascarAllowedActions } from "../../maps/madagascar/allowed_actions"
 import { MadagascarMapSettings } from "../../maps/madagascar/settings";
 import { assertNever } from "../../utils/validate";
 import { Username } from "../components/username";
-import { useAction } from "../services/game";
-import { useGameKey, useInject, useInjected } from "../utils/injection_context";
+import { useAction, useGame } from "../services/game";
+import { useInject, useInjected } from "../utils/injection_context";
 import { PlayerCircle } from "./bidding_info";
 import * as styles from './special_action_table.module.css';
 
@@ -28,13 +29,14 @@ export function SpecialActionTable() {
 }
 
 function SpecialAction({ action }: { action: Action }) {
-  const gameKey = useGameKey();
+  const game = useGame();
+  const { gameKey } = game;
   const { emit, canEmit, isPending } = useAction(ActionSelectionSelectAction);
   const allowed = useInjected(AllowedActions);
   const player = useInject(() => injectPlayerAction(action)(), [action]);
 
   const isClickable = canEmit && player == null && !isPending;
-  const disabledReason = allowed.getDisabledActionReason(action);
+  const disabledReason = game.status === GameStatus.enum.ACTIVE ? allowed.getDisabledActionReason(action) : undefined;
   const isEmittable = isClickable && disabledReason == null;
 
   const chooseAction = useCallback(() => isEmittable && emit({ action }), [emit, isEmittable, action]);
