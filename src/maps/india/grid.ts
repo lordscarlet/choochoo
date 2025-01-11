@@ -143,7 +143,7 @@ export const map = grid([
     MOUNTAIN,
     RIVER,
     RIVER,
-    city('Patna'),
+    city('Patna', BLUE, black(2), 3),
     RIVER,
     town('Raurkela'),
     RIVER,
