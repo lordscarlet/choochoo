@@ -206,7 +206,7 @@ export function GameMap() {
   const { canEmit: canEmitClaim, emit: emitClaim, isPending: isClaimPending } = useAction(ClaimAction);
   const { canEmit: canEmitDeurbanize, emit: emitDeurbanize, isPending: isDeurbanizePending } = useAction(DeurbanizeAction);
   const { canEmit: canEmitSelectCity, emit: emitSelectCity, isPending: isSelectCityPending } = useAction(SelectCityAction);
-  const { canEmit: canEmitConnectCity, emit: emitConnectCity, isPending: isConnectCityPending } = useAction(ConnectCitiesAction);
+  const { emit: emitConnectCity, isPending: isConnectCityPending } = useAction(ConnectCitiesAction);
   const player = useCurrentPlayer();
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Land | undefined>(undefined);
@@ -246,7 +246,6 @@ export function GameMap() {
 
   const clickTargets: Set<ClickTarget> = useMemo(() => {
     if (isPending) return new Set();
-    // TODO: canEmitMove can either be a good, or travelling, but not both.
     if (canEmitMove) {
       return new Set([ClickTarget.GOOD, ClickTarget.TOWN, ClickTarget.CITY]);
     }

@@ -142,11 +142,16 @@ export class Grid {
     });
   }
 
-  connection(fromCoordinates: Coordinates, direction: Direction): City | Track | undefined {
+  connection(fromCoordinates: Coordinates, direction: Direction): City | Track | InterCityConnection | undefined {
+    const current = this.grid.get(fromCoordinates);
     const neighbor = this.grid.get(fromCoordinates.neighbor(direction));
     if (neighbor == null) return undefined;
 
     if (neighbor instanceof City) {
+      if (current instanceof City) {
+        const connection = this.findConnection([fromCoordinates, neighbor.coordinates]);
+        return connection?.owner != null ? connection : undefined;
+      }
       return neighbor;
     }
     return neighbor.trackExiting(getOpposite(direction));
@@ -166,7 +171,7 @@ export class Grid {
     }
 
     const neighbor = this.connection(track.coordinates, toExit);
-    if (neighbor == undefined || neighbor instanceof City) {
+    if (!(neighbor instanceof Track)) {
       return [];
     } else {
       return [neighbor, ...this.getRouteOneWay(neighbor, getOpposite(toExit))];
@@ -181,7 +186,7 @@ export class Grid {
     }
 
     const neighbor = this.connection(track.coordinates, toExit);
-    if (neighbor == undefined || neighbor instanceof City) {
+    if (!(neighbor instanceof Track)) {
       return [track.coordinates, toExit];
     } else {
       return this.getEnd(neighbor, getOpposite(toExit));

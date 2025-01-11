@@ -10,16 +10,17 @@ import { BAG, injectAllPlayersUnsafe, injectCurrentPlayer, injectGrid } from "..
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
+import { Track } from "../map/track";
 import { Good, goodToString } from "../state/good";
 import { PlayerColor } from "../state/player";
-import { Direction } from "../state/tile";
+import { DirectionZod } from "../state/tile";
 import { MoveHelper } from "./helper";
 
 export const Path = z.object({
   owner: z.nativeEnum(PlayerColor).optional(),
   endingStop: CoordinatesZod,
   // The direction from the previous endingStop that points to the track.
-  startingExit: z.nativeEnum(Direction),
+  startingExit: DirectionZod,
 });
 
 export type Path = z.infer<typeof Path>;
@@ -64,9 +65,8 @@ export class MoveAction implements ActionProcessor<MoveData> {
     if (!(endingLocation instanceof City)) {
       throw new InvalidInputError(`${goodToString(action.good)} good cannot be delivered to non city`);
     }
-    if (!endingLocation.accepts(action.good)) {
-      throw new InvalidInputError(`${goodToString(action.good)} good cannot be delivered to ${endingLocation.goodColors().map(goodToString).join('/')} city`);
-    }
+    assert(this.moveHelper.canDeliverTo(endingLocation, action.good),
+      { invalidInput: `${goodToString(action.good)} good cannot be delivered to ${endingLocation.goodColors().map(goodToString).join('/')} city` });
 
     // Validate that the route passes through cities and towns
     for (const step of action.path.slice(0, action.path.length - 1)) {
@@ -74,7 +74,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
       if (!(location instanceof City) && !(location instanceof Land && location.hasTown())) {
         throw new InvalidInputError('Invalid path, must pass through cities and towns');
       }
-      if (location instanceof City && location.accepts(action.good)) {
+      if (location instanceof City && !this.moveHelper.canMoveThrough(location, action.good)) {
         throw new InvalidInputError(`Cannot pass through a ${location.goodColors().map(goodToString).join('/')} city with a ${goodToString(action.good)} good`);
       }
     }
@@ -92,16 +92,21 @@ export class MoveAction implements ActionProcessor<MoveData> {
     let fromCity: City | Land = startingCity;
     for (const step of action.path) {
       const toCoordinates = step.endingStop;
-      const startingRouteTrack = fromCity instanceof City
-        ? this.grid().connection(fromCity.coordinates, step.startingExit!)
-        : fromCity.trackExiting(step.startingExit!);
-      assert(startingRouteTrack != null, { invalidInput: `no route found from ${fromCity.coordinates} exiting ${step.startingExit}` });
-      assert(!(startingRouteTrack instanceof City), `cannot move from city to city`);
-      assert(startingRouteTrack.getOwner() === step.owner, { invalidInput: `route not owned by ${step.owner}` });
-      assert(this.grid().canMoveGoodsAcrossTrack(startingRouteTrack), { invalidInput: 'cannot move track across route' });
-      assert(
-        this.grid().endsWith(startingRouteTrack, step.endingStop),
-        { invalidInput: `indicated track does not end with ${step.endingStop}` });
+      const startingRouteTrackOrConnection = fromCity instanceof City
+        ? this.grid().connection(fromCity.coordinates, step.startingExit)
+        : fromCity.trackExiting(step.startingExit);
+      assert(startingRouteTrackOrConnection != null, { invalidInput: `no route found from ${fromCity.coordinates} exiting ${step.startingExit}` });
+      assert(!(startingRouteTrackOrConnection instanceof City), `cannot move from city to city`);
+      if (startingRouteTrackOrConnection instanceof Track) {
+        assert(startingRouteTrackOrConnection.getOwner() === step.owner, { invalidInput: `route not owned by ${step.owner}` });
+        assert(this.grid().canMoveGoodsAcrossTrack(startingRouteTrackOrConnection), { invalidInput: 'cannot move track across route' });
+        assert(
+          this.grid().endsWith(startingRouteTrackOrConnection, step.endingStop),
+          { invalidInput: `indicated track does not end with ${step.endingStop}` });
+      } else {
+        // InterCityConnection
+        assert(startingRouteTrackOrConnection.owner?.color === step.owner, { invalidInput: `route not owned by ${step.owner}` });
+      }
 
       fromCity = grid.get(toCoordinates)!;
     }

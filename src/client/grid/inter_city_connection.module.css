@@ -1,3 +1,4 @@
 .interCityConnection {
+  --player-color: white;
   fill: var(--player-color);
 }

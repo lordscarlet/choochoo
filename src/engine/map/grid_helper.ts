@@ -40,7 +40,7 @@ export class GridHelper {
     this.interCityConnections.update((connections) => {
       const set = new Set(connection.connects);
       const matching = connections.find((c) => c.connects.every(a => set.has(a)))!;
-      matching.owner = owner;
+      matching.owner = { color: owner };
     });
   }
 

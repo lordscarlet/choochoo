@@ -149,7 +149,7 @@ export class Validator {
       return [coordinates, exit];
     }
     const neighbor = this.grid().connection(coordinates, exit);
-    if (neighbor == null || neighbor instanceof City) {
+    if (!(neighbor instanceof Track)) {
       return [coordinates, exit];
     }
     return this.grid().getEnd(neighbor, getOpposite(exit));

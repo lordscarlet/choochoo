@@ -33,5 +33,6 @@ export function InterCityConnectionRender({ connection, offset, size, clickTarge
     cx={connectionCenter.x}
     cy={connectionCenter.y}
     r={size / 3}
-    className={`${styles.interCityConnection} ${clickable} ${getPlayerColorCss(connection.owner)}`} />;
+    stroke="black"
+    className={`${styles.interCityConnection} ${clickable} ${connection.owner ? getPlayerColorCss(connection.owner.color) : ''}`} />;
 }

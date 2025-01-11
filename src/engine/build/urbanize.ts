@@ -6,7 +6,6 @@ import { inject, injectState } from "../framework/execution_context";
 import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { AVAILABLE_CITIES, injectCurrentPlayer, injectGrid } from "../game/state";
-import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
 import { Track } from "../map/track";
@@ -73,7 +72,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
     const toUpdate: Track[] = [];
     for (const direction of allDirections) {
       const connection = this.grid().connection(data.coordinates, direction);
-      if (connection == null || connection instanceof City || connection.getOwner() != null) continue;
+      if (!(connection instanceof Track) || connection.getOwner() != null) continue;
 
       this.gridHelper.setRouteOwner(connection);
     }
