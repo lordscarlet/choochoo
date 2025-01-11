@@ -29,5 +29,9 @@ export function InterCityConnectionRender({ connection, offset, size, clickTarge
 
   const internalOnClick = useCallback(() => onClick && onClick(connection.connects), [...connection.connects]);
 
-  return <circle onClick={internalOnClick} cx={connectionCenter.x} cy={connectionCenter.y} r={size / 3} className={`${styles.interCityConnection} ${clickable} ${getPlayerColorCss(connection.owner)}`} />;
+  return <circle onClick={internalOnClick}
+    cx={connectionCenter.x}
+    cy={connectionCenter.y}
+    r={size / 3}
+    className={`${styles.interCityConnection} ${clickable} ${getPlayerColorCss(connection.owner)}`} />;
 }

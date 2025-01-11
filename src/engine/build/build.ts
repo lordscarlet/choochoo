@@ -45,7 +45,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     const coordinates: Coordinates = data.coordinates;
 
     const maxTrack = this.helper.getMaxBuilds();
-    assert(this.helper.buildsRemaining() > 0, `You can only build at most ${maxTrack} track`);
+    assert(this.helper.buildsRemaining() > 0, { invalidInput: `You can only build at most ${maxTrack} track` });
 
     if (this.currentPlayer().money < this.costCalculator.costOf(coordinates, data.tileType)) {
       throw new InvalidInputError('Cannot afford to place track');

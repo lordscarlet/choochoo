@@ -261,7 +261,7 @@ export class Grid {
       map = map.deleteAll(toDeleteKeys);
     }
 
-    if (map === this.grid) return this;
+    if (map === this.grid && deepEquals(connections, this.connections)) return this;
 
     return new Grid(map, connections);
   }

@@ -7,15 +7,17 @@ import { AvailableCity } from '../state/available_city';
 import { CityGroup } from '../state/city_group';
 import { Good } from '../state/good';
 import { GridData } from '../state/grid';
+import { InterCityConnection } from '../state/inter_city_connection';
 import { SpaceType } from '../state/location_type';
 import { allPlayerColors, PlayerColor, PlayerData } from '../state/player';
 import { OnRoll } from '../state/roll';
 import { SpaceData } from '../state/space';
 import { Random } from './random';
-import { AVAILABLE_CITIES, BAG, GRID, injectAllPlayersUnsafe, TURN_ORDER } from './state';
+import { AVAILABLE_CITIES, BAG, GRID, injectAllPlayersUnsafe, INTER_CITY_CONNECTIONS, TURN_ORDER } from './state';
 
 export class GameStarter {
   protected readonly grid = injectState(GRID);
+  protected readonly interCityConnections = injectState(INTER_CITY_CONNECTIONS);
   protected readonly turnOrder = injectState(TURN_ORDER);
   protected readonly players = injectAllPlayersUnsafe();
   protected readonly bag = injectState(BAG);
@@ -23,12 +25,13 @@ export class GameStarter {
   protected readonly gridHelper = inject(GridHelper);
   protected readonly random = inject(Random);
 
-  startGame(playerIds: number[], startingMap: GridData) {
+  startGame(playerIds: number[], startingMap: GridData, connections: InterCityConnection[]) {
     this.onBeginStartGame();
     this.initializeStartingCubes();
     this.drawCubesForCities(startingMap);
     this.initializePlayers(playerIds);
     this.initializeAvailableCities();
+    this.interCityConnections.initState(connections);
     this.onStartGame();
   }
 

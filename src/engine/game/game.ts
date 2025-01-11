@@ -3,6 +3,7 @@ import { infiniteLoopCheck } from "../../utils/functions";
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { GridData } from "../state/grid";
+import { InterCityConnection } from "../state/inter_city_connection";
 import { Ender, EndGameReason } from "./ender";
 import { CheckAutoAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
 import { Memory } from "./memory";
@@ -28,8 +29,8 @@ export class GameEngine {
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
   readonly hasEnded = inject(Memory).remember(false);
 
-  start(playerIds: number[], startingMap: GridData) {
-    this.starter.startGame(playerIds, startingMap);
+  start(playerIds: number[], startingMap: GridData, connections: InterCityConnection[]) {
+    this.starter.startGame(playerIds, startingMap, connections);
     this.lifecycle.set(new StartRound(1));
     this.runLifecycle();
   }

@@ -27,12 +27,12 @@ export class ConnectCitiesAction implements ActionProcessor<ConnectCitiesData> {
 
   validate(data: ConnectCitiesData): void {
     const maxTrack = this.helper.getMaxBuilds();
-    assert(this.helper.buildsRemaining() > 0, `You can only build at most ${maxTrack} track`);
+    assert(this.helper.buildsRemaining() > 0, { invalidInput: `You can only build at most ${maxTrack} track` });
 
-    assert(data.connect.length > 2, { invalidInput: 'Invalid connection' });
+    assert(data.connect.length === 2, { invalidInput: 'Invalid connection' });
 
     const connection = this.grid().findConnection(data.connect);
-    assert(connection != null, { invalidInput: 'Invalid connection' });
+    assert(connection != null, { invalidInput: 'Connection not found' });
     assert(connection.owner == null, { invalidInput: 'City already connected' });
     assert(this.currentPlayer().money >= connection.cost, { invalidInput: 'Cannot afford purchase' });
   }

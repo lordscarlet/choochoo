@@ -75,7 +75,7 @@ export class EngineProcessor {
     return this.process(undefined, () => {
       const mapSettings = MapRegistry.singleton.get(mapConfig.mapKey);
       assert(playerIds.length >= mapSettings.minPlayers, { invalidInput: 'not enough players to start' });
-      this.gameEngine.start(playerIds, mapSettings.startingGrid);
+      this.gameEngine.start(playerIds, mapSettings.startingGrid, mapSettings.interCityConnections ?? []);
       return this.getGameState();
     });
   }

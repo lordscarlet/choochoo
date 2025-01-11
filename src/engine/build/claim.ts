@@ -36,7 +36,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
 
   validate(data: ClaimData): void {
     const maxTrack = this.helper.getMaxBuilds();
-    assert(this.helper.buildsRemaining() > 0, `You can only build at most ${maxTrack} track`);
+    assert(this.helper.buildsRemaining() > 0, { invalidInput: `You can only build at most ${maxTrack} track` });
 
     const space = this.grid().get(data.coordinates);
     assert(!(space instanceof City), { invalidInput: 'cannot claim on a city' });
