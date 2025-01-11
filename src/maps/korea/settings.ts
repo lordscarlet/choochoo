@@ -3,6 +3,7 @@
 import { MapSettings, ReleaseStage } from '../../engine/game/map_settings';
 import { interCityConnections } from '../factory';
 import { map } from './grid';
+import { KoreaUrbanizeAction } from './urbanize';
 
 
 export class KoreaMapSettings implements MapSettings {
@@ -17,6 +18,7 @@ export class KoreaMapSettings implements MapSettings {
 
   getOverrides() {
     return [
+      KoreaUrbanizeAction,
     ];
   }
 }
