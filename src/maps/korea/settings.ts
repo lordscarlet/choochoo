@@ -2,7 +2,9 @@
 
 import { MapSettings, ReleaseStage } from '../../engine/game/map_settings';
 import { interCityConnections } from '../factory';
+import { KoreaCostCalculator } from './cost';
 import { map } from './grid';
+import { KoreaStarter } from './starter';
 import { KoreaUrbanizeAction } from './urbanize';
 
 
@@ -19,6 +21,8 @@ export class KoreaMapSettings implements MapSettings {
   getOverrides() {
     return [
       KoreaUrbanizeAction,
+      KoreaCostCalculator,
+      KoreaStarter,
     ];
   }
 }

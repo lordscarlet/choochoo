@@ -21,7 +21,7 @@ export class SwedenStarter extends GameStarter {
     ]));
   }
 
-  getAvailableCities(): Array<[Good, CityGroup, OnRoll]> {
+  getAvailableCities(): Array<[Good | Good[], CityGroup, OnRoll]> {
     return super.getAvailableCities().filter(([good]) => good === Good.BLACK);
   }
 

@@ -84,7 +84,7 @@ export class GameStarter {
     this.turnOrder.initState(this.random.shuffle(players).map((player) => player.color));
   }
 
-  getAvailableCities(): Array<[Good, CityGroup, OnRoll]> {
+  getAvailableCities(): Array<[Good | Good[], CityGroup, OnRoll]> {
     return [
       [Good.RED, CityGroup.WHITE, 3],
       [Good.BLUE, CityGroup.WHITE, 4],
