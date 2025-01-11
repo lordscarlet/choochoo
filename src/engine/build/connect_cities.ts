@@ -46,6 +46,8 @@ export class ConnectCitiesAction implements ActionProcessor<ConnectCitiesData> {
       buildState.buildCount!++;
     });
 
+    this.helper.checkOwnershipMarkerLimits();
+
     return this.helper.isAtEndOfTurn();
   }
 }

@@ -84,19 +84,9 @@ export class BuildAction implements ActionProcessor<BuildData> {
       buildState.buildCount = (buildState.buildCount ?? buildState.previousBuilds.length) + 1;
     });
 
-    this.checkOwnershipMarkerLimits();
+    this.helper.checkOwnershipMarkerLimits();
 
     return this.helper.isAtEndOfTurn();
-  }
-
-  checkOwnershipMarkerLimits(): void {
-    const count = this.grid().countOwnershipMarkers(this.currentPlayer().color);
-    const ownershipMarkerLimit = this.ownershipMarkerLimit();
-    assert(count <= ownershipMarkerLimit, `cannot exceed ownership marker limit of ${ownershipMarkerLimit}`);
-  }
-
-  protected ownershipMarkerLimit(): number {
-    return 20;
   }
 
   protected newTile(data: BuildData): TileData {

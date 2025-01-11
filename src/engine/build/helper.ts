@@ -1,7 +1,7 @@
 
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
-import { injectCurrentPlayer } from "../game/state";
+import { injectCurrentPlayer, injectGrid } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
 import { isTownTile } from "../map/tile";
@@ -13,7 +13,8 @@ import { BUILD_STATE } from "./state";
 export class BuilderHelper {
   protected readonly currentPlayer = injectCurrentPlayer();
   protected readonly buildState = injectState(BUILD_STATE);
-  protected readonly grid = inject(GridHelper);
+  protected readonly grid = injectGrid();
+  protected readonly gridHelper = inject(GridHelper);
 
   isAtEndOfTurn(): boolean {
     return this.buildsRemaining() === 0 && !this.canUrbanize();
@@ -81,7 +82,7 @@ export class BuilderHelper {
 
     const townTiles = new Map<TownTileType, number>();
 
-    const tiles = [...this.grid.all()].filter((space): space is Land =>
+    const tiles = [...this.gridHelper.all()].filter((space): space is Land =>
       space instanceof Land).filter(space => space.hasTile())
       .map((space) => space.getTileType()!);
     // We have to verify the new tile before shifting through all the
@@ -141,5 +142,15 @@ export class BuilderHelper {
       default:
         assertNever(tile);
     }
+  }
+
+  checkOwnershipMarkerLimits(): void {
+    const count = this.grid().countOwnershipMarkers(this.currentPlayer().color);
+    const ownershipMarkerLimit = this.ownershipMarkerLimit();
+    assert(count <= ownershipMarkerLimit, `cannot exceed ownership marker limit of ${ownershipMarkerLimit}`);
+  }
+
+  protected ownershipMarkerLimit(): number {
+    return 20;
   }
 }
