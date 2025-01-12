@@ -39,7 +39,7 @@ export class ConnectCitiesAction implements ActionProcessor<ConnectCitiesData> {
 
   process(data: ConnectCitiesData): boolean {
     const connection = this.grid().findConnection(data.connect)!;
-    this.moneyHelper.addMoneyForCurrentPlayer(connection.cost);
+    this.moneyHelper.addMoneyForCurrentPlayer(-connection.cost);
     this.gridHelper.setInterCityOwner(this.currentPlayer().color, connection);
 
     this.buildState.update((buildState) => {
