@@ -2,6 +2,10 @@
   pointer-events: none;
 }
 
+.hexGrid g {
+  pointer-events: inherit;
+}
+
 .hexGrid .clickable {
   pointer-events: inherit;
   cursor: pointer;

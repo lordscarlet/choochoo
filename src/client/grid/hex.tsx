@@ -116,7 +116,7 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, cl
   const gameKey = useGameKey();
 
   return <>
-    <polygon className={`${space instanceof City ? styles.city : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="0" />
+    <polygon className={`${space instanceof City ? styles.city : styles.location} ${clickable ? gridStyles.clickable : ''} ${hexColor}`} data-coordinates={space.coordinates.serialize()} points={corners} stroke="black" strokeWidth="0" />
     {alternateColor && <HalfHex center={center} size={size} alternateColor={alternateColor} />}
     <polygon fillOpacity="0" data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
     {space instanceof Land && space.unpassableExits().map(direction => <EdgeBoundary key={direction} center={center} size={size} direction={direction} />)}
@@ -127,7 +127,7 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, cl
     {space instanceof Land && space.hasTown() && <HexName name={space.name()!} rotation={rotation} center={center} size={size} />}
     {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} rotation={rotation} />}
     {space instanceof City && space.name() != '' && <HexName name={space.name()} rotation={rotation} center={center} size={size} />}
-    {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} rotation={rotation} />)}
+    {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} coordinates={coordinates} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} rotation={rotation} />)}
   </>;
 }
 

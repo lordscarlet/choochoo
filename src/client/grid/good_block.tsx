@@ -1,5 +1,6 @@
 import { Rotation } from "../../engine/game/map_settings";
 import { Good } from "../../engine/state/good";
+import { Coordinates } from "../../utils/coordinates";
 import { Rotate } from "../components/rotation";
 import { goodStyle } from "./good";
 import * as styles from './good_block.module.css';
@@ -11,12 +12,13 @@ interface GoodBlockProps {
   center: Point;
   size: number;
   offset: number;
+  coordinates: Coordinates;
   highlighted: boolean;
   clickable: boolean;
   rotation?: Rotation;
 }
 
-export function GoodBlock({ center, size, offset, good, highlighted, clickable, rotation }: GoodBlockProps) {
+export function GoodBlock({ center, size, offset, good, coordinates, highlighted, clickable, rotation }: GoodBlockProps) {
   const goodSize = size / 3;
 
   // If there are too many goods on the hex, split them up into top and bottom goods.
@@ -27,6 +29,14 @@ export function GoodBlock({ center, size, offset, good, highlighted, clickable, 
   const y = center.y + (yOffset * goodSize);
   const stroke = highlighted ? (good === Good.YELLOW ? 'lightgreen' : 'yellow') : (good === Good.BLACK ? 'grey' : 'black');
   return <Rotate rotation={rotation} center={center} reverse={true}>
-    <rect className={`${clickable ? hexGridStyles.clickable : ''} ${styles.good} ${goodStyle(good)}`} data-good={good} width={goodSize} height={goodSize} x={x} y={y} strokeWidth={1} stroke={stroke} />;
+    <rect className={`${clickable ? hexGridStyles.clickable : ''} ${styles.good} ${goodStyle(good)}`}
+      data-coordinates={coordinates.serialize()}
+      data-good={good}
+      width={goodSize}
+      height={goodSize}
+      x={x}
+      y={y}
+      strokeWidth={1}
+      stroke={stroke} />
   </Rotate>;
 }

@@ -61,22 +61,20 @@ interface HexGridProps {
   fullMapVersion?: boolean;
 }
 
-function onClickCb(grid: Grid, zoom: number, size: number, onClick?: (space: Space, good?: Good) => void) {
+function onClickCb(grid: Grid, onClick?: (space: Space, good?: Good) => void) {
   return (e: MouseEvent) => {
     if (onClick == null) return;
-    const canvas = e.currentTarget as HTMLCanvasElement;
-    const rect = canvas.getBoundingClientRect();
-    const coordinates = pixelToCoordinates({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    }, size * zoom);
+    const coordinatesStr = (e.target as HTMLElement)?.dataset?.coordinates;
+    if (coordinatesStr != null) {
+      const coordinates = Coordinates.unserialize(coordinatesStr);
 
-    const space = grid.get(coordinates);
-    if (space == null) return;
+      const space = grid.get(coordinates);
+      if (space == null) return;
 
-    const maybeGood = (e.target as HTMLElement).dataset.good;
-    if (maybeGood == null) return onClick(space);
-    onClick(space, parseInt(maybeGood) as Good);
+      const maybeGood = (e.target as HTMLElement).dataset.good;
+      if (maybeGood == null) return onClick(space);
+      onClick(space, parseInt(maybeGood) as Good);
+    }
   };
 }
 
@@ -103,7 +101,7 @@ export function HexGrid({ onClick, onClickInterCity, rotation, fullMapVersion, h
 
   const spaces = useMemo(() => [...grid.values()], [grid]);
 
-  const internalOnClick = useTypedCallback(onClickCb, [grid, zoom, size, onClick]);
+  const internalOnClick = useTypedCallback(onClickCb, [grid, onClick]);
 
   const zoomIn = useCallback(() => {
     setZoom(zoom + 0.05);
