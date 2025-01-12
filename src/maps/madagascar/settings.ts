@@ -1,5 +1,5 @@
 import { SimpleConstructor } from "../../engine/framework/dependency_stack";
-import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import { MapSettings, ReleaseStage, Rotation } from "../../engine/game/map_settings";
 import { MadagascarAllowedActions, MadagascarGameEnder, MadagascarRoundEngine, MadagascarStarter } from "./allowed_actions";
 import { MadagascarBuildCostCalculator, MadagascarBuilderHelper, MadagascarBuildPhase, MadagascarDoneAction } from "./build";
 import { map } from "./grid";
@@ -14,6 +14,7 @@ export class MadagascarMapSettings implements MapSettings {
   readonly maxPlayers = 6;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.ALPHA;
+  readonly rotation = Rotation.COUNTER_CLOCKWISE;
 
   getOverrides(): Array<SimpleConstructor<unknown>> {
     return [
