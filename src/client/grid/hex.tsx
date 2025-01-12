@@ -18,7 +18,7 @@ import * as styles from './hex.module.css';
 import * as gridStyles from './hex_grid.module.css';
 import { HexName } from "./hex_name";
 import { OnRoll } from "./on_roll";
-import { coordinatesToCenter, edgeCorners, getCorners, getHalfCorners, offsetPoint, Point, polygon } from "./point";
+import { coordinatesToCenter, edgeCorners, getCorners, getHalfCorners, Point, polygon } from "./point";
 import { Track as TrackSvg } from "./track";
 
 function colorStyles(space: Space): string[] {
@@ -60,15 +60,14 @@ interface RawHexProps {
   size: number;
   className?: string;
   hideGoods?: boolean;
-  offset?: Point;
   highlightedTrack?: Track[];
   selectedGood?: { good: Good, coordinates: Coordinates };
   clickTargets: Set<ClickTarget>;
 }
 
-export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, offset, clickTargets }: RawHexProps) {
+export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, clickTargets }: RawHexProps) {
   const coordinates = space.coordinates;
-  const center = useMemo(() => offsetPoint(coordinatesToCenter(coordinates, size), offset), [coordinates, offset, size]);
+  const center = useMemo(() => coordinatesToCenter(coordinates, size), [coordinates, size]);
 
   const corners = useMemo(() =>
     polygon(getCorners(center, size))

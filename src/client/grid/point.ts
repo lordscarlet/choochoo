@@ -115,10 +115,13 @@ export function directionToRad(direction: Direction): number {
   }
 }
 
-export function movePointInDirection(point: Point, size: number, direction: Direction): Point {
+export function distanceToSide(size: number): number {
   // Size refers to the space between the center and a corner. As such, the space between the center and
   // a side is different.
-  const distance = Math.cos(Math.PI / 6) * size;
-  return movePointInRadDirection(point, distance, directionToRad(direction));
+  return Math.cos(Math.PI / 6) * size;
+}
+
+export function movePointInDirection(point: Point, size: number, direction: Direction): Point {
+  return movePointInRadDirection(point, distanceToSide(size), directionToRad(direction));
 }
 

@@ -1,5 +1,5 @@
 
-import { MapSettings, ReleaseStage } from '../../engine/game/map_settings';
+import { MapSettings, ReleaseStage, Rotation } from '../../engine/game/map_settings';
 import { IrelandBuildPhase, IrelandClaimAction } from './claim_once';
 import { IrelandPhaseDelegator, IrelandPhaseEngine } from './deurbanization';
 import { map } from './grid';
@@ -17,6 +17,7 @@ export class IrelandMapSettings implements MapSettings {
   readonly maxPlayers = 4;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.ALPHA;
+  readonly rotation = Rotation.CLOCKWISE;
 
   getOverrides() {
     return [

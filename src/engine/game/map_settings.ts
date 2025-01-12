@@ -24,6 +24,11 @@ export function releaseStageToString(stage: ReleaseStage): string {
   }
 }
 
+export enum Rotation {
+  CLOCKWISE = 1,
+  COUNTER_CLOCKWISE = 2,
+}
+
 export interface MapSettings {
   readonly key: string;
   readonly name: string;
@@ -34,6 +39,7 @@ export interface MapSettings {
   readonly startingGrid: GridData;
   readonly interCityConnections?: InterCityConnection[];
   readonly stage: ReleaseStage;
+  readonly rotation?: Rotation;
 
   getOverrides(): Array<SimpleConstructor<unknown>>;
 }

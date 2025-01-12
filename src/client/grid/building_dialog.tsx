@@ -4,6 +4,7 @@ import { useNotifications } from '@toolpad/core';
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
+import { Rotation } from '../../engine/game/map_settings';
 import { AVAILABLE_CITIES } from "../../engine/game/state";
 import { City } from '../../engine/map/city';
 import { rotateDirectionClockwise } from "../../engine/map/direction";
@@ -26,10 +27,11 @@ import { HexGrid } from './hex_grid';
 
 interface BuildingProps {
   cancelBuild(): void;
+  rotation?: Rotation;
   coordinates?: Coordinates;
 }
 
-export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
+export function BuildingDialog({ coordinates, rotation, cancelBuild }: BuildingProps) {
   const { emit: emitBuild } = useAction(BuildAction);
   const { emit: emitUrbanize } = useAction(UrbanizeAction);
   const action = useInjected(BuildAction);
@@ -103,7 +105,7 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
             </div>
           )}
           {eligible.map((build, index) => <div key={index} className={buildingOption}>
-            <ModifiedSpace space={space!} tile={build.tile} onClick={() => build.reason == null && onSelect(build.action)} />
+            <ModifiedSpace space={space!} rotation={rotation} tile={build.tile} onClick={() => build.reason == null && onSelect(build.action)} />
             {build.reason}
           </div>)}
         </div>
@@ -115,11 +117,12 @@ export function BuildingDialog({ coordinates, cancelBuild }: BuildingProps) {
 interface ModifiedSpaceProps {
   space: Space;
   tile?: TileData;
+  rotation?: Rotation;
   asCity?: AvailableCity;
   onClick?: (space: Space) => void;
 }
 
-export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpaceProps) {
+export function ModifiedSpace({ space, tile, rotation, asCity, onClick }: ModifiedSpaceProps) {
   const newSpace = useMemo(() => {
     if (space instanceof City) {
       return new City(space.coordinates, space.data);
@@ -143,7 +146,7 @@ export function ModifiedSpace({ space, tile, asCity, onClick }: ModifiedSpacePro
   }, [space, tile, asCity]);
   const grid = useMemo(() => Grid.fromSpaces([newSpace], []), [newSpace]);
   const clickTargets = useMemo(() => new Set([ClickTarget.TOWN, ClickTarget.LOCATION, ClickTarget.CITY]), []);
-  return <HexGrid grid={grid} onClick={onClick} clickTargets={clickTargets} />
+  return <HexGrid grid={grid} rotation={rotation} onClick={onClick} clickTargets={clickTargets} />
 }
 
 interface EligibleBuild {

@@ -1,6 +1,7 @@
 
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import { FormEvent, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ReleaseStage, releaseStageToString } from "../../engine/game/map_settings";
 import { Grid } from "../../engine/map/grid";
 import { MapRegistry } from "../../maps";
@@ -12,20 +13,21 @@ import { MapInfo } from "./map_info";
 
 
 export function CreateGamePage() {
+  const initialMapValue = useSearchParams()[0].get('map');
   const maps = useMemo(() =>
     [...MapRegistry.singleton.values()]
       .filter((map) => map.stage !== ReleaseStage.DEPRECATED)
       .filter((map) => environment.stage === 'development' || map.stage !== ReleaseStage.DEVELOPMENT)
     , []);
   const [name, setName] = useTextInputState('');
-  const [gameKey, _, setGameKeyState] = useSelectState(maps[0].key);
+  const [gameKey, _, setGameKeyState] = useSelectState(initialMapValue ?? maps[0].key);
 
   const map = MapRegistry.singleton.get(gameKey);
   const allowPlayerSelections = map.minPlayers !== map.maxPlayers;
 
   const selectedMap = useMemo(() => {
     return MapRegistry.singleton.get(gameKey);
-  }, []);
+  }, [gameKey]);
 
   const [artificialStart, setArtificialStart] = useCheckboxState();
   const [minPlayersS, setMinPlayers, setMinPlayersRaw] = useNumberInputState(selectedMap.minPlayers);
@@ -142,6 +144,6 @@ export function CreateGamePage() {
       <Button type="submit" disabled={isPending}>Create</Button>
     </div>
     <MapInfo gameKey={gameKey} />
-    {grid && <HexGrid key={gameKey} grid={grid} fullMapVersion={true} />}
+    {grid && <HexGrid key={gameKey} rotation={selectedMap.rotation} grid={grid} fullMapVersion={true} />}
   </Box>;
 }

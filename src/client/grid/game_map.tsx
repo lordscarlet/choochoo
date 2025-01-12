@@ -14,6 +14,7 @@ import { Good } from "../../engine/state/good";
 import { OwnedInterCityConnection } from "../../engine/state/inter_city_connection";
 import { PlayerData } from "../../engine/state/player";
 import { isDirection } from "../../engine/state/tile";
+import { MapRegistry } from "../../maps";
 import { SelectCityAction, SelectCityData } from "../../maps/india/production";
 import { DeurbanizeAction, DeurbanizeData } from "../../maps/ireland/deurbanization";
 import { Coordinates } from "../../utils/coordinates";
@@ -21,7 +22,7 @@ import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { useAction, useGameVersionState } from "../services/game";
 import { useTypedCallback, useTypedMemo } from "../utils/hooks";
-import { Memoized, useCurrentPlayer, useGrid, useInjectedMemo } from "../utils/injection_context";
+import { Memoized, useCurrentPlayer, useGameKey, useGrid, useInjectedMemo } from "../utils/injection_context";
 import { BuildingDialog } from "./building_dialog";
 import { ClickTarget } from "./click_target";
 import { HexGrid } from "./hex_grid";
@@ -228,6 +229,9 @@ export function GameMap() {
   const grid = useGrid();
   const [buildingSpace, setBuildingSpace] = useGameVersionState<Land | undefined>(undefined);
   const moveHelper = useInjectedMemo(MoveHelper);
+  const gameKey = useGameKey();
+
+  const rotation = useMemo(() => MapRegistry.singleton.get(gameKey).rotation, [gameKey]);
 
   const isPending = isBuildPending || isMovePending || isDeurbanizePending || isClaimPending || isSelectCityPending || isConnectCityPending;
 
@@ -284,7 +288,15 @@ export function GameMap() {
   }, []);
 
   return <>
-    <HexGrid onClick={onClick} onClickInterCity={onClickInterCity} fullMapVersion={true} highlightedTrack={highlightedTrack} highlightedConnections={highlightedConnections} clickTargets={clickTargets} selectedGood={selectedGood} grid={grid} />
-    <BuildingDialog coordinates={buildingSpace?.coordinates} cancelBuild={() => setBuildingSpace(undefined)} />
+    <HexGrid onClick={onClick}
+      onClickInterCity={onClickInterCity}
+      fullMapVersion={true}
+      highlightedTrack={highlightedTrack}
+      highlightedConnections={highlightedConnections}
+      clickTargets={clickTargets}
+      selectedGood={selectedGood}
+      rotation={rotation}
+      grid={grid} />
+    <BuildingDialog coordinates={buildingSpace?.coordinates} rotation={rotation} cancelBuild={() => setBuildingSpace(undefined)} />
   </>;
 }

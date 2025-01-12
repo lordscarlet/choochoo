@@ -5,26 +5,25 @@ import { getPlayerColorCss } from "../components/player_color";
 import { ClickTarget } from "./click_target";
 import * as gridStyles from './hex_grid.module.css';
 import * as styles from './inter_city_connection.module.css';
-import { coordinatesToCenter, movePointInDirection, offsetPoint, Point } from "./point";
+import { coordinatesToCenter, movePointInDirection } from "./point";
 
 interface InterCityConnectionRenderProps {
   connection: InterCityConnection;
   size: number;
-  offset: Point;
   clickTargets: Set<ClickTarget>;
   highlighted?: boolean;
   onClick?: (connects: Coordinates[]) => void;
 }
 
-export function InterCityConnectionRender({ connection, offset, size, clickTargets, highlighted, onClick }: InterCityConnectionRenderProps) {
+export function InterCityConnectionRender({ connection, size, clickTargets, highlighted, onClick }: InterCityConnectionRenderProps) {
   // For now, assume that the connection can only be rendered if it is between two cities.
   if (connection.connects.length !== 2) return <></>;
 
   const [first, second] = connection.connects;
   const connectionCenter = useMemo(() => {
-    const center = offsetPoint(coordinatesToCenter(first, size), offset);
+    const center = coordinatesToCenter(first, size);
     return movePointInDirection(center, size, first.getDirection(second));
-  }, [offset.x, offset.y, first, second, size]);
+  }, [first, second, size]);
 
   const clickable = clickTargets.has(ClickTarget.INTER_CITY_CONNECTION) ? gridStyles.clickable : '';
 
