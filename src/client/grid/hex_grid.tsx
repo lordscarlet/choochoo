@@ -189,6 +189,7 @@ export function HexGrid({ onClick, onClickInterCity, rotation, fullMapVersion, h
         onClick={internalOnClick}>
         {fullMapVersion && <DoubleHeightNumbers origin={internalViewBox} spacing={numberSpacing} rotation={rotation} grid={grid} size={size} />}
         <g ref={ref}>
+          {/* I'm a bit uncomfortable that this rotation does not have a center. I'm honestly not even sure how it rotates correctly, but it seems to. */}
           <Rotate rotation={rotation}>
             {mapSpaces}
             {grid.connections.map((connection, index) => <InterCityConnectionRender key={index} highlighted={highlightedConnections?.some(c => interCityConnectionEquals(connection, c))} clickTargets={clickTargetsNormalized} onClick={onClickInterCity} size={size} connection={connection} />)}
