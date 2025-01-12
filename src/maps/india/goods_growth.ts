@@ -14,11 +14,10 @@ export class IndiaBuildAction extends BuildAction {
   private readonly goodsHelper = inject(GoodsHelper);
 
   process(data: BuildData): boolean {
-    const result = super.process(data);
     for (const city of this.getNewConnectedCities(data)) {
       this.goodsHelper.moveGoodsToCity(city.coordinates, 0, 1);
     }
-    return result;
+    return super.process(data);
   }
 
   private getNewConnectedCities(data: BuildData): City[] {
