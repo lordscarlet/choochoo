@@ -127,7 +127,7 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, cl
     {space instanceof Land && space.hasTown() && <HexName name={space.name()!} rotation={rotation} center={center} size={size} />}
     {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} rotation={rotation} />}
     {space instanceof City && space.name() != '' && <HexName name={space.name()} rotation={rotation} center={center} size={size} />}
-    {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
+    {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} rotation={rotation} />)}
   </>;
 }
 
