@@ -128,8 +128,8 @@ export function HexGrid({ onClick, onClickInterCity, rotation, fullMapVersion, h
       , [highlightedTrack]);
     const highlightedTrackSerialized = (highlightedTrackInSpace ?? []).map((track) => `${track.coordinates.serialize()}|${track.getExits().join(':')}`).join('?');
     mapSpaces.push(useMemo(() =>
-      hexFactory(space, selectedGood, highlightedTrackInSpace, size, clickTargetsNormalized),
-      [space, selectedGood, highlightedTrackSerialized, size, clickTargetsNormalized]));
+      hexFactory(space, selectedGood, highlightedTrackInSpace, size, clickTargetsNormalized, rotation),
+      [space, selectedGood, highlightedTrackSerialized, size, clickTargetsNormalized, rotation]));
   }
 
   const ref = useRef<SVGGElement>(null);
@@ -264,11 +264,13 @@ function hexFactory(
   selectedGood: { good: Good, coordinates: Coordinates } | undefined,
   highlightedTrack: Track[] | undefined,
   size: number,
-  clickTargets: Set<ClickTarget>) {
+  clickTargets: Set<ClickTarget>,
+  rotation?: Rotation) {
   return <Hex key={space.coordinates.serialize()}
     selectedGood={selectedGood}
     highlightedTrack={highlightedTrack}
     space={space}
     size={size}
-    clickTargets={clickTargets} />
+    clickTargets={clickTargets}
+    rotation={rotation} />
 }

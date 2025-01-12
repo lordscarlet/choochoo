@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Rotation } from "../../engine/game/map_settings";
 import { City } from "../../engine/map/city";
 import { Space } from "../../engine/map/grid";
 import { calculateTrackInfo, Land } from "../../engine/map/location";
@@ -10,6 +11,7 @@ import { Direction } from "../../engine/state/tile";
 import { CyprusMapData } from "../../maps/cyprus/map_data";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, assertNever } from "../../utils/validate";
+import { Rotate } from "../components/rotation";
 import { useGameKey } from "../utils/injection_context";
 import { ClickTarget } from "./click_target";
 import { goodStyle } from "./good";
@@ -55,7 +57,7 @@ function colorStyles(space: Space): string[] {
   assertNever(space);
 }
 
-interface RawHexProps {
+interface HexProps {
   space: Land | City;
   size: number;
   className?: string;
@@ -63,9 +65,10 @@ interface RawHexProps {
   highlightedTrack?: Track[];
   selectedGood?: { good: Good, coordinates: Coordinates };
   clickTargets: Set<ClickTarget>;
+  rotation?: Rotation;
 }
 
-export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, clickTargets }: RawHexProps) {
+export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, clickTargets, rotation }: HexProps) {
   const coordinates = space.coordinates;
   const center = useMemo(() => coordinatesToCenter(coordinates, size), [coordinates, size]);
 
@@ -118,22 +121,31 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, cl
     <polygon fillOpacity="0" data-coordinates={space.coordinates.toString()} points={corners} stroke="black" strokeWidth="1" />
     {space instanceof Land && space.unpassableExits().map(direction => <EdgeBoundary key={direction} center={center} size={size} direction={direction} />)}
     {gameKey === 'cyprus' && <CyprusBorder space={space} center={center} size={size} />}
-    {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} />)}
+    {trackInfo.map((t, index) => <TrackSvg key={index} center={center} size={size} track={t} highlighted={highlightedTrackSet.has(t)} rotation={rotation} />)}
     {space instanceof Land && (space.getTileType() != null ? isTownTile(space.getTileType()!) : space.hasTown()) && <circle cx={center.x} cy={center.y} fill="white" r={size / 2} />}
-    {space instanceof Land && space.getTileType() == null && space.getTerrainCost() != null && <TerrainCost space={space} center={center} size={size} />}
-    {space instanceof Land && space.hasTown() && <HexName name={space.name()!} center={center} size={size} />}
-    {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} />}
-    {space instanceof City && space.name() != '' && <HexName name={space.name()} center={center} size={size} />}
+    {space instanceof Land && space.getTileType() == null && space.getTerrainCost() != null && <TerrainCost space={space} center={center} size={size} rotation={rotation} />}
+    {space instanceof Land && space.hasTown() && <HexName name={space.name()!} rotation={rotation} center={center} size={size} />}
+    {space instanceof City && space.onRoll().length > 0 && <OnRoll city={space} center={center} size={size} rotation={rotation} />}
+    {space instanceof City && space.name() != '' && <HexName name={space.name()} rotation={rotation} center={center} size={size} />}
     {space instanceof City && !hideGoods && space.getGoods().map((g, index) => <GoodBlock key={index} clickable={clickTargets.has(ClickTarget.GOOD)} highlighted={selectedGoodIndex === index} offset={index} good={g} center={center} size={size} />)}
   </>;
 }
 
-function TerrainCost({ space, center, size }: { space: Land, center: Point, size: number }) {
+interface TerrainCostProps {
+  space: Land;
+  center: Point;
+  size: number;
+  rotation?: Rotation;
+}
+
+function TerrainCost({ space, center, size, rotation }: TerrainCostProps) {
   return <>
-    <circle cx={center.x} cy={center.y} fill="#E0E0E0" r={size / 2.5} />
-    <text x={center.x} y={center.y} dominantBaseline="middle" textAnchor="middle">
-      ${space.getTerrainCost()!}
-    </text>
+    <Rotate rotation={rotation} center={center} reverse={true}>
+      <circle cx={center.x} cy={center.y} fill="#E0E0E0" r={size / 2.5} />
+      <text x={center.x} y={center.y} dominantBaseline="middle" textAnchor="middle">
+        ${space.getTerrainCost()!}
+      </text>
+    </Rotate>
   </>;
 }
 
