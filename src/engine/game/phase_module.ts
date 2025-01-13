@@ -1,6 +1,6 @@
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
-import { AUTO_ACTION_NAME, AutoAction } from "../state/auto_action";
+import { AUTO_ACTION_NAME, AutoAction, NoAutoActionError } from "../state/auto_action";
 import { PlayerColor } from "../state/player";
 import { ActionProcessor } from "./action";
 import { TURN_ORDER } from "./state";
@@ -46,7 +46,15 @@ export class PhaseModule {
   }
 
   processAutoAction(action: AutoAction): boolean {
-    throw new Error('unimplemented');
+    const bundle = this.getAutoAction(action);
+    if (bundle == null) {
+      throw new NoAutoActionError();
+    }
+    return this.processAction(bundle.action.name, bundle.data);
+  }
+
+  protected getAutoAction(action: AutoAction): ActionBundle<{}> | undefined {
+    return undefined;
   }
 
   private runAction<T extends {}>(action: ActionProcessor<T>, data: unknown): boolean {

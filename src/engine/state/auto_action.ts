@@ -15,3 +15,5 @@ export const AutoAction = z.object({
   locoNext: z.boolean().optional(),
 });
 export type AutoAction = z.infer<typeof AutoAction>;
+
+export class NoAutoActionError extends Error { }

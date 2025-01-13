@@ -1,6 +1,6 @@
 import { GameApi, GameStatus } from "../../api/game";
 import { EngineDelegator } from "../../engine/framework/engine";
-import { AUTO_ACTION_NAME } from "../../engine/state/auto_action";
+import { AUTO_ACTION_NAME, NoAutoActionError } from "../../engine/state/auto_action";
 import { assert } from "../../utils/validate";
 import { LogDao } from "../messages/log_dao";
 import { sequelize } from "../sequelize";
@@ -93,7 +93,14 @@ async function checkForAutoAction(gameId: number) {
 
   if (autoAction == null) return;
 
-  await performAction(gameId, game.activePlayerId, AUTO_ACTION_NAME, autoAction);
+  try {
+    await performAction(gameId, game.activePlayerId, AUTO_ACTION_NAME, autoAction);
+  } catch (e) {
+    if (e instanceof NoAutoActionError) return;
+
+    console.log('failed to process auto action', gameId, autoAction);
+    console.error(e);
+  }
 }
 
 Lifecycle.singleton.onStart(() => {
