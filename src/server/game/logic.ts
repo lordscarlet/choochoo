@@ -3,6 +3,7 @@ import { EngineDelegator } from "../../engine/framework/engine";
 import { assert } from "../../utils/validate";
 import { LogDao } from "../messages/log_dao";
 import { sequelize } from "../sequelize";
+import { Lifecycle } from "../util/lifecycle";
 import { notifyTurn } from "../util/turn_notification";
 import { GameDao } from "./dao";
 import { GameHistoryDao } from "./history_dao";
@@ -81,3 +82,13 @@ export async function performAction(gameId: number, playerId: number, actionName
     return newGame.toApi();
   });
 }
+
+Lifecycle.singleton.onStart(() => {
+  GameDao.hooks.addListener('afterSave', (game: GameDao) => {
+    setTimeout(() => {
+      if (game.status === GameStatus.enum.LOBBY && game.playerIds.length === game.config.maxPlayers) {
+        startGame(game.id);
+      }
+    }, 2000);
+  });
+});
