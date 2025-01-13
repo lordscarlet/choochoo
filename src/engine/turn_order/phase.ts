@@ -2,10 +2,12 @@
 import { infiniteLoopCheck } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
+import { AutoActionManager } from "../game/auto_action_manager";
 import { Log } from "../game/log";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
 import { PlayerHelper } from "../game/player";
 import { injectCurrentPlayer, injectInGamePlayers, TURN_ORDER } from "../game/state";
+import { AutoAction } from "../state/auto_action";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { BidAction } from "./bid";
@@ -18,6 +20,7 @@ export class TurnOrderPhase extends PhaseModule {
   static readonly phase = Phase.TURN_ORDER;
 
   protected readonly players = injectInGamePlayers();
+  protected readonly autoAction = inject(AutoActionManager);
   protected readonly currentOrder = injectState(TURN_ORDER);
   protected readonly turnOrderState = injectState(TURN_ORDER_STATE);
   protected readonly helper = inject(TurnOrderHelper);
@@ -80,5 +83,25 @@ export class TurnOrderPhase extends PhaseModule {
       }
     } while (nextPlayer === maxBidPlayer || passedPlayers.has(nextPlayer));
     return nextPlayer;
+  }
+
+  protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
+    if (autoAction.bidUntil == null) return undefined;
+
+    const minBid = this.helper.getMinBid();
+
+    // TODO: We need to clear the bidUntil after the current user passes.
+    if (minBid <= autoAction.bidUntil.maxBid) {
+      return {
+        action: BidAction,
+        data: { bid: autoAction.bidUntil.incrementally ? minBid : autoAction.bidUntil.maxBid },
+      };
+    } else if (autoAction.bidUntil.thenPass) {
+      return {
+        action: PassAction,
+        data: {},
+      };
+    }
+    return undefined;
   }
 }

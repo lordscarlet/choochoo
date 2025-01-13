@@ -1,12 +1,19 @@
-import { PhaseModule } from "../game/phase_module";
+
+import { inject } from "../framework/execution_context";
+import { AutoActionManager } from "../game/auto_action_manager";
+import { ActionBundle, PhaseModule } from "../game/phase_module";
 import { injectAllPlayersUnsafe } from "../game/state";
+import { AutoAction } from "../state/auto_action";
 import { Phase } from "../state/phase";
+import { AllowedActions } from "./allowed_actions";
 import { SelectAction } from "./select";
 
 export class SelectActionPhase extends PhaseModule {
   static readonly phase = Phase.ACTION_SELECTION;
 
   private readonly players = injectAllPlayersUnsafe();
+  protected readonly autoActionManager = inject(AutoActionManager);
+  protected readonly allowedActions = inject(AllowedActions);
 
   configureActions() {
     this.installAction(SelectAction);
@@ -19,5 +26,22 @@ export class SelectActionPhase extends PhaseModule {
       }
     })
     super.onStart();
+  }
+
+  protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
+    if (autoAction.takeActionNext == null) return undefined;
+
+    this.autoActionManager.setNewAutoAction({
+      ...autoAction,
+      takeActionNext: undefined,
+    });
+
+    if (this.allowedActions.getAvailableActions().has(autoAction.takeActionNext)) {
+      return {
+        action: SelectAction,
+        data: { action: autoAction.takeActionNext },
+      };
+    }
+    return undefined;
   }
 }

@@ -1,8 +1,10 @@
 import { remove } from "../../utils/functions";
-import { injectState } from "../framework/execution_context";
-import { PhaseModule } from "../game/phase_module";
+import { inject, injectState } from "../framework/execution_context";
+import { AutoActionManager } from "../game/auto_action_manager";
+import { ActionBundle, PhaseModule } from "../game/phase_module";
 import { injectPlayerAction } from "../game/state";
 import { Action } from "../state/action";
+import { AutoAction } from "../state/auto_action";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 import { LocoAction } from "./loco";
@@ -13,6 +15,7 @@ import { MOVE_STATE } from "./state";
 export class MovePhase extends PhaseModule {
   static readonly phase = Phase.MOVING;
 
+  protected readonly autoAction = inject(AutoActionManager);
   protected readonly moveState = injectState(MOVE_STATE);
   protected readonly firstMovePlayer = injectPlayerAction(Action.FIRST_MOVE);
 
@@ -49,5 +52,19 @@ export class MovePhase extends PhaseModule {
       return [firstMove.color, ...remove(playerOrder, firstMove.color)];
     }
     return playerOrder;
+  }
+
+  protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
+    if (autoAction.locoNext === true) {
+      this.autoAction.setNewAutoAction({
+        ...autoAction,
+        locoNext: false,
+      });
+      return {
+        action: LocoAction,
+        data: {},
+      };
+    }
+    return undefined;
   }
 }
