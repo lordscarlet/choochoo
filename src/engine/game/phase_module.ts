@@ -1,5 +1,6 @@
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
+import { AUTO_ACTION_NAME, AutoAction } from "../state/auto_action";
 import { PlayerColor } from "../state/player";
 import { ActionProcessor } from "./action";
 import { TURN_ORDER } from "./state";
@@ -35,10 +36,17 @@ export class PhaseModule {
   }
 
   processAction(actionName: string, data: unknown): boolean {
+    if (actionName === AUTO_ACTION_NAME) {
+      return this.processAutoAction(data as AutoAction);
+    }
     assert(this.canEmitAction(actionName), `Cannot emit ${actionName}`);
     const action: ActionProcessor<{}> | undefined = this.actionRegistry.get(actionName);
     assert(action != null, `No action processor found for ${actionName}`);
     return this.runAction(action, data);
+  }
+
+  processAutoAction(action: AutoAction): boolean {
+    throw new Error('unimplemented');
   }
 
   private runAction<T extends {}>(action: ActionProcessor<T>, data: unknown): boolean {

@@ -1,5 +1,6 @@
 import { GameApi, GameStatus } from "../../api/game";
 import { EngineDelegator } from "../../engine/framework/engine";
+import { AUTO_ACTION_NAME } from "../../engine/state/auto_action";
 import { assert } from "../../utils/validate";
 import { LogDao } from "../messages/log_dao";
 import { sequelize } from "../sequelize";
@@ -83,11 +84,31 @@ export async function performAction(gameId: number, playerId: number, actionName
   });
 }
 
+async function checkForAutoAction(gameId: number) {
+  const game = await GameDao.findByPk(gameId);
+
+  if (game == null || game.activePlayerId == null) return;
+
+  const autoAction = game.autoAction?.users[game.activePlayerId];
+
+  if (autoAction == null) return;
+
+  await performAction(gameId, game.activePlayerId, AUTO_ACTION_NAME, autoAction);
+}
+
 Lifecycle.singleton.onStart(() => {
   GameDao.hooks.addListener('afterSave', (game: GameDao) => {
     setTimeout(() => {
       if (game.status === GameStatus.enum.LOBBY && game.playerIds.length === game.config.maxPlayers) {
         startGame(game.id);
+      }
+      if (game.status === GameStatus.enum.ACTIVE) {
+        const minutes = 1000 * 60;
+        // Delay by a random number between 2 and 4 minutes.
+        const autoActionDelay = minutes * 2 + (Math.random() * minutes * 4);
+        setTimeout(() => {
+          checkForAutoAction(game.id);
+        }, autoActionDelay);
       }
     }, 2000);
   });

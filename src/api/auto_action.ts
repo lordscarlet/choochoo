@@ -1,19 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import z from "zod";
-import { ActionZod } from "../engine/state/action";
-
-export const AutoAction = z.object({
-  skipShares: z.boolean().optional(),
-  takeSharesNext: z.number().optional(),
-  bidUntil: z.object({
-    maxBid: z.number(),
-    incrementally: z.boolean(),
-    thenPass: z.boolean(),
-  }).optional(),
-  takeActionNext: ActionZod.optional(),
-  locoNext: z.boolean().optional(),
-});
-export type AutoAction = z.infer<typeof AutoAction>;
+import { AutoAction } from "../engine/state/auto_action";
 
 
 const c = initContract();
