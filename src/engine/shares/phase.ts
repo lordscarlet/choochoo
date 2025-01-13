@@ -15,7 +15,7 @@ export class SharesPhase extends PhaseModule {
     this.installAction(TakeSharesAction);
   }
 
-  autoAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<{}> | undefined {
     if (this.helper.getSharesTheyCanTake() <= 0) {
       return { action: TakeSharesAction, data: { numShares: 0 } };
     }

@@ -41,7 +41,7 @@ export class TurnOrderPhase extends PhaseModule {
     });
   }
 
-  autoAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<{}> | undefined {
     const canAffordBid = this.currentPlayer().money >= this.helper.getMinBid();
     if (!canAffordBid && !this.helper.canUseTurnOrderPass()) {
       return { action: PassAction, data: {} };

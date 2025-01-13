@@ -7,11 +7,11 @@ import { TurnOrderPhase } from "../../engine/turn_order/phase";
 
 
 export class MadagascarTurnOrderPhase extends TurnOrderPhase {
-  autoAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<{}> | undefined {
     if (this.currentPlayer().selectedAction === Action.LAST_PLAYER) {
       return { action: PassAction, data: {} };
     }
-    return super.autoAction();
+    return super.forcedAction();
   }
 }
 

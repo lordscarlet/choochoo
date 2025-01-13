@@ -5,7 +5,7 @@ import { inject, injectState } from "../framework/execution_context";
 import { GridData } from "../state/grid";
 import { InterCityConnection } from "../state/inter_city_connection";
 import { Ender, EndGameReason } from "./ender";
-import { CheckAutoAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
+import { CheckAutoAction as CheckForcedAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
 import { Memory } from "./memory";
 import { PHASE, PhaseEngine } from "./phase";
 import { PhaseDelegator } from "./phase_delegator";
@@ -76,9 +76,9 @@ export class GameEngine {
       this.lifecycle.set(lifecycle.endPhase());
     } else if (lifecycle instanceof StartTurn) {
       this.turn.start(lifecycle.currentPlayer);
-      this.lifecycle.set(lifecycle.checkAutoAction());
-    } else if (lifecycle instanceof CheckAutoAction) {
-      const autoAction = this.delegator.get().autoAction();
+      this.lifecycle.set(lifecycle.checkForcedAction());
+    } else if (lifecycle instanceof CheckForcedAction) {
+      const autoAction = this.delegator.get().forcedAction();
       if (autoAction != null) {
         this.lifecycle.set(lifecycle.processAction(autoAction.action.action, autoAction.data));
         return;

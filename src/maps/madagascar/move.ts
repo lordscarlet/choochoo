@@ -19,11 +19,11 @@ export class MadagascarMovePhase extends MovePhase {
     return playerOrder;
   }
 
-  autoAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<{}> | undefined {
     if (this.currentPlayer().selectedAction === Action.ONE_MOVE && this.moveState().moveRound > 0) {
       return { action: MovePassAction, data: {} };
     }
-    return super.autoAction();
+    return super.forcedAction();
   }
 }
 

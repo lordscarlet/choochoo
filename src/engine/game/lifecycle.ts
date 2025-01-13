@@ -25,7 +25,7 @@ export class StartPhase {
 export class StartTurn {
   constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
 
-  checkAutoAction(): CheckAutoAction {
+  checkForcedAction(): CheckAutoAction {
     return new CheckAutoAction(this.round, this.phase, this.currentPlayer);
   }
 }

@@ -23,11 +23,11 @@ export class MadagascarBuildPhase extends BuildPhase {
     return playerOrder;
   }
 
-  autoAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<{}> | undefined {
     if (this.currentPlayer().selectedAction === Action.LOCOMOTIVE) {
       return { action: DoneAction, data: {} };
     }
-    return super.autoAction();
+    return super.forcedAction();
   }
 }
 

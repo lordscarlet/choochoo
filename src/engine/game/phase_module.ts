@@ -59,7 +59,7 @@ export class PhaseModule {
 
   onStart(): void { }
 
-  autoAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<{}> | undefined {
     return undefined;
   }
 
