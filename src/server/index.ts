@@ -10,6 +10,7 @@ import { UserError } from '../utils/error';
 import { assert } from '../utils/validate';
 import { devApp } from './dev/routes';
 import { feedbackApp } from './feedback/routes';
+import { autoActionApp } from './game/auto_action_routes';
 import { gameApp } from './game/routes';
 import { messageApp } from './messages/routes';
 import { redisSession } from './redis';
@@ -46,6 +47,7 @@ app.use(enforceRoleMiddleware());
 app.use('/api', gameApp);
 app.use('/api', messageApp);
 app.use('/api', feedbackApp);
+app.use('/api', autoActionApp);
 
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {

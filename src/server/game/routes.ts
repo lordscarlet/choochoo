@@ -20,8 +20,6 @@ import { performAction, startGame } from './logic';
 
 export const gameApp = express();
 
-const s = initServer();
-
 const router = initServer().router(gameContract, {
   async list({ query }) {
     const defaultQuery: ListGamesApi = { pageSize: 20, order: ['id', 'DESC'] };

@@ -1,5 +1,6 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
+import { AutoAction } from '../../api/auto_action';
 import { GameApi, GameLiteApi, GameStatus, MapConfig } from '../../api/game';
 import { EngineDelegator } from '../../engine/framework/engine';
 
@@ -23,11 +24,14 @@ export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttrib
   declare name: string;
 
   @Attribute(DataTypes.TEXT)
-  declare gameData?: string | null;
+  declare gameData: string | null;
 
   @Attribute(DataTypes.STRING)
   @NotNull
   declare status: GameStatus;
+
+  @Attribute(DataTypes.JSONB)
+  declare autoAction: { users: { [userId: number]: AutoAction } } | null;
 
   @Attribute(DataTypes.ARRAY(DataTypes.INTEGER))
   @NotNull
@@ -37,10 +41,10 @@ export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttrib
   declare config: MapConfig;
 
   @Attribute({ type: DataTypes.INTEGER, allowNull: true })
-  declare activePlayerId?: number | null;
+  declare activePlayerId: number | null;
 
   @Attribute({ type: DataTypes.INTEGER, allowNull: true })
-  declare undoPlayerId?: number | null;
+  declare undoPlayerId: number | null;
 
   @Version
   @NotNull
@@ -55,7 +59,7 @@ export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttrib
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date | null;
+  declare deletedAt: Date | null;
 
   toLiteApi(): GameLiteApi {
     return toLiteApi(this);

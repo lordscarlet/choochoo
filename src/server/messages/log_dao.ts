@@ -15,13 +15,13 @@ export class LogDao extends Model<InferAttributes<LogDao>, InferCreationAttribut
   declare message: string;
 
   @Attribute(DataTypes.INTEGER)
-  declare userId?: number | null;
+  declare userId: number | null;
 
   @BelongsTo(() => UserDao, 'userId')
   declare user?: UserDao;
 
   @Attribute(DataTypes.INTEGER)
-  declare gameId?: number | null;
+  declare gameId: number | null;
 
   @BelongsTo(() => GameDao, 'gameId')
   declare game?: GameDao;
@@ -42,7 +42,7 @@ export class LogDao extends Model<InferAttributes<LogDao>, InferCreationAttribut
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date | null;
+  declare deletedAt: Date | null;
 
   static async destroyLogsBackTo(gameId: number, backToVersion: number, transaction: Transaction): Promise<void> {
     // Fetch all the individual logs, so that socket.ts can individually notify the user that the logs were destroyed.

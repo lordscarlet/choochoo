@@ -11,8 +11,9 @@ export const AutoAction = z.object({
     thenPass: z.boolean(),
   }).optional(),
   takeActionNext: ActionZod.optional(),
-  locoNext: z.boolean(),
+  locoNext: z.boolean().optional(),
 });
+export type AutoAction = z.infer<typeof AutoAction>;
 
 
 const c = initContract();

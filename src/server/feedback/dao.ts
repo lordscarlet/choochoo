@@ -14,13 +14,13 @@ export class FeedbackDao extends Model<InferAttributes<FeedbackDao>, InferCreati
   declare userId: number;
 
   @Attribute(DataTypes.TEXT)
-  declare errorMessage?: string | null;
+  declare errorMessage: string | null;
 
   @Attribute(DataTypes.TEXT)
-  declare errorStack?: string | null;
+  declare errorStack: string | null;
 
   @Attribute(DataTypes.TEXT)
-  declare userMessage?: string | null;
+  declare userMessage: string | null;
 
   @Attribute(DataTypes.TEXT)
   @NotNull
@@ -39,7 +39,7 @@ export class FeedbackDao extends Model<InferAttributes<FeedbackDao>, InferCreati
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date | null;
+  declare deletedAt: Date | null;
 
   toApi(): FeedbackApi {
     return {

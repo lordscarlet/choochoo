@@ -47,7 +47,7 @@ export class UserDao extends Model<InferAttributes<UserDao>, InferCreationAttrib
   declare updatedAt: CreationOptional<Date>;
 
   @DeletedAt
-  declare deletedAt?: Date | null;
+  declare deletedAt: Date | null;
 
   // Helper methods
 
