@@ -23,6 +23,12 @@ export async function startGame(gameId: number, enforceOwner?: number): Promise<
     game.save({ transaction }),
     LogDao.createForGame(game.id, game.version - 1, logs, transaction),
   ]));
+
+  notifyTurn(newGame).catch(e => {
+    console.log('Failed during processAsync');
+    console.error(e);
+  });
+
   return newGame.toApi();
 }
 
