@@ -9,7 +9,7 @@ import { Op, WhereOptions } from '@sequelize/core';
 import { UserRole } from '../../api/user';
 import { EngineDelegator } from '../../engine/framework/engine';
 import { peek } from '../../utils/functions';
-import { CreateLogModel, LogDao } from '../messages/log_dao';
+import { LogDao } from '../messages/log_dao';
 import { sequelize } from '../sequelize';
 import '../session';
 import { UserDao } from '../user/dao';
@@ -139,11 +139,13 @@ const router = initServer().router(gameContract, {
     const originalGame = game.toApi();
     const { gameData, logs, activePlayerId } = EngineDelegator.singleton.start(game.playerIds, { mapKey: game.gameKey });
 
-    // TODO: save the logs
     game.gameData = gameData;
     game.status = GameStatus.enum.ACTIVE;
     game.activePlayerId = activePlayerId ?? null;
-    const newGame = await game.save();
+    const [newGame] = await sequelize.transaction((transaction) => Promise.all([
+      game.save({ transaction }),
+      LogDao.createForGame(game.id, game.version - 1, logs, transaction),
+    ]));
     return { status: 200, body: { game: newGame.toApi() } };
   },
 
@@ -190,16 +192,14 @@ const router = initServer().router(gameContract, {
       game.activePlayerId = activePlayerId ?? null;
       game.status = hasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
       game.undoPlayerId = reversible ? userId : null;
-      const newGame = await game.save({ transaction });
-      const newGameHistory = await gameHistory.save({ transaction });
-      console.log(`Game action id=${newGameHistory.id} reversible=${reversible} actionName=${body.actionName}`);
 
-      const createLogs = logs.map((message): CreateLogModel => ({
-        gameId: game.id,
-        message,
-        previousGameVersion: game.version - 1,
-      }));
-      await LogDao.bulkCreate(createLogs, { transaction });
+      const [newGame, newGameHistory] = await Promise.all([
+        game.save({ transaction }),
+        gameHistory.save({ transaction }),
+        LogDao.createForGame(game.id, game.version - 1, logs),
+      ]);
+
+      console.log(`Game action id=${newGameHistory.id} reversible=${reversible} actionName=${body.actionName}`);
 
       transaction.afterCommit(() => {
         if (!playerChanged) return;

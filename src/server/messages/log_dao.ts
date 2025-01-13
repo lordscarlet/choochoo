@@ -50,6 +50,15 @@ export class LogDao extends Model<InferAttributes<LogDao>, InferCreationAttribut
     await Promise.all(logs.map((log) => log.destroy({ transaction })));
   }
 
+  static async createForGame(gameId: number, gameVersion: number, logs: string[], transaction?: Transaction): Promise<void> {
+    const createLogs = logs.map((message): CreateLogModel => ({
+      gameId: gameId,
+      message,
+      previousGameVersion: gameVersion,
+    }));
+    await LogDao.bulkCreate(createLogs, { transaction });
+  }
+
   toApi(): MessageApi {
     return {
       id: this.id,
