@@ -15,8 +15,8 @@ import '../session';
 import { UserDao } from '../user/dao';
 import { assertRole } from '../util/enforce_role';
 import { environment, Stage } from '../util/environment';
-import { notifyTurn } from '../util/turn_notification';
 import { GameHistoryDao } from './history_dao';
+import { performAction, startGame } from './logic';
 
 export const gameApp = express();
 
@@ -130,23 +130,8 @@ const router = initServer().router(gameContract, {
     const userId = req.session.userId;
     assert(userId != null, { permissionDenied: true });
 
-    const game = await GameDao.findByPk(params.gameId);
-    assert(game != null);
-    assert(game.status === GameStatus.enum.LOBBY, { invalidInput: 'cannot start a game that has already been started' });
-    assert(game.playerIds[0] === userId, { invalidInput: 'only the owner can start the game' });
-    assert(game.playerIds.length >= game.toLiteApi().config.minPlayers, 'not enough players to start the game');
-
-    const originalGame = game.toApi();
-    const { gameData, logs, activePlayerId } = EngineDelegator.singleton.start(game.playerIds, { mapKey: game.gameKey });
-
-    game.gameData = gameData;
-    game.status = GameStatus.enum.ACTIVE;
-    game.activePlayerId = activePlayerId ?? null;
-    const [newGame] = await sequelize.transaction((transaction) => Promise.all([
-      game.save({ transaction }),
-      LogDao.createForGame(game.id, game.version - 1, logs, transaction),
-    ]));
-    return { status: 200, body: { game: newGame.toApi() } };
+    const game = await startGame(params.gameId, userId);
+    return { status: 200, body: { game } };
   },
 
   async setGameData({ req, params, body }) {
@@ -159,58 +144,11 @@ const router = initServer().router(gameContract, {
   },
 
   async performAction({ req, params, body }) {
-    return await sequelize.transaction(async (transaction) => {
-      const userId = req.session.userId;
-      assert(userId != null, { permissionDenied: true });
+    const userId = req.session.userId;
+    assert(userId != null, { permissionDenied: true });
+    const game = await performAction(params.gameId, userId, body.actionName, body.actionData);
 
-      const game = await GameDao.findByPk(params.gameId, { transaction });
-      assert(game != null);
-      assert(game.status === GameStatus.enum.ACTIVE, 'cannot perform an action unless the game is live');
-      assert(game.gameData != null);
-      assert(game.activePlayerId === req.session.userId, { permissionDenied: true });
-
-      const originalGame = game.toApi();
-
-      const { gameData, logs, activePlayerId, hasEnded, reversible } =
-        EngineDelegator.singleton.processAction(game.gameKey, game.gameData, body.actionName, body.actionData);
-
-      const gameHistory = GameHistoryDao.build({
-        previousGameVersion: game.version,
-        patch: '',
-        previousGameData: game.gameData,
-        actionName: body.actionName,
-        actionData: JSON.stringify(body.actionData),
-        reversible,
-        gameId: game.id,
-        userId,
-      });
-
-      const playerChanged = game.activePlayerId !== activePlayerId;
-
-      game.version = game.version + 1;
-      game.gameData = gameData;
-      game.activePlayerId = activePlayerId ?? null;
-      game.status = hasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
-      game.undoPlayerId = reversible ? userId : null;
-
-      const [newGame, newGameHistory] = await Promise.all([
-        game.save({ transaction }),
-        gameHistory.save({ transaction }),
-        LogDao.createForGame(game.id, game.version - 1, logs),
-      ]);
-
-      console.log(`Game action id=${newGameHistory.id} reversible=${reversible} actionName=${body.actionName}`);
-
-      transaction.afterCommit(() => {
-        if (!playerChanged) return;
-        notifyTurn(newGame).catch(e => {
-          console.log('Failed during processAsync');
-          console.error(e);
-        });
-      });
-
-      return { status: 200, body: { game: newGame.toApi() } };
-    });
+    return { status: 200, body: { game } };
   },
 
   async undoAction({ req, params: { gameId }, body: { backToVersion } }) {
