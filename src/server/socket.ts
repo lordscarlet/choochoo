@@ -8,6 +8,8 @@ import { LogDao } from "./messages/log_dao";
 import { redisClient, subClient } from "./redis";
 import { environment } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
+import { InstanceUpdateOptions } from "@sequelize/core";
+import { afterTransaction } from "../utils/transaction";
 
 const args: Partial<ServerOptions> = {
   adapter: createAdapter(redisClient, subClient),
@@ -82,29 +84,39 @@ Lifecycle.singleton.onStart(() => {
 
   const previous = new WeakMap<GameDao, GameApi | undefined>();
 
-  GameDao.hooks.addListener('beforeSave', (game: GameDao) => {
-    if (game.isNewRecord) {
-      previous.set(game, undefined);
-    } else {
-      previous.set(game, toApi({ ...game.dataValues, ...game.previous() }));
-    }
+  GameDao.hooks.addListener('beforeSave', (game: GameDao, options: InstanceUpdateOptions) => {
+    afterTransaction(options, () => {
+      if (game.isNewRecord) {
+        previous.set(game, undefined);
+      } else {
+        previous.set(game, toApi({ ...game.dataValues, ...game.previous() }));
+      }
+    });
   });
 
-  GameDao.hooks.addListener('afterSave', (game: GameDao) => {
-    emitGameUpdate(previous.get(game), game);
+  GameDao.hooks.addListener('afterSave', (game: GameDao, options: InstanceUpdateOptions) => {
+    afterTransaction(options, () => {
+      emitGameUpdate(previous.get(game), game);
+    });
   });
 
-  LogDao.hooks.addListener('afterDestroy', (log: LogDao) => {
-    emitLogDestroy(log);
+  LogDao.hooks.addListener('afterDestroy', (log: LogDao, options: InstanceUpdateOptions) => {
+    afterTransaction(options, () => {
+      emitLogDestroy(log);
+    });
   });
 
-  LogDao.hooks.addListener('afterBulkCreate', (logs: LogDao[]) => {
-    for (const log of logs) {
+  LogDao.hooks.addListener('afterBulkCreate', (logs: LogDao[], options: InstanceUpdateOptions) => {
+    afterTransaction(options, () => {
+      for (const log of logs) {
+        emitLogCreate(log);
+      }
+    });
+  });
+
+  LogDao.hooks.addListener('afterCreate', (log: LogDao, options: InstanceUpdateOptions) => {
+    afterTransaction(options, () => {
       emitLogCreate(log);
-    }
-  });
-
-  LogDao.hooks.addListener('afterCreate', (log: LogDao) => {
-    emitLogCreate(log);
+    });
   });
 });

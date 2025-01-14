@@ -1,7 +1,8 @@
-import { TransactionNestMode } from "@sequelize/core";
+import { InstanceUpdateOptions, TransactionNestMode } from "@sequelize/core";
 import { GameApi, GameStatus } from "../../api/game";
 import { EngineDelegator } from "../../engine/framework/engine";
 import { AUTO_ACTION_NAME, AutoAction, NoAutoActionError } from "../../engine/state/auto_action";
+import { afterTransaction } from "../../utils/transaction";
 import { assert } from "../../utils/validate";
 import { LogDao } from "../messages/log_dao";
 import { sequelize } from "../sequelize";
@@ -14,7 +15,7 @@ export async function startGame(gameId: number, enforceOwner?: number): Promise<
   const game = await GameDao.findByPk(gameId);
   assert(game != null);
   assert(game.status === GameStatus.enum.LOBBY, { invalidInput: 'cannot start a game that has already been started' });
-  assert(enforceOwner != null && game.playerIds[0] === enforceOwner, { invalidInput: 'only the owner can start the game' });
+  assert(enforceOwner == null || game.playerIds[0] === enforceOwner, { invalidInput: 'only the owner can start the game' });
   assert(game.playerIds.length >= game.toLiteApi().config.minPlayers, 'not enough players to start the game');
 
   const { gameData, logs, activePlayerId } = EngineDelegator.singleton.start(game.playerIds, { mapKey: game.gameKey });
@@ -122,19 +123,13 @@ async function checkForAutoAction(gameId: number) {
 }
 
 Lifecycle.singleton.onStart(() => {
-
-  function afterSave(game: GameDao) {
-    setTimeout(() => {
-      if (game.status === GameStatus.enum.LOBBY && game.playerIds.length === game.config.maxPlayers) {
-        startGame(game.id);
-      }
-    }, 2000);
-  }
-  GameDao.hooks.addListener('afterSave', (game: GameDao, options) => {
-    if (options.transaction) {
-      options.transaction.afterCommit(() => afterSave(game));
-    } else {
-      afterSave(game);
-    }
+  GameDao.hooks.addListener('afterSave', (game: GameDao, options: InstanceUpdateOptions) => {
+    afterTransaction(options, () => {
+      setTimeout(() => {
+        if (game.status === GameStatus.enum.LOBBY && game.playerIds.length === game.config.maxPlayers) {
+          startGame(game.id);
+        }
+      }, 2000);
+    });
   });
 });

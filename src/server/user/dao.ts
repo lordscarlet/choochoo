@@ -1,8 +1,9 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Transaction } from '@sequelize/core';
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, InstanceUpdateOptions, Model, Transaction } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
 import { compare, hash } from 'bcrypt';
 import { NotificationFrequency, NotificationPreferences, TurnNotificationSetting } from '../../api/notifications';
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from '../../api/user';
+import { afterTransaction } from '../../utils/transaction';
 import { assert, isPositiveInteger } from '../../utils/validate';
 import { emailService } from '../util/email';
 import { Lifecycle } from '../util/lifecycle';
@@ -152,8 +153,10 @@ export class UserDao extends Model<InferAttributes<UserDao>, InferCreationAttrib
 
 
 Lifecycle.singleton.onStart(() => {
-  function updateUserCache(user: UserDao) {
-    userCache.set(user.toMyApi());
+  function updateUserCache(user: UserDao, options: InstanceUpdateOptions) {
+    afterTransaction(options, () => {
+      userCache.set(user.toMyApi());
+    });
   }
   return UserDao.hooks.addListener('afterSave', updateUserCache);
 });
