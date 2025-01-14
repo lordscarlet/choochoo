@@ -19,9 +19,9 @@ const router = initServer().router(autoActionContract, {
     await assertRole(req);
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
-    game.setAutoActionForUser(req.session.userId!, body.auto);
+    game.setAutoActionForUser(req.session.userId!, body);
     await game.save();
-    return { status: 200, body: { auto: body.auto } };
+    return { status: 200, body: { auto: body } };
   },
 });
 

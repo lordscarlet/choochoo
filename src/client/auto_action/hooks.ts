@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { AutoAction } from "../../engine/state/auto_action";
+import { AutoAction, BidUntil } from "../../engine/state/auto_action";
+import { WithFormNumber } from "../../utils/types";
 import { tsr } from "../services/client";
 import { useMe } from "../services/me";
 import { handleError } from "../services/network";
@@ -16,15 +17,19 @@ export function useAutoAction(gameId: number) {
   return data.body.auto;
 }
 
+type AutoActionCreateApi = Omit<WithFormNumber<AutoAction, 'takeSharesNext'>, 'bidUntil'> & {
+  bidUntil?: WithFormNumber<BidUntil, 'maxBid'>,
+};
+
 export function useSetAutoAction(gameId: number) {
   const { mutate, error, isPending } = tsr.autoActions.set.useMutation();
   const validationError = handleError(isPending, error);
   const updateAutoActionCache = useUpdateAutoActionCache(gameId);
 
-  const setAutoAction = useCallback((auto: AutoAction) => {
-    mutate({ params: { gameId }, body: { auto } }, {
+  const setAutoAction = useCallback((body: AutoActionCreateApi) => {
+    mutate({ params: { gameId }, body: body as AutoAction }, {
       onSuccess: () => {
-        updateAutoActionCache(auto);
+        updateAutoActionCache(body as AutoAction);
       },
     });
   }, [mutate, gameId]);

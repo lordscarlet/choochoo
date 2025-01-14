@@ -18,7 +18,7 @@ export const autoActionContract = c.router({
   set: {
     method: 'POST',
     pathParams: z.object({ gameId: z.coerce.number() }),
-    body: z.object({ auto: AutoAction }),
+    body: AutoAction,
     path: '/games/:gameId/auto',
     responses: {
       200: z.object({ auto: AutoAction }),

@@ -50,11 +50,11 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
     e.preventDefault();
     setAutoAction({
       skipShares,
-      takeSharesNext: takeSharesNextDefined ? takeSharesNext as unknown as number : undefined,
+      takeSharesNext: takeSharesNextDefined ? takeSharesNext : undefined,
       takeActionNext: takeActionNextDefined ? takeActionNext : undefined,
       locoNext,
       bidUntil: bidUntilDefined ? {
-        maxBid: maxBid as unknown as number,
+        maxBid,
         incrementally,
         thenPass,
       } : undefined,
@@ -148,12 +148,12 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
             type="number"
             disabled={isPending}
             value={maxBid}
-            error={validationError?.maxBid != null}
-            helperText={validationError?.maxBid}
+            error={validationError?.['bidUntil.maxBid'] != null}
+            helperText={validationError?.['bidUntil.maxBid']}
             onChange={setMaxBid}
           />
         </FormControl>}
-        {bidUntilDefined && <FormControl component="div" className={styles.tab} error={validationError?.thenPass != null}>
+        {bidUntilDefined && <FormControl component="div" className={styles.tab} error={validationError?.['bidUntil.thenPass'] != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
             label='Pass once max bid is reached'
             control={
@@ -164,7 +164,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
                 onChange={setThenPass}
               />}
           />
-          <FormHelperText>{validationError?.thenPass}</FormHelperText>
+          <FormHelperText>{validationError?.['bidUntil.thenPass']}</FormHelperText>
         </FormControl>}
         <FormControl component="div" error={validationError?.takeActionNextDefined != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
@@ -188,7 +188,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
             onChange={setTakeActionNext}
             error={validationError?.takeActionNext != null}
             autoWidth
-            label="Map"
+            label="Selected Action"
           >
             {[...availableActions].map((action) => <MenuItem key={action} value={action}>
               {getSelectedActionString(action)}

@@ -1,5 +1,6 @@
 import { SelectChangeEvent } from "@mui/material";
 import { ChangeEvent, useCallback, useState } from "react";
+import { FormNumber } from "../../utils/types";
 
 export function useCheckboxState(initialValue = false): [boolean, (e: ChangeEvent<HTMLInputElement>) => void] {
   const [state, setState] = useState(initialValue);
@@ -11,7 +12,7 @@ export function useTextInputState(initialValue = ''): [string, (e: ChangeEvent<H
   return [state, useCallback((e) => setState(e.target.value), [setState]), setState];
 }
 
-export function useNumberInputState(initialValue: number | ''): [number | '', (e: ChangeEvent<HTMLInputElement>) => void, (value: number | '') => void] {
+export function useNumberInputState(initialValue: FormNumber): [FormNumber, (e: ChangeEvent<HTMLInputElement>) => void, (value: FormNumber) => void] {
   const [state, setState] = useState(initialValue);
   return [state, useCallback((e) => setState(isNaN(e.target.valueAsNumber) ? '' : e.target.valueAsNumber), [setState]), setState];
 }

@@ -6,7 +6,7 @@ import { CreateGameApi, GameApi, GameLiteApi, GamePageCursor, GameStatus, ListGa
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { entries, peek } from "../../utils/functions";
-import { Entry } from "../../utils/types";
+import { Entry, WithFormNumber } from "../../utils/types";
 import { assert, assertNever } from "../../utils/validate";
 import { useUpdateAutoActionCache } from "../auto_action/hooks";
 import { useMostRecentValue } from "../utils/hooks";
@@ -182,11 +182,7 @@ export function useGame(): GameApi {
   return data.body.game;
 }
 
-type AllowedNumber<T, N extends keyof T> = {
-  [K in keyof T]: N extends K ? T[K] | '' : T[K];
-};
-
-export type CreateGameInputApi = AllowedNumber<CreateGameApi, 'minPlayers' | 'maxPlayers'>;
+export type CreateGameInputApi = WithFormNumber<CreateGameApi, 'minPlayers' | 'maxPlayers'>;
 
 export function useCreateGame(): { validateGame: (game: CreateGameInputApi) => CreateGameApi | undefined, createGame: (game: CreateGameInputApi) => void, isPending: boolean, validationError?: ValidationError } {
   const { mutate, error, isPending } = tsr.games.create.useMutation();

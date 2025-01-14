@@ -2,9 +2,10 @@
 import { z } from 'zod';
 
 import { initContract } from '@ts-rest/core';
+import { AutoAction } from '../engine/state/auto_action';
 import { MapRegistry } from '../maps';
 import { assertNever } from '../utils/validate';
-import { AutoAction } from '../engine/state/auto_action';
+import { TextInputNumber } from '../utils/types';
 
 export const GameStatus = z.enum([
   'LOBBY',
@@ -12,8 +13,6 @@ export const GameStatus = z.enum([
   'ENDED',
   'ABANDONED',
 ]);
-
-export const TextInputNumber = z.union([z.literal(''), z.number()]).transform((data) => data === '' ? undefined : data).pipe(z.number());
 
 export const MapConfig = z.object({
   minPlayers: TextInputNumber,
