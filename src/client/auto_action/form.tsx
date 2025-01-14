@@ -1,5 +1,5 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from "@mui/material";
 import { FormEvent, useCallback, useState } from "react";
 import { GameStatus } from "../../api/game";
 import { inject } from "../../engine/framework/execution_context";
@@ -41,7 +41,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
   const [locoNext, setLocoNext] = useCheckboxState(autoAction.locoNext);
   const [bidUntilDefined, setBidUntilDefined] = useCheckboxState(autoAction.bidUntil != null);
   const [maxBid, setMaxBid] = useNumberInputState(autoAction.bidUntil?.maxBid ?? '');
-  const [incrementally, setIncrementally] = useCheckboxState(autoAction.bidUntil?.incrementally ?? false);
+  const [incrementally, setIncrementally] = useState(autoAction.bidUntil?.incrementally ?? false);
   const [thenPass, setThenPass] = useCheckboxState(autoAction.bidUntil?.thenPass ?? false);
 
   const { setAutoAction, isPending, validationError } = useSetAutoAction(gameId);
@@ -65,6 +65,10 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
 
   const count = [skipShares, takeSharesNextDefined, takeActionNextDefined, locoNext, bidUntilDefined]
     .filter((bool) => bool === true).length;
+
+  const handleIncrementallyChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setIncrementally((event.target as HTMLInputElement).value === 'true');
+  }, [setIncrementally]);
 
   return <Accordion expanded={expanded} onChange={handleAccordionChange}>
     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -129,22 +133,9 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
           />
           <FormHelperText>{validationError?.bidUntilDefined}</FormHelperText>
         </FormControl>
-        {bidUntilDefined && <FormControl component='div' className={styles.tab} error={validationError?.incrementally != null}>
-          <FormControlLabel sx={{ m: 1, minWidth: 80 }}
-            label='+1 previous bid until max is reached'
-            control={
-              <Checkbox
-                checked={incrementally}
-                value={incrementally}
-                disabled={isPending}
-                onChange={setIncrementally}
-              />}
-          />
-          <FormHelperText>{validationError?.incrementally}</FormHelperText>
-        </FormControl>}
         {bidUntilDefined && <FormControl component='div' className={styles.tab}>
           <TextField
-            label={incrementally ? 'Maximum bid' : 'Next bid'}
+            label='Max bid'
             type="number"
             disabled={isPending}
             value={maxBid}
@@ -153,9 +144,19 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
             onChange={setMaxBid}
           />
         </FormControl>}
+        {bidUntilDefined && <FormControl component='div' className={styles.tab2} error={validationError?.incrementally != null}>
+          <RadioGroup
+            value={incrementally}
+            name="radio-buttons-incrementally"
+            onChange={handleIncrementallyChange}
+          >
+            <FormControlLabel value={true} control={<Radio />} disabled={isPending} label="Incrementally +1 previous bid until max bid is reached" />
+            <FormControlLabel value={false} control={<Radio />} disabled={isPending} label="Jump right to max bid" />
+          </RadioGroup>
+        </FormControl>}
         {bidUntilDefined && <FormControl component="div" className={styles.tab} error={validationError?.['bidUntil.thenPass'] != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
-            label='Pass once max bid is reached'
+            label='Pass once max bid is exceeded'
             control={
               <Checkbox
                 checked={thenPass}
