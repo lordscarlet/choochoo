@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { initContract } from '@ts-rest/core';
 import { MapRegistry } from '../maps';
 import { assertNever } from '../utils/validate';
+import { AutoAction } from '../engine/state/auto_action';
 
 export const GameStatus = z.enum([
   'LOBBY',
@@ -197,7 +198,7 @@ export const gameContract = c.router({
     path: '/games/:gameId/action',
     body: ActionApi,
     responses: {
-      200: z.object({ game: GameApi }),
+      200: z.object({ game: GameApi, auto: AutoAction }),
     },
     summary: 'Performs an action on a game',
   },

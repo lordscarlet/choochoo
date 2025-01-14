@@ -1,8 +1,8 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
 import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
-import { AutoAction } from '../../api/auto_action';
 import { GameApi, GameLiteApi, GameStatus, MapConfig } from '../../api/game';
 import { EngineDelegator } from '../../engine/framework/engine';
+import { AutoAction } from '../../engine/state/auto_action';
 
 @Table({ modelName: 'Game' })
 export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttributes<GameDao>> {
@@ -71,6 +71,16 @@ export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttrib
 
   getSummary(): string | undefined {
     return toSummary(this);
+  }
+
+  getAutoActionForUser(userId: number): AutoAction {
+    return this.autoAction?.users?.[userId] ?? {};
+  }
+
+  setAutoActionForUser(userId: number, autoAction: AutoAction): void {
+    this.autoAction = this.autoAction ?? { users: {} };
+    this.autoAction.users[userId] = autoAction;
+    this.changed('autoAction', true);
   }
 }
 

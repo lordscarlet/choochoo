@@ -36,7 +36,6 @@ export class TurnOrderPhase extends PhaseModule {
 
   onStart(): void {
     super.onStart();
-    console.log('starting turn order phase');
     this.turnOrderState.initState({
       nextTurnOrder: [],
       previousBids: {},
@@ -90,7 +89,6 @@ export class TurnOrderPhase extends PhaseModule {
 
     const minBid = this.helper.getMinBid();
 
-    // TODO: We need to clear the bidUntil after the current user passes.
     if (minBid <= autoAction.bidUntil.maxBid) {
       return {
         action: BidAction,

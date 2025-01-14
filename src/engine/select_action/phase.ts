@@ -28,13 +28,15 @@ export class SelectActionPhase extends PhaseModule {
     super.onStart();
   }
 
+  onEndTurn(): void {
+    this.autoActionManager.mutateCurrentPlayer((autoAction) => {
+      autoAction.takeActionNext = undefined;
+    });
+    super.onEndTurn();
+  }
+
   protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
     if (autoAction.takeActionNext == null) return undefined;
-
-    this.autoActionManager.setNewAutoAction({
-      ...autoAction,
-      takeActionNext: undefined,
-    });
 
     if (this.allowedActions.getAvailableActions().has(autoAction.takeActionNext)) {
       return {

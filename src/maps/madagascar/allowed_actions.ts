@@ -57,7 +57,6 @@ export class MadagascarRoundEngine extends RoundEngine {
     const newActions: Action[] = [];
     iterate(7 - this.playerCount(), () => {
       const dieRoll = this.random.rollDie();
-      console.log('Madagascar rolled die', dieRoll);
       for (let i = dieRoll; i > 0;) {
         nextActionIndex++;
         nextActionIndex = nextActionIndex % allActions.length;

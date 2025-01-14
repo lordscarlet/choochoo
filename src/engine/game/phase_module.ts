@@ -50,7 +50,7 @@ export class PhaseModule {
     if (bundle == null) {
       throw new NoAutoActionError();
     }
-    return this.processAction(bundle.action.name, bundle.data);
+    return this.processAction(bundle.action.action, bundle.data);
   }
 
   protected getAutoAction(action: AutoAction): ActionBundle<{}> | undefined {

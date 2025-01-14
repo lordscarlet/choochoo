@@ -8,6 +8,7 @@ import { userContract } from '../../api/user';
 import { ErrorCode } from '../../utils/error_code';
 import { environment } from './environment';
 import { isErrorBody, isNetworkError } from './network';
+import { autoActionContract } from '../../api/auto_action';
 
 const c = initContract();
 
@@ -17,6 +18,7 @@ export const contract = c.router({
   users: userContract,
   feedback: feedbackContract,
   notifications: notificationsContract,
+  autoActions: autoActionContract,
 }, {
   validateResponse: true,
   commonResponses: {

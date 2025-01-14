@@ -1,4 +1,5 @@
 import { inject, injectState } from "../framework/execution_context";
+import { AutoActionManager } from "../game/auto_action_manager";
 import { Log } from "../game/log";
 import { MoneyManager } from "../game/money_manager";
 import { injectCurrentPlayer, TURN_ORDER } from "../game/state";
@@ -12,6 +13,7 @@ export class TurnOrderHelper {
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly moneyManager = inject(MoneyManager);
   private readonly log = inject(Log);
+  private readonly autoActionManager = inject(AutoActionManager);
 
   getMinBid(): number {
     return this.getCurrentMaxBid() + 1;
@@ -66,5 +68,9 @@ export class TurnOrderHelper {
       state.nextTurnOrder.unshift(player.color);
     });
     this.moneyManager.addMoney(player.color, -cost);
+
+    this.autoActionManager.mutate(player.playerId, (autoAction) => {
+      autoAction.bidUntil = undefined;
+    });
   }
 }

@@ -1,6 +1,7 @@
+import { TransactionNestMode } from "@sequelize/core";
 import { GameApi, GameStatus } from "../../api/game";
 import { EngineDelegator } from "../../engine/framework/engine";
-import { AUTO_ACTION_NAME, NoAutoActionError } from "../../engine/state/auto_action";
+import { AUTO_ACTION_NAME, AutoAction, NoAutoActionError } from "../../engine/state/auto_action";
 import { assert } from "../../utils/validate";
 import { LogDao } from "../messages/log_dao";
 import { sequelize } from "../sequelize";
@@ -21,7 +22,7 @@ export async function startGame(gameId: number, enforceOwner?: number): Promise<
   game.gameData = gameData;
   game.status = GameStatus.enum.ACTIVE;
   game.activePlayerId = activePlayerId ?? null;
-  const [newGame] = await sequelize.transaction((transaction) => Promise.all([
+  const [newGame] = await sequelize.transaction({ nestMode: TransactionNestMode.separate }, (transaction) => Promise.all([
     game.save({ transaction }),
     LogDao.createForGame(game.id, game.version - 1, logs, transaction),
   ]));
@@ -34,15 +35,15 @@ export async function startGame(gameId: number, enforceOwner?: number): Promise<
   return newGame.toApi();
 }
 
-export async function performAction(gameId: number, playerId: number, actionName: string, actionData: unknown): Promise<GameApi> {
-  return await sequelize.transaction(async (transaction) => {
+export async function performAction(gameId: number, playerId: number, actionName: string, actionData: unknown): Promise<GameDao> {
+  return await sequelize.transaction({ nestMode: TransactionNestMode.separate }, async (transaction) => {
     const game = await GameDao.findByPk(gameId, { transaction });
     assert(game != null);
     assert(game.status === GameStatus.enum.ACTIVE, 'cannot perform an action unless the game is live');
     assert(game.gameData != null);
     assert(game.activePlayerId === playerId, { permissionDenied: true });
 
-    const { gameData, logs, activePlayerId, hasEnded, reversible } =
+    const { gameData, logs, activePlayerId, hasEnded, reversible, autoActionMutations } =
       EngineDelegator.singleton.processAction(game.gameKey, game.gameData, actionName, actionData);
 
     const gameHistory = GameHistoryDao.build({
@@ -64,6 +65,12 @@ export async function performAction(gameId: number, playerId: number, actionName
     game.status = hasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
     game.undoPlayerId = reversible ? playerId : null;
 
+    for (const mutation of autoActionMutations) {
+      const autoAction = game.getAutoActionForUser(mutation.playerId);
+      mutation.mutation(autoAction);
+      game.setAutoActionForUser(mutation.playerId, autoAction);
+    }
+
     const [newGame, newGameHistory] = await Promise.all([
       game.save({ transaction }),
       gameHistory.save({ transaction }),
@@ -74,26 +81,37 @@ export async function performAction(gameId: number, playerId: number, actionName
 
     transaction.afterCommit(() => {
       if (!playerChanged) return;
+      console.log('notifying turn');
       notifyTurn(newGame).catch(e => {
         console.log('Failed during processAsync');
         console.error(e);
       });
+
+      if (game.status === GameStatus.enum.ACTIVE) {
+        const minutes = 1000 * 60;
+        // Delay by a random number between 2 and 4 minutes.
+        const autoActionDelay = minutes * 2 + (Math.random() * minutes * 4);
+        setTimeout(() => {
+          checkForAutoAction(game.id);
+        }, 3000);
+      }
     });
 
-    return newGame.toApi();
+    return newGame;
   });
 }
 
 async function checkForAutoAction(gameId: number) {
-  const game = await GameDao.findByPk(gameId);
-
-  if (game == null || game.activePlayerId == null) return;
-
-  const autoAction = game.autoAction?.users[game.activePlayerId];
-
-  if (autoAction == null) return;
-
+  let autoAction: AutoAction | undefined = undefined;
   try {
+    const game = await GameDao.findByPk(gameId, { transaction: null });
+
+    if (game == null || game.activePlayerId == null) return;
+
+    autoAction = game.autoAction?.users[game.activePlayerId];
+
+    if (autoAction == null) return;
+
     await performAction(gameId, game.activePlayerId, AUTO_ACTION_NAME, autoAction);
   } catch (e) {
     if (e instanceof NoAutoActionError) return;
@@ -104,19 +122,19 @@ async function checkForAutoAction(gameId: number) {
 }
 
 Lifecycle.singleton.onStart(() => {
-  GameDao.hooks.addListener('afterSave', (game: GameDao) => {
+
+  function afterSave(game: GameDao) {
     setTimeout(() => {
       if (game.status === GameStatus.enum.LOBBY && game.playerIds.length === game.config.maxPlayers) {
         startGame(game.id);
       }
-      if (game.status === GameStatus.enum.ACTIVE) {
-        const minutes = 1000 * 60;
-        // Delay by a random number between 2 and 4 minutes.
-        const autoActionDelay = minutes * 2 + (Math.random() * minutes * 4);
-        setTimeout(() => {
-          checkForAutoAction(game.id);
-        }, autoActionDelay);
-      }
     }, 2000);
+  }
+  GameDao.hooks.addListener('afterSave', (game: GameDao, options) => {
+    if (options.transaction) {
+      options.transaction.afterCommit(() => afterSave(game));
+    } else {
+      afterSave(game);
+    }
   });
 });

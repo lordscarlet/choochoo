@@ -25,6 +25,13 @@ export class SharesPhase extends PhaseModule {
     return undefined;
   }
 
+  onEndTurn(): void {
+    this.autoAction.mutateCurrentPlayer((autoAction) => {
+      autoAction.takeSharesNext = undefined;
+    });
+    super.onEndTurn();
+  }
+
   protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
     if (autoAction.skipShares === true) {
       return {
@@ -32,10 +39,6 @@ export class SharesPhase extends PhaseModule {
         data: { numShares: 0 },
       };
     } else if (autoAction.takeSharesNext != null) {
-      this.autoAction.setNewAutoAction({
-        ...autoAction,
-        takeSharesNext: undefined,
-      });
       return {
         action: TakeSharesAction,
         data: { numShares: autoAction.takeSharesNext },

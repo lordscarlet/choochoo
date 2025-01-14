@@ -146,7 +146,7 @@ const router = initServer().router(gameContract, {
     assert(userId != null, { permissionDenied: true });
     const game = await performAction(params.gameId, userId, body.actionName, body.actionData);
 
-    return { status: 200, body: { game } };
+    return { status: 200, body: { game: game.toApi(), auto: game.getAutoActionForUser(userId) } };
   },
 
   async undoAction({ req, params: { gameId }, body: { backToVersion } }) {

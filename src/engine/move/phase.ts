@@ -54,12 +54,15 @@ export class MovePhase extends PhaseModule {
     return playerOrder;
   }
 
+  onEndTurn(): void {
+    this.autoAction.mutateCurrentPlayer((autoAction) => {
+      autoAction.locoNext = undefined;
+    });
+    super.onEndTurn();
+  }
+
   protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
     if (autoAction.locoNext === true) {
-      this.autoAction.setNewAutoAction({
-        ...autoAction,
-        locoNext: false,
-      });
       return {
         action: LocoAction,
         data: {},

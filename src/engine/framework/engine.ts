@@ -1,5 +1,6 @@
 import { MapRegistry } from "../../maps";
 import { assert } from "../../utils/validate";
+import { AutoActionManager, AutoActionMutationConfig } from "../game/auto_action_manager";
 import { GameEngine } from "../game/game";
 import { Log } from "../game/log";
 import { Memory } from "../game/memory";
@@ -24,6 +25,7 @@ interface GameState {
   gameData: string;
   reversible: boolean;
   logs: string[];
+  autoActionMutations: AutoActionMutationConfig[];
 }
 
 export class EngineDelegator {
@@ -70,6 +72,7 @@ export class EngineProcessor {
   private readonly roundEngine = inject(RoundEngine);
   private readonly phase = injectState(PHASE);
   private readonly moveState = injectState(MOVE_STATE);
+  private readonly autoActionManager = inject(AutoActionManager);
 
   start(playerIds: number[], mapConfig: MapConfig): GameState {
     return this.process(undefined, () => {
@@ -116,6 +119,7 @@ export class EngineProcessor {
       gameData: this.state.serialize(),
       reversible: this.random.isReversible(),
       logs: this.log.dump(),
+      autoActionMutations: this.autoActionManager.getMutations(),
     };
   }
 }

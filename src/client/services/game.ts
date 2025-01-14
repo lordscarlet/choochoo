@@ -8,6 +8,7 @@ import { ActionConstructor } from "../../engine/game/phase_module";
 import { entries, peek } from "../../utils/functions";
 import { Entry } from "../../utils/types";
 import { assert, assertNever } from "../../utils/validate";
+import { useUpdateAutoActionCache } from "../auto_action/hooks";
 import { useMostRecentValue } from "../utils/hooks";
 import { useInjected } from "../utils/injection_context";
 import { tsr } from "./client";
@@ -158,9 +159,9 @@ export function useSetGame() {
 
 export function useSetGameSuccess() {
   const setGame = useSetGame();
-  return ({ body }: { status: 200, body: { game: GameApi } }) => {
+  return useCallback(({ body }: { status: 200, body: { game: GameApi } }) => {
     setGame(body.game);
-  };
+  }, [setGame]);
 }
 
 export function useGame(): GameApi {
@@ -317,6 +318,7 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
   const me = useMe();
   const game = useGame();
   const onSuccess = useSetGameSuccess();
+  const updateAutoActionCache = useUpdateAutoActionCache(game.id);
   const phaseDelegator = useInjected(PhaseDelegator);
   const notifications = useNotifications();
   const { mutate, isPending, error } = tsr.games.performAction.useMutation();
@@ -332,6 +334,7 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
     mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
       onSuccess(r) {
         onSuccess(r);
+        updateAutoActionCache(r.body.auto);
 
         notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
       }

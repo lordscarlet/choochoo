@@ -24,6 +24,7 @@ import { MapInfo } from "./map_info";
 import { PlayerStats } from "./player_stats";
 import { SpecialActionTable } from "./special_action_table";
 import { SwitchToActive, SwitchToUndo } from "./switch";
+import { AutoActionForm } from "../auto_action/form";
 
 
 export function ActiveGame() {
@@ -51,6 +52,7 @@ function InternalActiveGame() {
     <SwitchToActive />
     <SwitchToUndo />
     {!undoOnly && <ActionSummary />}
+    <AutoActionForm />
     {!undoOnly && canEmitProduction && <GoodsTable />}
     {!undoOnly && <BiddingInfo />}
     {!undoOnly && canEmitSelectAction && <SpecialActionTable />}

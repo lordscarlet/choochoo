@@ -1,16 +1,29 @@
 import { inject } from "../framework/execution_context";
 import { AutoAction } from "../state/auto_action";
 import { Memory } from "./memory";
+import { injectCurrentPlayer } from "./state";
+
+export type AutoActionMutation = (autoAction: AutoAction) => void;
+
+export interface AutoActionMutationConfig {
+  playerId: number;
+  mutation: AutoActionMutation;
+}
 
 export class AutoActionManager {
   private readonly memory = inject(Memory);
-  private readonly newAutoAction = this.memory.remember<AutoAction | undefined>(undefined);
+  private readonly currentPlayer = injectCurrentPlayer();
+  private readonly newAutoAction = this.memory.rememberArray<AutoActionMutationConfig>();
 
-  setNewAutoAction(autoAction: AutoAction): void {
-    this.newAutoAction.set(autoAction);
+  mutateCurrentPlayer(mutation: AutoActionMutation): void {
+    this.mutate(this.currentPlayer().playerId, mutation);
   }
 
-  getNewAutoAction(): AutoAction | undefined {
-    return this.newAutoAction();
+  getMutations(): AutoActionMutationConfig[] {
+    return [...this.newAutoAction];
+  }
+
+  mutate(playerId: number, mutation: AutoActionMutation) {
+    this.newAutoAction.push({ playerId, mutation });
   }
 }

@@ -12,15 +12,15 @@ const router = initServer().router(autoActionContract, {
     await assertRole(req);
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
-    const autoAction = game.autoAction?.users?.[req.session.userId!];
-    return { status: 200, body: { auto: autoAction ?? {} } };
+    const auto = game.getAutoActionForUser(req.session.userId!);
+    return { status: 200, body: { auto } };
   },
   async set({ req, params, body }) {
     await assertRole(req);
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
-    game.autoAction = game.autoAction ?? { users: {} };
-    game.autoAction.users[req.session.userId!] = body.auto;
+    game.setAutoActionForUser(req.session.userId!, body.auto);
+    await game.save();
     return { status: 200, body: { auto: body.auto } };
   },
 });
