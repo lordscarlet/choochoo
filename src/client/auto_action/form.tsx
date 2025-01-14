@@ -105,7 +105,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
           />
           <FormHelperText>{validationError?.takeSharesNextDefined}</FormHelperText>
         </FormControl>
-        {takeSharesNextDefined && <FormControl>
+        {takeSharesNextDefined && <FormControl component='div' className={styles.tab}>
           <TextField
             label='Number of shares'
             type="number"
@@ -129,9 +129,9 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
           />
           <FormHelperText>{validationError?.bidUntilDefined}</FormHelperText>
         </FormControl>
-        {bidUntilDefined && <FormControl component="div" error={validationError?.incrementally != null}>
+        {bidUntilDefined && <FormControl component='div' className={styles.tab} error={validationError?.incrementally != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
-            label='+1 previous bid'
+            label='+1 previous bid until max is reached'
             control={
               <Checkbox
                 checked={incrementally}
@@ -142,7 +142,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
           />
           <FormHelperText>{validationError?.incrementally}</FormHelperText>
         </FormControl>}
-        {bidUntilDefined && <FormControl>
+        {bidUntilDefined && <FormControl component='div' className={styles.tab}>
           <TextField
             label={incrementally ? 'Maximum bid' : 'Next bid'}
             type="number"
@@ -153,7 +153,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
             onChange={setMaxBid}
           />
         </FormControl>}
-        {bidUntilDefined && <FormControl component="div" error={validationError?.thenPass != null}>
+        {bidUntilDefined && <FormControl component="div" className={styles.tab} error={validationError?.thenPass != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
             label='Pass once max bid is reached'
             control={
@@ -179,7 +179,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
           />
           <FormHelperText>{validationError?.takeActionNextDefined}</FormHelperText>
         </FormControl>
-        {takeActionNextDefined && <FormControl component='div' error={validationError?.gameKey != null}>
+        {takeActionNextDefined && <FormControl component='div' className={styles.tab} error={validationError?.gameKey != null}>
           <InputLabel>Selected Action</InputLabel>
           <Select
             required

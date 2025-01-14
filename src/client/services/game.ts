@@ -332,12 +332,12 @@ export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHan
       throw new Error('Cannot use event as actionData. You likely want to use useEmptyAction');
     }
     mutate({ params: { gameId: game.id }, body: { actionName, actionData } }, {
-      onSuccess(r) {
+      onSuccess: (r) => {
         onSuccess(r);
         updateAutoActionCache(r.body.auto);
 
         notifications.show('Success', { autoHideDuration: 2000, severity: 'success' });
-      }
+      },
     });
   }, [game.id, actionName]);
 

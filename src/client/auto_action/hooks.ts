@@ -37,5 +37,5 @@ export function useUpdateAutoActionCache(gameId: number) {
   const tsrQueryClient = tsr.useQueryClient();
   return useCallback((auto: AutoAction) => {
     tsrQueryClient.autoActions.get.setQueryData(getQueryKey(me.id, gameId), (r) => r && ({ ...r, status: 200, body: { auto } }));
-  }, [gameId]);
+  }, [me.id, gameId]);
 }
