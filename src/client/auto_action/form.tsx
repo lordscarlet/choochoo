@@ -85,7 +85,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
       >
         <FormControl component="div" error={validationError?.skipShares != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
-            label="Skip taking shares the rest of the game."
+            label="Done taking shares."
             control={
               <Checkbox
                 checked={skipShares}
