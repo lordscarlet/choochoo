@@ -6,6 +6,7 @@ import { inject } from "../../engine/framework/execution_context";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { Action, getSelectedActionString } from "../../engine/state/action";
 import { AutoAction } from "../../engine/state/auto_action";
+import { HelpIcon } from '../components/help';
 import { useGame } from "../services/game";
 import { useMe } from "../services/me";
 import { useCheckboxState, useNumberInputState, useSelectState } from "../utils/form_state";
@@ -85,7 +86,13 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
       >
         <FormControl component="div" error={validationError?.skipShares != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
-            label="Done taking shares."
+            label={<>
+              Done taking shares.
+              <HelpIcon id='done-taking-shares'>
+                Every time it's your turn to take out shares, you'll pass without taking any shares. This will continue until the game ends
+                or you untoggle this button.
+              </HelpIcon>
+            </>}
             control={
               <Checkbox
                 checked={skipShares}
@@ -98,7 +105,13 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
         </FormControl>
         <FormControl component="div" error={validationError?.takeSharesNextDefined != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
-            label='Select how many shares to take out next shares round.'
+            label={<>
+              Select how many shares to take out next shares round.
+              <HelpIcon id='select-shares'>
+                The next time it's your turn to take out shares, you'll take out this many shares. This field gets reset after the action is
+                performed.
+              </HelpIcon>
+            </>}
             control={
               <Checkbox
                 checked={takeSharesNextDefined}
@@ -156,7 +169,13 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
         </FormControl>}
         {bidUntilDefined && <FormControl component="div" className={styles.tab} error={validationError?.['bidUntil.thenPass'] != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
-            label='Pass once max bid is exceeded'
+            label={<>
+              Pass once max bid is exceeded
+              <HelpIcon id='select-shares'>
+                The next time it's your turn to bid and the bid is greater than your max, you'll pass instead. Leave blank if you want to
+                bid until the max bid, then decide what to do.
+              </HelpIcon>
+            </>}
             control={
               <Checkbox
                 checked={thenPass}
@@ -169,7 +188,13 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
         </FormControl>}
         <FormControl component="div" error={validationError?.takeActionNextDefined != null}>
           <FormControlLabel sx={{ m: 1, minWidth: 80 }}
-            label='Select an action (if available)'
+            label={<>
+              Select an action (if available).
+              <HelpIcon id='select-shares'>
+                The next time it's your turn to select an action, it'll select this action if it's available. Otherwise, it'll just wait for you
+                to select an action. Resets after an action is selected.
+              </HelpIcon>
+            </>}
             control={
               <Checkbox
                 checked={takeActionNextDefined}
