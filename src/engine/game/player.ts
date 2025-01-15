@@ -84,6 +84,11 @@ export class PlayerHelper {
         }
       }
     }
+    for (const interCityConnection of this.grid().connections) {
+      if (interCityConnection.owner?.color === color) {
+        numTrack++;
+      }
+    }
     return numTrack;
   }
 
