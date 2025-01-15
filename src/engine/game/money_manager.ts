@@ -25,7 +25,7 @@ export class MoneyManager {
       return { lostIncome: 0, outOfGame: false };
     } else {
       assert(forced === true);
-      const lostIncome = money - player.money;
+      const lostIncome = -money - player.money;
 
       this.playerHelper.update(playerColor, player => {
         player.income -= lostIncome;
