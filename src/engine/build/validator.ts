@@ -32,7 +32,7 @@ export class Validator {
     if (space instanceof City) {
       return 'cannot build on a city';
     }
-    if (space == null || space.getLandType() === SpaceType.UNPASSABLE) {
+    if (space == null || space.getLandType() === SpaceType.UNPASSABLE || space.getLandType() === SpaceType.WATER) {
       return 'cannot build on unpassable terrain';
     }
 
@@ -72,7 +72,8 @@ export class Validator {
       for (const exit of track.exits) {
         if (exit === TOWN) continue;
         const neighbor = grid.getNeighbor(space.coordinates, exit);
-        if (neighbor == null || (neighbor instanceof Land && neighbor.getLandType() === SpaceType.UNPASSABLE)) {
+        if (neighbor == null || (neighbor instanceof Land &&
+            (neighbor.getLandType() === SpaceType.UNPASSABLE || neighbor.getLandType() === SpaceType.WATER))) {
           return 'cannot have an exit to unpassable terrain';
         }
         if (!space.canExit(exit) || !neighbor.canExit(getOpposite(exit))) {

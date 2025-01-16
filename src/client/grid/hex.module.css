@@ -22,6 +22,10 @@
   fill: darkblue;
 }
 
+.location.water {
+  fill: #579ba8;
+}
+
 .location.hill {
   fill: #F5DEB3;
 }

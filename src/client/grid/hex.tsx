@@ -37,6 +37,8 @@ function colorStyles(space: Space): string[] {
         return [styles.plain];
       case SpaceType.RIVER:
         return [styles.river];
+      case SpaceType.WATER:
+        return [styles.water];
       case SpaceType.MOUNTAIN:
         return [styles.mountain];
       // TODO: render street and street
@@ -103,7 +105,8 @@ export function Hex({ space, selectedGood, highlightedTrack, size, hideGoods, cl
     space.hasTown();
   const isClickableBuild = clickTargets.has(ClickTarget.LOCATION) &&
     space instanceof Land &&
-    space.getLandType() !== SpaceType.UNPASSABLE;
+    space.getLandType() !== SpaceType.UNPASSABLE &&
+    space.getLandType() !== SpaceType.WATER
   const isClaimableTrack = clickTargets.has(ClickTarget.LOCATION) &&
     space instanceof Land &&
     space.getTrack().some(track => track.isClaimable());

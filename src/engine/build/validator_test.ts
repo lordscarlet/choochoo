@@ -72,6 +72,24 @@ describe('BuildValidator', () => {
       .toBe('cannot have an exit to unpassable terrain');
   });
 
+  it("cannot build a tile into water terrain", () => {
+    const cityCoordinates = Coordinates.ORIGIN;
+    const plainCoordinates = cityCoordinates.neighbor(Direction.TOP);
+    const unpassableCoordinates = plainCoordinates.neighbor(Direction.TOP);
+    injector.state().set(GRID, new Map<Coordinates, SpaceData>([
+      [cityCoordinates, city()],
+      [plainCoordinates, plain()],
+      [unpassableCoordinates, { type: SpaceType.WATER }],
+    ]));
+    const build: BuildInfo = {
+      playerColor: PlayerColor.BLUE,
+      tileType: SimpleTileType.STRAIGHT,
+      orientation: Direction.TOP,
+    };
+    expect(validator().getInvalidBuildReason(plainCoordinates, build))
+        .toBe('cannot have an exit to unpassable terrain');
+  });
+
   it("cannot build a tile on unpassable terrain", () => {
     injector.state().set(GRID, new Map());
     const build: BuildInfo = {
@@ -93,6 +111,18 @@ describe('BuildValidator', () => {
     };
     expect(validator().getInvalidBuildReason(coordinates, build))
       .toBe('cannot build on unpassable terrain');
+  });
+
+  it("cannot build a tile on water terrain", () => {
+    const coordinates = Coordinates.ORIGIN;
+    injector.state().set(GRID, new Map([[coordinates, { type: SpaceType.WATER } as const]]));
+    const build: BuildInfo = {
+      playerColor: PlayerColor.BLUE,
+      tileType: SimpleTileType.CURVE,
+      orientation: Direction.TOP_LEFT,
+    };
+    expect(validator().getInvalidBuildReason(coordinates, build))
+        .toBe('cannot build on unpassable terrain');
   });
 
   it("cannot build an unavailable tile", () => {
