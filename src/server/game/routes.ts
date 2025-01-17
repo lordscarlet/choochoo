@@ -21,10 +21,11 @@ import { performAction, startGame } from './logic';
 export const gameApp = express();
 
 const router = initServer().router(gameContract, {
-  async list({ query }) {
+  async list({ query, req }) {
     const defaultQuery: ListGamesApi = { pageSize: 20, order: ['id', 'DESC'] };
     const { pageSize, excludeUserId, order, userId, status, pageCursor, ...rest } = { ...defaultQuery, ...query };
-    const where: WhereOptions<GameDao> = rest;
+    let where: WhereOptions<GameDao> = rest;
+
     if (status != null) {
       if (status.length === 1) {
         where.status = status[0];
@@ -46,8 +47,24 @@ const router = initServer().router(gameContract, {
     if (pageCursor != null) {
       where.id = { [Op.notIn]: pageCursor };
     }
+
+    // Add a condition so that only games which are not marked as unlisted or which the user is a part of will be included
+    if (req.session.userId) {
+      where = {
+        [Op.and]: [
+          {[Op.or]: [
+              {playerIds: { [Op.contains]: [req.session.userId] }},
+              {unlisted: false},
+            ]},
+          where,
+        ],
+      }
+    } else {
+      where.unlisted = false;
+    }
+
     const games = await GameDao.findAll({
-      attributes: ['id', 'gameKey', 'name', 'gameData', 'config', 'status', 'activePlayerId', 'playerIds'],
+      attributes: ['id', 'gameKey', 'name', 'gameData', 'config', 'status', 'activePlayerId', 'playerIds', 'unlisted'],
       where,
       limit: pageSize! + 1,
       order: order != null ? [order] : [['id', 'DESC']],
@@ -86,6 +103,7 @@ const router = initServer().router(gameContract, {
         minPlayers: body.minPlayers,
         maxPlayers: body.maxPlayers,
       },
+      unlisted: body.unlisted,
     });
     return { status: 201, body: { game: game.toApi() } };
   },

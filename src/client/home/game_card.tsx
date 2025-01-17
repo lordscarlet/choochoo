@@ -36,6 +36,9 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
       {game.status === GameStatus.enum.LOBBY && <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         Seats: {seats(game)}
       </Typography>}
+      {game.unlisted && <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+        Unlisted
+      </Typography>}
     </CardContent>
     <CardActions>
       <ViewButton game={game} />
