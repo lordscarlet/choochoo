@@ -1,11 +1,11 @@
 import { Good } from '../../engine/state/good';
 import { duplicate } from '../../utils/functions';
-import { black, city, MOUNTAIN, PLAIN, RIVER, startsLowerGrid, town, UNPASSABLE, white } from '../factory';
+import { black, city, MOUNTAIN, PLAIN, RIVER, startsLowerGrid, town, WATER, white } from '../factory';
 
 export const map = startsLowerGrid([
   [
     PLAIN,
-    UNPASSABLE,
+    WATER,
     PLAIN,
     PLAIN,
     MOUNTAIN,
@@ -16,7 +16,7 @@ export const map = startsLowerGrid([
     PLAIN,
     city('Toronto', Good.YELLOW, black(6)),
     RIVER,
-    UNPASSABLE,
+    WATER,
     PLAIN,
     PLAIN,
     RIVER,
@@ -26,7 +26,7 @@ export const map = startsLowerGrid([
   ],
   [
     ...duplicate(3, PLAIN),
-    UNPASSABLE,
+    WATER,
     town('Cleveland'),
     PLAIN,
     PLAIN,
@@ -35,24 +35,24 @@ export const map = startsLowerGrid([
     MOUNTAIN,
   ],
   [
-    UNPASSABLE,
+    WATER,
     ...duplicate(3, PLAIN),
-    UNPASSABLE,
+    WATER,
     ...duplicate(3, PLAIN),
     RIVER,
     town('Lexington'),
     MOUNTAIN,
   ],
   [
-    ...duplicate(3, UNPASSABLE),
+    ...duplicate(3, WATER),
     city('Detroit', Good.RED, black(3)),
-    UNPASSABLE,
+    WATER,
     ...duplicate(3, PLAIN),
     RIVER,
     PLAIN,
   ],
   [
-    ...duplicate(3, UNPASSABLE),
+    ...duplicate(3, WATER),
     PLAIN,
     PLAIN,
     town('Toledo'),
@@ -63,7 +63,7 @@ export const map = startsLowerGrid([
     PLAIN,
   ],
   [
-    UNPASSABLE,
+    WATER,
     ...duplicate(5, PLAIN),
     town('Fort Wayne'),
     PLAIN,
@@ -71,7 +71,7 @@ export const map = startsLowerGrid([
     RIVER,
   ],
   [
-    UNPASSABLE,
+    WATER,
     PLAIN,
     PLAIN,
     town('Grand Rapids'),
@@ -81,7 +81,7 @@ export const map = startsLowerGrid([
     RIVER,
   ],
   [
-    ...duplicate(5, UNPASSABLE),
+    ...duplicate(5, WATER),
     town('Michigan City'),
     PLAIN,
     PLAIN,
@@ -90,7 +90,7 @@ export const map = startsLowerGrid([
   ],
   [
     PLAIN,
-    ...duplicate(5, UNPASSABLE),
+    ...duplicate(5, WATER),
     PLAIN,
     PLAIN,
     town('Terre Haute'),
@@ -120,7 +120,7 @@ export const map = startsLowerGrid([
     city('St. Louis', Good.RED, white(2)),
   ],
   [
-    UNPASSABLE,
+    WATER,
     ...duplicate(2, PLAIN),
     town('La Crosse'),
     ...duplicate(5, RIVER),
@@ -128,7 +128,7 @@ export const map = startsLowerGrid([
     PLAIN,
   ],
   [
-    UNPASSABLE,
+    WATER,
     PLAIN,
     PLAIN,
     RIVER,

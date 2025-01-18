@@ -27,6 +27,10 @@ export const RIVER: LandData = {
   type: SpaceType.RIVER,
 };
 
+export const WATER: LandData = {
+  type: SpaceType.WATER,
+};
+
 export const MOUNTAIN: LandData = {
   type: SpaceType.MOUNTAIN,
 };
