@@ -5,14 +5,15 @@ import { isLand, Land } from "../map/location";
 import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { PlayerHelper } from "./player";
-import { CURRENT_PLAYER, injectAllPlayersUnsafe, TURN_ORDER } from "./state";
+import { CURRENT_PLAYER, injectAllPlayersUnsafe, injectGrid, TURN_ORDER } from "./state";
 
 export class MoneyManager {
   private readonly players = injectAllPlayersUnsafe();
   private readonly playerHelper = inject(PlayerHelper);
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
   private readonly order = injectState(TURN_ORDER);
-  private readonly grid = inject(GridHelper);
+  private readonly gridHelper = inject(GridHelper);
+  private readonly grid = injectGrid();
 
   addMoneyForCurrentPlayer(num: number): LostMoneyResponse {
     return this.addMoney(this.currentPlayer(), num);
@@ -53,15 +54,21 @@ export class MoneyManager {
   }
 
   protected removeOwnershipMarkers(player: PlayerColor): void {
-    const toUpdate: Land[] = [...this.grid.all()].filter(isLand)
+    const toUpdate: Land[] = [...this.gridHelper.all()].filter(isLand)
       .filter((location) =>
         [...location.getTrack()].some((track) => player === track.getOwner()));
     for (const location of toUpdate) {
-      this.grid.update(location.coordinates, (space) => {
+      this.gridHelper.update(location.coordinates, (space) => {
         assert(space.type !== SpaceType.CITY);
         assert(space.tile != null);
         space.tile.owners = space.tile.owners.map((owner) => player === owner ? undefined : owner);
       });
+    }
+
+    for (const connection of this.grid().connections) {
+      if (connection.owner?.color === player) {
+        this.gridHelper.setInterCityOwner(undefined, connection);
+      }
     }
   }
 }

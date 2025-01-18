@@ -36,7 +36,7 @@ export class GridHelper {
     }
   }
 
-  setInterCityOwner(owner: PlayerColor, connection: InterCityConnection): void {
+  setInterCityOwner(owner: PlayerColor | undefined, connection: InterCityConnection): void {
     this.interCityConnections.update((connections) => {
       const set = new Set(connection.connects);
       const matching = connections.find((c) => interCityConnectionEquals(connection, c))!;
