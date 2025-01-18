@@ -7,3 +7,11 @@
   stroke: black;
   fill: black;
 }
+
+.visibleOnHover {
+  display: none;
+}
+
+.visibleOnHover:hover {
+  display: inherit;
+}

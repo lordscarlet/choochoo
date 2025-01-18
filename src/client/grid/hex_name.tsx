@@ -7,10 +7,11 @@ import { Point, distanceToSide, movePointInRadDirection, pointBetween, polygon }
 interface HexNameProps {
   name: string; center: Point; size: number;
   rotation?: Rotation;
+  isCity?: boolean;
 }
 
 export function HexName(props: HexNameProps) {
-  if (props.rotation != null) return <HexNamePointyTop {...props} />;
+  if (props.rotation != null && props.isCity) return <HexNamePointyTop {...props} />;
   return <HexNameFlatTop {...props} />;
 }
 
@@ -36,7 +37,7 @@ export function HexNamePointyTop({ name, center, rotation, size }: HexNameProps)
     </Rotate>
   </>;
 }
-export function HexNameFlatTop({ name, center, size }: HexNameProps) {
+export function HexNameFlatTop({ name, center, size, rotation }: HexNameProps) {
   const containerCorners = useMemo(() => {
     const right = movePointInRadDirection(center, size, 0);
     const bottomRight = movePointInRadDirection(center, size, Math.PI / 3);
@@ -54,10 +55,13 @@ export function HexNameFlatTop({ name, center, size }: HexNameProps) {
     ]);
   }, [center, size]);
 
-  return <>
+  const rotationDegree = rotation == Rotation.CLOCKWISE ? '-60' : rotation === Rotation.COUNTER_CLOCKWISE ? '120' : undefined;
+  const transform = rotationDegree != null ? `rotate(${rotationDegree} ${center.x} ${center.y})` : '';
+
+  return <g transform={transform}>
     <polygon points={containerCorners} className={styles.hexNameContainer} strokeWidth="1" />
     <text x={center.x} y={center.y} dominantBaseline="middle" textAnchor="middle">{name}</text>
-  </>;
+  </g>;
 }
 
 export const hexNameDiff = 0.25;
