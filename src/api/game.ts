@@ -59,6 +59,7 @@ export const CreateGameApi = z.object({
   gameKey: z.string(),
   name: z.string().trim().min(1).max(32).regex(/^[a-zA-Z0-9_\- ]*$/, 'Can only use letters, numbers, spaces, _, and - characters'),
   artificialStart: z.boolean(),
+  unlisted: z.boolean(),
 }).and(MapConfig)
   .refine((data) => data.minPlayers <= data.maxPlayers,
     { message: 'Cannot be less than min players', path: ['maxPlayers'] })
@@ -90,6 +91,7 @@ export const GameLiteApi = z.object({
   activePlayerId: z.number().optional(),
   config: MapConfig,
   summary: z.string().optional(),
+  unlisted: z.boolean(),
 });
 export type GameLiteApi = z.infer<typeof GameLiteApi>;
 

@@ -30,6 +30,7 @@ export function CreateGamePage() {
   }, [gameKey]);
 
   const [artificialStart, setArtificialStart] = useCheckboxState();
+  const [unlisted, setUnlisted] = useCheckboxState();
   const [minPlayersS, setMinPlayers, setMinPlayersRaw] = useNumberInputState(selectedMap.minPlayers);
   const [maxPlayersS, setMaxPlayers, setMaxPlayersRaw] = useNumberInputState(selectedMap.maxPlayers);
   const { validateGame, createGame, validationError, isPending } = useCreateGame();
@@ -51,11 +52,11 @@ export function CreateGamePage() {
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createGame({ name, gameKey, artificialStart, minPlayers, maxPlayers });
+    createGame({ name, gameKey, artificialStart, minPlayers, maxPlayers, unlisted });
   }, [name, gameKey, allowPlayerSelections, artificialStart, createGame, minPlayers, maxPlayers]);
 
   const validateGameInternal = useCallback(() => {
-    validateGame({ name, gameKey, artificialStart, minPlayers, maxPlayers });
+    validateGame({ name, gameKey, artificialStart, minPlayers, maxPlayers, unlisted });
   }, [name, gameKey, artificialStart, minPlayers, maxPlayers]);
 
   const grid = useMemo(() => {
@@ -140,6 +141,18 @@ export function CreateGamePage() {
       />
       <FormHelperText>{validationError?.artificialStart}</FormHelperText>
     </FormControl>}
+    <FormControl error={validationError?.unlisted != null}>
+      <FormControlLabel sx={{ m: 1, minWidth: 80 }}
+                        label="Unlisted Game"
+                        control={
+                          <Checkbox
+                              value={unlisted}
+                              disabled={isPending}
+                              onChange={setUnlisted}
+                          />}
+      />
+      <FormHelperText>{validationError?.unlisted}</FormHelperText>
+    </FormControl>
     <div>
       <Button type="submit" disabled={isPending}>Create</Button>
     </div>

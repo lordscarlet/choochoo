@@ -37,6 +37,10 @@ export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttrib
   @NotNull
   declare playerIds: number[];
 
+  @Attribute(DataTypes.BOOLEAN)
+  @NotNull
+  declare unlisted: boolean;
+
   @Attribute(DataTypes.JSONB)
   declare config: MapConfig;
 
@@ -103,6 +107,7 @@ export function toLiteApi(game: GameApi | InferAttributes<GameDao>): GameLiteApi
     activePlayerId: game.activePlayerId ?? undefined,
     config: game.config,
     summary: toSummary(game),
+    unlisted: game.unlisted,
   };
 }
 
