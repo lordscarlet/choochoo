@@ -7,7 +7,6 @@ import { Memory } from "./memory";
 
 export class Random {
   private readonly memory = inject(Memory);
-  private readonly reversible = this.memory.remember(true);
   private readonly seed = this.memory.remember<undefined | { seed: string, random: PRNG }>(undefined);
 
   shuffle<T>(array: T[]): T[] {
@@ -39,7 +38,6 @@ export class Random {
   }
 
   random(number: number): number {
-    this.reversible.set(false);
     return Math.floor(this.getRandomGen() * number);
   }
 
@@ -61,6 +59,6 @@ export class Random {
   }
 
   isReversible(): boolean {
-    return this.seed() != null;
+    return this.seed() === null;
   }
 }
