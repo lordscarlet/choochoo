@@ -59,6 +59,6 @@ export class Random {
   }
 
   isReversible(): boolean {
-    return this.seed() === null;
+    return this.seed() == null;
   }
 }
