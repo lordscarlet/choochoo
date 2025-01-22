@@ -1,9 +1,10 @@
 import 'jasmine';
+import _ from 'lodash';
 import { SimpleConstructor } from "../engine/framework/dependency_stack";
 import { setInjectionContext } from "../engine/framework/execution_context";
 import { InjectionContext } from "../engine/framework/inject";
 import { Key } from '../engine/framework/key';
-import { StateStore } from '../engine/framework/state';
+import { InjectedState, StateStore } from '../engine/framework/state';
 import { ReversteamMapSettings } from '../maps/reversteam/settings';
 import { resettable } from './resettable';
 
@@ -38,10 +39,20 @@ export class InjectionHelper {
     return spyOn(this.injector().get(ctor), key);
   }
 
-  initResettableState<T>(key: Key<T>, value: T): void {
+  initResettableState<T>(key: Key<T>, value: T): InjectedState<T> {
+    let passthrough: InjectedState<T> | undefined;
+    const result = (() => passthrough!()) as InjectedState<T>;
+
     beforeEach(() => {
       this.state().init(key, value);
+      passthrough = this.state().injectState(key);
+      _.merge(result, passthrough);
     });
+    afterEach(() => {
+      passthrough = undefined;
+    });
+
+    return result;
   }
 
   state(): StateStore {

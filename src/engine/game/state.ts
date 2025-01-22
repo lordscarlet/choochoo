@@ -54,3 +54,5 @@ export const injectGrid = composeState([GRID, INTER_CITY_CONNECTIONS], (previous
   }
   return Grid.fromData(gridData, connections ?? []);
 });
+
+export const TEST_ONLY_PLAYERS = PLAYERS;
