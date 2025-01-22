@@ -21,12 +21,13 @@ export class MoneyManager {
 
   addMoney(playerColor: PlayerColor, money: number, forced = false): LostMoneyResponse {
     const player = this.playerHelper.getPlayer(playerColor);
-    if (money > 0 || -money <= player.money) {
-      this.playerHelper.update(playerColor, player => player.money += money);
+    const newMoney = player.money + money;
+    if (newMoney >= 0) {
+      this.playerHelper.update(playerColor, player => player.money = newMoney);
       return { lostIncome: 0, outOfGame: false };
     } else {
       assert(forced === true);
-      const lostIncome = -money - player.money;
+      const lostIncome = newMoney;
       assert(lostIncome < 0, 'you should never gain income through this code path');
 
       this.playerHelper.update(playerColor, player => {
