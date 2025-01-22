@@ -28,7 +28,9 @@ export class MoneyManager {
     } else {
       assert(forced === true);
       const lostIncome = newMoney;
-      assert(lostIncome < 0, 'you should never gain income through this code path');
+      assert(lostIncome > 0,
+        `you should never gain income through this code path, got ` +
+        `lostIncome=$${lostIncome}, money=$${money}, playerMoney=$${player.money}`);
 
       this.playerHelper.update(playerColor, player => {
         player.income -= lostIncome;
