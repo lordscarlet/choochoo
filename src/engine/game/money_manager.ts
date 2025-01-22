@@ -27,7 +27,7 @@ export class MoneyManager {
       return { lostIncome: 0, outOfGame: false };
     } else {
       assert(forced === true);
-      const lostIncome = newMoney;
+      const lostIncome = -newMoney;
       assert(lostIncome > 0,
         `you should never gain income through this code path, got ` +
         `lostIncome=$${lostIncome}, money=$${money}, playerMoney=$${player.money}`);
