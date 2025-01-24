@@ -1,4 +1,4 @@
-import * as styles from '../../client/grid/hex_grid.module.css';
+import * as styles from '../../client/grid/hex.module.css';
 
 export function IndiaRivers() {
     return <>
