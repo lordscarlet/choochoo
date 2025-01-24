@@ -2,7 +2,7 @@ export function IrelandRules() {
     return <div>
         <p>Same as base game with the following changes:</p>
         <ul>
-            <li><b>Brown hexes:</b> start with a fixed number of goods and won't get any more for the rest of the game. They don't accept goods but still act as stops.</li>
+            <li><b>Brown hexes:</b> start with a fixed number of goods and won&apos;t get any more for the rest of the game. They don&apos;t accept goods but still act as stops.</li>
             <li><b>Less cities:</b> the game has four less cities and no urbanization action.</li>
             <li><b>Shorter:</b> The game has one less turn than the base game.</li>
             <li><b>Sea routes:</b> are pre-built track that can be claimed for $6/each. It counts as one of your builds, and can only be done once per turn.</li>

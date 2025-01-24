@@ -90,7 +90,7 @@ export class BuildPhase extends PhaseModule {
     return playerOrder;
   }
 
-  forcedAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<object> | undefined {
     if (this.helper.shouldAutoPass()) {
       return { action: DoneAction, data: {} };
     }

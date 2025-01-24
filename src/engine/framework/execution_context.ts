@@ -1,4 +1,5 @@
 import { freeze, Immutable } from "../../utils/immutable";
+import { Tuple } from "../../utils/types";
 import { assert } from "../../utils/validate";
 import { SimpleConstructor } from "./dependency_stack";
 import { InjectionContext } from "./inject";
@@ -25,7 +26,8 @@ export function injectState<T>(key: Key<T>): InjectedState<T> {
   return inject(StateStore).injectState(key);
 }
 
-export function composeState<Args extends [...any[]], T extends (old: ReturnType<T> | undefined, ...args: Args) => any>(keys: NoInfer<KeyArray<Args>>, transformer: T): () => () => Immutable<ReturnType<T>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function composeState<Args extends Tuple, T extends (old: ReturnType<T> | undefined, ...args: Args) => any>(keys: NoInfer<KeyArray<Args>>, transformer: T): () => () => Immutable<ReturnType<T>> {
   let memoized: { value: Immutable<ReturnType<T>>, parameters: Args } | undefined = undefined;
   return () => {
     const injectedState = keys.map(injectState);
@@ -39,4 +41,5 @@ export function composeState<Args extends [...any[]], T extends (old: ReturnType
   };
 }
 
-export type Rest<T extends [...any[]]> = T extends [any, ...infer B] ? [...B] : never;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Rest<T extends Tuple> = T extends [any, ...infer B] ? [...B] : never;

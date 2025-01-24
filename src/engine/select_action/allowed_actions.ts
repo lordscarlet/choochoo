@@ -25,7 +25,7 @@ export class AllowedActions {
     return this.getDisabledActionReason(action) != null;
   }
 
-  getDisabledActionReason(action: Action): string | undefined {
+  getDisabledActionReason(_: Action): string | undefined {
     return undefined;
   }
 

@@ -36,7 +36,7 @@ export class PhaseDelegator {
     this.install(GoodsGrowthPhase);
   }
 
-  install<T>(ctor: PhaseConstructor): void {
+  install(ctor: PhaseConstructor): void {
     const phase = inject(ctor);
     phase.configureActions();
     this.phases.set(ctor.phase, phase);

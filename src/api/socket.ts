@@ -20,7 +20,7 @@ export interface ClientToServerEvents {
   leaveHomeRoom(): void;
   joinGameRoom(gameId: number): void;
   leaveGameRoom(gameId: number): void;
-  emitAction(actionName: string, actionData: {}): void;
+  emitAction(actionName: string, actionData: object): void;
   submitMessage(message: string): void;
 }
 

@@ -51,7 +51,7 @@ interface ToTsFileProps {
   jsFile: string;
 }
 
-function toTsFiles({ root, binDir, srcDir, jsFile }: ToTsFileProps): string[] {
+function toTsFiles({ binDir, srcDir, jsFile }: ToTsFileProps): string[] {
   const path = jsFile.substring(binDir.length + 1);
   const exts = ['.js', '.js.map'];
   for (const ext of exts) {

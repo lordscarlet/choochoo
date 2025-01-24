@@ -18,7 +18,7 @@ export class SharesPhase extends PhaseModule {
     this.installAction(TakeSharesAction);
   }
 
-  forcedAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<object> | undefined {
     if (this.helper.getSharesTheyCanTake() <= 0) {
       return { action: TakeSharesAction, data: { numShares: 0 } };
     }
@@ -32,7 +32,7 @@ export class SharesPhase extends PhaseModule {
     super.onEndTurn();
   }
 
-  protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
+  protected getAutoAction(autoAction: AutoAction): ActionBundle<object> | undefined {
     if (autoAction.skipShares === true) {
       return {
         action: TakeSharesAction,

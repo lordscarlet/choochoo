@@ -1,6 +1,6 @@
 import z from "zod";
 import { inject, injectState } from "../../engine/framework/execution_context";
-import { ActionProcessor } from "../../engine/game/action";
+import { ActionProcessor, EmptyAction } from "../../engine/game/action";
 import { Log } from "../../engine/game/log";
 import { PhaseEngine } from "../../engine/game/phase";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
@@ -40,7 +40,7 @@ export const DeurbanizeData = z.object({
 
 export type DeurbanizeData = z.infer<typeof DeurbanizeData>;
 
-export class DeurbanizeAction implements ActionProcessor<{}> {
+export class DeurbanizeAction implements ActionProcessor<DeurbanizeData> {
   static readonly action = 'deurbanize';
 
   readonly assertInput = DeurbanizeData.parse;
@@ -68,15 +68,15 @@ export class DeurbanizeAction implements ActionProcessor<{}> {
   }
 }
 
-export class PassAction implements ActionProcessor<{}> {
+export class PassAction implements ActionProcessor<EmptyAction> {
   static readonly action = 'pass';
 
   readonly assertInput = z.object({}).parse;
   private readonly log = inject(Log);
 
-  validate(_: {}): void { }
+  validate(_: EmptyAction): void { }
 
-  process(_: {}): boolean {
+  process(_: EmptyAction): boolean {
     this.log.currentPlayer(`skips the deurbanize action`);
     return true;
   }

@@ -2,7 +2,7 @@ import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRightTwoTone';
 import Circle from '@mui/icons-material/Circle';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
-import { ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import { GameStatus } from '../../api/game';
 import { PlayerHelper } from "../../engine/game/player";
 import { CURRENT_PLAYER, injectAllPlayersUnsafe, TURN_ORDER } from "../../engine/game/state";
@@ -102,11 +102,6 @@ export function PlayerStats() {
 
 interface PlayerStatColumnProps {
   player: PlayerData;
-}
-
-interface PlayerStatColumn {
-  header: string;
-  cell(props: PlayerStatColumnProps): ReactNode;
 }
 
 const actionColumn = {

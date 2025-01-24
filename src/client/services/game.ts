@@ -110,6 +110,7 @@ export function useGameList(baseQuery: ListGamesApi) {
             headers: new Headers(),
             body: { games },
           })),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
       });
     }
@@ -351,7 +352,7 @@ export function useGameVersionState<T>(initialValue: T): [T, (t: T) => void] {
   return [externalState, externalSetState];
 }
 
-export function useAction<T extends {}>(action: ActionConstructor<T>): ActionHandler<T> {
+export function useAction<T extends object>(action: ActionConstructor<T>): ActionHandler<T> {
   const me = useMe();
   const game = useGame();
   const onSuccess = useSetGameSuccess();

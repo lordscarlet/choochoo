@@ -27,14 +27,16 @@ export class InjectionHelper {
     return helper;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   resettableSpyOn<T, K extends keyof T = keyof T>(ctor: SimpleConstructor<T>, key: T[K] extends Function ? K : never, handleSpy?: (spy: ReturnType<typeof spyOn<T, K>>) => void): () => ReturnType<typeof spyOn<T, K>> {
     const spy = resettable(() => this.spyOn(ctor, key));
     beforeEach(() => {
-      handleSpy && handleSpy(spy());
+      handleSpy?.(spy());
     });
     return spy;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   spyOn<T, K extends keyof T = keyof T>(ctor: SimpleConstructor<T>, key: T[K] extends Function ? K : never): ReturnType<typeof spyOn<T, K>> {
     return spyOn(this.injector().get(ctor), key);
   }

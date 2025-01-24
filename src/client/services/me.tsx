@@ -50,7 +50,7 @@ export function useSubscribe() {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const subscribe = useCallback((email: string) => mutate({ body: { email } }, {
-    onSuccess: (data) => {
+    onSuccess: (_) => {
       setIsSuccess(true);
     },
   }), []);
@@ -124,7 +124,7 @@ export function useUpdatePassword() {
   const validationError = handleError(isPending, error);
 
   const updatePassword = useCallback((body: UpdatePasswordRequest, onSuccess?: () => void) => mutate({ body }, {
-    onSuccess: (data) => {
+    onSuccess: (_) => {
       notifications.show('Update succeeded!', { autoHideDuration: 2000, severity: 'success' });
       onSuccess?.();
     },
@@ -152,7 +152,6 @@ export function useLogout() {
 }
 
 export function useResendActivationCode() {
-  const tsrQueryClient = tsr.useQueryClient();
   const { mutate, error, isPending } = tsr.users.resendActivationCode.useMutation();
   handleError(isPending, error);
   const notifications = useNotifications();

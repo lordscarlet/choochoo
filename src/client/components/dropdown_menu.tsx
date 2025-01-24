@@ -120,11 +120,11 @@ export function DropdownMenu({ id, ariaLabel, disabled, children, ...rest }: Dro
   </DropdownCloser.Provider>;
 }
 
-export function DropdownMenuItem<T extends React.ElementType = MenuItemTypeMap['defaultComponent'], R = {}>({ onClick, ...rest }: MenuItemProps<T, R> & { onClick?: (e: MouseEvent<HTMLLIElement>) => void }) {
+export function DropdownMenuItem<T extends React.ElementType = MenuItemTypeMap['defaultComponent'], R = object>({ onClick, ...rest }: MenuItemProps<T, R> & { onClick?: (e: MouseEvent<HTMLLIElement>) => void }) {
   const dropdownCloser = useContext(DropdownCloser);
   const internalOnClick = useCallback((e: MouseEvent<HTMLLIElement>) => {
-    dropdownCloser && dropdownCloser();
-    onClick && onClick(e);
+    dropdownCloser?.();
+    onClick?.(e);
   }, [onClick]);
   return <MenuItem onClick={internalOnClick} {...rest} />;
 }

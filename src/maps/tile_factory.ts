@@ -48,7 +48,7 @@ export function townTile(directions: Direction[], owners: Array<PlayerColor | un
   fail(`found no track with exits ${directions.join(',')}`);
 }
 
-export function complex(tile1: MutableTileData, tile2: MutableTileData): MutableTileData {
+export function complex(_1: MutableTileData, _2: MutableTileData): MutableTileData {
   throw new Error('not implemented yet');
 }
 

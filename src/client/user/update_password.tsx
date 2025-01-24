@@ -31,7 +31,7 @@ export function UpdatePassword({ updateCode, onSuccess }: UpdatePasswordProps) {
     updatePassword({ oldPassword, newPassword, updateCode }, () => {
       setOldPasswordRaw('');
       setNewPasswordRaw('');
-      onSuccess && onSuccess();
+      onSuccess?.();
     });
   }, [newPassword, updateCode, updatePassword]);
 

@@ -154,11 +154,11 @@ function ResetError({ error, resetErrorBoundary }: { error: unknown, resetErrorB
   }, [setSubmittedForm]);
 
   return <div>
-    <p>Oops! We hit an error. We're looking into it, don't worry.</p>
-    <p>You can try refreshing the page and see if it happens again. If that doesn't work, sit tight! This is a work in progress.</p>
+    <p>Oops! We hit an error. We&apos;re looking into it, don&apos;t worry.</p>
+    <p>You can try refreshing the page and see if it happens again. If that doesn&apos;t work, sit tight! This is a work in progress.</p>
     {!submittedForm && errorId != null && <p>It would be really helpful if you submitted a report describing what you were attempting to do.</p>}
     {!submittedForm && errorId != null && <FeedbackForm onSubmit={close} errorId={errorId} />}
-    {submittedForm && <p>Thanks! We'll look into it ASAP!</p>}
+    {submittedForm && <p>Thanks! We&apos;ll look into it ASAP!</p>}
     <Button onClick={resetErrorBoundary}>Reload</Button>
   </div>;
 }

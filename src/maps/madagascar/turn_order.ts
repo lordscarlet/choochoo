@@ -7,7 +7,7 @@ import { TurnOrderPhase } from "../../engine/turn_order/phase";
 
 
 export class MadagascarTurnOrderPhase extends TurnOrderPhase {
-  forcedAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<object> | undefined {
     if (this.currentPlayer().selectedAction === Action.LAST_PLAYER) {
       return { action: PassAction, data: {} };
     }
@@ -18,7 +18,7 @@ export class MadagascarTurnOrderPhase extends TurnOrderPhase {
 export class MadagascarTurnOrderPass extends PassAction {
   private readonly log = inject(Log);
 
-  process(data: {}): boolean {
+  process(data: object): boolean {
     if (this.currentPlayer().selectedAction === Action.LAST_PLAYER) {
       this.log.currentPlayer('autopasses due to the last player action');
     }

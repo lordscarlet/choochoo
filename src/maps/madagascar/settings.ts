@@ -1,5 +1,5 @@
-import {SimpleConstructor} from "../../engine/framework/dependency_stack";
-import {MapSettings, ReleaseStage, Rotation} from "../../engine/game/map_settings";
+import { SimpleConstructor } from "../../engine/framework/dependency_stack";
+import { MapSettings, ReleaseStage, Rotation } from "../../engine/game/map_settings";
 import {
   MadagascarAllowedActions,
   MadagascarGameEnder,
@@ -12,11 +12,9 @@ import {
   MadagascarBuildPhase,
   MadagascarDoneAction
 } from "./build";
-import {map} from "./grid";
-import {MadagascarMovePassAction, MadagascarMovePhase} from "./move";
-import {MadagascarTurnOrderPass, MadagascarTurnOrderPhase} from "./turn_order";
-import {Action} from "../../engine/state/action";
-import {MadagascarRules} from "./rules";
+import { map } from "./grid";
+import { MadagascarMovePassAction, MadagascarMovePhase } from "./move";
+import { MadagascarTurnOrderPass, MadagascarTurnOrderPhase } from "./turn_order";
 
 export class MadagascarMapSettings implements MapSettings {
   static readonly key = 'madagascar'

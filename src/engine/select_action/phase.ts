@@ -35,7 +35,7 @@ export class SelectActionPhase extends PhaseModule {
     super.onEndTurn();
   }
 
-  protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
+  protected getAutoAction(autoAction: AutoAction): ActionBundle<object> | undefined {
     if (autoAction.takeActionNext == null) return undefined;
 
     if (this.allowedActions.getAvailableActions().has(autoAction.takeActionNext)) {

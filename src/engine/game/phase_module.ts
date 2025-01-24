@@ -6,27 +6,27 @@ import { ActionProcessor } from "./action";
 import { TURN_ORDER } from "./state";
 
 
-export interface ActionConstructor<T extends {}> {
+export interface ActionConstructor<T extends object> {
   new(): ActionProcessor<T>;
 
   readonly action: string;
 }
 
-export interface ActionBundle<T extends {}> {
+export interface ActionBundle<T extends object> {
   action: ActionConstructor<T>;
   data: NoInfer<T>;
 }
 
 export class PhaseModule {
   protected readonly turnOrder = injectState(TURN_ORDER);
-  private readonly actionRegistry = new Map<string, ActionProcessor<{}>>();
+  private readonly actionRegistry = new Map<string, ActionProcessor<object>>();
 
-  installAction<T extends {}>(action: ActionConstructor<T>) {
+  installAction<T extends object>(action: ActionConstructor<T>) {
     assert(!this.actionRegistry.has(action.action), 'cannot install duplicate actions: ' + action.action);
     this.actionRegistry.set(action.action, inject(action));
   }
 
-  canEmit<T extends {}>(action: ActionConstructor<T>): boolean {
+  canEmit<T extends object>(action: ActionConstructor<T>): boolean {
     return this.canEmitAction(action.action);
   }
 
@@ -40,7 +40,7 @@ export class PhaseModule {
       return this.processAutoAction(data as AutoAction);
     }
     assert(this.canEmitAction(actionName), `Cannot emit ${actionName}`);
-    const action: ActionProcessor<{}> | undefined = this.actionRegistry.get(actionName);
+    const action: ActionProcessor<object> | undefined = this.actionRegistry.get(actionName);
     assert(action != null, `No action processor found for ${actionName}`);
     return this.runAction(action, data);
   }
@@ -53,11 +53,11 @@ export class PhaseModule {
     return this.processAction(bundle.action.action, bundle.data);
   }
 
-  protected getAutoAction(action: AutoAction): ActionBundle<{}> | undefined {
+  protected getAutoAction(_: AutoAction): ActionBundle<object> | undefined {
     return undefined;
   }
 
-  private runAction<T extends {}>(action: ActionProcessor<T>, data: unknown): boolean {
+  private runAction<T extends object>(action: ActionProcessor<T>, data: unknown): boolean {
     const parsedData = action.assertInput(data);
     action.validate(parsedData);
     return action.process(parsedData);
@@ -67,7 +67,7 @@ export class PhaseModule {
 
   onStart(): void { }
 
-  forcedAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<object> | undefined {
     return undefined;
   }
 

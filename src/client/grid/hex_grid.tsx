@@ -22,34 +22,6 @@ import { InterCityConnectionRender } from './inter_city_connection';
 import { distanceToSide, Point } from "./point";
 
 
-function cubeRound(qFrac: number, rFrac: number): Coordinates {
-  const sFrac = - (qFrac + rFrac);
-  let q = Math.round(qFrac)
-  let r = Math.round(rFrac)
-  let s = Math.round(sFrac)
-
-  const qDiff = Math.abs(q - qFrac)
-  const rDiff = Math.abs(r - rFrac)
-  const sDiff = Math.abs(s - sFrac)
-
-  if (qDiff > rDiff && qDiff > sDiff) {
-    q = -r - s;
-  } else if (rDiff > sDiff) {
-    r = -q - s;
-  } else {
-    s = -q - r;
-  }
-
-  return Coordinates.from({ q, r });
-}
-
-
-function pixelToCoordinates(point: Point, size: number): Coordinates {
-  const q = (2. / 3 * point.x) / size;
-  const r = (-1. / 3 * point.x + Math.sqrt(3) / 3 * point.y) / size;
-  return cubeRound(q, r);
-}
-
 interface HexGridProps {
   grid: Grid;
   rotation?: Rotation;

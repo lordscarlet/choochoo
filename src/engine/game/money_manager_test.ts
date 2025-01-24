@@ -6,7 +6,7 @@ import { PlayerColor, PlayerData } from "../state/player";
 import { LandData, MutableSpaceData } from "../state/space";
 import { Direction, SimpleTileType } from "../state/tile";
 import { MoneyManager } from "./money_manager";
-import { GRID, INTER_CITY_CONNECTIONS, TEST_ONLY_PLAYERS, TURN_ORDER } from "./state";
+import { GRID, TEST_ONLY_PLAYERS, TURN_ORDER } from "./state";
 
 describe('MoneyManager', () => {
   const injector = InjectionHelper.install();
@@ -16,7 +16,6 @@ describe('MoneyManager', () => {
   const players = injector.initResettableState(TEST_ONLY_PLAYERS, [{ color: COLOR, money: 5 } as PlayerData]);
   const turnOrder = injector.initResettableState(TURN_ORDER, []);
   const grid = injector.initResettableState(GRID, new Map([]));
-  const connections = injector.initResettableState(INTER_CITY_CONNECTIONS, []);
 
   const manager = resettable(() => new MoneyManager());
 

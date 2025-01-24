@@ -6,7 +6,7 @@ import { useMessages, useSendChat } from "../services/socket";
 import { useTextInputState } from "../utils/form_state";
 import * as styles from "./game_log.module.css";
 
-// @ts-ignore-next
+// @ts-expect-error This doesn't inject properly.
 import useStayScrolled from 'react-stay-scrolled';
 import { Username } from '../components/username';
 
@@ -72,7 +72,7 @@ export function GameLog({ gameId }: GameLogProps) {
   </div>;
 }
 
-const MESSAGE_PARSER = /<@user\-(\d+)>/g;
+const MESSAGE_PARSER = /<@user-(\d+)>/g;
 
 function LogMessage({ message }: { message: string }) {
   const messageParsed = useMemo(() => {

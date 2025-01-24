@@ -8,7 +8,7 @@ export class GermanyStarter extends GameStarter {
     super.onStartGame();
 
     const bag = [...this.bag()];
-    for (let space of this.gridHelper.all()) {
+    for (const space of this.gridHelper.all()) {
       const mapData = space.getMapSpecific(GermanyMapData.parse);
       if (mapData && mapData.portCity) {
         const color = bag.pop();

@@ -19,7 +19,6 @@ export class PhaseEngine {
   }
 
   end(): void {
-    const currentPhase = this.phase();
     this.delegator.get().onEnd();
     this.phase.delete();
   }

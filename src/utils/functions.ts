@@ -61,7 +61,7 @@ export function isPrimitive(value: unknown): value is Primitive {
   return primitives.has(typeof value);
 }
 
-export function pick<T extends {}, R extends keyof T>(value: T, keys: R[]): Pick<T, R> {
+export function pick<T extends object, R extends keyof T>(value: T, keys: R[]): Pick<T, R> {
   const partial: Partial<T> = {};
   for (const key of keys) {
     partial[key] = value[key];
@@ -83,7 +83,7 @@ export function partition<R, T>(arr: R[], fn: (r: R) => T): Map<T, R[]> {
 
 export function infiniteLoopCheck(numChecks: number, data?: string): (moreData?: string) => void {
   let numRuns = 0;
-  let lastData = [];
+  const lastData: Array<string | undefined> = [];
   return (moreData?: string) => {
     lastData.push(moreData);
     if (lastData.length > 5) {
@@ -97,7 +97,7 @@ export function isNotNull<T>(t: T): t is NonNullable<T> {
   return t != null;
 }
 
-export function entries<T extends {}>(obj: T): Array<Entry<T>> {
+export function entries<T extends object>(obj: T): Array<Entry<T>> {
   return Object.entries(obj) as Array<Entry<T>>;
 }
 

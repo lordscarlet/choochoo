@@ -26,8 +26,8 @@ export function Pallet() {
           <PlayerCircle color={playerColor} bid={5} />
           <PlayerColorIndicator playerColor={playerColor} currentTurn={true} />
           {[SimpleTileType.CURVE, TownTileType.STRAIGHT].map((tileType) => <>
-            {[plain, river, mountain, desert].map((space) =>
-              <ModifiedSpace space={space} tile={{ tileType, orientation: Direction.TOP, owners: [playerColor, playerColor] }} />
+            {[plain, river, mountain, desert].map((space, index) =>
+              <ModifiedSpace key={index} space={space} tile={{ tileType, orientation: Direction.TOP, owners: [playerColor, playerColor] }} />
             )}
           </>)}
         </div >)}

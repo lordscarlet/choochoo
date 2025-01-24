@@ -16,9 +16,10 @@ export async function notifyTurn(game: GameDao): Promise<void> {
   switch (setting?.method) {
     case NotificationMethod.EMAIL:
       return emailService.sendTurnReminder(user, game.toApi());
-    case NotificationMethod.WEBHOOK:
+    case NotificationMethod.WEBHOOK: {
       const message = `Your turn in ${game.name} (${game.getSummary()!})\nhttps://www.choochoo.games/app/games/${game.id}`;
       return callWebhook(message, setting);
+    }
     case undefined:
       return;
     default:
@@ -28,13 +29,15 @@ export async function notifyTurn(game: GameDao): Promise<void> {
 
 export async function sendTestMessage(userId: number, setting: TurnNotificationSetting | undefined): Promise<void> {
   switch (setting?.method) {
-    case NotificationMethod.EMAIL:
+    case NotificationMethod.EMAIL: {
       const user = await UserDao.getUser(userId);
       assert(user != null);
       return emailService.sendTestNotification(user);
-    case NotificationMethod.WEBHOOK:
+    }
+    case NotificationMethod.WEBHOOK: {
       const message = `Test Message from Choo Choo Games.`;
       return callWebhook(message, setting);
+    }
     case undefined:
       return;
     default:
@@ -65,7 +68,7 @@ function getNotifyPrefix(urlStr: string): string {
   }
 }
 
-function getPayload(urlStr: string, message: string): {} {
+function getPayload(urlStr: string, message: string): object {
   const url = new URL(urlStr);
   switch (url.host) {
     case 'discord.com':

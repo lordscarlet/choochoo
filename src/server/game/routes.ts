@@ -133,7 +133,6 @@ const router = initServer().router(gameContract, {
     assert(!game.playerIds.includes(userId), { invalidInput: true });
     assert(game.playerIds.length < game.toLiteApi().config.maxPlayers, { invalidInput: 'game full' });
 
-    const originalGame = game.toApi();
     game.playerIds = [...game.playerIds, userId];
     const newGame = await game.save();
     return { status: 200, body: { game: newGame.toApi() } };
@@ -151,7 +150,6 @@ const router = initServer().router(gameContract, {
     // Figure out what to do if the owner wants to leave
     assert(index > 0, { invalidInput: 'the owner cannot leave the game' });
 
-    const originalGame = game.toApi();
     game.playerIds = game.playerIds.slice(0, index).concat(game.playerIds.slice(index + 1));
     const newGame = await game.save();
     return { status: 200, body: { game: newGame.toApi() } };
@@ -191,8 +189,6 @@ const router = initServer().router(gameContract, {
       assert(gameHistory.reversible, { invalidInput: 'cannot undo irreversible action' });
       assert(game.version === gameHistory.previousGameVersion + 1, 'can only undo one step');
       assert(gameHistory.userId === req.session.userId, { permissionDenied: true });
-
-      const originalGame = game.toApi();
 
       game.version = backToVersion;
       game.gameData = gameHistory.previousGameData;
@@ -254,9 +250,9 @@ const router = initServer().router(gameContract, {
       currentGameData = firstAction.previousGameData;
       currentGameVersion = firstAction.previousGameVersion;
     }
-    let firstGameVersion = currentGameVersion;
+    const firstGameVersion = currentGameVersion;
     let finalHasEnded: boolean | undefined;
-    while (previousAction = previousActions.pop()) {
+    while ((previousAction = previousActions.pop()) != null) {
       assert(previousAction.isActionHistory());
       const { gameData, logs, activePlayerId, hasEnded, reversible, seed } =
         EngineDelegator.singleton.processAction(game.gameKey, {

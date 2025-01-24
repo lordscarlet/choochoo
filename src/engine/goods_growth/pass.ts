@@ -1,16 +1,16 @@
 
 import { z } from "zod";
 import { inject } from "../framework/execution_context";
-import { ActionProcessor } from "../game/action";
+import { ActionProcessor, EmptyAction } from "../game/action";
 import { Log } from "../game/log";
 
 
-export class PassAction implements ActionProcessor<{}> {
+export class PassAction implements ActionProcessor<EmptyAction> {
   static readonly action = 'pass';
   readonly assertInput = z.object({}).parse;
   private readonly log = inject(Log);
 
-  validate(_: {}) { }
+  validate() { }
 
   process(): boolean {
     this.log.currentPlayer('skips production action');

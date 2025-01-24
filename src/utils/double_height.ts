@@ -5,8 +5,8 @@ export class DoubleHeight {
   constructor(readonly col: number, readonly row: number) { }
 
   toPoint(size: number): Point {
-    var x = size * 3 / 2 * this.col;
-    var y = size * Math.sqrt(3) / 2 * this.row;
+    const x = size * 3 / 2 * this.col;
+    const y = size * Math.sqrt(3) / 2 * this.row;
     return { x, y };
   }
 

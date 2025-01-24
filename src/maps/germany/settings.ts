@@ -1,10 +1,10 @@
-import {MapSettings, ReleaseStage} from '../../engine/game/map_settings';
-import {GermanyCostCalculator} from './cost';
-import {map} from './grid';
-import {GermanyMoveHelper} from './move';
-import {GermanyStarter} from './starter';
-import {GermanyBuildAction, GermanyBuilderHelper, GermanyBuildPhase} from "./build";
-import {interCityConnections} from '../factory';
+import { MapSettings, ReleaseStage } from '../../engine/game/map_settings';
+import { interCityConnections } from '../factory';
+import { GermanyBuildAction, GermanyBuilderHelper, GermanyBuildPhase } from "./build";
+import { GermanyCostCalculator } from './cost';
+import { map } from './grid';
+import { GermanyMoveHelper } from './move';
+import { GermanyStarter } from './starter';
 
 export class GermanyMapSettings implements MapSettings {
   static readonly key = 'germany';
@@ -18,12 +18,12 @@ export class GermanyMapSettings implements MapSettings {
 
   getOverrides() {
     return [
-        GermanyCostCalculator,
-        GermanyMoveHelper,
-        GermanyStarter,
-        GermanyBuilderHelper,
-        GermanyBuildAction,
-        GermanyBuildPhase,
+      GermanyCostCalculator,
+      GermanyMoveHelper,
+      GermanyStarter,
+      GermanyBuilderHelper,
+      GermanyBuildAction,
+      GermanyBuildPhase,
     ];
   }
 }

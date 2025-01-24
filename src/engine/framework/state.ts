@@ -1,9 +1,8 @@
 
-import { Map as ImmutableMap } from 'immutable';
 import z from 'zod';
 import { deepCopy } from "../../utils/deep_copy";
-import { deepEquals } from "../../utils/deep_equals";
 import { freeze, Immutable } from "../../utils/immutable";
+import { Tuple } from '../../utils/types';
 import { assert } from '../../utils/validate';
 import { Memory } from '../game/memory';
 import { DependencyStack } from './dependency_stack';
@@ -164,8 +163,8 @@ export class StateStore {
   }
 
   merge(gameDataStr: string): void {
-    const { gameData, ...rest } = SerializedGameData.parse(JSON.parse(gameDataStr));
-    let changes: ValueChange[] = Object.entries(gameData)
+    const { gameData } = SerializedGameData.parse(JSON.parse(gameDataStr));
+    const changes: ValueChange[] = Object.entries(gameData)
       .filter(([key]) => !Key.isDeprecated(key))
       .filter(([key, value]) => this.mergeValue(Key.fromString(key), value))
       .map(([key]) => ({ key }));
@@ -195,21 +194,10 @@ export interface ValueChange {
   key: string;
 }
 
-function mergeMap<R, S>(newMap: ImmutableMap<R, S>, oldMap: ImmutableMap<R, S>): [ImmutableMap<R, S>, R[]] {
-  const differentKeys: R[] = [];
-  let updatedMap = oldMap;
-  for (const [key, value] of newMap) {
-    if (!deepEquals(value, updatedMap.get(key)!)) {
-      updatedMap = updatedMap.set(key, value);
-      differentKeys.push(key);
-    }
-  }
-  return [updatedMap, differentKeys];
-}
 
-export type KeyArray<Tuple extends [...any[]]> = {
-  [Index in keyof Tuple]: Key<Tuple[Index]>;
-} & { length: Tuple['length'] };
+export type KeyArray<T extends Tuple> = {
+  [Index in keyof T]: Key<T[Index]>;
+} & { length: T['length'] };
 
 interface InjectedOps<Data> {
   initState(state: Data): void;

@@ -34,7 +34,7 @@ export abstract class EmailService {
       const decrypted = EmailVerificationCode.parse(JSON.parse(decrypt(code)));
       if (Date.now() > decrypted.expires) return undefined;
       return decrypted.email;
-    } catch (e) {
+    } catch (_: unknown) {
       return undefined;
     }
   }
@@ -182,8 +182,8 @@ class MailjetEmailService extends EmailService {
           "ContactAlt": email,
           "ListID": "10484665",
         })
-    } catch (e: any) {
-      if (e.ErrorMessage?.includes('already exists')) {
+    } catch (e: unknown) {
+      if (typeof e === 'object' && e != null && 'ErrorMessage' in e && (e.ErrorMessage as string[])?.includes('already exists')) {
         return;
       }
       throw e;
@@ -197,9 +197,10 @@ class MailjetEmailService extends EmailService {
         .request({
           "IsExcludedFromCampaigns": isExcluded ? "true" : 'false',
         });
-    } catch (e: any) {
+    } catch (e: unknown) {
       const alreadyExcluded =
-        e.statusCode === 304 && e.statusText == 'Content not changed';
+        typeof e === 'object' && e != null && 'statusCode' in e &&
+        e.statusCode === 304 && 'statusText' in e && e.statusText == 'Content not changed';
       // Ignore errors where the user is already excluded.
       if (alreadyExcluded) return;
       throw e;

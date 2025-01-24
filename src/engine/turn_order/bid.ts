@@ -10,7 +10,7 @@ import { TURN_ORDER_STATE } from "./state";
 export const BidData = z.object({ bid: z.number().refine(isPositiveInteger) });
 export type BidData = z.infer<typeof BidData>;
 
-export class BidAction implements ActionProcessor<{}> {
+export class BidAction implements ActionProcessor<BidData> {
   static readonly action = 'bid';
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly currentPlayer = injectCurrentPlayer();

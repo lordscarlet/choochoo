@@ -1,8 +1,5 @@
 import z from "zod";
 
-export type Constructor<T> = new (...args: any) => T;
-export type ConstructorReturnType<T> = T extends Constructor<infer P> ? P : never;
-
 export type Primitive = number | string | boolean;
 
 export type PromiseOr<T> = Promise<T> | T;
@@ -23,8 +20,11 @@ export type Entry<T> = {
 
 export type FormNumber = number | '';
 
-export type WithFormNumber<T extends {}, R extends keyof T> = {
+export type WithFormNumber<T extends object, R extends keyof T> = {
   [K in keyof T]: K extends R ? (number extends T[K] ? T[K] | '' : never) : T[K];
 }
 
 export const TextInputNumber = z.union([z.literal(''), z.number()]).transform((data) => data === '' ? undefined : data).pipe(z.number());
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Tuple = [...any[]];

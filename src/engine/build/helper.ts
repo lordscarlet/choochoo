@@ -40,13 +40,13 @@ export class BuilderHelper {
 
   tileAvailableInManifest(newTile: TileType): boolean {
     const manifest = this.calculateManifest(newTile);
-    const invariantType = [...manifest.entries()].find(([key, value]) => value < 0)?.[0];
+    const invariantType = [...manifest.entries()].find(([_, value]) => value < 0)?.[0];
     return invariantType == null;
   }
 
   trackManifest(): Map<TileType, number> {
     const manifest = this.calculateManifest();
-    const invariantType = [...manifest.entries()].find(([key, value]) => value < 0)?.[0];
+    const invariantType = [...manifest.entries()].find(([_, value]) => value < 0)?.[0];
     assert(invariantType == null, 'Oops, we have used too much of tile ' + invariantType);
     return manifest;
   }

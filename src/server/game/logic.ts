@@ -106,7 +106,7 @@ export async function performAction(gameId: number, playerId: number, actionName
         const autoActionDelay = minutes * 2 + (Math.random() * minutes * 4);
         setTimeout(() => {
           checkForAutoAction(game.id);
-        }, 3000);
+        }, autoActionDelay);
       }
     });
 

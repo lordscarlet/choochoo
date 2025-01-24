@@ -89,7 +89,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
             label={<>
               Done taking shares.
               <HelpIcon id='done-taking-shares'>
-                Every time it's your turn to take out shares, you'll pass without taking any shares. This will continue until the game ends
+                Every time it&apos;s your turn to take out shares, you&apos;ll pass without taking any shares. This will continue until the game ends
                 or you untoggle this button.
               </HelpIcon>
             </>}
@@ -108,7 +108,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
             label={<>
               Select how many shares to take out next shares round.
               <HelpIcon id='select-shares'>
-                The next time it's your turn to take out shares, you'll take out this many shares. This field gets reset after the action is
+                The next time it&apos;s your turn to take out shares, you&apos;ll take out this many shares. This field gets reset after the action is
                 performed.
               </HelpIcon>
             </>}
@@ -172,7 +172,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
             label={<>
               Pass once max bid is exceeded
               <HelpIcon id='select-shares'>
-                The next time it's your turn to bid and the bid is greater than your max, you'll pass instead. Leave blank if you want to
+                The next time it&apos;s your turn to bid and the bid is greater than your max, you&apos;ll pass instead. Leave blank if you want to
                 bid until the max bid, then decide what to do.
               </HelpIcon>
             </>}
@@ -191,7 +191,7 @@ export function InternalAutoActionForm({ gameId, autoAction, expanded, setExpand
             label={<>
               Select an action (if available).
               <HelpIcon id='select-shares'>
-                The next time it's your turn to select an action, it'll select this action if it's available. Otherwise, it'll just wait for you
+                The next time it&apos;s your turn to select an action, it&apos;ll select this action if it&apos;s available. Otherwise, it&apos;ll just wait for you
                 to select an action. Resets after an action is selected.
               </HelpIcon>
             </>}

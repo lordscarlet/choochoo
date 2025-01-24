@@ -25,9 +25,9 @@ export class GermanyBuildAction extends BuildAction {
   process(data: BuildData): boolean {
     const cost = this.germanyCostCalculator.rawCostOf(data.coordinates, data.tileType);
 
-    let result = super.process(data);
+    const result = super.process(data);
 
-    let newRawBuildCosts = this.rawBuildCosts().slice();
+    const newRawBuildCosts = this.rawBuildCosts().slice();
     newRawBuildCosts.push(cost);
     this.rawBuildCosts.set(newRawBuildCosts);
 

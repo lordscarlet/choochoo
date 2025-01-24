@@ -14,6 +14,6 @@ export const up: Migration = async ({ context: queryInterface }) => {
   });
 }
 
-export const down: Migration = async ({ context: queryInterface }) => {
+export const down: Migration = async () => {
   // NOOP
 }

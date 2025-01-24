@@ -43,7 +43,7 @@ export class TurnOrderPhase extends PhaseModule {
     });
   }
 
-  forcedAction(): ActionBundle<{}> | undefined {
+  forcedAction(): ActionBundle<object> | undefined {
     const canAffordBid = this.currentPlayer().money >= this.helper.getMinBid();
     if (!canAffordBid && !this.helper.canUseTurnOrderPass()) {
       return { action: PassAction, data: {} };
@@ -84,7 +84,7 @@ export class TurnOrderPhase extends PhaseModule {
     return nextPlayer;
   }
 
-  protected getAutoAction(autoAction: AutoAction): ActionBundle<{}> | undefined {
+  protected getAutoAction(autoAction: AutoAction): ActionBundle<object> | undefined {
     if (autoAction.bidUntil == null) return undefined;
 
     const minBid = this.helper.getMinBid();

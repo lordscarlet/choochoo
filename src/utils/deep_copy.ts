@@ -5,7 +5,7 @@ import { Immutable } from "./immutable";
 import { assert } from "./validate";
 
 export function deepCopy<T>(t: Immutable<T>): T;
-export function deepCopy<T>(t: unknown): unknown {
+export function deepCopy(t: unknown): unknown {
   if (isPrimitive(t)) {
     return t;
   } else if (t == null) {
@@ -20,9 +20,11 @@ export function deepCopy<T>(t: unknown): unknown {
     return t;
   } else {
     assert(typeof t === 'object');
-    return Object.keys(t as Object).reduce((result, prop: string) => {
+    return Object.keys(t as object).reduce((result, prop: string) => {
+      // eslint-disable-next-line
       result[prop] = deepCopy((t as any)[prop]);
       return result;
+      // eslint-disable-next-line
     }, {} as any);
   }
 }

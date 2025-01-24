@@ -39,7 +39,7 @@ function LoginRequiredPage() {
     </p>
     <p>
       Please provide feedback as we will certainly prioritize things people ask for over things
-      in our backlog. If the amount of bugs becomes intolerable, let us know! There are things we can do to improve the stability, it's just not a priority right
+      in our backlog. If the amount of bugs becomes intolerable, let us know! There are things we can do to improve the stability, it&apos;s just not a priority right
       now.
     </p>
     <div className={styles.links}>

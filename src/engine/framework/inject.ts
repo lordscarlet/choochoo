@@ -73,16 +73,16 @@ interface ProxyObject<T> {
   proxy: T;
 }
 
-function buildProxy<R>(constructorFn: SimpleConstructor<R>): ProxyObject<R> {
+function buildProxy<R>(_: SimpleConstructor<R>): ProxyObject<R> {
   //we don't care about the target, but compiler does not allow a null one, so let's pass an "empty object" {}
   let initialized: Initialized<R> | undefined;
   const proxy = new Proxy({}, {
     get: function (_, property: string, __) {
       assert(initialized != null, 'called an uninitialized value');
 
-      let item = (initialized.value as any)[property];
+      const item = (initialized.value as Record<string, unknown>)[property];
       if (typeof (item) === "function") {
-        return function (...args: any) {
+        return function (...args: unknown[]) {
           assert(initialized != null, 'called an uninitialized value');
           return item.call(initialized.value, ...args);
         };
@@ -91,12 +91,11 @@ function buildProxy<R>(constructorFn: SimpleConstructor<R>): ProxyObject<R> {
       }
     },
 
-    set: function (_, property: string | symbol, value: any, __): boolean {
+    set: function (_, property: string | symbol, value: unknown, __): boolean {
       assert(initialized != null, 'called an uninitialized value');
-      (initialized.value as any)[property] = value;
+      (initialized.value as Record<string | symbol, unknown>)[property] = value;
       return true;
     },
-
   });
 
   return {

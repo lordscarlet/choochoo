@@ -1,9 +1,9 @@
-import {MapSettings, ReleaseStage} from "../../engine/game/map_settings";
-import {ExpensiveMountains} from "./costs";
-import {IndiaBuildAction, IndiaUrbanizeAction} from "./goods_growth";
-import {map} from "./grid";
-import {IndiaIncomePhase} from "./monsoon";
-import {IndiaPhaseDelegator, IndiaPhaseEngine} from "./production";
+import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import { ExpensiveMountains } from "./costs";
+import { IndiaBuildAction, IndiaUrbanizeAction } from "./goods_growth";
+import { map } from "./grid";
+import { IndiaIncomePhase } from "./monsoon";
+import { IndiaPhaseDelegator, IndiaPhaseEngine } from "./production";
 
 export class IndiaMapSettings implements MapSettings {
   static readonly key = 'india';

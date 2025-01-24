@@ -65,6 +65,7 @@ export function useMessages(gameId?: number): UseMessages {
       return {
         pageParams: [undefined],
         pages: [{ status: 200, headers: new Headers(), body: { messages: newMessages, nextPageCursor } }],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
     });
   }, [queryClient, queryKey, messages, data]);

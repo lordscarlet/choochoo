@@ -39,7 +39,7 @@ export function BuildingDialog({ coordinates, rotation, cancelBuild }: BuildingP
   const availableCities = useInjectedState(AVAILABLE_CITIES);
   const grid = useInjected(GridHelper);
   const [showReasons, setShowReasons] = useState(false);
-  const [direction, rotate] = useReducer((prev: Direction, _: {}) => rotateDirectionClockwise(prev), Direction.TOP);
+  const [direction, rotate] = useReducer((prev: Direction, _: object) => rotateDirectionClockwise(prev), Direction.TOP);
   const space = coordinates && (grid.lookup(coordinates) as Land);
   const eligible = useTypedMemo(getEligibleBuilds, [action, coordinates, direction, showReasons]);
   const onSelect = useCallback((build: BuildData) => {

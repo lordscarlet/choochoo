@@ -28,8 +28,8 @@ export class Coordinates {
   }
 
   toDoubleHeight(): DoubleHeight {
-    var col = this.q;
-    var row = 2 * this.r + this.q;
+    const col = this.q;
+    const row = 2 * this.r + this.q;
     return new DoubleHeight(col, row);
   }
 
@@ -46,7 +46,7 @@ export class Coordinates {
   static readonly ORIGIN = Coordinates.from({ q: 0, r: 0 });
 
   static fromCartesianString(str: string): Coordinates {
-    const matches = str.match(/^\((\d+)\, (\d+)\)$/);
+    const matches = str.match(/^\((\d+), (\d+)\)$/);
     assert(matches != null);
     const [_, q, r] = matches;
     return Coordinates.unserialize(`${q}|${r}`);

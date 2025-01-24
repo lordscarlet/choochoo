@@ -7,17 +7,16 @@ import { messageContract } from '../../api/message';
 import { reverse } from '../../utils/functions';
 import { assert } from '../../utils/validate';
 import { GameDao } from '../game/dao';
-import { LogDao } from './log_dao';
 import '../session';
 import { badwords } from '../util/badwords';
+import { LogDao } from './log_dao';
 
 export const messageApp = express();
 
 const router = initServer().router(messageContract, {
   async list({ query }) {
     const where: WhereOptions<LogDao> = {};
-    // Sequelize gets confused about the null query.
-    where.gameId = query.gameId ?? (null as any);
+    where.gameId = query.gameId ?? null;
     if (query.pageCursor != null) {
       where.id = {
         [Op.lte]: query.pageCursor,

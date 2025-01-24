@@ -63,7 +63,7 @@ export function FinalOverviewInternal() {
           </tr>
           <tr>
             <th className={styles.label}>Result</th>
-            {playersOrdered.map(({ player, score }, index) =>
+            {playersOrdered.map(({ player }, index) =>
               <td key={player.playerId}>{getPlacement(placement[index])}</td>)}
           </tr>
           <tr>

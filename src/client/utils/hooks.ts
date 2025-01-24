@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { isNotNull } from "../../utils/functions";
+import { Tuple } from "../../utils/types";
 
-export function useTypedCallback<Args extends [...any], Deps extends [...any], T>(cb: (...deps: Deps) => (...args: Args) => T, deps: NoInfer<Deps>): (...args: Args) => T {
+export function useTypedCallback<Args extends Tuple, Deps extends Tuple, T>(cb: (...deps: Deps) => (...args: Args) => T, deps: NoInfer<Deps>): (...args: Args) => T {
   return useCallback(cb(...deps), deps);
 }
 
-export function useTypedMemo<Deps extends [...any], T>(cb: (...deps: Deps) => T, deps: NoInfer<Deps>): T {
+export function useTypedMemo<Deps extends Tuple, T>(cb: (...deps: Deps) => T, deps: NoInfer<Deps>): T {
   return useMemo(() => cb(...deps), deps);
 }
 
-export function useTypedEffect<Deps extends [...any]>(cb: (...deps: Deps) => (() => void) | void, deps: NoInfer<Deps>): void {
+export function useTypedEffect<Deps extends Tuple>(cb: (...deps: Deps) => (() => void) | void, deps: NoInfer<Deps>): void {
   return useEffect(() => cb(...deps), deps);
 }
 
