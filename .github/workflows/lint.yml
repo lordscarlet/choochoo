@@ -27,9 +27,11 @@ jobs:
         run: npm ci
 
       - name: Run linters
-        uses: wearerequired/lint-action@v2
+      # Revert back to original lint-action branch once it's fixed.
+        uses: YourDeveloperFriend/lint-action@master
         with:
           eslint_dir: src/
+          prettier_dir: src/
           auto_fix: true
           eslint: true
           prettier: true
