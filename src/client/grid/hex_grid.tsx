@@ -7,7 +7,7 @@ import { Grid, Space } from "../../engine/map/grid";
 import { Track } from "../../engine/map/track";
 import { Good } from "../../engine/state/good";
 import { interCityConnectionEquals, OwnedInterCityConnection } from '../../engine/state/inter_city_connection';
-import { MapRegistry } from "../../maps/registry";
+import { ViewRegistry } from '../../maps/view_registry';
 import { Coordinates } from "../../utils/coordinates";
 import { deepEquals } from '../../utils/deep_equals';
 import { DoubleHeight } from '../../utils/double_height';
@@ -166,7 +166,7 @@ export function HexGrid({ onClick, onClickInterCity, rotation, fullMapVersion, h
 
   let texturesLayer: ReactNode = null;
   if (gameKey) {
-    let mapSettings = MapRegistry.singleton.get(gameKey);
+    let mapSettings = ViewRegistry.singleton.get(gameKey);
     if (mapSettings.getTexturesLayer) {
       texturesLayer = mapSettings.getTexturesLayer();
     }
