@@ -8,6 +8,7 @@
     "deploy-client": "./src/scripts/deploy_client.sh",
     "deploy-server": "./src/scripts/deploy_server.sh",
     "create-migration": "./src/scripts/create_migration.sh",
+    "lint": "eslint src/",
     "migrate": "node bin/scripts/migrations up",
     "test": "ts-node node_modules/jasmine/bin/jasmine",
     "test-watch": "nodemon -V --ext ts,tsx --watch src/ --exec 'ts-node node_modules/jasmine/bin/jasmine'"

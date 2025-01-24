@@ -138,7 +138,7 @@ export function HexGrid({ onClick, onClickInterCity, rotation, fullMapVersion, h
 
   let texturesLayer: ReactNode = null;
   if (gameKey) {
-    let mapSettings = ViewRegistry.singleton.get(gameKey);
+    const mapSettings = ViewRegistry.singleton.get(gameKey);
     if (mapSettings.getTexturesLayer) {
       texturesLayer = mapSettings.getTexturesLayer();
     }

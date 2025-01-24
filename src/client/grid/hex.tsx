@@ -1,28 +1,28 @@
-import {useMemo} from "react";
-import {Rotation} from "../../engine/game/map_settings";
-import {City} from "../../engine/map/city";
-import {Space} from "../../engine/map/grid";
-import {calculateTrackInfo, Land} from "../../engine/map/location";
-import {isTownTile} from "../../engine/map/tile";
-import {Track, TrackInfo} from "../../engine/map/track";
-import {Good} from "../../engine/state/good";
-import {SpaceType} from "../../engine/state/location_type";
-import {Direction} from "../../engine/state/tile";
-import {CyprusMapData} from "../../maps/cyprus/map_data";
-import {Coordinates} from "../../utils/coordinates";
-import {assert, assertNever} from "../../utils/validate";
-import {Rotate} from "../components/rotation";
-import {useGameKey} from "../utils/injection_context";
-import {ClickTarget} from "./click_target";
-import {goodStyle} from "./good";
-import {GoodBlock} from "./good_block";
+import { useMemo } from "react";
+import { Rotation } from "../../engine/game/map_settings";
+import { City } from "../../engine/map/city";
+import { Space } from "../../engine/map/grid";
+import { calculateTrackInfo, Land } from "../../engine/map/location";
+import { isTownTile } from "../../engine/map/tile";
+import { Track, TrackInfo } from "../../engine/map/track";
+import { CityGroup } from "../../engine/state/city_group";
+import { Good } from "../../engine/state/good";
+import { SpaceType } from "../../engine/state/location_type";
+import { Direction } from "../../engine/state/tile";
+import { CyprusMapData } from "../../maps/cyprus/map_data";
+import { Coordinates } from "../../utils/coordinates";
+import { assert, assertNever } from "../../utils/validate";
+import { Rotate } from "../components/rotation";
+import { useGameKey } from "../utils/injection_context";
+import { ClickTarget } from "./click_target";
+import { goodStyle } from "./good";
+import { GoodBlock } from "./good_block";
 import * as styles from './hex.module.css';
 import * as gridStyles from './hex_grid.module.css';
-import {HexName} from "./hex_name";
-import {OnRoll} from "./on_roll";
-import {coordinatesToCenter, edgeCorners, getCorners, getHalfCorners, Point, polygon} from "./point";
-import {Track as TrackSvg} from "./track";
-import {CityGroup} from "../../engine/state/city_group";
+import { HexName } from "./hex_name";
+import { OnRoll } from "./on_roll";
+import { coordinatesToCenter, edgeCorners, getCorners, getHalfCorners, Point, polygon } from "./point";
+import { Track as TrackSvg } from "./track";
 
 function cityColorStyles(space: City): string[] {
   const colors = space.goodColors();
@@ -109,7 +109,7 @@ export function LowerTerrainHex({ space, size, clickTargets, rotation }: Terrain
     const [hexColor, alternateColor] = cityColorStyles(space);
 
     const onRoll = space.onRoll();
-    let cityGroup: CityGroup = space.onRoll()[0]?.group;
+    const cityGroup: CityGroup = space.onRoll()[0]?.group;
     // Determine the "outer fill" color, which is the thick border around cities indicating its goods-growth group color.
     const outerFill = useMemo(() => {
       if (cityGroup == null || cityGroup === CityGroup.WHITE) return '#ffffff';
