@@ -1,4 +1,3 @@
-
 import { inject } from "../framework/execution_context";
 import { AutoActionManager } from "../game/auto_action_manager";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
@@ -24,7 +23,7 @@ export class SelectActionPhase extends PhaseModule {
       for (const player of players) {
         delete player.selectedAction;
       }
-    })
+    });
     super.onStart();
   }
 
@@ -35,10 +34,14 @@ export class SelectActionPhase extends PhaseModule {
     super.onEndTurn();
   }
 
-  protected getAutoAction(autoAction: AutoAction): ActionBundle<object> | undefined {
+  protected getAutoAction(
+    autoAction: AutoAction,
+  ): ActionBundle<object> | undefined {
     if (autoAction.takeActionNext == null) return undefined;
 
-    if (this.allowedActions.getAvailableActions().has(autoAction.takeActionNext)) {
+    if (
+      this.allowedActions.getAvailableActions().has(autoAction.takeActionNext)
+    ) {
       return {
         action: SelectAction,
         data: { action: autoAction.takeActionNext },

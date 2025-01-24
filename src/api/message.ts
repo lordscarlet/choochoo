@@ -1,6 +1,5 @@
-
-import { initContract } from '@ts-rest/core';
-import { z } from 'zod';
+import { initContract } from "@ts-rest/core";
+import { z } from "zod";
 
 export const SubmitMessageApi = z.object({
   message: z.string().min(1),
@@ -36,24 +35,23 @@ export const ListMessageResponse = z.object({
 });
 export type ListMessageResponse = z.infer<typeof ListMessageResponse>;
 
-
 const c = initContract();
 
 export const messageContract = c.router({
   list: {
-    method: 'GET',
+    method: "GET",
     path: `/messages/`,
     responses: {
       200: ListMessageResponse,
     },
     query: ListMessageApi,
-    summary: 'Get a list of messages',
+    summary: "Get a list of messages",
   },
   sendChat: {
-    method: 'POST',
+    method: "POST",
     path: `/messages/send`,
     responses: {
-      200: z.object({ message: MessageApi })
+      200: z.object({ message: MessageApi }),
     },
     body: SubmitMessageApi,
   },

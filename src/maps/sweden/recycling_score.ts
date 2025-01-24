@@ -4,7 +4,8 @@ import { ImmutableSet } from "../../utils/immutable";
 
 export class SwedenAllowedActions extends AllowedActions {
   getActions(): ImmutableSet<Action> {
-    return super.getActions()
+    return super
+      .getActions()
       .remove(Action.PRODUCTION)
       .add(Action.WTE_PLANT_OPERATOR);
   }

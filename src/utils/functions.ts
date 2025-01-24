@@ -13,7 +13,11 @@ export function reverse<T>(arr: T[]): T[] {
   return [...arr].reverse();
 }
 
-export function lpad(input: number | string, minLength: number, padWith: string): string {
+export function lpad(
+  input: number | string,
+  minLength: number,
+  padWith: string,
+): string {
   let str = `${input}`;
   while (str.length < minLength) {
     str = padWith + str;
@@ -26,7 +30,9 @@ export function timeFormat(date: Date): string {
     date.getHours(),
     date.getMinutes(),
     Math.round(date.getMilliseconds() / 100),
-  ].map((value) => lpad(value, 2, '0')).join(':');
+  ]
+    .map((value) => lpad(value, 2, "0"))
+    .join(":");
 }
 
 export function iterate<T>(iterations: number, factory: (i: number) => T): T[] {
@@ -39,7 +45,7 @@ export function iterate<T>(iterations: number, factory: (i: number) => T): T[] {
 
 export function remove<T>(array: T[], value: T): T[] {
   const index = array.indexOf(value);
-  assert(index !== -1, 'cannot find value in array');
+  assert(index !== -1, "cannot find value in array");
   return array.slice(0, index).concat(array.slice(index + 1));
 }
 
@@ -48,7 +54,10 @@ export function replaceAll<T>(array: T[], newArray: T[]): void {
   array.push(...newArray);
 }
 
-export function iterateHexGrid<T>(grid: Map<number, Map<number, T>>, fn: (value: T) => void) {
+export function iterateHexGrid<T>(
+  grid: Map<number, Map<number, T>>,
+  fn: (value: T) => void,
+) {
   for (const row of grid.values()) {
     for (const cell of row.values()) {
       fn(cell);
@@ -57,11 +66,14 @@ export function iterateHexGrid<T>(grid: Map<number, Map<number, T>>, fn: (value:
 }
 
 export function isPrimitive(value: unknown): value is Primitive {
-  const primitives = new Set(['boolean', 'number', 'string'])
+  const primitives = new Set(["boolean", "number", "string"]);
   return primitives.has(typeof value);
 }
 
-export function pick<T extends object, R extends keyof T>(value: T, keys: R[]): Pick<T, R> {
+export function pick<T extends object, R extends keyof T>(
+  value: T,
+  keys: R[],
+): Pick<T, R> {
   const partial: Partial<T> = {};
   for (const key of keys) {
     partial[key] = value[key];
@@ -81,7 +93,10 @@ export function partition<R, T>(arr: R[], fn: (r: R) => T): Map<T, R[]> {
   return map;
 }
 
-export function infiniteLoopCheck(numChecks: number, data?: string): (moreData?: string) => void {
+export function infiniteLoopCheck(
+  numChecks: number,
+  data?: string,
+): (moreData?: string) => void {
   let numRuns = 0;
   const lastData: Array<string | undefined> = [];
   return (moreData?: string) => {
@@ -89,7 +104,10 @@ export function infiniteLoopCheck(numChecks: number, data?: string): (moreData?:
     if (lastData.length > 5) {
       lastData.shift();
     }
-    assert(numRuns++ < numChecks, `found infinite loop w/ data: ${data} moreData=${lastData}`);
+    assert(
+      numRuns++ < numChecks,
+      `found infinite loop w/ data: ${data} moreData=${lastData}`,
+    );
   };
 }
 

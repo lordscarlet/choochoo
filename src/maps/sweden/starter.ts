@@ -14,11 +14,13 @@ export class SwedenStarter extends GameStarter {
   }
 
   initializeStartingCubes(): void {
-    this.bag.initState(this.random.shuffle([
-      ...duplicate(12, Good.YELLOW),
-      ...duplicate(8, Good.RED),
-      ...duplicate(4, Good.BLUE),
-    ]));
+    this.bag.initState(
+      this.random.shuffle([
+        ...duplicate(12, Good.YELLOW),
+        ...duplicate(8, Good.RED),
+        ...duplicate(4, Good.BLUE),
+      ]),
+    );
   }
 
   getAvailableCities(): Array<[Good | Good[], CityGroup, OnRoll]> {

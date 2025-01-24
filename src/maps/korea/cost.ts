@@ -6,7 +6,8 @@ export class KoreaCostCalculator extends BuildCostCalculator {
   protected getCostOfLandType(type: LandType): number {
     switch (type) {
       case SpaceType.MOUNTAIN:
-      case SpaceType.HILL: return 3;
+      case SpaceType.HILL:
+        return 3;
       default:
         return super.getCostOfLandType(type);
     }

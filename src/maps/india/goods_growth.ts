@@ -29,7 +29,10 @@ export class IndiaBuildAction extends BuildAction {
       .filter((connection) => connection instanceof City)
       .filter((city) => {
         for (const direction of allDirections) {
-          const cityConnection = this.grid().connection(city.coordinates, direction);
+          const cityConnection = this.grid().connection(
+            city.coordinates,
+            direction,
+          );
           if (!(cityConnection instanceof Track)) continue;
           if (cityConnection.getOwner() === currentColor) return false;
         }

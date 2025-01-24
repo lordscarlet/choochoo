@@ -17,7 +17,10 @@ export class PlayerHelper {
     });
   }
 
-  update(playerColor: PlayerColor, updateFn: (data: MutablePlayerData) => void): void {
+  update(
+    playerColor: PlayerColor,
+    updateFn: (data: MutablePlayerData) => void,
+  ): void {
     this.players.update((players) => {
       const player = players.find((player) => player.color === playerColor);
       updateFn(player!);
@@ -34,7 +37,7 @@ export class PlayerHelper {
   }
 
   getPlayersRemaining(): number {
-    return this.players().filter(p => p.outOfGame !== true).length;
+    return this.players().filter((p) => p.outOfGame !== true).length;
   }
 
   isSoloGame(): boolean {
@@ -48,11 +51,12 @@ export class PlayerHelper {
     return this.calculateScore(player);
   }
 
-
   protected calculateScore(player: PlayerData): number {
-    return this.getScoreFromIncome(player) +
+    return (
+      this.getScoreFromIncome(player) +
       this.getScoreFromShares(player) +
-      this.getScoreFromTrack(player);
+      this.getScoreFromTrack(player)
+    );
   }
 
   getScoreFromIncome(player: PlayerData): number {
@@ -97,7 +101,7 @@ export class PlayerHelper {
   }
 }
 
-export const ELIMINATED = 'Eliminated';
+export const ELIMINATED = "Eliminated";
 export type Eliminated = typeof ELIMINATED;
 
 export type Score = Eliminated | number;

@@ -26,10 +26,15 @@ export const WebHookSetting = z.object({
 });
 export type WebHookSetting = z.infer<typeof WebHookSetting>;
 
-export const TurnNotificationSetting = z.discriminatedUnion('method', [WebHookSetting, EmailSetting]);
+export const TurnNotificationSetting = z.discriminatedUnion("method", [
+  WebHookSetting,
+  EmailSetting,
+]);
 export type TurnNotificationSetting = z.infer<typeof TurnNotificationSetting>;
 
-export function isWebHookSetting(value: TurnNotificationSetting): value is WebHookSetting {
+export function isWebHookSetting(
+  value: TurnNotificationSetting,
+): value is WebHookSetting {
   return value.method === NotificationMethod.WEBHOOK;
 }
 
@@ -45,31 +50,31 @@ export const notificationsContract = initContract().router({
     responses: {
       200: z.object({ preferences: NotificationPreferences }),
     },
-    method: 'GET',
-    path: '/notification-preferences',
+    method: "GET",
+    path: "/notification-preferences",
   },
   update: {
     body: z.object({ preferences: NotificationPreferences }),
     responses: {
       200: z.object({ preferences: NotificationPreferences }),
     },
-    method: 'PUT',
-    path: '/notification-preferences',
+    method: "PUT",
+    path: "/notification-preferences",
   },
   test: {
     body: z.object({ preferences: NotificationPreferences }),
     responses: {
       200: z.object({ success: z.literal(true) }),
     },
-    method: 'PUT',
-    path: '/test',
+    method: "PUT",
+    path: "/test",
   },
   unsubscribe: {
     body: z.object({ unsubscribeCode: z.string() }),
     responses: {
       200: z.object({ success: z.literal(true) }),
     },
-    method: 'POST',
-    path: '/notification-preferences/unsubscribe',
+    method: "POST",
+    path: "/notification-preferences/unsubscribe",
   },
 });

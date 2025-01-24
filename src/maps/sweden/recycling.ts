@@ -51,7 +51,10 @@ export class SwedenMovePhase extends MovePhase {
     const player = this.wtePlayer();
     if (player != null) {
       const count = this.incinerator.getGarbageCount();
-      this.log.player(player, `operated the WTE Plant, taking ${count} black cubes and scoring ${count * 2} points.`)
+      this.log.player(
+        player,
+        `operated the WTE Plant, taking ${count} black cubes and scoring ${count * 2} points.`,
+      );
       this.incinerator.takeCubes(player.color);
     }
   }
@@ -60,9 +63,12 @@ export class SwedenMovePhase extends MovePhase {
     assert(good !== Good.PURPLE);
     assert(good !== Good.BLACK);
     switch (good) {
-      case Good.YELLOW: return Good.RED;
-      case Good.RED: return Good.BLUE;
-      case Good.BLUE: return Good.BLACK;
+      case Good.YELLOW:
+        return Good.RED;
+      case Good.RED:
+        return Good.BLUE;
+      case Good.BLUE:
+        return Good.BLACK;
       default:
         assertNever(good);
     }

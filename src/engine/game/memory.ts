@@ -1,5 +1,3 @@
-
-
 interface RememberedValue<T> {
   (): T;
 
@@ -13,7 +11,7 @@ export class Memory {
   remember<T>(initialValue: T): RememberedValue<T> {
     let value = initialValue;
     const remembered: RememberedValue<T> = () => value;
-    remembered.set = (newValue: T) => value = newValue;
+    remembered.set = (newValue: T) => (value = newValue);
     this.resetters.push(() => {
       value = initialValue;
     });

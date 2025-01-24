@@ -9,5 +9,4 @@ export class ExpensiveMountains extends BuildCostCalculator {
     }
     return super.getCostOfLandType(type);
   }
-
 }

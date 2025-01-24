@@ -1,16 +1,14 @@
-
-import { assert } from '../utils/validate';
-import { CyprusViewSettings } from './cyprus/view_settings';
+import { assert } from "../utils/validate";
+import { CyprusViewSettings } from "./cyprus/view_settings";
 import { GermanyViewSettings } from "./germany/view_settings";
-import { IndiaViewSettings } from './india/view_settings';
-import { IrelandViewSettings } from './ireland/view_settings';
-import { KoreaViewSettings } from './korea/view_settings';
-import { MadagascarViewSettings } from './madagascar/view_settings';
-import { ReversteamViewSettings } from './reversteam/view_settings';
-import { RustBeltViewSettings } from './rust_belt/view_settings';
-import { SwedenRecyclingViewSettings } from './sweden/view_settings';
-import { MapViewSettings } from './view_settings';
-
+import { IndiaViewSettings } from "./india/view_settings";
+import { IrelandViewSettings } from "./ireland/view_settings";
+import { KoreaViewSettings } from "./korea/view_settings";
+import { MadagascarViewSettings } from "./madagascar/view_settings";
+import { ReversteamViewSettings } from "./reversteam/view_settings";
+import { RustBeltViewSettings } from "./rust_belt/view_settings";
+import { SwedenRecyclingViewSettings } from "./sweden/view_settings";
+import { MapViewSettings } from "./view_settings";
 
 export class ViewRegistry {
   static readonly singleton = new ViewRegistry();

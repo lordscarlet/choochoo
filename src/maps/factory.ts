@@ -1,23 +1,23 @@
-import { Map as ImmutableMap } from 'immutable';
+import { Map as ImmutableMap } from "immutable";
 import { BLACK, WHITE } from "../engine/state/city_group";
 import { Good } from "../engine/state/good";
-import { GridData } from '../engine/state/grid';
-import { InterCityConnection } from '../engine/state/inter_city_connection';
+import { GridData } from "../engine/state/grid";
+import { InterCityConnection } from "../engine/state/inter_city_connection";
 import { SpaceType } from "../engine/state/location_type";
 import { OnRoll, OnRollData } from "../engine/state/roll";
-import { CityData, LandData } from '../engine/state/space';
+import { CityData, LandData } from "../engine/state/space";
 import { Coordinates } from "../utils/coordinates";
-import { duplicate } from '../utils/functions';
+import { duplicate } from "../utils/functions";
 
 export const PLAIN: LandData = {
   type: SpaceType.PLAIN,
 };
 
-export function plain(data: Omit<LandData, 'type'>): LandData {
+export function plain(data: Omit<LandData, "type">): LandData {
   return { ...data, type: SpaceType.PLAIN };
 }
 
-export function bridge(data: Omit<LandData, 'type'>): LandData {
+export function bridge(data: Omit<LandData, "type">): LandData {
   return { ...data, type: SpaceType.UNPASSABLE };
 }
 
@@ -43,21 +43,45 @@ export function white(onRoll: OnRoll): OnRollData {
   return { group: WHITE, onRoll, goods: [] };
 }
 
-export function city(name: string, cityColor?: Good | Good[], onRollData?: OnRollData | OnRollData[], startingNumCubes = 2): CityData {
-  const onRoll = Array.isArray(onRollData) ? onRollData : onRollData != null ? [onRollData] : [];
-  const color = Array.isArray(cityColor) ? cityColor : cityColor != null ? [cityColor] : [];
-  return customCity({ name, color: Array.isArray(color) ? color : [color], startingNumCubes, onRoll, goods: [] });
+export function city(
+  name: string,
+  cityColor?: Good | Good[],
+  onRollData?: OnRollData | OnRollData[],
+  startingNumCubes = 2,
+): CityData {
+  const onRoll = Array.isArray(onRollData)
+    ? onRollData
+    : onRollData != null
+      ? [onRollData]
+      : [];
+  const color = Array.isArray(cityColor)
+    ? cityColor
+    : cityColor != null
+      ? [cityColor]
+      : [];
+  return customCity({
+    name,
+    color: Array.isArray(color) ? color : [color],
+    startingNumCubes,
+    onRoll,
+    goods: [],
+  });
 }
 
-export function customCity(city: Omit<CityData, 'type'>): CityData {
+export function customCity(city: Omit<CityData, "type">): CityData {
   return { ...city, type: SpaceType.CITY };
 }
 
-export function startsLowerGrid<T>(array: Array<Array<T | undefined>>): ImmutableMap<Coordinates, T> {
+export function startsLowerGrid<T>(
+  array: Array<Array<T | undefined>>,
+): ImmutableMap<Coordinates, T> {
   return grid(array, true);
 }
 
-export function grid<T>(array: Array<Array<T | undefined>>, startsLower = false): ImmutableMap<Coordinates, T> {
+export function grid<T>(
+  array: Array<Array<T | undefined>>,
+  startsLower = false,
+): ImmutableMap<Coordinates, T> {
   const newArray = offset(array, startsLower);
 
   return ImmutableMap<Coordinates, T>().withMutations((grid) => {
@@ -70,12 +94,16 @@ export function grid<T>(array: Array<Array<T | undefined>>, startsLower = false)
   });
 }
 
-
-function offset<T>(grid: Array<Array<T | undefined>>, startsLower = false): Array<Array<T | undefined>> {
+function offset<T>(
+  grid: Array<Array<T | undefined>>,
+  startsLower = false,
+): Array<Array<T | undefined>> {
   const newGrid: Array<Array<T | undefined>> = [];
   for (let i = 0; i < grid.length; i++) {
     const newColumn: Array<T | undefined> = [];
-    newColumn.push(...duplicate(getOffset(i, grid.length, startsLower), UNPASSABLE));
+    newColumn.push(
+      ...duplicate(getOffset(i, grid.length, startsLower), UNPASSABLE),
+    );
     newGrid.push([...newColumn, ...grid[i]]);
   }
   return newGrid;
@@ -94,11 +122,16 @@ export function town(townName: string): LandData {
   };
 }
 
-export function interCityConnections(grid: GridData, connections: string[][]): InterCityConnection[] {
-  const cities = new Map([...grid.entries()].map(([coordinates, space]) => {
-    const name = space.type === SpaceType.CITY ? space.name : undefined;
-    return [name, coordinates];
-  }));
+export function interCityConnections(
+  grid: GridData,
+  connections: string[][],
+): InterCityConnection[] {
+  const cities = new Map(
+    [...grid.entries()].map(([coordinates, space]) => {
+      const name = space.type === SpaceType.CITY ? space.name : undefined;
+      return [name, coordinates];
+    }),
+  );
   return connections.map((connects) => ({
     connects: connects.map((name) => cities.get(name)!),
     cost: 2,

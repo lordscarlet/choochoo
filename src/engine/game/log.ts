@@ -12,8 +12,9 @@ export class Log {
   }
 
   player(player: PlayerData, entry: string): void {
-    this.log(`<@user-${player.playerId}> (${playerColorToString(player.color)}) ${entry}`);
-
+    this.log(
+      `<@user-${player.playerId}> (${playerColorToString(player.color)}) ${entry}`,
+    );
   }
 
   currentPlayer(entry: string): void {

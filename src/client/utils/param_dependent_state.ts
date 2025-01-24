@@ -1,11 +1,18 @@
 import { useCallback, useRef, useState } from "react";
 
-
-export function useResettableState<T>(initialFn: () => T, deps: unknown[]): [T, (t: T) => void] {
+export function useResettableState<T>(
+  initialFn: () => T,
+  deps: unknown[],
+): [T, (t: T) => void] {
   const [internalState, internalSetState] = useState<T>(initialFn);
-  const depsRef = useRef<{ result: T, deps: unknown[] }>({ result: internalState, deps });
+  const depsRef = useRef<{ result: T; deps: unknown[] }>({
+    result: internalState,
+    deps,
+  });
 
-  const hasBeenReset = depsRef.current.deps.length !== deps.length || !depsRef.current.deps.every((d, i) => deps[i] === d);
+  const hasBeenReset =
+    depsRef.current.deps.length !== deps.length ||
+    !depsRef.current.deps.every((d, i) => deps[i] === d);
 
   if (hasBeenReset) {
     depsRef.current = {

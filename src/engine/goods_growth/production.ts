@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
@@ -13,7 +12,6 @@ import { OnRoll, OnRollData } from "../state/roll";
 import { GoodsHelper } from "./helper";
 import { GOODS_GROWTH_STATE } from "./state";
 
-
 export const ProductionData = z.object({
   urbanized: z.boolean(),
   good: z.nativeEnum(Good),
@@ -24,7 +22,7 @@ export const ProductionData = z.object({
 export type ProductionData = z.infer<typeof ProductionData>;
 
 export class ProductionAction implements ActionProcessor<ProductionData> {
-  static readonly action = 'production';
+  static readonly action = "production";
   readonly assertInput = ProductionData.parse;
 
   private readonly grid = inject(GridHelper);
@@ -32,29 +30,40 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
   private readonly helper = inject(GoodsHelper);
   private readonly turnState = injectState(GOODS_GROWTH_STATE);
 
-  private findOnRoll(onRoll: OnRollData[], data: ProductionData): OnRollData | undefined {
-    return onRoll.find(({ onRoll, group }) => onRoll === data.onRoll && group === data.cityGroup);
+  private findOnRoll(
+    onRoll: OnRollData[],
+    data: ProductionData,
+  ): OnRollData | undefined {
+    return onRoll.find(
+      ({ onRoll, group }) => onRoll === data.onRoll && group === data.cityGroup,
+    );
   }
 
   private findCity(data: ProductionData): City | undefined {
-    return [...this.grid.findAllCities()].find((city) =>
-      this.findOnRoll(city.onRoll(), data) != null &&
-      city.isUrbanized() === data.urbanized);
+    return [...this.grid.findAllCities()].find(
+      (city) =>
+        this.findOnRoll(city.onRoll(), data) != null &&
+        city.isUrbanized() === data.urbanized,
+    );
   }
 
   validate(data: ProductionData) {
-    assert(this.turnState().goods.includes(data.good), { invalidInput: 'must place one of the goods' });
+    assert(this.turnState().goods.includes(data.good), {
+      invalidInput: "must place one of the goods",
+    });
     const city = this.findCity(data);
-    assert(city != null, { invalidInput: 'must place good on a city' });
+    assert(city != null, { invalidInput: "must place good on a city" });
     const onRoll = this.findOnRoll(city.onRoll(), data);
-    assert(onRoll != null, { invalidInput: 'must place in valid onRoll' });
+    assert(onRoll != null, { invalidInput: "must place in valid onRoll" });
     const maxGoods = city.isUrbanized() ? 2 : 3;
-    assert(onRoll.goods.length < maxGoods, { invalidInput: 'chosen onroll is full' });
+    assert(onRoll.goods.length < maxGoods, {
+      invalidInput: "chosen onroll is full",
+    });
   }
 
   process(data: ProductionData): boolean {
     const city = this.findCity(data);
-    this.grid.update(city!.coordinates, city => {
+    this.grid.update(city!.coordinates, (city) => {
       assert(city.type === SpaceType.CITY);
       const onRoll = this.findOnRoll(city.onRoll, data);
       onRoll!.goods.push(data.good);
@@ -66,7 +75,9 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
     });
 
     if (!this.helper.hasCityOpenings()) {
-      this.log.currentPlayer('has to forfeit remaining production due to no openings');
+      this.log.currentPlayer(
+        "has to forfeit remaining production due to no openings",
+      );
       return true;
     }
 

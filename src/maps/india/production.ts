@@ -30,7 +30,9 @@ export const ProductionState = z.object({
 });
 export type ProductionState = z.infer<typeof ProductionState>;
 
-export const PRODUCTION_STATE = new Key('productionState', { parse: ProductionState.parse });
+export const PRODUCTION_STATE = new Key("productionState", {
+  parse: ProductionState.parse,
+});
 
 export class IndiaPhaseEngine extends PhaseEngine {
   phaseOrder(): Phase[] {
@@ -84,7 +86,7 @@ export const SelectCityData = z.object({
 export type SelectCityData = z.infer<typeof SelectCityData>;
 
 export class SelectCityAction implements ActionProcessor<SelectCityData> {
-  static readonly action = 'select-city';
+  static readonly action = "select-city";
   readonly assertInput = SelectCityData.parse;
   private readonly grid = injectGrid();
   private readonly log = inject(Log);
@@ -96,7 +98,9 @@ export class SelectCityAction implements ActionProcessor<SelectCityData> {
   }
 
   validate({ coordinates }: SelectCityData) {
-    assert(this.grid().get(coordinates) instanceof City, { invalidInput: 'Must choose a city' });
+    assert(this.grid().get(coordinates) instanceof City, {
+      invalidInput: "Must choose a city",
+    });
   }
 
   process({ coordinates }: SelectCityData): boolean {
@@ -109,7 +113,9 @@ export class SelectCityAction implements ActionProcessor<SelectCityData> {
     });
     const city = this.grid().get(coordinates);
     assert(city instanceof City);
-    this.log.currentPlayer(`selects ${city.name()}, draws ${goods.map(goodToString).join(', ')}`);
+    this.log.currentPlayer(
+      `selects ${city.name()}, draws ${goods.map(goodToString).join(", ")}`,
+    );
     return false;
   }
 }
@@ -120,7 +126,7 @@ export const SelectGoodData = z.object({
 export type SelectGoodData = z.infer<typeof SelectGoodData>;
 
 export class SelectGoodAction implements ActionProcessor<SelectGoodData> {
-  static readonly action = 'select-good';
+  static readonly action = "select-good";
   readonly assertInput = SelectGoodData.parse;
 
   private readonly log = inject(Log);
@@ -134,8 +140,8 @@ export class SelectGoodAction implements ActionProcessor<SelectGoodData> {
 
   validate({ good }: SelectGoodData) {
     const { production } = this.state();
-    assert(production != null, { invalidInput: 'must select city first' });
-    assert(production.goods.includes(good), { invalidInput: 'invalid good' });
+    assert(production != null, { invalidInput: "must select city first" });
+    assert(production.goods.includes(good), { invalidInput: "invalid good" });
   }
 
   process({ good }: SelectGoodData): boolean {

@@ -6,9 +6,9 @@ import { IndiaIncomePhase } from "./monsoon";
 import { IndiaPhaseDelegator, IndiaPhaseEngine } from "./production";
 
 export class IndiaMapSettings implements MapSettings {
-  static readonly key = 'india';
+  static readonly key = "india";
   readonly key = IndiaMapSettings.key;
-  readonly name = 'India';
+  readonly name = "India";
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
   readonly startingGrid = map;

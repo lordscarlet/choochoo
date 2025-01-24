@@ -14,11 +14,10 @@ import { PHASE } from "./phase";
 import { PhaseModule } from "./phase_module";
 
 interface PhaseConstructor {
-  new(): PhaseModule;
+  new (): PhaseModule;
 
   readonly phase: Phase;
 }
-
 
 export class PhaseDelegator {
   private readonly currentPhase = injectState(PHASE);
@@ -45,7 +44,10 @@ export class PhaseDelegator {
   get(): PhaseModule {
     const currentPhase = this.currentPhase();
     const processor = this.phases.get(this.currentPhase());
-    assert(processor != null, `No phase processor found for ${currentPhase}. Available Phases: ${[...this.phases.keys()]}`);
+    assert(
+      processor != null,
+      `No phase processor found for ${currentPhase}. Available Phases: ${[...this.phases.keys()]}`,
+    );
     return processor;
   }
 }

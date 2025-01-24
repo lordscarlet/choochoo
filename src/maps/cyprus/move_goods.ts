@@ -12,7 +12,11 @@ export class CyprusMoveAction extends MoveAction {
     const endingStop = this.grid().get(peek(data.path).endingStop);
     assert(endingStop instanceof City);
     const country = this.currentPlayer().color;
-    assert(endingStop.getMapSpecific(CyprusMapData.parse)?.rejects !== country,
-      { invalidInput: `${countryName(country)} cannot deliver to ${endingStop.name()}` });
+    assert(
+      endingStop.getMapSpecific(CyprusMapData.parse)?.rejects !== country,
+      {
+        invalidInput: `${countryName(country)} cannot deliver to ${endingStop.name()}`,
+      },
+    );
   }
 }

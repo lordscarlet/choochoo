@@ -2,7 +2,11 @@ import { inject, injectState } from "../framework/execution_context";
 import { Log } from "../game/log";
 import { PhaseModule } from "../game/phase_module";
 import { Random } from "../game/random";
-import { BAG, injectInitialPlayerCount, injectPlayerAction } from "../game/state";
+import {
+  BAG,
+  injectInitialPlayerCount,
+  injectPlayerAction,
+} from "../game/state";
 import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
 import { CityGroup } from "../state/city_group";
@@ -35,7 +39,7 @@ export class GoodsGrowthPhase extends PhaseModule {
     super.onStartTurn();
     const goods = this.helper.drawGoods(2);
     const asColors = goods.map(goodToString);
-    this.log.currentPlayer(`draws ${asColors.join(', ')}`);
+    this.log.currentPlayer(`draws ${asColors.join(", ")}`);
     this.goodsGrowthState.initState({ goods });
   }
 
@@ -53,7 +57,10 @@ export class GoodsGrowthPhase extends PhaseModule {
       return [];
     }
     if (!this.helper.hasCityOpenings()) {
-      this.log.player(productionPlayer, 'has to forfeit production due to no openings');
+      this.log.player(
+        productionPlayer,
+        "has to forfeit production due to no openings",
+      );
       return [];
     }
     return [productionPlayer.color];
@@ -64,8 +71,8 @@ export class GoodsGrowthPhase extends PhaseModule {
       [CityGroup.WHITE, this.random.rollDice(this.playerCount()).sort()],
       [CityGroup.BLACK, this.random.rollDice(this.playerCount()).sort()],
     ]);
-    this.log.log(`White rolled ${rolls.get(CityGroup.WHITE)!.join(', ')}`);
-    this.log.log(`Black rolled ${rolls.get(CityGroup.BLACK)!.join(', ')}`);
+    this.log.log(`White rolled ${rolls.get(CityGroup.WHITE)!.join(", ")}`);
+    this.log.log(`Black rolled ${rolls.get(CityGroup.BLACK)!.join(", ")}`);
     const cities = this.grid.findAllCities();
     for (const city of cities) {
       for (const [index, { group, onRoll }] of city.onRoll().entries()) {

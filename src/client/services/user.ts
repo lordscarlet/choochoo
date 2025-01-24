@@ -4,7 +4,7 @@ import { tsr } from "./client";
 import { handleError } from "./network";
 
 function getQueryKey(userId: number) {
-  return ['users', userId];
+  return ["users", userId];
 }
 
 function userQuery(userId: number) {
@@ -25,39 +25,41 @@ export function useUser(userId: number): UserApi {
 }
 
 export function useUsers(userIds: number[]): Array<UserApi | undefined> {
-  const deduplicate = useMemo(() => [...new Set(userIds)], [userIds])
+  const deduplicate = useMemo(() => [...new Set(userIds)], [userIds]);
   const { data } = tsr.users.get.useQueries({
     queries: deduplicate.map(userQuery),
     combine: (results) => {
       return {
         data: results.map((result) => result.data),
         pending: results.some((result) => result.isPending),
-      }
+      };
     },
   });
   return useMemo(() => {
     const users = data.map((d) => d?.body.user);
-    return userIds.map(userId => users.find((user) => user?.id === userId));
+    return userIds.map((userId) => users.find((user) => user?.id === userId));
   }, [userIds, data]);
 }
 
 export function useUserList() {
   const queryWithLimit: ListUsersApi = { pageSize: 20 };
-  const queryKeyFromFilter =
-    Object.entries(queryWithLimit)
-      .sort((a, b) => a[0] > b[0] ? 1 : -1).map(([key, value]) => `${key}:${value}`).join(',');
-  const queryKey = ['userList', queryKeyFromFilter];
-  const { data, isLoading, error, fetchNextPage, hasNextPage } = tsr.users.list.useInfiniteQuery({
-    queryKey,
-    queryData: ({ pageParam }) => ({
-      query: { ...queryWithLimit, pageCursor: pageParam },
-    }),
-    initialPageParam: (undefined as (UserPageCursor | undefined)),
-    getNextPageParam: ({ status, body }): UserPageCursor | undefined => {
-      if (status !== 200) return undefined;
-      return body.nextPageCursor;
-    },
-  });
+  const queryKeyFromFilter = Object.entries(queryWithLimit)
+    .sort((a, b) => (a[0] > b[0] ? 1 : -1))
+    .map(([key, value]) => `${key}:${value}`)
+    .join(",");
+  const queryKey = ["userList", queryKeyFromFilter];
+  const { data, isLoading, error, fetchNextPage, hasNextPage } =
+    tsr.users.list.useInfiniteQuery({
+      queryKey,
+      queryData: ({ pageParam }) => ({
+        query: { ...queryWithLimit, pageCursor: pageParam },
+      }),
+      initialPageParam: undefined as UserPageCursor | undefined,
+      getNextPageParam: ({ status, body }): UserPageCursor | undefined => {
+        if (status !== 200) return undefined;
+        return body.nextPageCursor;
+      },
+    });
 
   handleError(isLoading, error);
 
@@ -65,7 +67,8 @@ export function useUserList() {
 
   const users = data?.pages[page]?.body.users;
 
-  const isOnLastPage = data != null && !hasNextPage && data.pages.length - 1 === page;
+  const isOnLastPage =
+    data != null && !hasNextPage && data.pages.length - 1 === page;
   const nextPage = useCallback(() => {
     if (isLoading || isOnLastPage) return;
     setPage(page + 1);
@@ -80,5 +83,12 @@ export function useUserList() {
     setPage(page - 1);
   }, [page, setPage, page]);
 
-  return { users, hasNextPage: !isOnLastPage, nextPage, hasPrevPage, prevPage, isLoading };
+  return {
+    users,
+    hasNextPage: !isOnLastPage,
+    nextPage,
+    hasPrevPage,
+    prevPage,
+    isLoading,
+  };
 }

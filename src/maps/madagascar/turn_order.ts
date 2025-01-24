@@ -5,7 +5,6 @@ import { Action } from "../../engine/state/action";
 import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPhase } from "../../engine/turn_order/phase";
 
-
 export class MadagascarTurnOrderPhase extends TurnOrderPhase {
   forcedAction(): ActionBundle<object> | undefined {
     if (this.currentPlayer().selectedAction === Action.LAST_PLAYER) {
@@ -20,7 +19,7 @@ export class MadagascarTurnOrderPass extends PassAction {
 
   process(data: object): boolean {
     if (this.currentPlayer().selectedAction === Action.LAST_PLAYER) {
-      this.log.currentPlayer('autopasses due to the last player action');
+      this.log.currentPlayer("autopasses due to the last player action");
     }
     return super.process(data);
   }

@@ -1,4 +1,3 @@
-
 export const badwords = `
 2 girls 1 cup
 2g1c
@@ -955,4 +954,6 @@ yellow showers
 yiffy
 zoophilia
 🖕
-`.trim().split(/\n/);
+`
+  .trim()
+  .split(/\n/);

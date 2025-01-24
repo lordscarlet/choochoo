@@ -19,8 +19,8 @@
   gap: 4px;
 }
 
-.row>*,
-.column>* {
+.row > *,
+.column > * {
   flex: 1;
   text-align: center;
 }

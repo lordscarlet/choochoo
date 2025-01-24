@@ -1,18 +1,27 @@
-import axios from 'axios';
+import axios from "axios";
 import { URL } from "url";
-import { NotificationFrequency, NotificationMethod, TurnNotificationSetting, WebHookSetting } from "../../api/notifications";
+import {
+  NotificationFrequency,
+  NotificationMethod,
+  TurnNotificationSetting,
+  WebHookSetting,
+} from "../../api/notifications";
 import { assert, assertNever } from "../../utils/validate";
 import { GameDao } from "../game/dao";
 import { UserDao } from "../user/dao";
 import { emailService } from "./email";
-import { environment } from './environment';
+import { environment } from "./environment";
 
 export async function notifyTurn(game: GameDao): Promise<void> {
   if (game.activePlayerId === null) return;
 
-  const user = await UserDao.findByPk(game.activePlayerId!, { transaction: null });
+  const user = await UserDao.findByPk(game.activePlayerId!, {
+    transaction: null,
+  });
   if (user == null) return;
-  const setting = user.getTurnNotificationSetting(NotificationFrequency.IMMEDIATELY);
+  const setting = user.getTurnNotificationSetting(
+    NotificationFrequency.IMMEDIATELY,
+  );
   switch (setting?.method) {
     case NotificationMethod.EMAIL:
       return emailService.sendTurnReminder(user, game.toApi());
@@ -27,7 +36,10 @@ export async function notifyTurn(game: GameDao): Promise<void> {
   }
 }
 
-export async function sendTestMessage(userId: number, setting: TurnNotificationSetting | undefined): Promise<void> {
+export async function sendTestMessage(
+  userId: number,
+  setting: TurnNotificationSetting | undefined,
+): Promise<void> {
   switch (setting?.method) {
     case NotificationMethod.EMAIL: {
       const user = await UserDao.getUser(userId);
@@ -45,37 +57,43 @@ export async function sendTestMessage(userId: number, setting: TurnNotificationS
   }
 }
 
-export async function callWebhook(message: string, setting: WebHookSetting): Promise<void> {
+export async function callWebhook(
+  message: string,
+  setting: WebHookSetting,
+): Promise<void> {
+  const encodedMessage = `<${getNotifyPrefix(setting.webHookUrl)}${setting.webHookUserId}> ${message}`;
 
-  const encodedMessage =
-    `<${getNotifyPrefix(setting.webHookUrl)}${setting.webHookUserId}> ${message}`;
-
-  if (environment.stage !== 'production') {
-    console.log(`submitting webhook (${setting.webHookUrl}), "${encodedMessage}"`);
+  if (environment.stage !== "production") {
+    console.log(
+      `submitting webhook (${setting.webHookUrl}), "${encodedMessage}"`,
+    );
     return;
   }
 
-  await axios.post(setting.webHookUrl, getPayload(setting.webHookUrl, encodedMessage));
+  await axios.post(
+    setting.webHookUrl,
+    getPayload(setting.webHookUrl, encodedMessage),
+  );
 }
 
 function getNotifyPrefix(urlStr: string): string {
   const url = new URL(urlStr);
   switch (url.host) {
-    case 'chat.googleapis.com':
-      return 'users/';
+    case "chat.googleapis.com":
+      return "users/";
     default:
-      return '@';
+      return "@";
   }
 }
 
 function getPayload(urlStr: string, message: string): object {
   const url = new URL(urlStr);
   switch (url.host) {
-    case 'discord.com':
-    case 'discordapp.com':
+    case "discord.com":
+    case "discordapp.com":
       return {
         content: message,
-        allowed_mentions: { parse: ['users'] },
+        allowed_mentions: { parse: ["users"] },
       };
     default:
       return { text: message };

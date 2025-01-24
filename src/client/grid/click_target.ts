@@ -1,4 +1,3 @@
-
 export enum ClickTarget {
   GOOD = 1,
   CITY = 2,

@@ -25,34 +25,39 @@ if (environment.clientOrigin != null) {
 
 export const io = new Server<ClientToServerEvents, ServerToClientEvents>(args);
 
-const HOME_ROOM = 'HOME_ROOM';
+const HOME_ROOM = "HOME_ROOM";
 
 function roomName(gameId?: number | null) {
-  return gameId == undefined ? HOME_ROOM : 'gameId-' + gameId;
+  return gameId == undefined ? HOME_ROOM : "gameId-" + gameId;
 }
 
-export function emitGameUpdate(oldGame: GameApi | undefined, game: GameDao): void {
+export function emitGameUpdate(
+  oldGame: GameApi | undefined,
+  game: GameDao,
+): void {
   const gameApi = game.toApi();
   const gameLiteApi = game.toLiteApi();
   if (oldGame == null || !deepEquals(oldGame, gameApi)) {
-    io.to(roomName(game.id)).emit('gameUpdate', gameApi);
+    io.to(roomName(game.id)).emit("gameUpdate", gameApi);
   }
-  io.to(roomName()).emit('gameUpdateLite', gameLiteApi);
+  io.to(roomName()).emit("gameUpdateLite", gameLiteApi);
 }
 
 export function emitGameDestroy(gameId: number): void {
-  io.to(roomName()).emit('gameDestroy', gameId);
+  io.to(roomName()).emit("gameDestroy", gameId);
 }
 
 export function emitLogCreate(log: LogDao): void {
-  io.to(roomName(log.gameId)).emit('newLog', log.toApi());
+  io.to(roomName(log.gameId)).emit("newLog", log.toApi());
 }
 
 export function emitLogDestroy(log: LogDao): void {
-  io.to(roomName(log.gameId)).emit('destroyLog', log.id);
+  io.to(roomName(log.gameId)).emit("destroyLog", log.id);
 }
 
-function bindSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) {
+function bindSocket(
+  socket: Socket<ClientToServerEvents, ServerToClientEvents>,
+) {
   const rooms = new Map<string, number>();
 
   function joinRoom(gameId?: number) {
@@ -77,56 +82,74 @@ function bindSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) 
     }
   }
 
-  socket.on('joinHomeRoom', joinRoom);
-  socket.on('leaveHomeRoom', leaveRoom);
-  socket.on('joinGameRoom', joinRoom);
-  socket.on('leaveGameRoom', leaveRoom);
+  socket.on("joinHomeRoom", joinRoom);
+  socket.on("leaveHomeRoom", leaveRoom);
+  socket.on("joinGameRoom", joinRoom);
+  socket.on("leaveGameRoom", leaveRoom);
 }
 
 Lifecycle.singleton.onStart(() => {
-  io.on('connection', bindSocket);
+  io.on("connection", bindSocket);
 
   const previous = new WeakMap<GameDao, GameApi | undefined>();
 
-  GameDao.hooks.addListener('beforeSave', (game: GameDao, options: InstanceUpdateOptions) => {
-    afterTransaction(options, () => {
-      if (game.isNewRecord) {
-        previous.set(game, undefined);
-      } else {
-        previous.set(game, toApi({ ...game.dataValues, ...game.previous() }));
-      }
-    });
-  });
+  GameDao.hooks.addListener(
+    "beforeSave",
+    (game: GameDao, options: InstanceUpdateOptions) => {
+      afterTransaction(options, () => {
+        if (game.isNewRecord) {
+          previous.set(game, undefined);
+        } else {
+          previous.set(game, toApi({ ...game.dataValues, ...game.previous() }));
+        }
+      });
+    },
+  );
 
-  GameDao.hooks.addListener('afterSave', (game: GameDao, options: InstanceUpdateOptions) => {
-    afterTransaction(options, () => {
-      emitGameUpdate(previous.get(game), game);
-    });
-  });
+  GameDao.hooks.addListener(
+    "afterSave",
+    (game: GameDao, options: InstanceUpdateOptions) => {
+      afterTransaction(options, () => {
+        emitGameUpdate(previous.get(game), game);
+      });
+    },
+  );
 
-  GameDao.hooks.addListener('afterDestroy', (game: GameDao, options: InstanceUpdateOptions) => {
-    afterTransaction(options, () => {
-      emitGameDestroy(game.id);
-    });
-  });
+  GameDao.hooks.addListener(
+    "afterDestroy",
+    (game: GameDao, options: InstanceUpdateOptions) => {
+      afterTransaction(options, () => {
+        emitGameDestroy(game.id);
+      });
+    },
+  );
 
-  LogDao.hooks.addListener('afterDestroy', (log: LogDao, options: InstanceUpdateOptions) => {
-    afterTransaction(options, () => {
-      emitLogDestroy(log);
-    });
-  });
+  LogDao.hooks.addListener(
+    "afterDestroy",
+    (log: LogDao, options: InstanceUpdateOptions) => {
+      afterTransaction(options, () => {
+        emitLogDestroy(log);
+      });
+    },
+  );
 
-  LogDao.hooks.addListener('afterBulkCreate', (logs: LogDao[], options: InstanceUpdateOptions) => {
-    afterTransaction(options, () => {
-      for (const log of logs) {
+  LogDao.hooks.addListener(
+    "afterBulkCreate",
+    (logs: LogDao[], options: InstanceUpdateOptions) => {
+      afterTransaction(options, () => {
+        for (const log of logs) {
+          emitLogCreate(log);
+        }
+      });
+    },
+  );
+
+  LogDao.hooks.addListener(
+    "afterCreate",
+    (log: LogDao, options: InstanceUpdateOptions) => {
+      afterTransaction(options, () => {
         emitLogCreate(log);
-      }
-    });
-  });
-
-  LogDao.hooks.addListener('afterCreate', (log: LogDao, options: InstanceUpdateOptions) => {
-    afterTransaction(options, () => {
-      emitLogCreate(log);
-    });
-  });
+      });
+    },
+  );
 });

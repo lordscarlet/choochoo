@@ -1,7 +1,19 @@
-import { createContext, ReactNode, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 import { GameApi, GameStatus } from "../../api/game";
 import { SimpleConstructor } from "../../engine/framework/dependency_stack";
-import { inject, injectState, setInjectionContext } from "../../engine/framework/execution_context";
+import {
+  inject,
+  injectState,
+  setInjectionContext,
+} from "../../engine/framework/execution_context";
 import { InjectionContext } from "../../engine/framework/inject";
 import { Key } from "../../engine/framework/key";
 import { StateStore } from "../../engine/framework/state";
@@ -14,8 +26,10 @@ import { Immutable } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
 import { useGame } from "../services/game";
 
-export const InjectionContextContext = createContext<InjectionContext | undefined>(undefined);
-export const MapKeyContext = createContext<string>('');
+export const InjectionContextContext = createContext<
+  InjectionContext | undefined
+>(undefined);
+export const MapKeyContext = createContext<string>("");
 
 function useInjectionContext(): InjectionContext {
   const ctx = useContext(InjectionContextContext);
@@ -87,29 +101,39 @@ export function GameContextProvider({ game, children }: InjectionContextProps) {
     ctx.get(StateStore).merge(game.gameData!);
   }, [ctx, game.gameData]);
 
-  return <InjectionContextContext.Provider value={ctx}>
-    <MapKeyContext.Provider value={game.gameKey}>
-      {children}
-    </MapKeyContext.Provider>
-  </InjectionContextContext.Provider>;
+  return (
+    <InjectionContextContext.Provider value={ctx}>
+      <MapKeyContext.Provider value={game.gameKey}>
+        {children}
+      </MapKeyContext.Provider>
+    </InjectionContextContext.Provider>
+  );
 }
 
 export function useGameKey(): string {
   return useContext(MapKeyContext);
 }
 
-export function usePhaseState<T>(phase: Phase, key: Key<T>): Immutable<T> | undefined {
+export function usePhaseState<T>(
+  phase: Phase,
+  key: Key<T>,
+): Immutable<T> | undefined {
   const currentPhase = useActiveGameState(PHASE);
   return useOptionalInjectedState(key, phase === currentPhase);
 }
 
-function useOptionalInjectedState<T>(key: Key<T>, optionalCheck: boolean): Immutable<T> | undefined {
+function useOptionalInjectedState<T>(
+  key: Key<T>,
+  optionalCheck: boolean,
+): Immutable<T> | undefined {
   const ctx = useInjectionContext();
   setInjectionContext(ctx);
   const [injectedState] = ctx.runFunction(() => injectState(key));
   setInjectionContext();
 
-  const [_, setValue] = useState<Immutable<T> | undefined>(() => optionalCheck ? injectedState() : undefined);
+  const [_, setValue] = useState<Immutable<T> | undefined>(() =>
+    optionalCheck ? injectedState() : undefined,
+  );
 
   useEffect(() => {
     if (!optionalCheck) return;

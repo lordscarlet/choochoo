@@ -3,7 +3,6 @@ import { Immutable } from "../../utils/immutable";
 import { assertNever } from "../../utils/validate";
 import { PlayerColor } from "./player";
 
-
 export enum SimpleTileType {
   // Simple
   STRAIGHT = 1,
@@ -51,14 +50,8 @@ export enum Direction {
   BOTTOM,
   BOTTOM_LEFT,
 }
-export const {
-  TOP_LEFT,
-  TOP,
-  TOP_RIGHT,
-  BOTTOM_RIGHT,
-  BOTTOM,
-  BOTTOM_LEFT,
-} = Direction;
+export const { TOP_LEFT, TOP, TOP_RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT } =
+  Direction;
 
 export const DirectionZod = z.nativeEnum(Direction);
 
@@ -69,7 +62,7 @@ export const allDirections = [
   Direction.BOTTOM_RIGHT,
   Direction.BOTTOM,
   Direction.BOTTOM_LEFT,
-]
+];
 
 export function isDirection(v: unknown): v is Direction {
   return Direction[v as number] != null;
@@ -87,8 +80,22 @@ export const MutableTileData = z.object({
   tileType: TileType,
   orientation: z.nativeEnum(Direction),
   // An array that includes undefined values will be coerced into null by JSON.stringify.
-  owners: z.array(z.nativeEnum(PlayerColor).optional().nullable().transform((v) => v ?? undefined)),
-  claimableCost: z.array(z.number().optional().nullable().transform(v => v ?? undefined)).optional(),
+  owners: z.array(
+    z
+      .nativeEnum(PlayerColor)
+      .optional()
+      .nullable()
+      .transform((v) => v ?? undefined),
+  ),
+  claimableCost: z
+    .array(
+      z
+        .number()
+        .optional()
+        .nullable()
+        .transform((v) => v ?? undefined),
+    )
+    .optional(),
 });
 
 export type MutableTileData = z.infer<typeof MutableTileData>;
@@ -96,27 +103,48 @@ export type TileData = Immutable<MutableTileData>;
 
 export function getTileTypeString(tileType: TileType): string {
   switch (tileType) {
-    case SimpleTileType.STRAIGHT: return 'Straight';
-    case SimpleTileType.CURVE: return 'Curve';
-    case SimpleTileType.TIGHT: return 'Tight';
-    case ComplexTileType.X: return 'X';
-    case ComplexTileType.BOW_AND_ARROW: return 'Bow and Arrow';
-    case ComplexTileType.CROSSING_CURVES: return 'Crossing Curves';
-    case ComplexTileType.STRAIGHT_TIGHT: return 'Straight Tight';
-    case ComplexTileType.COEXISTING_CURVES: return 'Coexisting Curves';
-    case ComplexTileType.CURVE_TIGHT_1: return 'Curve Tight #1';
-    case ComplexTileType.CURVE_TIGHT_2: return 'Curve Tight #2';
-    case TownTileType.LOLLYPOP: return 'Lollypop';
-    case TownTileType.STRAIGHT: return 'Straight';
-    case TownTileType.CURVE: return 'Curve';
-    case TownTileType.TIGHT: return 'Tight';
-    case TownTileType.THREE_WAY: return 'Three Exit';
-    case TownTileType.LEFT_LEANER: return 'Left Leaner';
-    case TownTileType.RIGHT_LEANER: return 'Right Leaner';
-    case TownTileType.TIGHT_THREE: return 'Tight Three';
-    case TownTileType.X: return 'X';
-    case TownTileType.CHICKEN_FOOT: return 'Chicken Foot';
-    case TownTileType.K: return 'K';
+    case SimpleTileType.STRAIGHT:
+      return "Straight";
+    case SimpleTileType.CURVE:
+      return "Curve";
+    case SimpleTileType.TIGHT:
+      return "Tight";
+    case ComplexTileType.X:
+      return "X";
+    case ComplexTileType.BOW_AND_ARROW:
+      return "Bow and Arrow";
+    case ComplexTileType.CROSSING_CURVES:
+      return "Crossing Curves";
+    case ComplexTileType.STRAIGHT_TIGHT:
+      return "Straight Tight";
+    case ComplexTileType.COEXISTING_CURVES:
+      return "Coexisting Curves";
+    case ComplexTileType.CURVE_TIGHT_1:
+      return "Curve Tight #1";
+    case ComplexTileType.CURVE_TIGHT_2:
+      return "Curve Tight #2";
+    case TownTileType.LOLLYPOP:
+      return "Lollypop";
+    case TownTileType.STRAIGHT:
+      return "Straight";
+    case TownTileType.CURVE:
+      return "Curve";
+    case TownTileType.TIGHT:
+      return "Tight";
+    case TownTileType.THREE_WAY:
+      return "Three Exit";
+    case TownTileType.LEFT_LEANER:
+      return "Left Leaner";
+    case TownTileType.RIGHT_LEANER:
+      return "Right Leaner";
+    case TownTileType.TIGHT_THREE:
+      return "Tight Three";
+    case TownTileType.X:
+      return "X";
+    case TownTileType.CHICKEN_FOOT:
+      return "Chicken Foot";
+    case TownTileType.K:
+      return "K";
     default:
       assertNever(tileType);
   }

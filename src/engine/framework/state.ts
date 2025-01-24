@@ -1,13 +1,12 @@
-
-import z from 'zod';
+import z from "zod";
 import { deepCopy } from "../../utils/deep_copy";
 import { freeze, Immutable } from "../../utils/immutable";
-import { Tuple } from '../../utils/types';
-import { assert } from '../../utils/validate';
-import { Memory } from '../game/memory';
-import { DependencyStack } from './dependency_stack';
-import { inject } from './execution_context';
-import { Key } from './key';
+import { Tuple } from "../../utils/types";
+import { assert } from "../../utils/validate";
+import { Memory } from "../game/memory";
+import { DependencyStack } from "./dependency_stack";
+import { inject } from "./execution_context";
+import { Key } from "./key";
 
 interface StateContainer<T> {
   state?: { value: Immutable<T> };
@@ -42,7 +41,7 @@ export class StateStore {
   }
 
   init<T>(key: Key<T>, state: T): void {
-    assert(!this.isInitialized(key), 'cannot call init on initialized key');
+    assert(!this.isInitialized(key), "cannot call init on initialized key");
     this.initContainerIfNotExists(key);
     this.internalSet(key, state);
   }
@@ -57,7 +56,7 @@ export class StateStore {
   }
 
   set<T>(key: Key<T>, state: T): void {
-    assert(this.isInitialized(key), 'cannot call set with uninitialized key');
+    assert(this.isInitialized(key), "cannot call set with uninitialized key");
     this.internalSet(key, state);
   }
 
@@ -79,7 +78,10 @@ export class StateStore {
   }
 
   get<T>(key: Key<T>): Immutable<T> {
-    assert(this.isInitialized(key), `cannot call get on uninitialized key: ${key.name}`);
+    assert(
+      this.isInitialized(key),
+      `cannot call get on uninitialized key: ${key.name}`,
+    );
     return this.getContainer(key).state!.value;
   }
 
@@ -119,7 +121,7 @@ export class StateStore {
   }
 
   delete<T>(key: Key<T>): void {
-    assert(this.isInitialized(key), 'cannot call delete on uninitialized key');
+    assert(this.isInitialized(key), "cannot call delete on uninitialized key");
     this.getContainer(key).state = undefined;
     this.notifyListeners(key);
     this.maybeDeleteKey(key);
@@ -140,7 +142,7 @@ export class StateStore {
       initState: (state: T) => this.init(key, state),
       set: (state: T) => this.set(key, state),
       isInitialized: () => this.isInitialized(key),
-      listen: (listenFn: (t: Immutable<T>) => void): () => void =>
+      listen: (listenFn: (t: Immutable<T>) => void): (() => void) =>
         this.listen(key, listenFn),
       update: (updateFn: (t: T) => void) => this.update(key, updateFn),
       delete: () => this.delete(key),
@@ -154,7 +156,8 @@ export class StateStore {
     const gameData = Object.fromEntries(
       [...this.state.entries()]
         .filter(([_, value]) => value.state != null)
-        .map(([key, value]) => [key.name, key.serialize(value.state!.value)]));
+        .map(([key, value]) => [key.name, key.serialize(value.state!.value)]),
+    );
     const data: SerializedGameData = {
       version: 3,
       gameData,
@@ -194,10 +197,9 @@ export interface ValueChange {
   key: string;
 }
 
-
 export type KeyArray<T extends Tuple> = {
   [Index in keyof T]: Key<T[Index]>;
-} & { length: T['length'] };
+} & { length: T["length"] };
 
 interface InjectedOps<Data> {
   initState(state: Data): void;
@@ -208,7 +210,6 @@ interface InjectedOps<Data> {
   delete(): void;
 }
 
-export type InjectedState<Data> =
-  (() => Immutable<Data>) & InjectedOps<Data>;
+export type InjectedState<Data> = (() => Immutable<Data>) & InjectedOps<Data>;
 
 export type Mappable<Data> = () => Immutable<Data>;

@@ -6,12 +6,12 @@ import { Direction } from "../state/tile";
 import { City } from "./city";
 import { rotateDirectionClockwise } from "./direction";
 
-
 export class Track {
   constructor(
     readonly ownerIndex: number,
     readonly coordinates: Coordinates,
-    private readonly track: TrackInfo) { }
+    private readonly track: TrackInfo,
+  ) {}
 
   /** Returns the exits for the track */
   getExits(): [Exit, Exit] {
@@ -22,7 +22,9 @@ export class Track {
     const [first, second] = this.track.exits;
     if (first === lookingFor) return second;
     if (second === lookingFor) return first;
-    fail(`cannot find other exit when exit not found: lookingFor=${lookingFor} exits=${first},${second}`);
+    fail(
+      `cannot find other exit when exit not found: lookingFor=${lookingFor} exits=${first},${second}`,
+    );
   }
 
   /** Returns the owner of the track */
@@ -36,13 +38,11 @@ export class Track {
   }
 
   wasClaimed(): boolean {
-    return this.track.claimableCost != null &&
-      this.getOwner() != null;
+    return this.track.claimableCost != null && this.getOwner() != null;
   }
 
   isClaimable(): boolean {
-    return this.track.claimableCost != null &&
-      this.getOwner() == null;
+    return this.track.claimableCost != null && this.getOwner() == null;
   }
 
   claimCost(): number {
@@ -51,8 +51,10 @@ export class Track {
   }
 
   equals(other: Track): boolean {
-    return this.coordinates.equals(other.coordinates) &&
-      this.getExits().every((e) => other.getExits().includes(e));
+    return (
+      this.coordinates.equals(other.coordinates) &&
+      this.getExits().every((e) => other.getExits().includes(e))
+    );
   }
 }
 

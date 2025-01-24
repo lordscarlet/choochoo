@@ -21,26 +21,36 @@ import { assertNever } from "../../utils/validate";
 import { DropdownMenu, DropdownMenuItem } from "../components/dropdown_menu";
 import { Username } from "../components/username";
 import { useAction, useEmptyAction } from "../services/game";
-import { useActiveGameState, useCurrentPlayer, useInject, useInjected, usePhaseState } from "../utils/injection_context";
+import {
+  useActiveGameState,
+  useCurrentPlayer,
+  useInject,
+  useInjected,
+  usePhaseState,
+} from "../utils/injection_context";
 import { ManualGoodsGrowth } from "./india/goods_growth";
 
-
-const PASS_ACTION = 'Pass' as const;
+const PASS_ACTION = "Pass" as const;
 type PassActionString = typeof PASS_ACTION;
 
-const TURN_ORDER_PASS_ACTION = 'Turn Order Pass' as const;
+const TURN_ORDER_PASS_ACTION = "Turn Order Pass" as const;
 type TurnOrderPassActionString = typeof TURN_ORDER_PASS_ACTION;
 
 export function ActionSummary() {
   const currentPhase = useActiveGameState(PHASE);
   switch (currentPhase) {
-    case Phase.SHARES: return <TakeShares />;
-    case Phase.TURN_ORDER: return <Bid />;
-    case Phase.ACTION_SELECTION: return <SpecialActionSelector />
-    case Phase.BUILDING: return <Build />;
-    case Phase.MOVING: return <MoveGoods />;
+    case Phase.SHARES:
+      return <TakeShares />;
+    case Phase.TURN_ORDER:
+      return <Bid />;
+    case Phase.ACTION_SELECTION:
+      return <SpecialActionSelector />;
+    case Phase.BUILDING:
+      return <Build />;
+    case Phase.MOVING:
+      return <MoveGoods />;
     case Phase.END_GAME:
-      return <EndGame />
+      return <EndGame />;
     case Phase.DEURBANIZATION:
       return <Deurbanization />;
     case Phase.MANUAL_GOODS_GROWTH:
@@ -50,12 +60,11 @@ export function ActionSummary() {
     case Phase.EXPENSES:
     case Phase.INCOME_REDUCTION:
     case undefined:
-      return <></>
+      return <></>;
     default:
       assertNever(currentPhase);
   }
 }
-
 
 export function SpecialActionSelector() {
   const { canEmit, canEmitUserId } = useAction(ActionSelectionSelectAction);
@@ -65,7 +74,11 @@ export function SpecialActionSelector() {
   }
 
   if (!canEmit) {
-    return <GenericMessage><Username userId={canEmitUserId} /> must select a special action.</GenericMessage>;
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must select a special action.
+      </GenericMessage>
+    );
   }
   return <GenericMessage>You must select a special action.</GenericMessage>;
 }
@@ -85,14 +98,22 @@ export function MoveGoods() {
   }
 
   if (!canEmit) {
-    return <GenericMessage><Username userId={canEmitUserId} /> must move a good.</GenericMessage>;
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must move a good.
+      </GenericMessage>
+    );
   }
 
-  return <div>
-    <GenericMessage>You must move a good.</GenericMessage>
-    {!state!.locomotive.includes(player!.color) && <Button onClick={emitLoco}>Locomotive</Button>}
-    <Button onClick={emitPass}>Pass</Button>
-  </div>;
+  return (
+    <div>
+      <GenericMessage>You must move a good.</GenericMessage>
+      {!state!.locomotive.includes(player!.color) && (
+        <Button onClick={emitLoco}>Locomotive</Button>
+      )}
+      <Button onClick={emitPass}>Pass</Button>
+    </div>
+  );
 }
 
 function numberFormat(num: number): string {
@@ -100,7 +121,7 @@ function numberFormat(num: number): string {
 }
 
 function dollarFormat(num: number | string): string {
-  if (typeof num === 'string') return num;
+  if (typeof num === "string") return num;
   if (num < 0) {
     return `-$${-num}`;
   }
@@ -108,31 +129,44 @@ function dollarFormat(num: number | string): string {
 }
 
 export function Bid() {
-  const { emit: emitBid, canEmit, canEmitUserId, isPending: isBidPending } = useAction(BidAction);
-  const { emit: emitTurnOrderPass, isPending: isTurnOrderPending } = useEmptyAction(TurnOrderPassAction);
-  const { emit: emitPass, isPending: isPassPending } = useEmptyAction(PassAction);
+  const {
+    emit: emitBid,
+    canEmit,
+    canEmitUserId,
+    isPending: isBidPending,
+  } = useAction(BidAction);
+  const { emit: emitTurnOrderPass, isPending: isTurnOrderPending } =
+    useEmptyAction(TurnOrderPassAction);
+  const { emit: emitPass, isPending: isPassPending } =
+    useEmptyAction(PassAction);
   const helper = useInjected(TurnOrderHelper);
 
   const isPending = isBidPending || isTurnOrderPending || isPassPending;
 
-  const placeBid = useCallback((bid: number | PassActionString | TurnOrderPassActionString) => {
-    if (bid === PASS_ACTION) {
-      emitPass();
-    } else if (bid === TURN_ORDER_PASS_ACTION) {
-      emitTurnOrderPass();
-    } else {
-      emitBid({ bid });
-    }
-  }, [emitBid, emitPass, emitTurnOrderPass]);
+  const placeBid = useCallback(
+    (bid: number | PassActionString | TurnOrderPassActionString) => {
+      if (bid === PASS_ACTION) {
+        emitPass();
+      } else if (bid === TURN_ORDER_PASS_ACTION) {
+        emitTurnOrderPass();
+      } else {
+        emitBid({ bid });
+      }
+    },
+    [emitBid, emitPass, emitTurnOrderPass],
+  );
 
   if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage><Username userId={canEmitUserId} /> must bid.</GenericMessage>;
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must bid.
+      </GenericMessage>
+    );
   }
-
 
   const minBid = helper.getMinBid();
   const maxBid = helper.getMaxBid();
@@ -142,62 +176,97 @@ export function Bid() {
     ...iterate(maxBid - minBid + 1, (i) => i + minBid),
   ];
 
-  return <div>
-    <p>You must bid.</p>
-    <DropdownMenu id='bid' title='Place bid' disabled={isPending}>
-      {bids.map(option =>
-        <DropdownMenuItem key={option} onClick={() => placeBid(option)} disabled={isPending}>
-          {dollarFormat(option)}
-        </DropdownMenuItem>)}
-    </DropdownMenu>
-  </div >;
+  return (
+    <div>
+      <p>You must bid.</p>
+      <DropdownMenu id="bid" title="Place bid" disabled={isPending}>
+        {bids.map((option) => (
+          <DropdownMenuItem
+            key={option}
+            onClick={() => placeBid(option)}
+            disabled={isPending}
+          >
+            {dollarFormat(option)}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenu>
+    </div>
+  );
 }
 
 export function GenericMessage({ children }: { children: ReactNode }) {
-  return <div>{children}</div>
+  return <div>{children}</div>;
 }
 
 export function TakeShares() {
-  const { canEmit, canEmitUserId, emit, isPending } = useAction(TakeSharesAction);
+  const { canEmit, canEmitUserId, emit, isPending } =
+    useAction(TakeSharesAction);
   const numShares = useInjected(ShareHelper).getSharesTheyCanTake();
   const options = iterate(numShares + 1, (i) => i);
 
-  const chooseValue = useCallback((numShares: number) => emit({ numShares }), [emit]);
+  const chooseValue = useCallback(
+    (numShares: number) => emit({ numShares }),
+    [emit],
+  );
 
   if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage><Username userId={canEmitUserId} /> must take out shares.</GenericMessage>;
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must take out shares.
+      </GenericMessage>
+    );
   }
 
-  return <div>
-    <p>Choose how many shares you would like to take out.</p>
-    <DropdownMenu id='shares' title='Choose shares' disabled={isPending}>
-      {options.map(option =>
-        <DropdownMenuItem key={option} onClick={() => chooseValue(option)} disabled={isPending}>
-          {numberFormat(option)}
-        </DropdownMenuItem>)}
-    </DropdownMenu>
-  </div>;
+  return (
+    <div>
+      <p>Choose how many shares you would like to take out.</p>
+      <DropdownMenu id="shares" title="Choose shares" disabled={isPending}>
+        {options.map((option) => (
+          <DropdownMenuItem
+            key={option}
+            onClick={() => chooseValue(option)}
+            disabled={isPending}
+          >
+            {numberFormat(option)}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenu>
+    </div>
+  );
 }
 
 export function Deurbanization() {
-  const { emit: emitPass, canEmit, isPending, canEmitUserId } = useEmptyAction(DeurbanizationPassAction);
+  const {
+    emit: emitPass,
+    canEmit,
+    isPending,
+    canEmitUserId,
+  } = useEmptyAction(DeurbanizationPassAction);
 
   if (canEmitUserId == null) {
     return <></>;
   }
 
   if (!canEmit) {
-    return <GenericMessage><Username userId={canEmitUserId} /> must select a good to deurbanize.</GenericMessage>;
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must select a good to deurbanize.
+      </GenericMessage>
+    );
   }
 
-  return <div>
-    You must select a good to deurbanize.
-    <Button onClick={emitPass} disabled={isPending}>Skip</Button>
-  </div>;
+  return (
+    <div>
+      You must select a good to deurbanize.
+      <Button onClick={emitPass} disabled={isPending}>
+        Skip
+      </Button>
+    </div>
+  );
 }
 
 export function Build() {
@@ -213,11 +282,17 @@ export function Build() {
   }
 
   if (!canEmit) {
-    return <GenericMessage><Username userId={canEmitUserId} /> must build.</GenericMessage>;
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must build.
+      </GenericMessage>
+    );
   }
 
-  return <div>
-    You can build {buildsRemaining} more track{canUrbanize && ' and urbanize'}.
-    <Button onClick={emitPass}>Done Building</Button>
-  </div>;
+  return (
+    <div>
+      You can build {buildsRemaining} more track{canUrbanize && " and urbanize"}
+      .<Button onClick={emitPass}>Done Building</Button>
+    </div>
+  );
 }

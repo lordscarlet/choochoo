@@ -3,13 +3,15 @@ import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { BuildPhase } from "../../engine/build/phase";
 import { ActionBundle } from "../../engine/game/phase_module";
-import { injectCurrentPlayer, injectPlayerAction } from "../../engine/game/state";
+import {
+  injectCurrentPlayer,
+  injectPlayerAction,
+} from "../../engine/game/state";
 import { Action } from "../../engine/state/action";
 import { PlayerColor } from "../../engine/state/player";
 import { TileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { remove } from "../../utils/functions";
-
 
 export class MadagascarBuildPhase extends BuildPhase {
   private readonly lastBuildPlayer = injectPlayerAction(Action.LAST_BUILD);
@@ -53,7 +55,6 @@ export class MadagascarBuildCostCalculator extends BuildCostCalculator {
     }
     return baseCost;
   }
-
 }
 
 export class MadagascarDoneAction extends DoneAction {
@@ -61,7 +62,7 @@ export class MadagascarDoneAction extends DoneAction {
 
   protected logAction() {
     if (this.currentPlayer().selectedAction === Action.LOCOMOTIVE) {
-      this.log.currentPlayer('skips their build track turn');
+      this.log.currentPlayer("skips their build track turn");
     } else {
       super.logAction();
     }

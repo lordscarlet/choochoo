@@ -5,7 +5,12 @@ import { isLand, Land } from "../map/location";
 import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { PlayerHelper } from "./player";
-import { CURRENT_PLAYER, injectAllPlayersUnsafe, injectGrid, TURN_ORDER } from "./state";
+import {
+  CURRENT_PLAYER,
+  injectAllPlayersUnsafe,
+  injectGrid,
+  TURN_ORDER,
+} from "./state";
 
 export class MoneyManager {
   private readonly players = injectAllPlayersUnsafe();
@@ -19,20 +24,29 @@ export class MoneyManager {
     return this.addMoney(this.currentPlayer(), num);
   }
 
-  addMoney(playerColor: PlayerColor, money: number, forced = false): LostMoneyResponse {
+  addMoney(
+    playerColor: PlayerColor,
+    money: number,
+    forced = false,
+  ): LostMoneyResponse {
     const player = this.playerHelper.getPlayer(playerColor);
     const newMoney = player.money + money;
     if (newMoney >= 0) {
-      this.playerHelper.update(playerColor, player => player.money = newMoney);
+      this.playerHelper.update(
+        playerColor,
+        (player) => (player.money = newMoney),
+      );
       return { lostIncome: 0, outOfGame: false };
     } else {
       assert(forced === true);
       const lostIncome = -newMoney;
-      assert(lostIncome > 0,
+      assert(
+        lostIncome > 0,
         `you should never gain income through this code path, got ` +
-        `lostIncome=$${lostIncome}, money=$${money}, playerMoney=$${player.money}`);
+          `lostIncome=$${lostIncome}, money=$${money}, playerMoney=$${player.money}`,
+      );
 
-      this.playerHelper.update(playerColor, player => {
+      this.playerHelper.update(playerColor, (player) => {
         player.income -= lostIncome;
         player.money = 0;
         if (player.income < 0) {
@@ -57,14 +71,18 @@ export class MoneyManager {
   }
 
   protected removeOwnershipMarkers(player: PlayerColor): void {
-    const toUpdate: Land[] = [...this.gridHelper.all()].filter(isLand)
+    const toUpdate: Land[] = [...this.gridHelper.all()]
+      .filter(isLand)
       .filter((location) =>
-        [...location.getTrack()].some((track) => player === track.getOwner()));
+        [...location.getTrack()].some((track) => player === track.getOwner()),
+      );
     for (const location of toUpdate) {
       this.gridHelper.update(location.coordinates, (space) => {
         assert(space.type !== SpaceType.CITY);
         assert(space.tile != null);
-        space.tile.owners = space.tile.owners.map((owner) => player === owner ? undefined : owner);
+        space.tile.owners = space.tile.owners.map((owner) =>
+          player === owner ? undefined : owner,
+        );
       });
     }
 

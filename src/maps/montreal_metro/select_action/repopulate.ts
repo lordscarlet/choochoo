@@ -1,5 +1,8 @@
 import z from "zod";
-import { inject, injectState } from "../../../engine/framework/execution_context";
+import {
+  inject,
+  injectState,
+} from "../../../engine/framework/execution_context";
 import { ActionProcessor } from "../../../engine/game/action";
 import { Log } from "../../../engine/game/log";
 import { BAG, injectGrid } from "../../../engine/game/state";
@@ -11,7 +14,6 @@ import { CoordinatesZod } from "../../../utils/coordinates";
 import { assert } from "../../../utils/validate";
 import { REPOPULATION } from "./state";
 
-
 export const RepopulateData = z.object({
   coordinates: CoordinatesZod,
   good: GoodZod,
@@ -19,7 +21,7 @@ export const RepopulateData = z.object({
 export type RepopulateData = z.infer<typeof RepopulateData>;
 
 export class RepopulateAction implements ActionProcessor<RepopulateData> {
-  static readonly action = 'repopulate';
+  static readonly action = "repopulate";
   protected readonly log = inject(Log);
   private readonly grid = injectGrid();
   private readonly gridHelper = inject(GridHelper);
@@ -28,8 +30,12 @@ export class RepopulateAction implements ActionProcessor<RepopulateData> {
 
   readonly assertInput = RepopulateData.parse;
   validate({ coordinates, good }: RepopulateData): void {
-    assert(this.repopulation().includes(good), { invalidInput: 'must select a good you drew' });
-    assert(this.grid().get(coordinates) instanceof City, { invalidInput: 'must be placed in a city' });
+    assert(this.repopulation().includes(good), {
+      invalidInput: "must select a good you drew",
+    });
+    assert(this.grid().get(coordinates) instanceof City, {
+      invalidInput: "must be placed in a city",
+    });
   }
 
   process({ coordinates, good }: RepopulateData): boolean {
@@ -40,14 +46,16 @@ export class RepopulateAction implements ActionProcessor<RepopulateData> {
 
     const city = this.grid().get(coordinates);
     assert(city instanceof City);
-    this.log.currentPlayer(`places a ${goodToString(good)} in ${city.name()}`)
+    this.log.currentPlayer(`places a ${goodToString(good)} in ${city.name()}`);
 
     this.bag.update((bag) => {
       const repopulation = this.repopulation();
       const index = repopulation.indexOf(good);
       assert(index > 0);
 
-      bag.push(...repopulation.slice(0, index).concat(repopulation.slice(index + 1)));
+      bag.push(
+        ...repopulation.slice(0, index).concat(repopulation.slice(index + 1)),
+      );
     });
     this.repopulation.delete();
     return true;

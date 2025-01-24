@@ -11,7 +11,10 @@ export function resettable<T>(getter: () => T): () => T {
   });
 
   return () => {
-    assert(instance != null, 'cannot call resettable getter outside of a beforeEach or a test');
+    assert(
+      instance != null,
+      "cannot call resettable getter outside of a beforeEach or a test",
+    );
     return instance;
-  }
+  };
 }

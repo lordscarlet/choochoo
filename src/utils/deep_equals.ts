@@ -16,7 +16,10 @@ export function deepEquals<T>(t1: T, t2: NoInfer<T>): unknown {
   } else if (ImmutableSet.isSet(t1) || t1 instanceof Set) {
     assert(ImmutableSet.isSet(t2) || t2 instanceof Set);
     const t2List = [...t2];
-    return t1.size === t2.size && [...t1].every((k1) => t2List.some((k2) => deepEquals(k1, k2)));
+    return (
+      t1.size === t2.size &&
+      [...t1].every((k1) => t2List.some((k2) => deepEquals(k1, k2)))
+    );
   } else if (ImmutableMap.isMap(t1) || t1 instanceof Map) {
     assert(ImmutableMap.isMap(t2) || t2 instanceof Map);
     if (t1.size !== t2.size) return false;
@@ -31,8 +34,8 @@ export function deepEquals<T>(t1: T, t2: NoInfer<T>): unknown {
   } else if (t1 instanceof Coordinates) {
     return t1 === t2;
   } else {
-    assert(typeof t1 === 'object');
-    assert(typeof t2 === 'object');
+    assert(typeof t1 === "object");
+    assert(typeof t2 === "object");
     return deepEquals(new Map(Object.entries(t1)), new Map(Object.entries(t2)));
   }
 }

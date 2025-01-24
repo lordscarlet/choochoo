@@ -9,4 +9,4 @@ export const MoveState = z.object({
 
 export type MoveState = z.infer<typeof MoveState>;
 
-export const MOVE_STATE = new Key('MoveState', { parse: MoveState.parse });
+export const MOVE_STATE = new Key("MoveState", { parse: MoveState.parse });

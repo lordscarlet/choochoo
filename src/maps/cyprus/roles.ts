@@ -7,9 +7,12 @@ export const TURKEY = PlayerColor.RED;
 
 export function countryName(country: PlayerColor): string {
   switch (country) {
-    case UN: return 'The UN';
-    case GREECE: return 'Greece';
-    case TURKEY: return 'Turkey';
+    case UN:
+      return "The UN";
+    case GREECE:
+      return "Greece";
+    case TURKEY:
+      return "Turkey";
     default:
       fail(`Unidentified country ${country}`);
   }

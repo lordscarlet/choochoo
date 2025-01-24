@@ -5,7 +5,7 @@ function assumeIsZodIssue(t: unknown): t is ZodIssue {
 }
 
 export const ZodErrorResponse = z.object({
-  name: z.literal('ZodError'),
+  name: z.literal("ZodError"),
   issues: z.unknown().refine(assumeIsZodIssue).array(),
 });
 

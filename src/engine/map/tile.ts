@@ -1,6 +1,10 @@
 import { assertNever } from "../../utils/validate";
-import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../state/tile";
-
+import {
+  ComplexTileType,
+  SimpleTileType,
+  TileType,
+  TownTileType,
+} from "../state/tile";
 
 export function isSimpleTile(tileType: TileType): tileType is SimpleTileType {
   return tileType in SimpleTileType;
@@ -20,7 +24,7 @@ export function crosses(tileType: ComplexTileType): boolean {
     case ComplexTileType.X:
     case ComplexTileType.BOW_AND_ARROW:
     case ComplexTileType.CROSSING_CURVES:
-    return true;
+      return true;
 
     // COEXISTING
     case ComplexTileType.STRAIGHT_TIGHT:

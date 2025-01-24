@@ -1,11 +1,12 @@
-.gameCard {}
+.gameCard {
+}
 
 .active {
   background-color: lightyellow;
 }
 
 :global(.dark-mode) .active {
-  background-color: #8B4000;
+  background-color: #8b4000;
 }
 
 .lobby {

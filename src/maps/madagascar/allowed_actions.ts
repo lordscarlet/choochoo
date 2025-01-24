@@ -5,17 +5,25 @@ import { Random } from "../../engine/game/random";
 import { RoundEngine } from "../../engine/game/round";
 import { GameStarter } from "../../engine/game/starter";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
-import { Action, ActionZod, getSelectedActionString } from "../../engine/state/action";
+import {
+  Action,
+  ActionZod,
+  getSelectedActionString,
+} from "../../engine/state/action";
 import { iterate, peek } from "../../utils/functions";
 import { ImmutableSet } from "../../utils/immutable";
 
-const DISABLED_ACTIONS = new SetKey('disabledActions', { parse: ActionZod.parse });
+const DISABLED_ACTIONS = new SetKey("disabledActions", {
+  parse: ActionZod.parse,
+});
 
 export class MadagascarAllowedActions extends AllowedActions {
   private readonly disabledActions = injectState(DISABLED_ACTIONS);
 
   getDisabledActionReason(action: Action): string | undefined {
-    return this.disabledActions().has(action) ? 'This action is disabled this round' : undefined;
+    return this.disabledActions().has(action)
+      ? "This action is disabled this round"
+      : undefined;
   }
 
   getLastDisabledAction(): Action {
@@ -53,11 +61,18 @@ export class MadagascarRoundEngine extends RoundEngine {
   start(round: number) {
     super.start(round);
     const allActions = [...this.allowedActions.getActions()];
-    let nextActionIndex = round !== 1 ? allActions.indexOf((this.allowedActions as MadagascarAllowedActions).getLastDisabledAction()) : -1;
+    let nextActionIndex =
+      round !== 1
+        ? allActions.indexOf(
+            (
+              this.allowedActions as MadagascarAllowedActions
+            ).getLastDisabledAction(),
+          )
+        : -1;
     const newActions: Action[] = [];
     iterate(7 - this.playerCount(), () => {
       const dieRoll = this.random.rollDie();
-      for (let i = dieRoll; i > 0;) {
+      for (let i = dieRoll; i > 0; ) {
         nextActionIndex++;
         nextActionIndex = nextActionIndex % allActions.length;
         if (!newActions.includes(allActions[nextActionIndex])) {
@@ -66,7 +81,9 @@ export class MadagascarRoundEngine extends RoundEngine {
       }
       newActions.push(allActions[nextActionIndex]);
     });
-    this.log.log('Disabling actions ' + newActions.map(getSelectedActionString).join(', '));
+    this.log.log(
+      "Disabling actions " + newActions.map(getSelectedActionString).join(", "),
+    );
     this.disabledActions.set(new Set(newActions));
   }
 }

@@ -19,7 +19,12 @@ export class GoodsHelper {
   }
 
   isAtCapacity(city: City): boolean {
-    return city.onRoll().every(({ goods }) => goods.length >= this.getTotalUpcomingGoodsSlots(city.isUrbanized()));
+    return city
+      .onRoll()
+      .every(
+        ({ goods }) =>
+          goods.length >= this.getTotalUpcomingGoodsSlots(city.isUrbanized()),
+      );
   }
 
   hasCityOpenings(): boolean {
@@ -31,7 +36,11 @@ export class GoodsHelper {
     return false;
   }
 
-  moveGoodsToCity(coordinates: Coordinates, onRollIndex: number, count: number): void {
+  moveGoodsToCity(
+    coordinates: Coordinates,
+    onRollIndex: number,
+    count: number,
+  ): void {
     if (count === 0) return;
 
     this.grid.update(coordinates, (location) => {

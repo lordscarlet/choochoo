@@ -2,14 +2,16 @@ import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 import { injectState } from "../framework/execution_context";
 import { GRID, injectGrid, INTER_CITY_CONNECTIONS } from "../game/state";
-import { InterCityConnection, interCityConnectionEquals } from "../state/inter_city_connection";
+import {
+  InterCityConnection,
+  interCityConnectionEquals,
+} from "../state/inter_city_connection";
 import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { MutableSpaceData, SpaceData } from "../state/space";
 import { City } from "./city";
 import { Space } from "./grid";
 import { Track } from "./track";
-
 
 export class GridHelper {
   private readonly grid = injectState(GRID);
@@ -23,7 +25,10 @@ export class GridHelper {
     });
   }
 
-  update(coordinates: Coordinates, updateFn: (value: MutableSpaceData) => void): void {
+  update(
+    coordinates: Coordinates,
+    updateFn: (value: MutableSpaceData) => void,
+  ): void {
     this.grid.update((grid) => updateFn(grid.get(coordinates)!));
   }
 
@@ -36,9 +41,14 @@ export class GridHelper {
     }
   }
 
-  setInterCityOwner(owner: PlayerColor | undefined, connection: InterCityConnection): void {
+  setInterCityOwner(
+    owner: PlayerColor | undefined,
+    connection: InterCityConnection,
+  ): void {
     this.interCityConnections.update((connections) => {
-      const matching = connections.find((c) => interCityConnectionEquals(connection, c))!;
+      const matching = connections.find((c) =>
+        interCityConnectionEquals(connection, c),
+      )!;
       matching.owner = { color: owner };
     });
   }

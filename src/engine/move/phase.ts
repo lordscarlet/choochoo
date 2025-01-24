@@ -61,7 +61,9 @@ export class MovePhase extends PhaseModule {
     super.onEndTurn();
   }
 
-  protected getAutoAction(autoAction: AutoAction): ActionBundle<object> | undefined {
+  protected getAutoAction(
+    autoAction: AutoAction,
+  ): ActionBundle<object> | undefined {
     if (autoAction.locoNext === true) {
       return {
         action: LocoAction,

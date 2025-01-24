@@ -5,19 +5,18 @@ import { Log } from "../game/log";
 import { TurnOrderHelper } from "./helper";
 import { TURN_ORDER_STATE } from "./state";
 
-
 export class TurnOrderPassAction extends EmptyActionProcessor {
-  static readonly action = 'turnOrderPass';
+  static readonly action = "turnOrderPass";
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly helper = inject(TurnOrderHelper);
   private readonly log = inject(Log);
 
   validate(): void {
-    assert(this.helper.canUseTurnOrderPass(), 'cannot use turn order pass');
+    assert(this.helper.canUseTurnOrderPass(), "cannot use turn order pass");
   }
 
   process(): boolean {
-    this.log.currentPlayer('uses their turn order pass');
+    this.log.currentPlayer("uses their turn order pass");
     this.turnOrderState.update((state) => {
       state.turnOrderPassUsed = true;
     });

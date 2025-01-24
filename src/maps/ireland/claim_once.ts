@@ -5,7 +5,7 @@ import { injectState } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
 import { assert } from "../../utils/validate";
 
-const HAS_CLAIMED = new Key('HAS_CLAIMED', { parse: z.boolean().parse })
+const HAS_CLAIMED = new Key("HAS_CLAIMED", { parse: z.boolean().parse });
 
 export class IrelandBuildPhase extends BuildPhase {
   private readonly hasClaimed = injectState(HAS_CLAIMED);
@@ -25,7 +25,9 @@ export class IrelandClaimAction extends ClaimAction {
   private readonly hasClaimed = injectState(HAS_CLAIMED);
 
   validate(data: ClaimData): void {
-    assert(!this.hasClaimed(), { invalidInput: 'Can only claim one sea route per turn' });
+    assert(!this.hasClaimed(), {
+      invalidInput: "Can only claim one sea route per turn",
+    });
     return super.validate(data);
   }
 

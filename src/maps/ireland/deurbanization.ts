@@ -17,7 +17,9 @@ import { assert } from "../../utils/validate";
 export class DeurbanizationPhase extends PhaseModule {
   static readonly phase = Phase.DEURBANIZATION;
 
-  private readonly deurbanizationPlayer = injectPlayerAction(Action.DEURBANIZATION);
+  private readonly deurbanizationPlayer = injectPlayerAction(
+    Action.DEURBANIZATION,
+  );
 
   configureActions() {
     this.installAction(PassAction);
@@ -41,7 +43,7 @@ export const DeurbanizeData = z.object({
 export type DeurbanizeData = z.infer<typeof DeurbanizeData>;
 
 export class DeurbanizeAction implements ActionProcessor<DeurbanizeData> {
-  static readonly action = 'deurbanize';
+  static readonly action = "deurbanize";
 
   readonly assertInput = DeurbanizeData.parse;
 
@@ -52,8 +54,10 @@ export class DeurbanizeAction implements ActionProcessor<DeurbanizeData> {
 
   validate(data: DeurbanizeData): void {
     const location = this.grid().get(data.coordinates);
-    assert(location != null, { invalidInput: 'Must select a valid location' });
-    assert(location.getGoods().includes(data.good), { invalidInput: 'Must select a valid good' });
+    assert(location != null, { invalidInput: "Must select a valid location" });
+    assert(location.getGoods().includes(data.good), {
+      invalidInput: "Must select a valid good",
+    });
   }
 
   process(data: DeurbanizeData): boolean {
@@ -63,18 +67,20 @@ export class DeurbanizeAction implements ActionProcessor<DeurbanizeData> {
       assert(Array.isArray(location.goods));
       location.goods.splice(location.goods.indexOf(data.good), 1);
     });
-    this.log.currentPlayer(`deurbanizes a ${goodToString(data.good)} from ${space!.name()!}`);
+    this.log.currentPlayer(
+      `deurbanizes a ${goodToString(data.good)} from ${space!.name()!}`,
+    );
     return true;
   }
 }
 
 export class PassAction implements ActionProcessor<EmptyAction> {
-  static readonly action = 'pass';
+  static readonly action = "pass";
 
   readonly assertInput = z.object({}).parse;
   private readonly log = inject(Log);
 
-  validate(_: EmptyAction): void { }
+  validate(_: EmptyAction): void {}
 
   process(_: EmptyAction): boolean {
     this.log.currentPlayer(`skips the deurbanize action`);

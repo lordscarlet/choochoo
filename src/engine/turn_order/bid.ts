@@ -11,7 +11,7 @@ export const BidData = z.object({ bid: z.number().refine(isPositiveInteger) });
 export type BidData = z.infer<typeof BidData>;
 
 export class BidAction implements ActionProcessor<BidData> {
-  static readonly action = 'bid';
+  static readonly action = "bid";
   private readonly turnOrderState = injectState(TURN_ORDER_STATE);
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly helper = inject(TurnOrderHelper);
@@ -20,8 +20,8 @@ export class BidAction implements ActionProcessor<BidData> {
   readonly assertInput = BidData.parse;
   validate({ bid }: BidData): void {
     const minBid = this.helper.getMinBid();
-    assert(bid >= minBid, 'must bid more than another person');
-    assert(this.currentPlayer().money >= bid, 'cannot afford bid');
+    assert(bid >= minBid, "must bid more than another person");
+    assert(this.currentPlayer().money >= bid, "cannot afford bid");
   }
 
   process({ bid }: BidData): boolean {

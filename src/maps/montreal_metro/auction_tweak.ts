@@ -6,7 +6,9 @@ import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
 import { BidAction, BidData } from "../../engine/turn_order/bid";
 import { TurnOrderPhase } from "../../engine/turn_order/phase";
 
-const HAS_BID = new SetKey<PlayerColor>('HAS_BID', { parse: PlayerColorZod.parse });
+const HAS_BID = new SetKey<PlayerColor>("HAS_BID", {
+  parse: PlayerColorZod.parse,
+});
 
 export class MontrealTurnOrderPhase extends TurnOrderPhase {
   private readonly hasBid = injectState(HAS_BID);

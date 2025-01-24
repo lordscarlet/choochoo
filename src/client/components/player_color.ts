@@ -1,6 +1,6 @@
 import { PlayerColor } from "../../engine/state/player";
 import { assertNever } from "../../utils/validate";
-import * as styles from './player_color.module.css';
+import * as styles from "./player_color.module.css";
 
 export function getPlayerColorCss(playerColor?: PlayerColor): string {
   switch (playerColor) {

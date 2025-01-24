@@ -11,7 +11,10 @@ export function isCity(s: unknown): s is City {
 export class City {
   private readonly goodColorArray: Good[];
 
-  constructor(readonly coordinates: Coordinates, readonly data: CityData) {
+  constructor(
+    readonly coordinates: Coordinates,
+    readonly data: CityData,
+  ) {
     this.goodColorArray = Array.isArray(data.color) ? data.color : [data.color];
   }
 
@@ -44,8 +47,8 @@ export class City {
   }
 
   getMapSpecific<T>(parser: (t: unknown) => T): T | undefined {
-    return this.data.mapSpecific != null ?
-      parser(this.data.mapSpecific) :
-      undefined;
+    return this.data.mapSpecific != null
+      ? parser(this.data.mapSpecific)
+      : undefined;
   }
 }

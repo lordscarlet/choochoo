@@ -23,16 +23,16 @@ export class Ender {
     switch (reason) {
       case EndGameReason.PLAYERS_ELIMINATED:
         if (this.playerHelper.isSoloGame()) {
-          this.log.log('You lose! Better luck next time.');
+          this.log.log("You lose! Better luck next time.");
         } else if (this.playerHelper.getPlayersRemaining() === 0) {
-          this.log.log('All players lose, no winner!');
+          this.log.log("All players lose, no winner!");
         } else {
-          this.log.log('Only one player remaining, game over.');
+          this.log.log("Only one player remaining, game over.");
         }
         return;
 
       case EndGameReason.ROUNDS_ENDED:
-        this.log.log('Game over.');
+        this.log.log("Game over.");
     }
   }
 
@@ -47,5 +47,5 @@ export class Ender {
     }
   }
 
-  protected onEndGame() { }
+  protected onEndGame() {}
 }

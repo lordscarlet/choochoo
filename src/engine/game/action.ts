@@ -9,11 +9,12 @@ export interface ActionProcessor<T extends object> {
   process(data: T): boolean;
 }
 
-
 export const EmptyAction = z.object({});
 export type EmptyAction = z.infer<typeof EmptyAction>;
 
-export abstract class EmptyActionProcessor implements ActionProcessor<EmptyAction> {
+export abstract class EmptyActionProcessor
+  implements ActionProcessor<EmptyAction>
+{
   assertInput = EmptyAction.parse;
 
   abstract validate(): void;

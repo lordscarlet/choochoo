@@ -1,4 +1,3 @@
-
 import { GameStatus } from "../../api/game";
 import { assertNever } from "../../utils/validate";
 import { GameCard } from "../home/game_card";
@@ -14,7 +13,7 @@ export function GamePage() {
     case GameStatus.enum.ACTIVE:
     case GameStatus.enum.ENDED:
     case GameStatus.enum.ABANDONED:
-      return <ActiveGame />
+      return <ActiveGame />;
     default:
       assertNever(game.status);
   }

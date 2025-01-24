@@ -1,7 +1,5 @@
-
-import { readdir, stat, unlink } from 'fs/promises';
-import { resolve } from 'path';
-
+import { readdir, stat, unlink } from "fs/promises";
+import { resolve } from "path";
 
 async function* readdirRecursive(dir: string): AsyncIterable<string> {
   const files = await readdir(dir);
@@ -17,14 +15,16 @@ async function* readdirRecursive(dir: string): AsyncIterable<string> {
 }
 
 async function removeDeleted() {
-  const root = resolve('./');
-  const binDir = resolve(root, './bin');
-  const srcDir = resolve(root, './src');
+  const root = resolve("./");
+  const binDir = resolve(root, "./bin");
+  const srcDir = resolve(root, "./src");
   for await (const jsFile of readdirRecursive(resolve(root, binDir))) {
     const tsFiles = toTsFiles({ root, binDir, srcDir, jsFile });
     if (tsFiles.length == 0) continue;
 
-    const found = (await Promise.all(tsFiles.map(fileExists))).some((exists) => exists);
+    const found = (await Promise.all(tsFiles.map(fileExists))).some(
+      (exists) => exists,
+    );
     if (!found) {
       await unlink(jsFile);
     }
@@ -36,8 +36,11 @@ async function fileExists(file: string): Promise<boolean> {
     await stat(file);
     return true;
   } catch (e) {
-    if (typeof e !== 'object' || e == null) throw e;
-    if ('message' in e && (e as Error).message.startsWith('ENOENT: no such file or directory')) {
+    if (typeof e !== "object" || e == null) throw e;
+    if (
+      "message" in e &&
+      (e as Error).message.startsWith("ENOENT: no such file or directory")
+    ) {
       return false;
     }
     throw e;
@@ -53,12 +56,12 @@ interface ToTsFileProps {
 
 function toTsFiles({ binDir, srcDir, jsFile }: ToTsFileProps): string[] {
   const path = jsFile.substring(binDir.length + 1);
-  const exts = ['.js', '.js.map'];
+  const exts = [".js", ".js.map"];
   for (const ext of exts) {
     if (path.endsWith(ext)) {
       return [
-        resolve(srcDir, path.substring(0, path.length - ext.length) + '.ts'),
-        resolve(srcDir, path.substring(0, path.length - ext.length) + '.tsx'),
+        resolve(srcDir, path.substring(0, path.length - ext.length) + ".ts"),
+        resolve(srcDir, path.substring(0, path.length - ext.length) + ".tsx"),
       ];
     }
   }
@@ -66,6 +69,6 @@ function toTsFiles({ binDir, srcDir, jsFile }: ToTsFileProps): string[] {
 }
 
 removeDeleted().catch((e) => {
-  console.log('error removing deleted');
+  console.log("error removing deleted");
   console.error(e);
 });

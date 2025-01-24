@@ -9,6 +9,7 @@
     "deploy-server": "./src/scripts/deploy_server.sh",
     "create-migration": "./src/scripts/create_migration.sh",
     "lint": "eslint src/",
+    "format": "prettier src --write",
     "migrate": "node bin/scripts/migrations up",
     "test": "ts-node node_modules/jasmine/bin/jasmine",
     "test-watch": "nodemon -V --ext ts,tsx --watch src/ --exec 'ts-node node_modules/jasmine/bin/jasmine'"
@@ -75,10 +76,12 @@
     "@types/uuid": "^10.0.0",
     "esbuild": "^0.24.0",
     "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-react": "^7.37.4",
     "globals": "^15.14.0",
     "jasmine": "^5.5.0",
     "nodemon": "^3.1.9",
+    "prettier": "3.4.2",
     "sqlite3": "^5.1.7",
     "ts-node": "^10.9.2",
     "typescript-eslint": "^8.21.0"

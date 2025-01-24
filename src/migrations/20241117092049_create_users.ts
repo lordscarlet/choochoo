@@ -1,8 +1,8 @@
-import { DataTypes } from '@sequelize/core';
-import type { Migration } from '../scripts/migrations';
+import { DataTypes } from "@sequelize/core";
+import type { Migration } from "../scripts/migrations";
 
 export const up: Migration = async ({ context: queryInterface }) => {
-  await queryInterface.createTable('Users', {
+  await queryInterface.createTable("Users", {
     id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -44,8 +44,8 @@ export const up: Migration = async ({ context: queryInterface }) => {
       allowNull: true,
     },
   });
-}
+};
 
 export const down: Migration = async ({ context: queryInterface }) => {
-  await queryInterface.dropTable('Users');
-}
+  await queryInterface.dropTable("Users");
+};

@@ -1,4 +1,7 @@
-import { inject, injectState } from "../../../engine/framework/execution_context";
+import {
+  inject,
+  injectState,
+} from "../../../engine/framework/execution_context";
 import { Random } from "../../../engine/game/random";
 import { BAG } from "../../../engine/game/state";
 import { SelectAction, SelectData } from "../../../engine/select_action/select";
@@ -7,7 +10,6 @@ import { Good, goodToString } from "../../../engine/state/good";
 import { assert } from "../../../utils/validate";
 import { GOVERNMENT_ENGINE_LEVEL } from "../government_engine_level";
 import { REPOPULATION } from "./state";
-
 
 export class MontrealSelectAction extends SelectAction {
   private readonly random = inject(Random);
@@ -19,7 +21,10 @@ export class MontrealSelectAction extends SelectAction {
     if (this.currentPlayer().locomotive >= 6) return;
 
     this.engineLevel.update((engineLevel) => {
-      engineLevel.set(this.currentPlayer().color, engineLevel.get(this.currentPlayer().color)! + 1);
+      engineLevel.set(
+        this.currentPlayer().color,
+        engineLevel.get(this.currentPlayer().color)! + 1,
+      );
     });
   }
 

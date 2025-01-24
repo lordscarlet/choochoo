@@ -32,7 +32,9 @@ export class SharesPhase extends PhaseModule {
     super.onEndTurn();
   }
 
-  protected getAutoAction(autoAction: AutoAction): ActionBundle<object> | undefined {
+  protected getAutoAction(
+    autoAction: AutoAction,
+  ): ActionBundle<object> | undefined {
     if (autoAction.skipShares === true) {
       return {
         action: TakeSharesAction,

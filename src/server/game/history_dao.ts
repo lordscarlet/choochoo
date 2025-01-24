@@ -1,20 +1,42 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, NonAttribute } from "@sequelize/core";
-import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, Index, NotNull, PrimaryKey, Table, UpdatedAt, Version } from "@sequelize/core/decorators-legacy";
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  NonAttribute,
+} from "@sequelize/core";
+import {
+  Attribute,
+  AutoIncrement,
+  BelongsTo,
+  CreatedAt,
+  DeletedAt,
+  Index,
+  NotNull,
+  PrimaryKey,
+  Table,
+  UpdatedAt,
+  Version,
+} from "@sequelize/core/decorators-legacy";
 import { SomeRequired } from "../../utils/types";
 import { UserDao } from "../user/dao";
 import { GameDao } from "./dao";
 
-const gameVersionIndex = 'game-history-game-id';
+const gameVersionIndex = "game-history-game-id";
 
-@Table({ modelName: 'GameHistory' })
-export class GameHistoryDao extends Model<InferAttributes<GameHistoryDao>, InferCreationAttributes<GameHistoryDao>> {
+@Table({ modelName: "GameHistory" })
+export class GameHistoryDao extends Model<
+  InferAttributes<GameHistoryDao>,
+  InferCreationAttributes<GameHistoryDao>
+> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)
   declare id: CreationOptional<number>;
 
   @Index(gameVersionIndex)
-  @Attribute({ type: DataTypes.INTEGER, columnName: 'gameVersion' })
+  @Attribute({ type: DataTypes.INTEGER, columnName: "gameVersion" })
   @NotNull
   declare previousGameVersion: number;
 
@@ -42,13 +64,13 @@ export class GameHistoryDao extends Model<InferAttributes<GameHistoryDao>, Infer
   @NotNull
   declare gameId: number;
 
-  @BelongsTo(() => GameDao, 'gameId')
+  @BelongsTo(() => GameDao, "gameId")
   declare game: NonAttribute<GameDao>;
 
   @Attribute(DataTypes.INTEGER)
   declare userId: number | null;
 
-  @BelongsTo(() => UserDao, 'userId')
+  @BelongsTo(() => UserDao, "userId")
   declare user: NonAttribute<UserDao>;
 
   @Version
@@ -71,4 +93,7 @@ export class GameHistoryDao extends Model<InferAttributes<GameHistoryDao>, Infer
   }
 }
 
-type PerformActionGameHistoryDao = SomeRequired<GameHistoryDao, 'userId' | 'previousGameData' | 'actionName' | 'actionData'>;
+type PerformActionGameHistoryDao = SomeRequired<
+  GameHistoryDao,
+  "userId" | "previousGameData" | "actionName" | "actionData"
+>;

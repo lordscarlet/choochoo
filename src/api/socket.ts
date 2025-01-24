@@ -1,7 +1,7 @@
 import { GameApi, GameLiteApi } from "./game";
 import { MessageApi } from "./message";
 
-export const HOME_ROOM = 'homeroom';
+export const HOME_ROOM = "homeroom";
 
 export interface ServerToClientEvents {
   // The game room
@@ -23,4 +23,3 @@ export interface ClientToServerEvents {
   emitAction(actionName: string, actionData: object): void;
   submitMessage(message: string): void;
 }
-

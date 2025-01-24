@@ -1,6 +1,9 @@
 import { MapRegistry } from "../../maps/registry";
 import { assert } from "../../utils/validate";
-import { AutoActionManager, AutoActionMutationConfig } from "../game/auto_action_manager";
+import {
+  AutoActionManager,
+  AutoActionMutationConfig,
+} from "../game/auto_action_manager";
 import { GameEngine } from "../game/game";
 import { Log } from "../game/log";
 import { Memory } from "../game/memory";
@@ -33,7 +36,7 @@ export class EngineDelegator {
   static readonly singleton = new EngineDelegator();
   private readonly engines = new Map<string, EngineProcessor>();
 
-  private constructor() { }
+  private constructor() {}
 
   private getEngine(mapKey: string): EngineProcessor {
     if (!this.engines.has(mapKey)) {
@@ -61,7 +64,6 @@ export class EngineDelegator {
     return this.getEngine(mapKey).readSummary(gameData);
   }
 }
-
 
 interface StartProps {
   playerIds: number[];
@@ -93,13 +95,24 @@ export class EngineProcessor {
     return this.process(undefined, () => {
       this.random.setSeed(seed);
       const mapSettings = MapRegistry.singleton.get(mapConfig.mapKey);
-      assert(playerIds.length >= mapSettings.minPlayers, { invalidInput: 'not enough players to start' });
-      this.gameEngine.start(playerIds, mapSettings.startingGrid, mapSettings.interCityConnections ?? []);
+      assert(playerIds.length >= mapSettings.minPlayers, {
+        invalidInput: "not enough players to start",
+      });
+      this.gameEngine.start(
+        playerIds,
+        mapSettings.startingGrid,
+        mapSettings.interCityConnections ?? [],
+      );
       return this.getGameState();
     });
   }
 
-  processAction({ gameData, actionName, actionData, seed }: ProcessActionProps): GameState {
+  processAction({
+    gameData,
+    actionName,
+    actionData,
+    seed,
+  }: ProcessActionProps): GameState {
     return this.process(gameData, () => {
       this.random.setSeed(seed);
       this.gameEngine.processAction(actionName, actionData);
@@ -114,7 +127,7 @@ export class EngineProcessor {
         this.phase() === Phase.MOVING
           ? `Move goods round ${this.moveState().moveRound + 1}`
           : getPhaseString(this.phase()),
-      ].join(' - ');
+      ].join(" - ");
     });
   }
 
@@ -131,7 +144,9 @@ export class EngineProcessor {
 
   private getGameState(): GameState {
     return {
-      activePlayerId: this.gameEngine.hasEnded() ? undefined : this.currentPlayer().playerId,
+      activePlayerId: this.gameEngine.hasEnded()
+        ? undefined
+        : this.currentPlayer().playerId,
       hasEnded: this.gameEngine.hasEnded(),
       gameData: this.state.serialize(),
       reversible: this.random.isReversible(),
@@ -145,7 +160,7 @@ export class EngineProcessor {
 export class InjectionRunner {
   private static readonly ctxs = new Map<string, InjectionContext>();
 
-  private constructor() { }
+  private constructor() {}
 
   private static getInjectionContext(mapKey: string): InjectionContext {
     if (!this.ctxs.has(mapKey)) {
@@ -154,7 +169,11 @@ export class InjectionRunner {
     return this.ctxs.get(mapKey)!;
   }
 
-  static runFunction<T>(mapKey: string, gameData: string | undefined, fn: () => T): T {
+  static runFunction<T>(
+    mapKey: string,
+    gameData: string | undefined,
+    fn: () => T,
+  ): T {
     const ctx = this.getInjectionContext(mapKey);
     try {
       setInjectionContext(ctx);
@@ -168,7 +187,11 @@ export class InjectionRunner {
     }
   }
 
-  static get<T>(mapKey: string, gameData: string | undefined, ctor: SimpleConstructor<T>): T {
+  static get<T>(
+    mapKey: string,
+    gameData: string | undefined,
+    ctor: SimpleConstructor<T>,
+  ): T {
     return this.runFunction(mapKey, gameData, () => inject(ctor));
   }
 }

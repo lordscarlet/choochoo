@@ -47,7 +47,7 @@
 }
 
 .location.desert {
-  fill: #FFFFCC;
+  fill: #ffffcc;
 }
 
 :global(.dark-mode) .location.desert {

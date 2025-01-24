@@ -6,7 +6,6 @@ import { Log } from "../game/log";
 import { PlayerHelper } from "../game/player";
 import { ShareHelper } from "./share_helper";
 
-
 export const TakeSharesData = z.object({
   numShares: z.number(),
 });
@@ -14,7 +13,7 @@ export const TakeSharesData = z.object({
 export type TakeSharesData = z.infer<typeof TakeSharesData>;
 
 export class TakeSharesAction implements ActionProcessor<TakeSharesData> {
-  static readonly action = 'takeShares';
+  static readonly action = "takeShares";
   readonly assertInput = TakeSharesData.parse;
 
   private readonly log = inject(Log);
@@ -22,18 +21,20 @@ export class TakeSharesAction implements ActionProcessor<TakeSharesData> {
   private readonly helper = inject(ShareHelper);
 
   validate(data: TakeSharesData) {
-    assert(
-      data.numShares <= this.helper.getSharesTheyCanTake(),
-      { invalidInput: `cannot take more than ${this.helper.getMaxShares()} shares` })
+    assert(data.numShares <= this.helper.getSharesTheyCanTake(), {
+      invalidInput: `cannot take more than ${this.helper.getMaxShares()} shares`,
+    });
   }
 
   process({ numShares }: TakeSharesData): boolean {
     if (this.helper.getSharesTheyCanTake() === 0) {
       this.log.currentPlayer(`cannot take out anymore shares`);
     } else if (numShares === 0) {
-      this.log.currentPlayer('does not take out any shares');
+      this.log.currentPlayer("does not take out any shares");
     } else {
-      this.log.currentPlayer(`takes out ${numShares} shares and receives $${5 * numShares}`);
+      this.log.currentPlayer(
+        `takes out ${numShares} shares and receives $${5 * numShares}`,
+      );
     }
 
     this.playerHelper.updateCurrentPlayer((player) => {

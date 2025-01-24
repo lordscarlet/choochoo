@@ -1,6 +1,5 @@
-
-import { initContract } from '@ts-rest/core';
-import { z } from 'zod';
+import { initContract } from "@ts-rest/core";
+import { z } from "zod";
 
 function limit(msg: string): string {
   return msg.substring(0, 1000);
@@ -39,23 +38,23 @@ export const feedbackContract = c.router({
     responses: {
       200: z.object({ success: z.literal(true), errorId: z.number() }),
     },
-    method: 'POST',
-    path: '/feedback/error-report',
+    method: "POST",
+    path: "/feedback/error-report",
   },
   submit: {
     body: SubmitFeedbackApi,
     responses: {
       200: z.object({ success: z.literal(true) }),
     },
-    method: 'POST',
-    path: '/feedback',
+    method: "POST",
+    path: "/feedback",
   },
   list: {
     responses: {
       200: z.object({ feedback: z.array(FeedbackApi) }),
     },
-    method: 'GET',
-    path: '/feedback',
+    method: "GET",
+    path: "/feedback",
   },
   deleteFeedback: {
     body: z.object({}),
@@ -63,7 +62,7 @@ export const feedbackContract = c.router({
     responses: {
       200: z.object({ success: z.literal(true) }),
     },
-    method: 'DELETE',
-    path: '/feedback/:feedbackId',
+    method: "DELETE",
+    path: "/feedback/:feedbackId",
   },
 });

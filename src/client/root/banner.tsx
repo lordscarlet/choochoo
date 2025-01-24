@@ -1,6 +1,3 @@
-
 export function Banner() {
-  return <>
-    {/* <WaitlistBanner /> */}
-  </>;
+  return <>{/* <WaitlistBanner /> */}</>;
 }

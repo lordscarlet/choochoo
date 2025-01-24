@@ -1,4 +1,4 @@
-import seedrandom, { PRNG } from 'seedrandom';
+import seedrandom, { PRNG } from "seedrandom";
 import { iterate } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
@@ -7,7 +7,9 @@ import { Memory } from "./memory";
 
 export class Random {
   private readonly memory = inject(Memory);
-  private readonly seed = this.memory.remember<undefined | { seed: string, random: PRNG }>(undefined);
+  private readonly seed = this.memory.remember<
+    undefined | { seed: string; random: PRNG }
+  >(undefined);
 
   shuffle<T>(array: T[]): T[] {
     const results: T[] = [];
@@ -30,7 +32,10 @@ export class Random {
   }
 
   draw<T>(number: number, arr: T[], failOnOverflow: boolean): T[] {
-    assert(!failOnOverflow || number <= arr.length, 'cannot pull too many items from array');
+    assert(
+      !failOnOverflow || number <= arr.length,
+      "cannot pull too many items from array",
+    );
     return iterate(Math.min(number, arr.length), () => {
       const index = this.random(arr.length);
       return arr.splice(index, 1)[0];

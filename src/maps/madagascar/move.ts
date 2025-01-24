@@ -1,6 +1,9 @@
 import { EmptyAction } from "../../engine/game/action";
 import { ActionBundle } from "../../engine/game/phase_module";
-import { injectCurrentPlayer, injectPlayerAction } from "../../engine/game/state";
+import {
+  injectCurrentPlayer,
+  injectPlayerAction,
+} from "../../engine/game/state";
 import { MovePassAction } from "../../engine/move/pass";
 import { MovePhase } from "../../engine/move/phase";
 import { Action } from "../../engine/state/action";
@@ -21,7 +24,10 @@ export class MadagascarMovePhase extends MovePhase {
   }
 
   forcedAction(): ActionBundle<object> | undefined {
-    if (this.currentPlayer().selectedAction === Action.ONE_MOVE && this.moveState().moveRound > 0) {
+    if (
+      this.currentPlayer().selectedAction === Action.ONE_MOVE &&
+      this.moveState().moveRound > 0
+    ) {
       return { action: MovePassAction, data: {} };
     }
     return super.forcedAction();
@@ -30,7 +36,7 @@ export class MadagascarMovePhase extends MovePhase {
 
 export class MadagascarMovePassAction extends MovePassAction {
   process(data: EmptyAction): boolean {
-    this.log.currentPlayer('loses their second move turn.');
+    this.log.currentPlayer("loses their second move turn.");
     return super.process(data);
   }
 }

@@ -1,7 +1,7 @@
-import {GameStarter} from "../../engine/game/starter";
-import {assert} from "../../utils/validate";
-import {SpaceType} from "../../engine/state/location_type";
-import {GermanyMapData} from "./grid";
+import { GameStarter } from "../../engine/game/starter";
+import { assert } from "../../utils/validate";
+import { SpaceType } from "../../engine/state/location_type";
+import { GermanyMapData } from "./grid";
 
 export class GermanyStarter extends GameStarter {
   protected onStartGame(): void {
@@ -13,7 +13,7 @@ export class GermanyStarter extends GameStarter {
       if (mapData && mapData.portCity) {
         const color = bag.pop();
         assert(color !== undefined, "Bag cannot be emptied during setup");
-        this.gridHelper.update(space.coordinates, loc => {
+        this.gridHelper.update(space.coordinates, (loc) => {
           assert(loc.type === SpaceType.CITY);
           loc.color = color;
         });

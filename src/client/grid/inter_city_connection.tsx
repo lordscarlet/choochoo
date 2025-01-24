@@ -3,8 +3,8 @@ import { InterCityConnection } from "../../engine/state/inter_city_connection";
 import { Coordinates } from "../../utils/coordinates";
 import { getPlayerColorCss } from "../components/player_color";
 import { ClickTarget } from "./click_target";
-import * as gridStyles from './hex_grid.module.css';
-import * as styles from './inter_city_connection.module.css';
+import * as gridStyles from "./hex_grid.module.css";
+import * as styles from "./inter_city_connection.module.css";
 import { coordinatesToCenter, movePointInDirection } from "./point";
 
 interface InterCityConnectionRenderProps {
@@ -15,7 +15,13 @@ interface InterCityConnectionRenderProps {
   onClick?: (connects: Coordinates[]) => void;
 }
 
-export function InterCityConnectionRender({ connection, size, clickTargets, highlighted, onClick }: InterCityConnectionRenderProps) {
+export function InterCityConnectionRender({
+  connection,
+  size,
+  clickTargets,
+  highlighted,
+  onClick,
+}: InterCityConnectionRenderProps) {
   // For now, assume that the connection can only be rendered if it is between two cities.
   if (connection.connects.length !== 2) return <></>;
 
@@ -25,14 +31,23 @@ export function InterCityConnectionRender({ connection, size, clickTargets, high
     return movePointInDirection(center, size, first.getDirection(second));
   }, [first, second, size]);
 
-  const clickable = clickTargets.has(ClickTarget.INTER_CITY_CONNECTION) ? gridStyles.clickable : '';
+  const clickable = clickTargets.has(ClickTarget.INTER_CITY_CONNECTION)
+    ? gridStyles.clickable
+    : "";
 
-  const internalOnClick = useCallback(() => onClick && onClick(connection.connects), [...connection.connects]);
+  const internalOnClick = useCallback(
+    () => onClick && onClick(connection.connects),
+    [...connection.connects],
+  );
 
-  return <circle onClick={internalOnClick}
-    cx={connectionCenter.x}
-    cy={connectionCenter.y}
-    r={size / 3}
-    stroke={highlighted ? 'yellow' : 'black'}
-    className={`${styles.interCityConnection} ${clickable} ${connection.owner ? getPlayerColorCss(connection.owner.color) : ''}`} />;
+  return (
+    <circle
+      onClick={internalOnClick}
+      cx={connectionCenter.x}
+      cy={connectionCenter.y}
+      r={size / 3}
+      stroke={highlighted ? "yellow" : "black"}
+      className={`${styles.interCityConnection} ${clickable} ${connection.owner ? getPlayerColorCss(connection.owner.color) : ""}`}
+    />
+  );
 }

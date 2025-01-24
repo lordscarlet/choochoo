@@ -3,11 +3,16 @@ import { Direction } from "../engine/state/tile";
 import { DoubleHeight } from "./double_height";
 import { assert, assertNever } from "./validate";
 
-
 export class Coordinates {
   private static readonly staticMap = new Map<string, Coordinates>();
-  private constructor(readonly q: number, readonly r: number) {
-    assert(!Coordinates.staticMap.has(this.serialize()), 'accidentally built a different version of coordinates');
+  private constructor(
+    readonly q: number,
+    readonly r: number,
+  ) {
+    assert(
+      !Coordinates.staticMap.has(this.serialize()),
+      "accidentally built a different version of coordinates",
+    );
   }
 
   neighbor(dir: Direction): Coordinates {
@@ -33,7 +38,7 @@ export class Coordinates {
     return new DoubleHeight(col, row);
   }
 
-  static from({ q, r }: { q: number, r: number }): Coordinates {
+  static from({ q, r }: { q: number; r: number }): Coordinates {
     const key = `${q}|${r}`;
     if (Coordinates.staticMap.has(key)) {
       return Coordinates.staticMap.get(key)!;
@@ -53,7 +58,7 @@ export class Coordinates {
   }
 
   static unserialize(serialized: string): Coordinates {
-    const [q, r] = serialized.split('|').map((num) => Number(num));
+    const [q, r] = serialized.split("|").map((num) => Number(num));
     return Coordinates.from({ q, r });
   }
 
@@ -89,18 +94,27 @@ function fromOffset(offset: Offset): Direction {
   } else if (offset.q === 1 && offset.r === 0) {
     return Direction.BOTTOM_RIGHT;
   } else {
-    assert(false, 'cannot calculate direction of offset ' + JSON.stringify(offset));
+    assert(
+      false,
+      "cannot calculate direction of offset " + JSON.stringify(offset),
+    );
   }
 }
 
 function toOffset(dir: Direction): Offset {
   switch (dir) {
-    case Direction.TOP_LEFT: return { q: -1, r: 0 };
-    case Direction.TOP: return { q: 0, r: -1 };
-    case Direction.TOP_RIGHT: return { q: 1, r: -1 };
-    case Direction.BOTTOM_LEFT: return { q: -1, r: 1 };
-    case Direction.BOTTOM: return { q: 0, r: 1 };
-    case Direction.BOTTOM_RIGHT: return { q: 1, r: 0 };
+    case Direction.TOP_LEFT:
+      return { q: -1, r: 0 };
+    case Direction.TOP:
+      return { q: 0, r: -1 };
+    case Direction.TOP_RIGHT:
+      return { q: 1, r: -1 };
+    case Direction.BOTTOM_LEFT:
+      return { q: -1, r: 1 };
+    case Direction.BOTTOM:
+      return { q: 0, r: 1 };
+    case Direction.BOTTOM_RIGHT:
+      return { q: 1, r: 0 };
     default:
       assertNever(dir);
   }

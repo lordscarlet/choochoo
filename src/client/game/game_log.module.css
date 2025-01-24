@@ -33,7 +33,8 @@
   text-align: center;
 }
 
-.scroll-to-bottom {}
+.scroll-to-bottom {
+}
 
 .submit-form {
   display: flex;
@@ -52,4 +53,5 @@
   font-weight: bold;
 }
 
-.message {}
+.message {
+}

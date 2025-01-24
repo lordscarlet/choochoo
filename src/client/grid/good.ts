@@ -1,7 +1,6 @@
-
-import { Good } from '../../engine/state/good';
-import { assertNever } from '../../utils/validate';
-import * as styles from './good.module.css';
+import { Good } from "../../engine/state/good";
+import { assertNever } from "../../utils/validate";
+import * as styles from "./good.module.css";
 
 export function goodStyle(good: Good): string {
   switch (good) {

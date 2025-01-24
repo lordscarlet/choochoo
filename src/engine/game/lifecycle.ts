@@ -1,9 +1,8 @@
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
 
-
 export class StartRound {
-  constructor(readonly round: number) { }
+  constructor(readonly round: number) {}
 
   startPhase(phase: Phase): StartPhase {
     return new StartPhase(this.round, phase);
@@ -11,7 +10,10 @@ export class StartRound {
 }
 
 export class StartPhase {
-  constructor(readonly round: number, readonly phase: Phase) { }
+  constructor(
+    readonly round: number,
+    readonly phase: Phase,
+  ) {}
 
   startTurn(currentPlayer: PlayerColor): StartTurn {
     return new StartTurn(this.round, this.phase, currentPlayer);
@@ -23,7 +25,11 @@ export class StartPhase {
 }
 
 export class StartTurn {
-  constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
+  constructor(
+    readonly round: number,
+    readonly phase: Phase,
+    readonly currentPlayer: PlayerColor,
+  ) {}
 
   checkForcedAction(): CheckAutoAction {
     return new CheckAutoAction(this.round, this.phase, this.currentPlayer);
@@ -31,10 +37,20 @@ export class StartTurn {
 }
 
 export class CheckAutoAction {
-  constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
+  constructor(
+    readonly round: number,
+    readonly phase: Phase,
+    readonly currentPlayer: PlayerColor,
+  ) {}
 
   processAction(actionName: string, data: unknown) {
-    return new ProcessAction(this.round, this.phase, this.currentPlayer, actionName, data);
+    return new ProcessAction(
+      this.round,
+      this.phase,
+      this.currentPlayer,
+      actionName,
+      data,
+    );
   }
 
   waitForAction(): WaitForAction {
@@ -43,7 +59,11 @@ export class CheckAutoAction {
 }
 
 export class WaitForAction {
-  constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
+  constructor(
+    readonly round: number,
+    readonly phase: Phase,
+    readonly currentPlayer: PlayerColor,
+  ) {}
 }
 
 export class ProcessAction {
@@ -52,7 +72,8 @@ export class ProcessAction {
     readonly phase: Phase,
     readonly currentPlayer: PlayerColor,
     readonly actionName: string,
-    readonly data: unknown) { }
+    readonly data: unknown,
+  ) {}
 
   endTurn() {
     return new EndTurn(this.round, this.phase, this.currentPlayer);
@@ -64,7 +85,11 @@ export class ProcessAction {
 }
 
 export class EndTurn {
-  constructor(readonly round: number, readonly phase: Phase, readonly currentPlayer: PlayerColor) { }
+  constructor(
+    readonly round: number,
+    readonly phase: Phase,
+    readonly currentPlayer: PlayerColor,
+  ) {}
 
   startTurn(playerColor: PlayerColor) {
     return new StartTurn(this.round, this.phase, playerColor);
@@ -76,7 +101,10 @@ export class EndTurn {
 }
 
 export class EndPhase {
-  constructor(readonly round: number, readonly phase: Phase) { }
+  constructor(
+    readonly round: number,
+    readonly phase: Phase,
+  ) {}
 
   startPhase(phase: Phase) {
     return new StartPhase(this.round, phase);
@@ -88,7 +116,7 @@ export class EndPhase {
 }
 
 export class EndRound {
-  constructor(readonly round: number) { }
+  constructor(readonly round: number) {}
 
   startNextRound() {
     return new StartRound(this.round + 1);
@@ -96,12 +124,12 @@ export class EndRound {
 }
 
 export type LifecycleStage =
-  StartRound |
-  StartPhase |
-  StartTurn |
-  CheckAutoAction |
-  ProcessAction |
-  WaitForAction |
-  EndTurn |
-  EndPhase |
-  EndRound;
+  | StartRound
+  | StartPhase
+  | StartTurn
+  | CheckAutoAction
+  | ProcessAction
+  | WaitForAction
+  | EndTurn
+  | EndPhase
+  | EndRound;

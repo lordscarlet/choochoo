@@ -10,13 +10,14 @@ export class CyprusAllowedActions extends AllowedActions {
   protected readonly currentPlayer = injectState(CURRENT_PLAYER);
 
   getDisabledActionReason(action: Action): string | undefined {
-    const disabledAction = this.round() % 2 === 0 ? Action.ENGINEER : Action.LOCOMOTIVE;
+    const disabledAction =
+      this.round() % 2 === 0 ? Action.ENGINEER : Action.LOCOMOTIVE;
     if (disabledAction === action) {
-      return `This action is disabled on ${action === Action.ENGINEER ? 'even' : 'odd'} rounds.`;
+      return `This action is disabled on ${action === Action.ENGINEER ? "even" : "odd"} rounds.`;
     }
 
     if (this.currentPlayer() === UN && action === Action.URBANIZATION) {
-      return 'The UN is not allowed to select the Urbanization action';
+      return "The UN is not allowed to select the Urbanization action";
     }
     return undefined;
   }

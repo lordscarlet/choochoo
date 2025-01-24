@@ -1,7 +1,9 @@
 import { MutableRefObject, useEffect } from "react";
 
-
-export function useOutsideClick(ref: MutableRefObject<HTMLDivElement|null>, cb: () => void) {
+export function useOutsideClick(
+  ref: MutableRefObject<HTMLDivElement | null>,
+  cb: () => void,
+) {
   useEffect(() => {
     /**
      * Alert if clicked on outside of element
@@ -18,5 +20,4 @@ export function useOutsideClick(ref: MutableRefObject<HTMLDivElement|null>, cb: 
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [ref]);
-
 }

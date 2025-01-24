@@ -3,7 +3,6 @@ import { Immutable } from "../../utils/immutable";
 import { assertNever } from "../../utils/validate";
 import { ActionZod } from "./action";
 
-
 export enum PlayerColor {
   RED = 1,
   YELLOW,
@@ -34,24 +33,26 @@ export const MutablePlayerData = z.object({
 export type MutablePlayerData = z.infer<typeof MutablePlayerData>;
 export type PlayerData = Immutable<MutablePlayerData>;
 
-export function playerColorToString(playerColor?: PlayerColor): 'red' | 'yellow' | 'green' | 'purple' | 'black' | 'blue' | 'brown' | 'grey' {
+export function playerColorToString(
+  playerColor?: PlayerColor,
+): "red" | "yellow" | "green" | "purple" | "black" | "blue" | "brown" | "grey" {
   switch (playerColor) {
     case PlayerColor.RED:
-      return 'red';
+      return "red";
     case PlayerColor.YELLOW:
-      return 'yellow';
+      return "yellow";
     case PlayerColor.GREEN:
-      return 'green';
+      return "green";
     case PlayerColor.PURPLE:
-      return 'purple';
+      return "purple";
     case PlayerColor.BLACK:
-      return 'black';
+      return "black";
     case PlayerColor.BLUE:
-      return 'blue';
+      return "blue";
     case PlayerColor.BROWN:
-      return 'brown';
+      return "brown";
     case undefined:
-      return 'grey';
+      return "grey";
     default:
       assertNever(playerColor);
   }

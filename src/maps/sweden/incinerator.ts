@@ -4,8 +4,14 @@ import { Key, MapKey } from "../../engine/framework/key";
 import { TURN_ORDER } from "../../engine/game/state";
 import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
 
-export const GarbageCount = new Key('GarbageCount', { parse: z.number().parse });
-export const OwnedGarbage = new MapKey('OwnedGarbage', PlayerColorZod.parse, z.number().parse);
+export const GarbageCount = new Key("GarbageCount", {
+  parse: z.number().parse,
+});
+export const OwnedGarbage = new MapKey(
+  "OwnedGarbage",
+  PlayerColorZod.parse,
+  z.number().parse,
+);
 
 export class Incinerator {
   private readonly count = injectState(GarbageCount);
@@ -14,7 +20,9 @@ export class Incinerator {
 
   initialize(): void {
     this.count.initState(0);
-    this.ownedGarbage.initState(new Map(this.turnOrder().map((color) => [color, 0])));
+    this.ownedGarbage.initState(
+      new Map(this.turnOrder().map((color) => [color, 0])),
+    );
   }
 
   getGarbageCount(): number {

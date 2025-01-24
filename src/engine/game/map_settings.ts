@@ -1,7 +1,7 @@
-import {assertNever} from "../../utils/validate";
-import {SimpleConstructor} from "../framework/dependency_stack";
-import {GridData} from "../state/grid";
-import {InterCityConnection} from "../state/inter_city_connection";
+import { assertNever } from "../../utils/validate";
+import { SimpleConstructor } from "../framework/dependency_stack";
+import { GridData } from "../state/grid";
+import { InterCityConnection } from "../state/inter_city_connection";
 
 export enum ReleaseStage {
   DEVELOPMENT = 1,
@@ -13,11 +13,16 @@ export enum ReleaseStage {
 
 export function releaseStageToString(stage: ReleaseStage): string {
   switch (stage) {
-    case ReleaseStage.DEVELOPMENT: return 'Development';
-    case ReleaseStage.ALPHA: return 'Alpha';
-    case ReleaseStage.BETA: return 'Beta';
-    case ReleaseStage.PRODUCTION: return 'Production';
-    case ReleaseStage.DEPRECATED: return 'Deprecated';
+    case ReleaseStage.DEVELOPMENT:
+      return "Development";
+    case ReleaseStage.ALPHA:
+      return "Alpha";
+    case ReleaseStage.BETA:
+      return "Beta";
+    case ReleaseStage.PRODUCTION:
+      return "Production";
+    case ReleaseStage.DEPRECATED:
+      return "Deprecated";
     default:
       assertNever(stage);
   }

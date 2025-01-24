@@ -1,19 +1,25 @@
-
-import { duplicate } from '../../utils/functions';
-import { assert } from '../../utils/validate';
+import { duplicate } from "../../utils/functions";
+import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { GridHelper } from "../map/grid_helper";
-import { AvailableCity } from '../state/available_city';
-import { CityGroup } from '../state/city_group';
-import { Good } from '../state/good';
-import { GridData } from '../state/grid';
-import { InterCityConnection } from '../state/inter_city_connection';
-import { SpaceType } from '../state/location_type';
-import { allPlayerColors, PlayerColor, PlayerData } from '../state/player';
-import { OnRoll } from '../state/roll';
-import { SpaceData } from '../state/space';
-import { Random } from './random';
-import { AVAILABLE_CITIES, BAG, GRID, injectAllPlayersUnsafe, INTER_CITY_CONNECTIONS, TURN_ORDER } from './state';
+import { AvailableCity } from "../state/available_city";
+import { CityGroup } from "../state/city_group";
+import { Good } from "../state/good";
+import { GridData } from "../state/grid";
+import { InterCityConnection } from "../state/inter_city_connection";
+import { SpaceType } from "../state/location_type";
+import { allPlayerColors, PlayerColor, PlayerData } from "../state/player";
+import { OnRoll } from "../state/roll";
+import { SpaceData } from "../state/space";
+import { Random } from "./random";
+import {
+  AVAILABLE_CITIES,
+  BAG,
+  GRID,
+  injectAllPlayersUnsafe,
+  INTER_CITY_CONNECTIONS,
+  TURN_ORDER,
+} from "./state";
 
 export class GameStarter {
   protected readonly grid = injectState(GRID);
@@ -25,7 +31,11 @@ export class GameStarter {
   protected readonly gridHelper = inject(GridHelper);
   protected readonly random = inject(Random);
 
-  startGame(playerIds: number[], startingMap: GridData, connections: InterCityConnection[]) {
+  startGame(
+    playerIds: number[],
+    startingMap: GridData,
+    connections: InterCityConnection[],
+  ) {
     this.onBeginStartGame();
     this.initializeStartingCubes();
     this.drawCubesForCities(startingMap);
@@ -35,18 +45,20 @@ export class GameStarter {
     this.onStartGame();
   }
 
-  protected onBeginStartGame(): void { }
+  protected onBeginStartGame(): void {}
 
-  protected onStartGame(): void { }
+  protected onStartGame(): void {}
 
   initializeStartingCubes() {
-    this.bag.initState(this.random.shuffle([
-      ...duplicate(20, Good.RED),
-      ...duplicate(20, Good.PURPLE),
-      ...duplicate(20, Good.YELLOW),
-      ...duplicate(20, Good.BLUE),
-      ...duplicate(16, Good.BLACK),
-    ]));
+    this.bag.initState(
+      this.random.shuffle([
+        ...duplicate(20, Good.RED),
+        ...duplicate(20, Good.PURPLE),
+        ...duplicate(20, Good.YELLOW),
+        ...duplicate(20, Good.BLUE),
+        ...duplicate(16, Good.BLACK),
+      ]),
+    );
   }
 
   drawCubesForCities(startingMap: GridData) {
@@ -63,12 +75,10 @@ export class GameStarter {
     return {
       ...location,
       goods: draw(location.startingNumCubes ?? 0, bag),
-      onRoll: location.onRoll.map(
-        (onRollData) => ({
-          ...onRollData,
-          goods: this.getDrawnCubesFor(bag, false),
-        }),
-      ),
+      onRoll: location.onRoll.map((onRollData) => ({
+        ...onRollData,
+        goods: this.getDrawnCubesFor(bag, false),
+      })),
     };
   }
 
@@ -78,10 +88,14 @@ export class GameStarter {
 
   initializePlayers(playerIds: number[]) {
     const shuffledColors = this.random.shuffle(this.allPlayerColors());
-    const players = playerIds.map((id, index) => this.buildPlayer(id, shuffledColors[index]));
+    const players = playerIds.map((id, index) =>
+      this.buildPlayer(id, shuffledColors[index]),
+    );
 
     this.players.initState(players);
-    this.turnOrder.initState(this.random.shuffle(players).map((player) => player.color));
+    this.turnOrder.initState(
+      this.random.shuffle(players).map((player) => player.color),
+    );
   }
 
   getAvailableCities(): Array<[Good | Good[], CityGroup, OnRoll]> {
@@ -99,16 +113,19 @@ export class GameStarter {
 
   initializeAvailableCities() {
     const bag = [...this.bag()];
-    const availableCities: AvailableCity[] =
-      this.getAvailableCities().map(([color, group, onRoll]) => ({
+    const availableCities: AvailableCity[] = this.getAvailableCities().map(
+      ([color, group, onRoll]) => ({
         color,
-        onRoll: [{
-          goods: this.getDrawnCubesFor(bag, true),
-          group,
-          onRoll,
-        }],
+        onRoll: [
+          {
+            goods: this.getDrawnCubesFor(bag, true),
+            group,
+            onRoll,
+          },
+        ],
         goods: [],
-      }));
+      }),
+    );
     this.availableCities.initState(availableCities);
     this.bag.set(bag);
   }
@@ -134,9 +151,7 @@ export class GameStarter {
   }
 }
 
-
 function draw<T>(num: number, arr: T[]): T[] {
-  assert(arr.length >= num, 'drew too many!');
+  assert(arr.length >= num, "drew too many!");
   return duplicate(num, arr[0]).map((_) => arr.pop()!);
 }
-

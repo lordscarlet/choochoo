@@ -1,11 +1,34 @@
-import { CreationAttributes, CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, Op, Transaction } from "@sequelize/core";
-import { Attribute, AutoIncrement, BelongsTo, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from "@sequelize/core/decorators-legacy";
+import {
+  CreationAttributes,
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  Op,
+  Transaction,
+} from "@sequelize/core";
+import {
+  Attribute,
+  AutoIncrement,
+  BelongsTo,
+  CreatedAt,
+  DeletedAt,
+  NotNull,
+  PrimaryKey,
+  Table,
+  UpdatedAt,
+  Version,
+} from "@sequelize/core/decorators-legacy";
 import { MessageApi } from "../../api/message";
 import { GameDao } from "../game/dao";
 import { UserDao } from "../user/dao";
 
-@Table({ modelName: 'Log' })
-export class LogDao extends Model<InferAttributes<LogDao>, InferCreationAttributes<LogDao>> {
+@Table({ modelName: "Log" })
+export class LogDao extends Model<
+  InferAttributes<LogDao>,
+  InferCreationAttributes<LogDao>
+> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)
@@ -17,16 +40,16 @@ export class LogDao extends Model<InferAttributes<LogDao>, InferCreationAttribut
   @Attribute(DataTypes.INTEGER)
   declare userId: number | null;
 
-  @BelongsTo(() => UserDao, 'userId')
+  @BelongsTo(() => UserDao, "userId")
   declare user?: UserDao;
 
   @Attribute(DataTypes.INTEGER)
   declare gameId: number | null;
 
-  @BelongsTo(() => GameDao, 'gameId')
+  @BelongsTo(() => GameDao, "gameId")
   declare game?: GameDao;
 
-  @Attribute({ columnName: 'gameVersion', type: DataTypes.INTEGER })
+  @Attribute({ columnName: "gameVersion", type: DataTypes.INTEGER })
   declare previousGameVersion?: number | null;
 
   @Version
@@ -44,18 +67,35 @@ export class LogDao extends Model<InferAttributes<LogDao>, InferCreationAttribut
   @DeletedAt
   declare deletedAt: Date | null;
 
-  static async destroyLogsBackTo(gameId: number, backToVersion: number, transaction: Transaction): Promise<void> {
+  static async destroyLogsBackTo(
+    gameId: number,
+    backToVersion: number,
+    transaction: Transaction,
+  ): Promise<void> {
     // Fetch all the individual logs, so that socket.ts can individually notify the user that the logs were destroyed.
-    const logs = await LogDao.findAll({ where: { gameId: gameId, previousGameVersion: { [Op.gte]: backToVersion } }, transaction });
+    const logs = await LogDao.findAll({
+      where: {
+        gameId: gameId,
+        previousGameVersion: { [Op.gte]: backToVersion },
+      },
+      transaction,
+    });
     await Promise.all(logs.map((log) => log.destroy({ transaction })));
   }
 
-  static async createForGame(gameId: number, gameVersion: number, logs: string[], transaction?: Transaction): Promise<void> {
-    const createLogs = logs.map((message): CreateLogModel => ({
-      gameId: gameId,
-      message,
-      previousGameVersion: gameVersion,
-    }));
+  static async createForGame(
+    gameId: number,
+    gameVersion: number,
+    logs: string[],
+    transaction?: Transaction,
+  ): Promise<void> {
+    const createLogs = logs.map(
+      (message): CreateLogModel => ({
+        gameId: gameId,
+        message,
+        previousGameVersion: gameVersion,
+      }),
+    );
     await LogDao.bulkCreate(createLogs, { transaction });
   }
 

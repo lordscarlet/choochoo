@@ -11,8 +11,10 @@ export const BLACK = CityGroup.BLACK;
 
 export function cityGroupColor(group: CityGroup) {
   switch (group) {
-    case CityGroup.WHITE: return 'white';
-    case CityGroup.BLACK: return 'black';
+    case CityGroup.WHITE:
+      return "white";
+    case CityGroup.BLACK:
+      return "black";
     default:
       assertNever(group);
   }
@@ -20,8 +22,10 @@ export function cityGroupColor(group: CityGroup) {
 
 export function cityGroupTextColor(group: CityGroup): string {
   switch (group) {
-    case CityGroup.WHITE: return 'black';
-    case CityGroup.BLACK: return 'white';
+    case CityGroup.WHITE:
+      return "black";
+    case CityGroup.BLACK:
+      return "white";
     default:
       assertNever(group);
   }
@@ -29,7 +33,7 @@ export function cityGroupTextColor(group: CityGroup): string {
 
 export function toLetter({ group, onRoll }: OnRollData): string {
   if (group === CityGroup.WHITE) {
-    return String.fromCharCode('A'.charCodeAt(0) + onRoll - 3);
+    return String.fromCharCode("A".charCodeAt(0) + onRoll - 3);
   }
-  return String.fromCharCode('E'.charCodeAt(0) + onRoll - 1);
+  return String.fromCharCode("E".charCodeAt(0) + onRoll - 1);
 }

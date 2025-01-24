@@ -25,10 +25,13 @@ export class IndiaIncomePhase extends IncomePhase {
     for (const player of this.players()) {
       const result = this.moneyManager.addMoney(player.color, cost);
       if (result.lostIncome > 0) {
-        this.log.player(player, `cannot afford monsoon expenses, loses ${result.lostIncome}`);
+        this.log.player(
+          player,
+          `cannot afford monsoon expenses, loses ${result.lostIncome}`,
+        );
 
         if (result.outOfGame) {
-          this.log.player(player, 'drops out of the game');
+          this.log.player(player, "drops out of the game");
         }
       }
     }
@@ -37,13 +40,13 @@ export class IndiaIncomePhase extends IncomePhase {
   private monsoonCost(): number {
     switch (this.random.rollDie()) {
       case 1:
-        this.log.log('No monsoon expenses this round.');
+        this.log.log("No monsoon expenses this round.");
         return 0;
       case 6:
-        this.log.log('Heavy monsoon season, every player pays $2');
+        this.log.log("Heavy monsoon season, every player pays $2");
         return 2;
       default:
-        this.log.log('Light monsoon season, every player pays $2');
+        this.log.log("Light monsoon season, every player pays $2");
         return 1;
     }
   }

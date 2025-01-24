@@ -1,11 +1,30 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
-import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
-import { GameApi, GameLiteApi, GameStatus, MapConfig } from '../../api/game';
-import { EngineDelegator } from '../../engine/framework/engine';
-import { AutoAction } from '../../engine/state/auto_action';
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from "@sequelize/core";
+import {
+  Attribute,
+  AutoIncrement,
+  CreatedAt,
+  DeletedAt,
+  NotNull,
+  PrimaryKey,
+  Table,
+  UpdatedAt,
+  Version,
+} from "@sequelize/core/decorators-legacy";
+import { GameApi, GameLiteApi, GameStatus, MapConfig } from "../../api/game";
+import { EngineDelegator } from "../../engine/framework/engine";
+import { AutoAction } from "../../engine/state/auto_action";
 
-@Table({ modelName: 'Game' })
-export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttributes<GameDao>> {
+@Table({ modelName: "Game" })
+export class GameDao extends Model<
+  InferAttributes<GameDao>,
+  InferCreationAttributes<GameDao>
+> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)
@@ -84,7 +103,7 @@ export class GameDao extends Model<InferAttributes<GameDao>, InferCreationAttrib
   setAutoActionForUser(userId: number, autoAction: AutoAction): void {
     this.autoAction = this.autoAction ?? { users: {} };
     this.autoAction.users[userId] = autoAction;
-    this.changed('autoAction', true);
+    this.changed("autoAction", true);
   }
 }
 
@@ -97,7 +116,9 @@ export function toApi(game: InferAttributes<GameDao>): GameApi {
   };
 }
 
-export function toLiteApi(game: GameApi | InferAttributes<GameDao>): GameLiteApi {
+export function toLiteApi(
+  game: GameApi | InferAttributes<GameDao>,
+): GameLiteApi {
   return {
     id: game.id,
     gameKey: game.gameKey,
@@ -111,8 +132,10 @@ export function toLiteApi(game: GameApi | InferAttributes<GameDao>): GameLiteApi
   };
 }
 
-function toSummary(game: GameApi | InferAttributes<GameDao>): string | undefined {
-  if ('summary' in game) {
+function toSummary(
+  game: GameApi | InferAttributes<GameDao>,
+): string | undefined {
+  if ("summary" in game) {
     return game.summary;
   }
   if (game.status != GameStatus.enum.ACTIVE) return undefined;

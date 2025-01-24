@@ -6,4 +6,6 @@ export const GoodsGrowthState = z.object({
   goods: z.array(z.nativeEnum(Good)),
 });
 export type GoodsGrowthState = z.infer<typeof GoodsGrowthState>;
-export const GOODS_GROWTH_STATE = new Key('GoodsGrowthState', { parse: GoodsGrowthState.parse });
+export const GOODS_GROWTH_STATE = new Key("GoodsGrowthState", {
+  parse: GoodsGrowthState.parse,
+});

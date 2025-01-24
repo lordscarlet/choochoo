@@ -5,7 +5,6 @@ import { SpaceType, SpaceTypeZod } from "./location_type";
 import { OnRollData } from "./roll";
 import { DirectionZod, MutableTileData } from "./tile";
 
-
 export const MutableCityData = z.object({
   type: z.literal(SpaceType.CITY),
   name: z.string(),

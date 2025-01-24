@@ -1,9 +1,9 @@
-import { createExpressEndpoints, initServer } from '@ts-rest/express';
-import express from 'express';
-import { autoActionContract } from '../../api/auto_action';
-import { assert } from '../../utils/validate';
-import { assertRole } from '../util/enforce_role';
-import { GameDao } from './dao';
+import { createExpressEndpoints, initServer } from "@ts-rest/express";
+import express from "express";
+import { autoActionContract } from "../../api/auto_action";
+import { assert } from "../../utils/validate";
+import { assertRole } from "../util/enforce_role";
+import { GameDao } from "./dao";
 
 export const autoActionApp = express();
 

@@ -12,14 +12,15 @@ interface RotateProps {
 export function Rotate({ rotation, reverse, center, children }: RotateProps) {
   const rotationNorm = reverse ? reverseRotation(rotation) : rotation;
   const rotationStr = (rotationNorm === Rotation.CLOCKWISE ? 1 : -1) * 90;
-  const centerStr = center != null ? `${center.x} ${center.y}` : '';
-  const rotateStr = rotationNorm != null ? `rotate(${rotationStr} ${centerStr})` : '';
-  return <g transform={rotateStr}>
-    {children}
-  </g>;
+  const centerStr = center != null ? `${center.x} ${center.y}` : "";
+  const rotateStr =
+    rotationNorm != null ? `rotate(${rotationStr} ${centerStr})` : "";
+  return <g transform={rotateStr}>{children}</g>;
 }
 
 function reverseRotation(rotation?: Rotation): Rotation | undefined {
   if (rotation == null) return rotation;
-  return rotation === Rotation.CLOCKWISE ? Rotation.COUNTER_CLOCKWISE : Rotation.CLOCKWISE;
+  return rotation === Rotation.CLOCKWISE
+    ? Rotation.COUNTER_CLOCKWISE
+    : Rotation.CLOCKWISE;
 }

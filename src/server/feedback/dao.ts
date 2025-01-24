@@ -1,9 +1,28 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from '@sequelize/core';
-import { Attribute, AutoIncrement, CreatedAt, DeletedAt, NotNull, PrimaryKey, Table, UpdatedAt, Version } from '@sequelize/core/decorators-legacy';
-import { FeedbackApi } from '../../api/feedback';
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from "@sequelize/core";
+import {
+  Attribute,
+  AutoIncrement,
+  CreatedAt,
+  DeletedAt,
+  NotNull,
+  PrimaryKey,
+  Table,
+  UpdatedAt,
+  Version,
+} from "@sequelize/core/decorators-legacy";
+import { FeedbackApi } from "../../api/feedback";
 
-@Table({ modelName: 'Feedback' })
-export class FeedbackDao extends Model<InferAttributes<FeedbackDao>, InferCreationAttributes<FeedbackDao>> {
+@Table({ modelName: "Feedback" })
+export class FeedbackDao extends Model<
+  InferAttributes<FeedbackDao>,
+  InferCreationAttributes<FeedbackDao>
+> {
   @AutoIncrement
   @PrimaryKey
   @Attribute(DataTypes.INTEGER)

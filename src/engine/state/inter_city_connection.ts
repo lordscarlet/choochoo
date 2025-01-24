@@ -13,7 +13,10 @@ export type InterCityConnection = z.infer<typeof InterCityConnection>;
 
 export type OwnedInterCityConnection = Required<InterCityConnection>;
 
-export function interCityConnectionEquals(first?: InterCityConnection | OwnedInterCityConnection, second?: InterCityConnection | OwnedInterCityConnection) {
+export function interCityConnectionEquals(
+  first?: InterCityConnection | OwnedInterCityConnection,
+  second?: InterCityConnection | OwnedInterCityConnection,
+) {
   if (first == null && second == null) return true;
   if (first == null || second == null) return false;
   return arrayEqualsIgnoreOrder(first.connects, second.connects);

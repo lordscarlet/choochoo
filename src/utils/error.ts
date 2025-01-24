@@ -1,12 +1,16 @@
 import { ErrorCode } from "./error_code";
 
 export class UserError extends Error {
-  constructor(readonly statusCode: number, msg: string, readonly errorCode?: ErrorCode) {
+  constructor(
+    readonly statusCode: number,
+    msg: string,
+    readonly errorCode?: ErrorCode,
+  ) {
     super(msg);
   }
 
   toString(): string {
-    return this.constructor.name + ': ' + this.message;
+    return this.constructor.name + ": " + this.message;
   }
 }
 
@@ -18,7 +22,7 @@ export class InvalidInputError extends UserError {
 
 export class InvalidXsrfToken extends UserError {
   constructor() {
-    super(400, 'Invalid XSRF token', ErrorCode.INVALID_XSRF_TOKEN);
+    super(400, "Invalid XSRF token", ErrorCode.INVALID_XSRF_TOKEN);
   }
 }
 
@@ -40,7 +44,6 @@ export class NotFoundError extends UserError {
   }
 }
 
-
 interface ErrorData {
   invalidInput?: true | string;
   permissionDenied?: true | string;
@@ -51,17 +54,23 @@ interface ErrorData {
 export type ErrorInput = ErrorData | string;
 
 export function emitError(err: ErrorInput): never {
-  if (typeof err === 'string') {
+  if (typeof err === "string") {
     throw new Error(err);
   } else if (err.invalidInput != null) {
-    throw new InvalidInputError(err.invalidInput === true ? 'invalidInput' : err.invalidInput);
+    throw new InvalidInputError(
+      err.invalidInput === true ? "invalidInput" : err.invalidInput,
+    );
   } else if (err.permissionDenied != null) {
-    throw new PermissionDeniedError(err.permissionDenied === true ? 'permissionDenied' : err.permissionDenied);
+    throw new PermissionDeniedError(
+      err.permissionDenied === true ? "permissionDenied" : err.permissionDenied,
+    );
   } else if (err.notFound != null) {
-    throw new NotFoundError(err.notFound === true ? 'notFound' : err.notFound);
+    throw new NotFoundError(err.notFound === true ? "notFound" : err.notFound);
   } else if (err.unauthorized != null) {
-    throw new UnauthorizedError(err.unauthorized === true ? 'unauthorized' : err.unauthorized);
+    throw new UnauthorizedError(
+      err.unauthorized === true ? "unauthorized" : err.unauthorized,
+    );
   } else {
-    throw new Error('unknown');
+    throw new Error("unknown");
   }
 }

@@ -5,7 +5,7 @@ import { Phase, PhaseZod } from "../state/phase";
 import { Log } from "./log";
 import { PhaseDelegator } from "./phase_delegator";
 
-export const PHASE = new Key('currentPhase', { parse: PhaseZod.parse });
+export const PHASE = new Key("currentPhase", { parse: PhaseZod.parse });
 
 export class PhaseEngine {
   private readonly log = inject(Log);
@@ -44,7 +44,7 @@ export class PhaseEngine {
   findNextPhase(currentPhase: Phase): Phase | undefined {
     const phaseOrder = this.phaseOrder();
     const phaseIndex = phaseOrder.indexOf(currentPhase);
-    assert(phaseIndex >= 0, 'Phase index not found');
+    assert(phaseIndex >= 0, "Phase index not found");
 
     return phaseOrder[phaseIndex + 1];
   }

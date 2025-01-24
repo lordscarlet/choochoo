@@ -98,7 +98,7 @@ ${this.makeUnsubscribeLink(user.email)}
     const updatePasswordLink = `https://www.choochoo.games/app/users/update-password?code=${code}`;
     await this.sendEmail({
       email,
-      subject: 'Forgotten password request',
+      subject: "Forgotten password request",
       text: `
 Let's get you back on the train!
 Copy and paste the following link into your browser window to update your password:
@@ -131,7 +131,7 @@ ${this.makeUnsubscribeLink(email)}
     const activationLink = `https://www.choochoo.games/app/users/activate?activationCode=${activationCode}`;
     await this.sendEmail({
       email,
-      subject: 'Activate your account',
+      subject: "Activate your account",
       text: `
 Welcome to Choo Cho Games!
 Copy and paste the following link into your browser window to activate:
@@ -173,64 +173,80 @@ class MailjetEmailService extends EmailService {
 
   async subscribe(email: string): Promise<void> {
     try {
-      await this.mailjet.post("contact", { 'version': 'v3' })
-        .request({ "Email": email, "Name": email });
       await this.mailjet
-        .post("listrecipient", { 'version': 'v3' })
-        .request({
-          "IsUnsubscribed": "false",
-          "ContactAlt": email,
-          "ListID": "10484665",
-        })
+        .post("contact", { version: "v3" })
+        .request({ Email: email, Name: email });
+      await this.mailjet.post("listrecipient", { version: "v3" }).request({
+        IsUnsubscribed: "false",
+        ContactAlt: email,
+        ListID: "10484665",
+      });
     } catch (e: unknown) {
-      if (typeof e === 'object' && e != null && 'ErrorMessage' in e && (e.ErrorMessage as string[])?.includes('already exists')) {
+      if (
+        typeof e === "object" &&
+        e != null &&
+        "ErrorMessage" in e &&
+        (e.ErrorMessage as string[])?.includes("already exists")
+      ) {
         return;
       }
       throw e;
     }
   }
 
-  async setIsExcludedFromCampaigns(email: string, isExcluded = true): Promise<void> {
+  async setIsExcludedFromCampaigns(
+    email: string,
+    isExcluded = true,
+  ): Promise<void> {
     try {
-      await this.mailjet.put("contact")
+      await this.mailjet
+        .put("contact")
         .id(email)
         .request({
-          "IsExcludedFromCampaigns": isExcluded ? "true" : 'false',
+          IsExcludedFromCampaigns: isExcluded ? "true" : "false",
         });
     } catch (e: unknown) {
       const alreadyExcluded =
-        typeof e === 'object' && e != null && 'statusCode' in e &&
-        e.statusCode === 304 && 'statusText' in e && e.statusText == 'Content not changed';
+        typeof e === "object" &&
+        e != null &&
+        "statusCode" in e &&
+        e.statusCode === 304 &&
+        "statusText" in e &&
+        e.statusText == "Content not changed";
       // Ignore errors where the user is already excluded.
       if (alreadyExcluded) return;
       throw e;
     }
   }
 
-  async sendEmail({ email, subject, text, html }: SendEmailProps): Promise<void> {
+  async sendEmail({
+    email,
+    subject,
+    text,
+    html,
+  }: SendEmailProps): Promise<void> {
     try {
-      await this.mailjet.post("send", { 'version': 'v3.1' })
-        .request({
-          "Messages": [
-            {
-              "From": {
-                "Email": "support@choochoo.games",
-                "Name": "Choo Choo Games"
-              },
-              "To": [
-                {
-                  "Email": email,
-                  "Name": email,
-                }
-              ],
-              "Subject": subject,
-              "TextPart": text,
-              "HTMLPart": html,
+      await this.mailjet.post("send", { version: "v3.1" }).request({
+        Messages: [
+          {
+            From: {
+              Email: "support@choochoo.games",
+              Name: "Choo Choo Games",
             },
-          ],
-        });
+            To: [
+              {
+                Email: email,
+                Name: email,
+              },
+            ],
+            Subject: subject,
+            TextPart: text,
+            HTMLPart: html,
+          },
+        ],
+      });
     } catch (e) {
-      console.log('failed to send an email');
+      console.log("failed to send an email");
       console.error(e);
     }
   }
@@ -245,20 +261,22 @@ interface SendEmailProps {
 
 class NoopEmailService extends EmailService {
   async setIsExcludedFromCampaigns(email: string): Promise<void> {
-    console.log('unsubscribing', email);
+    console.log("unsubscribing", email);
   }
 
   async subscribe(email: string): Promise<void> {
-    console.log('subscribing', email);
+    console.log("subscribing", email);
   }
 
   protected async sendEmail(email: SendEmailProps): Promise<void> {
-    console.log('sending email', email);
+    console.log("sending email", email);
   }
-
 }
 
 export const emailService =
   environment.mailjetKey == null || environment.mailjetSecret == null
     ? new NoopEmailService()
-    : new MailjetEmailService(environment.mailjetKey, environment.mailjetSecret);
+    : new MailjetEmailService(
+        environment.mailjetKey,
+        environment.mailjetSecret,
+      );

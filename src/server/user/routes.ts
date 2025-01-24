@@ -1,21 +1,19 @@
-import { Op, ValidationError, WhereOptions } from '@sequelize/core';
-import { createExpressEndpoints, initServer } from '@ts-rest/express';
-import express from 'express';
-import { userContract, UserRole } from '../../api/user';
-import { assert, fail } from '../../utils/validate';
-import '../session';
-import { badwords } from '../util/badwords';
-import { emailService } from '../util/email';
-import { assertRole } from '../util/enforce_role';
-import { UserDao } from './dao';
-
+import { Op, ValidationError, WhereOptions } from "@sequelize/core";
+import { createExpressEndpoints, initServer } from "@ts-rest/express";
+import express from "express";
+import { userContract, UserRole } from "../../api/user";
+import { assert, fail } from "../../utils/validate";
+import "../session";
+import { badwords } from "../util/badwords";
+import { emailService } from "../util/email";
+import { assertRole } from "../util/enforce_role";
+import { UserDao } from "./dao";
 
 export const userApp = express();
 
 const router = initServer().router(userContract, {
-
   async getMe({ req }) {
-    if (typeof req.session.userId === 'string') {
+    if (typeof req.session.userId === "string") {
       delete req.session.userId;
     }
     if (req.session.userId == null) {
@@ -23,7 +21,9 @@ const router = initServer().router(userContract, {
     }
     const [user, adminUser] = await Promise.all([
       UserDao.getUser(req.session.userId),
-      req.session.adminUserId != null ? UserDao.getUser(req.session.adminUserId) : undefined,
+      req.session.adminUserId != null
+        ? UserDao.getUser(req.session.adminUserId)
+        : undefined,
     ]);
 
     assert(user != null);
@@ -42,14 +42,16 @@ const router = initServer().router(userContract, {
     let user: UserDao | null;
     if (body.updateCode != null) {
       const email = emailService.getEmailFromActivationCode(body.updateCode);
-      assert(email != null, { invalidInput: 'Expired activation code (1)' });
+      assert(email != null, { invalidInput: "Expired activation code (1)" });
       user = await UserDao.findByUsernameOrEmail(email);
-      assert(user != null, { invalidInput: 'Expired activation code (2)' });
+      assert(user != null, { invalidInput: "Expired activation code (2)" });
     } else if (body.oldPassword != null) {
       assert(req.session.userId != null, { unauthorized: true });
       user = await UserDao.findByPk(req.session.userId);
       assert(user != null);
-      assert(await user.comparePassword(body.oldPassword), { permissionDenied: 'Invalid credentials' });
+      assert(await user.comparePassword(body.oldPassword), {
+        permissionDenied: "Invalid credentials",
+      });
     } else {
       fail({ invalidInput: true });
     }
@@ -66,13 +68,20 @@ const router = initServer().router(userContract, {
     }
     const pageSize = query.pageSize ?? 20;
     const allUsers = await UserDao.findAll({
-      order: [['id', 'DESC']],
+      order: [["id", "DESC"]],
       limit: pageSize + 1,
       where,
     });
-    const users = allUsers.length > pageSize ? allUsers.slice(0, pageSize) : allUsers;
-    const nextPageCursor = allUsers.length > pageSize ? (query.pageCursor ?? []).concat(users.map((user) => user.id)) : undefined;
-    return { status: 200, body: { users: users.map((user) => user.toMyApi()), nextPageCursor } };
+    const users =
+      allUsers.length > pageSize ? allUsers.slice(0, pageSize) : allUsers;
+    const nextPageCursor =
+      allUsers.length > pageSize
+        ? (query.pageCursor ?? []).concat(users.map((user) => user.id))
+        : undefined;
+    return {
+      status: 200,
+      body: { users: users.map((user) => user.toMyApi()), nextPageCursor },
+    };
   },
 
   async get({ req, params }) {
@@ -85,7 +94,9 @@ const router = initServer().router(userContract, {
   async create({ req, body }) {
     try {
       for (const badword of badwords) {
-        assert(!body.username.includes(badword), { invalidInput: 'cannot use bad words in username' });
+        assert(!body.username.includes(badword), {
+          invalidInput: "cannot use bad words in username",
+        });
       }
       const user = await UserDao.register(body);
       req.session.userId = user.id;
@@ -93,24 +104,28 @@ const router = initServer().router(userContract, {
       emailService.sendActivationCode(user.email);
       return { status: 200, body: { user: user.toMyApi() } };
     } catch (e) {
-      console.log('error', e);
+      console.log("error", e);
       if (e instanceof ValidationError) {
-        assert(!e.errors[0].message.includes('must be unique'), { invalidInput: e.errors[0].message });
+        assert(!e.errors[0].message.includes("must be unique"), {
+          invalidInput: e.errors[0].message,
+        });
       }
       throw e;
     }
   },
 
   async activateAccount({ req, body }) {
-    assert(req.session.userId != null, { invalidInput: 'Sign in first' });
+    assert(req.session.userId != null, { invalidInput: "Sign in first" });
     const user = await UserDao.findByPk(req.session.userId);
 
-    assert(user != null, { unauthorized: 'Sign in first' });
+    assert(user != null, { unauthorized: "Sign in first" });
     const email = emailService.getEmailFromActivationCode(body.activationCode);
-    assert(user.email == email, { invalidInput: 'Invalid activation code (1)' });
-    assert(
-      user.role == UserRole.enum.ACTIVATE_EMAIL,
-      { invalidInput: 'Already activated' });
+    assert(user.email == email, {
+      invalidInput: "Invalid activation code (1)",
+    });
+    assert(user.role == UserRole.enum.ACTIVATE_EMAIL, {
+      invalidInput: "Already activated",
+    });
 
     user.role = UserRole.enum.USER;
     await user.save();
@@ -126,16 +141,22 @@ const router = initServer().router(userContract, {
     }
     const user = await UserDao.findByPk(body.userId ?? req.session.userId);
     assert(user != null, { permissionDenied: true });
-    assert(user.role == UserRole.enum.ACTIVATE_EMAIL, { permissionDenied: true });
+    assert(user.role == UserRole.enum.ACTIVATE_EMAIL, {
+      permissionDenied: true,
+    });
     emailService.sendActivationCode(user.email);
     return { status: 200, body: { success: true } };
   },
 
   async login({ req, body }) {
     const user = await UserDao.login(body.usernameOrEmail, body.password);
-    assert(user != null && user.role !== UserRole.enum.BLOCKED, { unauthorized: 'Invalid credentials' });
+    assert(user != null && user.role !== UserRole.enum.BLOCKED, {
+      unauthorized: "Invalid credentials",
+    });
     if (body.activationCode != null) {
-      const email = emailService.getEmailFromActivationCode(body.activationCode);
+      const email = emailService.getEmailFromActivationCode(
+        body.activationCode,
+      );
       if (email == user.email && user.role == UserRole.enum.ACTIVATE_EMAIL) {
         user.role = UserRole.enum.USER;
         await user.save();
@@ -171,7 +192,7 @@ const router = initServer().router(userContract, {
   async makeAdmin({ params, req }) {
     await assertRole(req, UserRole.enum.ADMIN);
     const modifyUser = await UserDao.findByPk(params.userId);
-    assert(modifyUser != null, { notFound: 'user not found' });
+    assert(modifyUser != null, { notFound: "user not found" });
     modifyUser.role = UserRole.enum.ADMIN;
     await modifyUser.save();
     await modifyUser.updateCache();

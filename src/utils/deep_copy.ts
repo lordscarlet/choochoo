@@ -19,7 +19,7 @@ export function deepCopy(t: unknown): unknown {
   } else if (t instanceof Coordinates) {
     return t;
   } else {
-    assert(typeof t === 'object');
+    assert(typeof t === "object");
     return Object.keys(t as object).reduce((result, prop: string) => {
       // eslint-disable-next-line
       result[prop] = deepCopy((t as any)[prop]);

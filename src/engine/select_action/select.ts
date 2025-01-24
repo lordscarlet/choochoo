@@ -1,5 +1,3 @@
-
-
 import { z } from "zod";
 import { assert } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
@@ -17,7 +15,7 @@ export const SelectData = z.object({
 export type SelectData = z.infer<typeof SelectData>;
 
 export class SelectAction implements ActionProcessor<SelectData> {
-  static readonly action = 'select';
+  static readonly action = "select";
   protected readonly currentPlayer = injectCurrentPlayer();
   protected readonly helper = inject(PlayerHelper);
   protected readonly log = inject(Log);
@@ -25,7 +23,9 @@ export class SelectAction implements ActionProcessor<SelectData> {
 
   readonly assertInput = SelectData.parse;
   validate({ action }: SelectData): void {
-    assert(this.actions.getAvailableActions().has(action), { invalidInput: 'action already selected' });
+    assert(this.actions.getAvailableActions().has(action), {
+      invalidInput: "action already selected",
+    });
   }
 
   protected applyLocomotive(): void {

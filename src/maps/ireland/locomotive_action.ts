@@ -1,4 +1,3 @@
-
 import { injectState } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
 import { MoveHelper } from "../../engine/move/helper";

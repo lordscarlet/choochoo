@@ -3,7 +3,12 @@
 import { rotateDirectionClockwise } from "../engine/map/direction";
 import { toBaseTile } from "../engine/map/location";
 import { PlayerColor } from "../engine/state/player";
-import { Direction, MutableTileData, SimpleTileType, TownTileType } from "../engine/state/tile";
+import {
+  Direction,
+  MutableTileData,
+  SimpleTileType,
+  TownTileType,
+} from "../engine/state/tile";
 import { ImmutableSet } from "../utils/immutable";
 import { fail } from "../utils/validate";
 
@@ -11,7 +16,10 @@ export function startFrom(startFrom: Direction): TrackFactory {
   return new TrackFactory(startFrom);
 }
 
-export function townTile(directions: Direction[], owners: Array<PlayerColor | undefined>): MutableTileData {
+export function townTile(
+  directions: Direction[],
+  owners: Array<PlayerColor | undefined>,
+): MutableTileData {
   const options = [
     TownTileType.LOLLYPOP,
     TownTileType.STRAIGHT,
@@ -26,9 +34,11 @@ export function townTile(directions: Direction[], owners: Array<PlayerColor | un
     TownTileType.K,
   ];
   for (const tileType of options) {
-    let tileDirections = toBaseTile(tileType).map((tile) => tile.exits[1] as Direction);
+    let tileDirections = toBaseTile(tileType).map(
+      (tile) => tile.exits[1] as Direction,
+    );
     if (tileDirections.length === directions.length) continue;
-    let orientation = Direction.TOP
+    let orientation = Direction.TOP;
     for (let i = 0; i < 6; i++) {
       if (ImmutableSet(tileDirections).subtract(directions).isEmpty()) {
         const newOwners = tileDirections.map((dir) => {
@@ -45,15 +55,18 @@ export function townTile(directions: Direction[], owners: Array<PlayerColor | un
       orientation = rotateDirectionClockwise(orientation);
     }
   }
-  fail(`found no track with exits ${directions.join(',')}`);
+  fail(`found no track with exits ${directions.join(",")}`);
 }
 
-export function complex(_1: MutableTileData, _2: MutableTileData): MutableTileData {
-  throw new Error('not implemented yet');
+export function complex(
+  _1: MutableTileData,
+  _2: MutableTileData,
+): MutableTileData {
+  throw new Error("not implemented yet");
 }
 
 class TrackFactory {
-  constructor(private readonly startFrom: Direction) { }
+  constructor(private readonly startFrom: Direction) {}
 
   straightAcross(owner?: PlayerColor): MutableTileData {
     return {
@@ -66,7 +79,9 @@ class TrackFactory {
   curveLeft(owner?: PlayerColor): MutableTileData {
     return {
       tileType: SimpleTileType.CURVE,
-      orientation: rotateDirectionClockwise(rotateDirectionClockwise(this.startFrom)),
+      orientation: rotateDirectionClockwise(
+        rotateDirectionClockwise(this.startFrom),
+      ),
       owners: [owner],
     };
   }
@@ -95,4 +110,3 @@ class TrackFactory {
     };
   }
 }
-

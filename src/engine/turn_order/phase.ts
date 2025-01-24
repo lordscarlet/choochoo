@@ -1,4 +1,3 @@
-
 import { infiniteLoopCheck } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
@@ -6,7 +5,11 @@ import { AutoActionManager } from "../game/auto_action_manager";
 import { Log } from "../game/log";
 import { ActionBundle, PhaseModule } from "../game/phase_module";
 import { PlayerHelper } from "../game/player";
-import { injectCurrentPlayer, injectInGamePlayers, TURN_ORDER } from "../game/state";
+import {
+  injectCurrentPlayer,
+  injectInGamePlayers,
+  TURN_ORDER,
+} from "../game/state";
 import { AutoAction } from "../state/auto_action";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
@@ -54,7 +57,7 @@ export class TurnOrderPhase extends PhaseModule {
   onEnd(): void {
     super.onEnd();
     const remainingBidders = this.helper.remainingBiddersOrder();
-    assert(remainingBidders.length === 1, 'expected exactly one bidder');
+    assert(remainingBidders.length === 1, "expected exactly one bidder");
     this.helper.pass(this.playerHelper.getPlayer(remainingBidders[0]));
     this.currentOrder.set(this.turnOrderState().nextTurnOrder);
     this.turnOrderState.delete();
@@ -75,16 +78,26 @@ export class TurnOrderPhase extends PhaseModule {
     do {
       infiniteLoop();
       const previousIndex = currentOrder.indexOf(nextPlayer);
-      nextPlayer = currentOrder[previousIndex === currentOrder.length - 1 ? 0 : previousIndex + 1];
+      nextPlayer =
+        currentOrder[
+          previousIndex === currentOrder.length - 1 ? 0 : previousIndex + 1
+        ];
       if (nextPlayer === maxBidPlayer) {
-        const nextPlayerData = this.players().find(({ color }) => color === nextPlayer)!;
-        this.log.player(nextPlayerData, 'does not have to bid against themselves');
+        const nextPlayerData = this.players().find(
+          ({ color }) => color === nextPlayer,
+        )!;
+        this.log.player(
+          nextPlayerData,
+          "does not have to bid against themselves",
+        );
       }
     } while (nextPlayer === maxBidPlayer || passedPlayers.has(nextPlayer));
     return nextPlayer;
   }
 
-  protected getAutoAction(autoAction: AutoAction): ActionBundle<object> | undefined {
+  protected getAutoAction(
+    autoAction: AutoAction,
+  ): ActionBundle<object> | undefined {
     if (autoAction.bidUntil == null) return undefined;
 
     const minBid = this.helper.getMinBid();
@@ -92,7 +105,11 @@ export class TurnOrderPhase extends PhaseModule {
     if (minBid <= autoAction.bidUntil.maxBid) {
       return {
         action: BidAction,
-        data: { bid: autoAction.bidUntil.incrementally ? minBid : autoAction.bidUntil.maxBid },
+        data: {
+          bid: autoAction.bidUntil.incrementally
+            ? minBid
+            : autoAction.bidUntil.maxBid,
+        },
       };
     } else if (autoAction.bidUntil.thenPass) {
       return {

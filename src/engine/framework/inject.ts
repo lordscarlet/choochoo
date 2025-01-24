@@ -1,12 +1,22 @@
 import { MapRegistry } from "../../maps/registry";
 import { assert } from "../../utils/validate";
-import { Dependency, DependencyStack, SimpleConstructor } from "./dependency_stack";
+import {
+  Dependency,
+  DependencyStack,
+  SimpleConstructor,
+} from "./dependency_stack";
 import { Key } from "./key";
 
 export class InjectionContext {
   private readonly overrides = new Map<SimpleConstructor<unknown>, unknown>();
-  private readonly inConstruction = new Map<SimpleConstructor<unknown>, ProxyObject<unknown>>();
-  private readonly dependencies = new Map<SimpleConstructor<unknown>, Set<Dependency>>();
+  private readonly inConstruction = new Map<
+    SimpleConstructor<unknown>,
+    ProxyObject<unknown>
+  >();
+  private readonly dependencies = new Map<
+    SimpleConstructor<unknown>,
+    Set<Dependency>
+  >();
   private readonly injected = new Map<SimpleConstructor<unknown>, unknown>();
   private readonly dependencyStack = new DependencyStack();
 
@@ -26,7 +36,8 @@ export class InjectionContext {
   }
 
   get<R>(factory: SimpleConstructor<R>): R {
-    const overridden = this.overrides.get(factory) as SimpleConstructor<R> ?? factory;
+    const overridden =
+      (this.overrides.get(factory) as SimpleConstructor<R>) ?? factory;
     this.dependencyStack.addDependency(overridden);
     if (!this.injected.has(overridden)) {
       if (this.inConstruction.has(overridden)) {
@@ -46,7 +57,9 @@ export class InjectionContext {
     return this.injected.get(overridden) as R;
   }
 
-  getStateDependencies(...dependencies: Array<Key<unknown> | SimpleConstructor<unknown>>): Set<Key<unknown>> {
+  getStateDependencies(
+    ...dependencies: Array<Key<unknown> | SimpleConstructor<unknown>>
+  ): Set<Key<unknown>> {
     const stateDependencies = new Set<Key<unknown>>();
     const visited = new Set<SimpleConstructor<unknown>>();
     for (let index = 0; index < dependencies.length; index++) {
@@ -76,30 +89,39 @@ interface ProxyObject<T> {
 function buildProxy<R>(_: SimpleConstructor<R>): ProxyObject<R> {
   //we don't care about the target, but compiler does not allow a null one, so let's pass an "empty object" {}
   let initialized: Initialized<R> | undefined;
-  const proxy = new Proxy({}, {
-    get: function (_, property: string, __) {
-      assert(initialized != null, 'called an uninitialized value');
+  const proxy = new Proxy(
+    {},
+    {
+      get: function (_, property: string, __) {
+        assert(initialized != null, "called an uninitialized value");
 
-      const item = (initialized.value as Record<string, unknown>)[property];
-      if (typeof (item) === "function") {
-        return function (...args: unknown[]) {
-          assert(initialized != null, 'called an uninitialized value');
-          return item.call(initialized.value, ...args);
-        };
-      } else {
-        return item;
-      }
-    },
+        const item = (initialized.value as Record<string, unknown>)[property];
+        if (typeof item === "function") {
+          return function (...args: unknown[]) {
+            assert(initialized != null, "called an uninitialized value");
+            return item.call(initialized.value, ...args);
+          };
+        } else {
+          return item;
+        }
+      },
 
-    set: function (_, property: string | symbol, value: unknown, __): boolean {
-      assert(initialized != null, 'called an uninitialized value');
-      (initialized.value as Record<string | symbol, unknown>)[property] = value;
-      return true;
+      set: function (
+        _,
+        property: string | symbol,
+        value: unknown,
+        __,
+      ): boolean {
+        assert(initialized != null, "called an uninitialized value");
+        (initialized.value as Record<string | symbol, unknown>)[property] =
+          value;
+        return true;
+      },
     },
-  });
+  );
 
   return {
     proxy: proxy as R,
-    setInternalObject: (value: R) => initialized = { value },
+    setInternalObject: (value: R) => (initialized = { value }),
   };
 }

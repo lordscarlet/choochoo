@@ -1,11 +1,21 @@
-
 import { infiniteLoopCheck } from "../../utils/functions";
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { GridData } from "../state/grid";
 import { InterCityConnection } from "../state/inter_city_connection";
 import { Ender, EndGameReason } from "./ender";
-import { CheckAutoAction as CheckForcedAction, EndPhase, EndRound, EndTurn, LifecycleStage, ProcessAction, StartPhase, StartRound, StartTurn, WaitForAction } from "./lifecycle";
+import {
+  CheckAutoAction as CheckForcedAction,
+  EndPhase,
+  EndRound,
+  EndTurn,
+  LifecycleStage,
+  ProcessAction,
+  StartPhase,
+  StartRound,
+  StartTurn,
+  WaitForAction,
+} from "./lifecycle";
 import { Memory } from "./memory";
 import { PHASE, PhaseEngine } from "./phase";
 import { PhaseDelegator } from "./phase_delegator";
@@ -25,23 +35,39 @@ export class GameEngine {
   private readonly phaseEngine = inject(PhaseEngine);
   private readonly phase = injectState(PHASE);
   private readonly turn = inject(TurnEngine);
-  private readonly lifecycle = inject(Memory).remember<LifecycleStage | undefined>(undefined);
+  private readonly lifecycle = inject(Memory).remember<
+    LifecycleStage | undefined
+  >(undefined);
   private readonly currentPlayer = injectState(CURRENT_PLAYER);
   readonly hasEnded = inject(Memory).remember(false);
 
-  start(playerIds: number[], startingMap: GridData, connections: InterCityConnection[]) {
+  start(
+    playerIds: number[],
+    startingMap: GridData,
+    connections: InterCityConnection[],
+  ) {
     this.starter.startGame(playerIds, startingMap, connections);
     this.lifecycle.set(new StartRound(1));
     this.runLifecycle();
   }
 
   processAction(actionName: string, data: unknown): void {
-    this.lifecycle.set(new ProcessAction(this.round(), this.phase(), this.currentPlayer(), actionName, data));
+    this.lifecycle.set(
+      new ProcessAction(
+        this.round(),
+        this.phase(),
+        this.currentPlayer(),
+        actionName,
+        data,
+      ),
+    );
     this.runLifecycle();
   }
 
   private shouldGameEndPrematurely(): EndGameReason | undefined {
-    return this.playerHelper.enoughPlayersEliminatedToEndGame() ? EndGameReason.PLAYERS_ELIMINATED : undefined;
+    return this.playerHelper.enoughPlayersEliminatedToEndGame()
+      ? EndGameReason.PLAYERS_ELIMINATED
+      : undefined;
   }
 
   private runLifecycle(): void {
@@ -65,7 +91,9 @@ export class GameEngine {
 
     if (lifecycle instanceof StartRound) {
       this.roundEngine.start(lifecycle.round);
-      this.lifecycle.set(lifecycle.startPhase(this.phaseEngine.getFirstPhase()));
+      this.lifecycle.set(
+        lifecycle.startPhase(this.phaseEngine.getFirstPhase()),
+      );
     } else if (lifecycle instanceof StartPhase) {
       this.phaseEngine.start(lifecycle.phase);
       const firstPlayer = this.delegator.get().getFirstPlayer();
@@ -80,12 +108,16 @@ export class GameEngine {
     } else if (lifecycle instanceof CheckForcedAction) {
       const autoAction = this.delegator.get().forcedAction();
       if (autoAction != null) {
-        this.lifecycle.set(lifecycle.processAction(autoAction.action.action, autoAction.data));
+        this.lifecycle.set(
+          lifecycle.processAction(autoAction.action.action, autoAction.data),
+        );
         return;
       }
       this.lifecycle.set(lifecycle.waitForAction());
     } else if (lifecycle instanceof ProcessAction) {
-      const endsTurn = this.delegator.get().processAction(lifecycle.actionName, lifecycle.data);
+      const endsTurn = this.delegator
+        .get()
+        .processAction(lifecycle.actionName, lifecycle.data);
       if (endsTurn) {
         this.lifecycle.set(lifecycle.endTurn());
         return;
@@ -94,7 +126,9 @@ export class GameEngine {
       this.lifecycle.set(lifecycle.checkAutoAction());
     } else if (lifecycle instanceof EndTurn) {
       this.turn.end();
-      const nextPlayer = this.delegator.get().findNextPlayer(lifecycle.currentPlayer);
+      const nextPlayer = this.delegator
+        .get()
+        .findNextPlayer(lifecycle.currentPlayer);
       if (nextPlayer != null) {
         this.lifecycle.set(lifecycle.startTurn(nextPlayer));
         return;

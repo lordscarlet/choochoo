@@ -1,12 +1,11 @@
-import { createExpressEndpoints, initServer } from '@ts-rest/express';
-import express from 'express';
-import { feedbackContract } from '../../api/feedback';
-import { UserRole } from '../../api/user';
-import { assert } from '../../utils/validate';
-import '../session';
-import { assertRole } from '../util/enforce_role';
-import { FeedbackDao } from './dao';
-
+import { createExpressEndpoints, initServer } from "@ts-rest/express";
+import express from "express";
+import { feedbackContract } from "../../api/feedback";
+import { UserRole } from "../../api/user";
+import { assert } from "../../utils/validate";
+import "../session";
+import { assertRole } from "../util/enforce_role";
+import { FeedbackDao } from "./dao";
 
 export const feedbackApp = express();
 
@@ -26,7 +25,9 @@ const router = initServer().router(feedbackContract, {
     if (body.errorId != null) {
       const submission = await FeedbackDao.findByPk(body.errorId);
       assert(submission != null, { notFound: true });
-      assert(submission.userId === req.session.userId, { permissionDenied: true });
+      assert(submission.userId === req.session.userId, {
+        permissionDenied: true,
+      });
 
       submission.userMessage = body.message;
       await submission.save();
@@ -41,8 +42,11 @@ const router = initServer().router(feedbackContract, {
   },
   async list({ req }) {
     await assertRole(req, UserRole.enum.ADMIN);
-    const feedback = await FeedbackDao.findAll({ order: [['id', 'ASC']], limit: 20 });
-    return { status: 200, body: { feedback: feedback.map(f => f.toApi()) } };
+    const feedback = await FeedbackDao.findAll({
+      order: [["id", "ASC"]],
+      limit: 20,
+    });
+    return { status: 200, body: { feedback: feedback.map((f) => f.toApi()) } };
   },
   async deleteFeedback({ req, params }) {
     await assertRole(req, UserRole.enum.ADMIN);
@@ -52,4 +56,3 @@ const router = initServer().router(feedbackContract, {
 });
 
 createExpressEndpoints(feedbackContract, router, feedbackApp);
-

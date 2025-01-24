@@ -9,9 +9,15 @@ interface UsernameProps {
 export function Username({ userId }: UsernameProps) {
   const { data, isPending } = useUserUnsuspended(userId);
 
-  return <>
-    {isPending ? '<Loading>' : data?.body.user.username != null ? data?.body.user.username : '<Unknown>'}
-  </>;
+  return (
+    <>
+      {isPending
+        ? "<Loading>"
+        : data?.body.user.username != null
+          ? data?.body.user.username
+          : "<Unknown>"}
+    </>
+  );
 }
 
 interface UsernameListProps {
@@ -21,7 +27,14 @@ interface UsernameListProps {
 export function UsernameList({ userIds }: UsernameListProps) {
   const users = useUsers(userIds);
 
-  return <>
-    {users.filter(isNotNull).map(({ username }, index) => <span key={username}>{index !== 0 && ', '}{username}</span>)}
-  </>
+  return (
+    <>
+      {users.filter(isNotNull).map(({ username }, index) => (
+        <span key={username}>
+          {index !== 0 && ", "}
+          {username}
+        </span>
+      ))}
+    </>
+  );
 }

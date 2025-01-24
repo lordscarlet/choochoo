@@ -27,7 +27,9 @@ export class TurnOrderHelper {
     const { previousBids } = this.turnOrderState();
     if (Object.keys(previousBids).length === 0) return undefined;
     const maxBid = this.getCurrentMaxBid();
-    const key = [...Object.keys(previousBids)].find(p => previousBids[p] === maxBid)!;
+    const key = [...Object.keys(previousBids)].find(
+      (p) => previousBids[p] === maxBid,
+    )!;
     return stringToPlayerColor(key);
   }
 
@@ -36,9 +38,11 @@ export class TurnOrderHelper {
   }
 
   canUseTurnOrderPass(): boolean {
-    const hasTurnOrderPass = this.currentPlayer().selectedAction === Action.TURN_ORDER_PASS &&
+    const hasTurnOrderPass =
+      this.currentPlayer().selectedAction === Action.TURN_ORDER_PASS &&
       !this.turnOrderState().turnOrderPassUsed;
-    const wouldBeTheirTurnAgainAnyways = this.remainingBiddersOrder().length === 2;
+    const wouldBeTheirTurnAgainAnyways =
+      this.remainingBiddersOrder().length === 2;
     const canTurnOrderPass = hasTurnOrderPass && !wouldBeTheirTurnAgainAnyways;
 
     return canTurnOrderPass;
@@ -54,14 +58,14 @@ export class TurnOrderHelper {
     const previousBid = previousState.previousBids[player.color] ?? 0;
     const numPlayers = this.turnOrder().length;
     const playerOrder = numPlayers - previousState.nextTurnOrder.length;
-    const costMultiplier = playerOrder === numPlayers ? 0 :
-      playerOrder <= 2 ? 1 : 0.5;
+    const costMultiplier =
+      playerOrder === numPlayers ? 0 : playerOrder <= 2 ? 1 : 0.5;
     const cost = Math.ceil(previousBid * costMultiplier);
 
     if (cost === 0) {
       this.log.player(player, `becomes player ${playerOrder} for free`);
     } else {
-      this.log.player(player, `pays ${cost} and becomes player ${playerOrder}`)
+      this.log.player(player, `pays ${cost} and becomes player ${playerOrder}`);
     }
     this.turnOrderState.update((state) => {
       delete state.previousBids[player.color];
