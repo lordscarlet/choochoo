@@ -2,15 +2,15 @@ import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { Key } from "../framework/key";
 import { Phase, PhaseZod } from "../state/phase";
-import { Log } from "./log";
 import { PhaseDelegator } from "./phase_delegator";
+import { injectInitialPlayerCount } from "./state";
 
 export const PHASE = new Key("currentPhase", { parse: PhaseZod.parse });
 
 export class PhaseEngine {
-  private readonly log = inject(Log);
   private readonly phase = injectState(PHASE);
   private readonly delegator = inject(PhaseDelegator);
+  private readonly playerCount = injectInitialPlayerCount();
 
   start(phase: Phase): void {
     this.phase.initState(phase);
@@ -30,7 +30,8 @@ export class PhaseEngine {
   phaseOrder(): Phase[] {
     return [
       Phase.SHARES,
-      Phase.TURN_ORDER,
+      // Solo games won't need turn order.
+      ...(this.playerCount() === 1 ? [] : [Phase.TURN_ORDER]),
       Phase.ACTION_SELECTION,
       Phase.BUILDING,
       Phase.MOVING,
