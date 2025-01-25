@@ -81,6 +81,7 @@ function ClaimableTrack({ center, size, cost, rotation }: ClaimableTrackProps) {
       />
       <Rotate rotation={rotation} reverse={true} center={center}>
         <text
+          data-claimable
           x={center.x}
           y={center.y}
           dominantBaseline="middle"

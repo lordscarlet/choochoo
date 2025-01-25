@@ -150,10 +150,10 @@ export function LowerTerrainHex({
     const [hexColor, alternateColor] = cityColorStyles(space);
 
     const onRoll = space.onRoll();
-    const cityGroup: CityGroup = space.onRoll()[0]?.group;
+    const cityGroup: CityGroup = space.onRoll()[0]?.group ?? CityGroup.WHITE;
     // Determine the "outer fill" color, which is the thick border around cities indicating its goods-growth group color.
     const outerFill = useMemo(() => {
-      if (cityGroup == null || cityGroup === CityGroup.WHITE) return "#ffffff";
+      if (cityGroup == CityGroup.WHITE) return "#ffffff";
       return "#222222";
     }, [onRoll]);
 
@@ -192,7 +192,12 @@ export function LowerTerrainHex({
           stroke="black"
           strokeWidth={size / 100}
         />
-        <circle cx={center.x} cy={center.y} fill="white" r={size * 0.4} />
+        <circle
+          cx={center.x}
+          cy={center.y}
+          fill={cityGroup == CityGroup.WHITE ? "#ffffff" : "#222222"}
+          r={size * 0.4}
+        />
 
         {gameKey === "cyprus" && (
           <CyprusBorder space={space} center={center} size={size} />
