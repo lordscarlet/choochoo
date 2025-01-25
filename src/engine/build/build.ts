@@ -48,9 +48,9 @@ export class BuildAction implements ActionProcessor<BuildData> {
 
     assert(this.currentPlayer().money >= this.costCalculator.costOf(coordinates, data.tileType), { invalidInput: 'Cannot afford to place track' });
 
-    assert(this.hasBuiltHere(coordinates), { invalidInput: 'cannot build in the same location twice in one turn' });
+    assert(!this.hasBuiltHere(coordinates), { invalidInput: 'cannot build in the same location twice in one turn' });
     const invalidBuildReason = this.validator.getInvalidBuildReason(coordinates, { ...data, playerColor: this.currentPlayer().color });
-    assert(invalidBuildReason != null, { invalidInput: 'invalid build: ' + invalidBuildReason });
+    assert(invalidBuildReason == null, { invalidInput: 'invalid build: ' + invalidBuildReason });
   }
 
   process(data: BuildData): boolean {
