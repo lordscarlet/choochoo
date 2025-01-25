@@ -32,6 +32,13 @@ export function DetroitRules() {
           <b>Winner:</b> last one remaining, or, if multiple go bankrupt in one
           round, whoever has the highest income.
         </li>
+        <li>
+          <b>Solo:</b> In solo mode, actions have a special cost that goes down
+          each time it&apos;s selected. After being selected 3 times, the action
+          will no longer be available. Goods growth rolls 2 dice per side, and
+          income reduction has no maximum. The goal is to last longer than 6
+          rounds.
+        </li>
       </ul>
     </div>
   );
