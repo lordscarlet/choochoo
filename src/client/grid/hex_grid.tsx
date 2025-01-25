@@ -101,6 +101,7 @@ export function HexGrid({
   const [zoom, setZoom] = useZoom(allowZoom);
   const size = 70;
   const padding = 20;
+  const numberSpacing = fullMapVersion ? 50 : 0;
 
   const spaces = useMemo(() => [...grid.values()], [grid]);
 
@@ -241,17 +242,15 @@ export function HexGrid({
     const bbox = ref.current.getBBox();
 
     const newViewBox = {
-      x: bbox.x,
-      y: bbox.y,
-      width: bbox.width,
-      height: bbox.height,
+      x: Math.round(bbox.x),
+      y: Math.round(bbox.y),
+      width: Math.round(bbox.width),
+      height: Math.round(bbox.height),
     };
     if (!deepEquals(newViewBox, internalViewBox)) {
       setViewBox(newViewBox);
     }
   }, [ref, internalViewBox]);
-
-  const numberSpacing = 50;
 
   const viewBox = useMemo(
     () => ({
