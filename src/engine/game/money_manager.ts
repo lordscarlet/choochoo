@@ -55,7 +55,7 @@ export class MoneyManager {
       });
 
       const newPlayerData = this.playerHelper.getPlayer(playerColor);
-      if (newPlayerData.income) {
+      if (newPlayerData.outOfGame ?? false) {
         this.outOfGame(newPlayerData);
       }
 
