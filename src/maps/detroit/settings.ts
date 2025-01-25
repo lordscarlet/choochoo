@@ -1,4 +1,5 @@
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import { interCityConnections } from "../factory";
 import {
   DetroitAllowedActions,
   DetroitSelectAction,
@@ -28,10 +29,10 @@ export class DetroitBankruptcyMapSettings implements MapSettings {
   readonly maxPlayers = 3;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.ALPHA;
-  // readonly interCityConnections = interCityConnections(map, [
-  //   ["Midtown Detroit", "Downtown Detroit"],
-  //   ["Windsor", "Windsor Airport"],
-  // ]).map((connection) => ({ ...connection, cost: 6 }));
+  readonly interCityConnections = interCityConnections(map, [
+    ["Midtown Detroit", "Downtown Detroit"],
+    ["Windsor", "Windsor Airport"],
+  ]).map((connection) => ({ ...connection, cost: 6 }));
 
   getOverrides() {
     return [
