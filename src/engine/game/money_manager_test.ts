@@ -6,7 +6,12 @@ import { PlayerColor, PlayerData } from "../state/player";
 import { LandData, MutableSpaceData } from "../state/space";
 import { Direction, SimpleTileType } from "../state/tile";
 import { MoneyManager } from "./money_manager";
-import { GRID, TEST_ONLY_PLAYERS, TURN_ORDER } from "./state";
+import {
+  GRID,
+  INTER_CITY_CONNECTIONS,
+  TEST_ONLY_PLAYERS,
+  TURN_ORDER,
+} from "./state";
 
 describe("MoneyManager", () => {
   const injector = InjectionHelper.install();
@@ -18,6 +23,7 @@ describe("MoneyManager", () => {
   ]);
   const turnOrder = injector.initResettableState(TURN_ORDER, []);
   const grid = injector.initResettableState(GRID, new Map([]));
+  injector.initResettableState(INTER_CITY_CONNECTIONS, []);
 
   const manager = resettable(() => new MoneyManager());
 
