@@ -14,6 +14,9 @@ interface HexNameProps {
 export function HexName(props: HexNameProps) {
   const pathId = useId();
 
+  // There are some odd things that happen when the name gets too long.
+  const division = 4 + Math.floor(props.name.length / 12);
+
   return (
     <Rotate rotation={props.rotation} reverse={true} center={props.center}>
       <path
@@ -23,7 +26,7 @@ export function HexName(props: HexNameProps) {
         d={`M ${props.center.x - props.size / 1.6} ${props.center.y} a ${props.size / 2} ${props.size / 2.2} 0 0 0 ${(2 * props.size) / 1.6} 0`}
       />
       <text
-        fontSize={props.size / 4}
+        fontSize={props.size / division}
         fill="white"
         dominantBaseline="middle"
         textAnchor="middle"
