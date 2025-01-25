@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { FormEvent, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import { UserRole } from "../../api/user";
 import {
   ReleaseStage,
   releaseStageToString,
@@ -22,6 +23,7 @@ import { ViewRegistry } from "../../maps/view_registry";
 import { HexGrid } from "../grid/hex_grid";
 import { environment, Stage } from "../services/environment";
 import { useCreateGame } from "../services/game";
+import { useMe } from "../services/me";
 import {
   useCheckboxState,
   useNumberInputState,
@@ -31,6 +33,7 @@ import {
 import { MapInfo } from "./map_info";
 
 export function CreateGamePage() {
+  const me = useMe();
   const initialMapValue = useSearchParams()[0].get("map");
   const maps = useMemo(
     () =>
@@ -39,7 +42,8 @@ export function CreateGamePage() {
         .filter(
           (map) =>
             environment.stage === "development" ||
-            map.stage !== ReleaseStage.DEVELOPMENT,
+            map.stage !== ReleaseStage.DEVELOPMENT ||
+            me?.role === UserRole.enum.ADMIN,
         ),
     [],
   );
