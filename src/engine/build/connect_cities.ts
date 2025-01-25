@@ -6,7 +6,7 @@ import { ActionProcessor } from "../game/action";
 import { Log } from "../game/log";
 import { MoneyManager } from "../game/money_manager";
 import { injectCurrentPlayer, injectGrid } from "../game/state";
-import { City } from "../map/city";
+import { City, isCity } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
@@ -38,6 +38,9 @@ export class ConnectCitiesAction implements ActionProcessor<ConnectCitiesData> {
     assert(connection != null, { invalidInput: 'Connection not found' });
     assert(connection.owner == null, { invalidInput: 'City already connected' });
     assert(this.currentPlayer().money >= connection.cost, { invalidInput: 'Cannot afford purchase' });
+
+    const cities = data.connect.map((coordinates) => this.grid().get(coordinates));
+    assert(cities.every(isCity), {invalidInput: 'Cannot connect cities until both have been urbanized'});
   }
 
   process(data: ConnectCitiesData): boolean {

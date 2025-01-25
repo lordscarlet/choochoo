@@ -59,7 +59,8 @@ function SpecialAction({ action }: { action: Action }) {
   const captionEl =
     player != null ? (
       <>
-        <Username userId={player.playerId} /> ({caption})
+        <Username userId={player.playerId} />
+        {caption && ` (${caption})`}
       </>
     ) : (
       <>{caption}</>
