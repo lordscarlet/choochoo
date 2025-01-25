@@ -34,7 +34,7 @@ import { MapInfo } from "./map_info";
 
 export function CreateGamePage() {
   const me = useMe();
-  const initialMapValue = useSearchParams()[0].get("map");
+  const initialMapValue = useSearchParams()[0].get("map") ?? "reversteam";
   const maps = useMemo(
     () =>
       [...ViewRegistry.singleton.values()]
@@ -44,13 +44,12 @@ export function CreateGamePage() {
             environment.stage === "development" ||
             map.stage !== ReleaseStage.DEVELOPMENT ||
             me?.role === UserRole.enum.ADMIN,
-        ),
+        )
+        .sort((a, b) => (a.name < b.name ? -1 : 1)),
     [],
   );
   const [name, setName] = useTextInputState("");
-  const [gameKey, _, setGameKeyState] = useSelectState(
-    initialMapValue ?? maps[0].key,
-  );
+  const [gameKey, _, setGameKeyState] = useSelectState(initialMapValue);
 
   const map = ViewRegistry.singleton.get(gameKey);
   const allowPlayerSelections = map.minPlayers !== map.maxPlayers;
