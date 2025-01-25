@@ -1,5 +1,6 @@
 import { assert } from "../utils/validate";
 import { CyprusViewSettings } from "./cyprus/view_settings";
+import { DetroitBankruptcyViewSettings } from "./detroit/view_settings";
 import { GermanyViewSettings } from "./germany/view_settings";
 import { IndiaViewSettings } from "./india/view_settings";
 import { IrelandViewSettings } from "./ireland/view_settings";
@@ -24,6 +25,7 @@ export class ViewRegistry {
     this.add(new IndiaViewSettings());
     this.add(new KoreaViewSettings());
     this.add(new GermanyViewSettings());
+    this.add(new DetroitBankruptcyViewSettings());
   }
 
   values(): Iterable<MapViewSettings> {

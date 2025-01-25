@@ -192,7 +192,10 @@ Lifecycle.singleton.onStart(() => {
             game.status === GameStatus.enum.LOBBY &&
             game.playerIds.length === game.config.maxPlayers
           ) {
-            startGame(game.id);
+            startGame(game.id).catch((e) => {
+              console.log("error starting game");
+              console.error(e);
+            });
           }
         }, 2000);
       });
