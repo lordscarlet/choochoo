@@ -18,7 +18,7 @@ export function plain(data: Omit<LandData, "type">): LandData {
 }
 
 export function bridge(data: Omit<LandData, "type">): LandData {
-  return { ...data, type: SpaceType.UNPASSABLE };
+  return { ...data, type: SpaceType.WATER };
 }
 
 export const UNPASSABLE = undefined;

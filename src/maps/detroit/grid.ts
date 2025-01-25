@@ -8,7 +8,7 @@ import {
   PLAIN,
   startsLowerGrid,
   town,
-  UNPASSABLE,
+  WATER,
   white,
 } from "../factory";
 import { startFrom } from "../tile_factory";
@@ -30,7 +30,7 @@ export const map = startsLowerGrid([
     PLAIN,
   ],
   [...duplicate(10, PLAIN)],
-  [PLAIN, UNPASSABLE, ...duplicate(7, PLAIN)],
+  [PLAIN, WATER, ...duplicate(7, PLAIN)],
   [
     PLAIN,
     PLAIN,
@@ -78,6 +78,7 @@ export const map = startsLowerGrid([
         claimableCost: [8],
       },
     }),
+    WATER,
   ],
   [
     ...duplicate(7, PLAIN),
@@ -96,8 +97,8 @@ export const map = startsLowerGrid([
     PLAIN,
     city("St Clair Shores", YELLOW, black(4)),
     PLAIN,
-    UNPASSABLE,
-    UNPASSABLE,
+    WATER,
+    WATER,
     PLAIN,
     town("Windsor Airport"),
   ],

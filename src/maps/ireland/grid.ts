@@ -19,6 +19,7 @@ import {
   RIVER,
   town,
   UNPASSABLE,
+  WATER,
   white,
 } from "../factory";
 import { startFrom } from "../tile_factory";
@@ -26,7 +27,7 @@ import { startFrom } from "../tile_factory";
 export const map = grid([
   [
     city("Scotland", [RED, BLUE], black(1)),
-    UNPASSABLE,
+    WATER,
     PLAIN,
     town("Coleraine"),
     UNPASSABLE,
@@ -109,7 +110,7 @@ export const map = grid([
   ],
   [
     city("Wales", [RED, BLUE], black(2)),
-    UNPASSABLE,
+    WATER,
     PLAIN,
     town("Mullingar"),
     PLAIN,
@@ -188,8 +189,8 @@ export const map = grid([
         claimableCost: [6],
       },
     }),
-    UNPASSABLE,
-    UNPASSABLE,
+    WATER,
+    WATER,
     PLAIN,
     PLAIN,
     city("Cork", Good.BLACK, white(6)),
@@ -202,15 +203,15 @@ export const map = grid([
     UNPASSABLE,
     UNPASSABLE,
     city("England", YELLOW),
-    ...duplicate(3, UNPASSABLE),
+    ...duplicate(3, WATER),
     bridge({
       tile: {
         ...startFrom(Direction.BOTTOM_LEFT).straightAcross(),
         claimableCost: [6],
       },
     }),
-    PLAIN,
-    PLAIN,
+    WATER,
+    WATER,
     plain({ unpassableEdges: [Direction.TOP_RIGHT] }),
   ],
   [
