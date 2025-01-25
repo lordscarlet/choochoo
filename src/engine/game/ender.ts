@@ -37,7 +37,11 @@ export class Ender {
   }
 
   endGame(reason: EndGameReason): void {
-    this.phase.initState(Phase.END_GAME);
+    if (!this.phase.isInitialized()) {
+      this.phase.initState(Phase.END_GAME);
+    } else {
+      this.phase.set(Phase.END_GAME);
+    }
     this.onEndGame();
 
     this.logEndGame(reason);
