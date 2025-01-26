@@ -63,8 +63,11 @@ export class PlayerHelper {
     let compareToIndex = 0;
     for (const { score, player } of scores) {
       if (compareScore(compareTo, score) !== 0) {
-        compareToIndex += ordered[compareToIndex].length;
+        compareToIndex++;
         compareTo = score;
+      }
+      if (ordered[compareToIndex] == null) {
+        ordered[compareToIndex] = [];
       }
       ordered[compareToIndex].push(player);
     }
