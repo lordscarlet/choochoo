@@ -1,3 +1,4 @@
+import { assert, fail } from "../../utils/validate";
 import { injectState } from "../framework/execution_context";
 import { Land } from "../map/location";
 import { MutablePlayerData, PlayerColor, PlayerData } from "../state/player";
@@ -51,8 +52,22 @@ export class PlayerHelper {
     return [this.calculateScore(player), 0];
   }
 
+  beatSoloGoal(): boolean {
+    assert(this.players().length === 1);
+    const [player] = this.players();
+    const soloScore = this.getScore(player);
+    return compareScore(soloScore, this.soloGoalScore()) > 0;
+  }
+
   /** Returns the players ordered by their score. Tied players end up in the same placement in the array. */
   getPlayersOrderedByScore(): PlayerData[][] {
+    if (this.players().length === 1) {
+      const [player] = this.players();
+      if (this.beatSoloGoal()) {
+        return [[], [player]];
+      }
+      return [[player]];
+    }
     const scores = this.players()
       .map((player) => ({ player, score: this.getScore(player) }))
       .sort(({ score: score1 }, { score: score2 }) =>
@@ -72,6 +87,10 @@ export class PlayerHelper {
       ordered[compareToIndex].push(player);
     }
     return ordered;
+  }
+
+  protected soloGoalScore(): Score {
+    fail("not implemented");
   }
 
   protected calculateScore(player: PlayerData): number {

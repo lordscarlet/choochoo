@@ -23,7 +23,11 @@ export class Ender {
     switch (reason) {
       case EndGameReason.PLAYERS_ELIMINATED:
         if (this.playerHelper.isSoloGame()) {
-          this.log.log("You lose! Better luck next time.");
+          if (this.playerHelper.beatSoloGoal()) {
+            this.log.log("You win! Congrats!");
+          } else {
+            this.log.log("You lose! Better luck next time.");
+          }
         } else if (this.playerHelper.getPlayersRemaining() === 0) {
           this.log.log("All players lose, no winner!");
         } else {

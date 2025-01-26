@@ -23,6 +23,10 @@ export class DetroitPlayerHelper extends PlayerHelper {
     return [this.getRoundsLasted(player), player.income];
   }
 
+  protected soloGoalScore(): Score {
+    return [6, -1];
+  }
+
   protected getRoundsLasted(player: PlayerData): number {
     if (this.phase() === Phase.END_GAME) {
       // Surviving player must have played one more round than the last player to be eliminated.
