@@ -10,7 +10,13 @@ import {
   DetroitPlayerHelper,
   DetroitRoundEngine,
 } from "./end_game";
-import { DetroitBuildAction, DetroitCostCalculator } from "./engineer";
+import {
+  DetroitBuildAction,
+  DetroitBuildPhase,
+  DetroitClaimAction,
+  DetroitConnectCities,
+  DetroitCostCalculator,
+} from "./engineer";
 import {
   DetroitIncomeReduction,
   DetroitProfitHelper,
@@ -48,8 +54,11 @@ export class DetroitBankruptcyMapSettings implements MapSettings {
       DetroitBuildAction,
       DetroitSelectAction,
       DetroitCostCalculator,
+      DetroitConnectCities,
+      DetroitBuildPhase,
       DetroitGoodsGrowthPhase,
       DetroitSelectActionPhase,
+      DetroitClaimAction,
     ];
   }
 }

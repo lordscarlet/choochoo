@@ -10,6 +10,7 @@ import { CURRENT_PLAYER, injectCurrentPlayer, injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
+import { Track } from "../map/track";
 import { SpaceType } from "../state/location_type";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
@@ -34,6 +35,10 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
   protected readonly playerHelper = inject(PlayerHelper);
   protected readonly moneyManager = inject(MoneyManager);
 
+  protected claimCost(track: Track): number {
+    return track.claimCost();
+  }
+
   validate(data: ClaimData): void {
     const maxTrack = this.helper.getMaxBuilds();
     assert(this.helper.buildsRemaining() > 0, { invalidInput: `You can only build at most ${maxTrack} track` });
@@ -43,7 +48,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
     assert(space != null, { invalidInput: 'cannot call claim on an invalid space' });
     const track = space.getTrack().find((track) => track.isClaimable());
     assert(track != null, { invalidInput: 'No claimable track on given space' });
-    assert(this.currentPlayer().money >= track.claimCost(), { invalidInput: 'cannot afford claim' });
+    assert(this.currentPlayer().money >= this.claimCost(track), { invalidInput: 'cannot afford claim' });
   }
 
   process(data: ClaimData): boolean {
@@ -69,7 +74,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
       buildState.buildCount = (buildState.buildCount ?? buildState.previousBuilds.length) + 1;
     });
 
-    this.moneyManager.addMoneyForCurrentPlayer(-track.claimCost());
+    this.moneyManager.addMoneyForCurrentPlayer(-this.claimCost(track));
     return this.helper.isAtEndOfTurn();
   }
 }
