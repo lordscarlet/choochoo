@@ -1,5 +1,6 @@
 import { GameKey } from "../../api/game_key";
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import { ReversteamMoveHelper } from "./accepts";
 import { map } from "./grid";
 
 export class ReversteamMapSettings implements MapSettings {
@@ -11,6 +12,6 @@ export class ReversteamMapSettings implements MapSettings {
   readonly stage = ReleaseStage.BETA;
 
   getOverrides() {
-    return [];
+    return [ReversteamMoveHelper];
   }
 }
