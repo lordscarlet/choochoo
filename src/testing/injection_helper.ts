@@ -28,7 +28,7 @@ export class InjectionHelper {
 
       helper.spyOn(GameMemory, "getGame").and.returnValue({
         gameKey: GameKey.REVERSTEAM,
-        variant: { gameKey: GameKey.REVERSTEAM },
+        variant: { gameKey: GameKey.REVERSTEAM, baseRules: true },
       });
     });
 
