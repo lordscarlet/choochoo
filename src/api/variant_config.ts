@@ -10,7 +10,6 @@ export const EmptyVariantConfig = z.object({
     GameKey.KOREA,
     GameKey.MADAGASCAR,
     GameKey.MONTREAL_METRO,
-    GameKey.REVERSTEAM,
     GameKey.RUST_BELT,
     GameKey.SWEDEN,
   ]),
@@ -23,8 +22,15 @@ export const IrelandVariantConfig = z.object({
 });
 export type IrelandVariantConfig = z.infer<typeof IrelandVariantConfig>;
 
+export const ReversteamVariantConfig = z.object({
+  gameKey: z.literal(GameKey.REVERSTEAM),
+  baseRules: z.boolean(),
+});
+export type ReversteamVariantConfig = z.infer<typeof ReversteamVariantConfig>;
+
 export const VariantConfig = z.discriminatedUnion("gameKey", [
   EmptyVariantConfig,
   IrelandVariantConfig,
+  ReversteamVariantConfig,
 ]);
 export type VariantConfig = z.infer<typeof VariantConfig>;
