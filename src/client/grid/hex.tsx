@@ -459,7 +459,7 @@ export function EdgeBoundary({ center, size, direction }: EdgeBoundaryProps) {
       y1={corner1.y}
       x2={corner2.x}
       y2={corner2.y}
-      stroke="black"
+      stroke="red"
       strokeLinecap="round"
       strokeWidth={12}
     />
