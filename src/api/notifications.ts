@@ -4,17 +4,32 @@ import z from "zod";
 export enum NotificationMethod {
   EMAIL = 1,
   WEBHOOK,
+  DIRECT_WEBHOOK,
 }
 
 export enum NotificationFrequency {
   IMMEDIATELY = 1,
 }
 
+export enum WebHookOption {
+  AOS = 1,
+  EOT,
+}
+export const WebHookOptionZod = z.nativeEnum(WebHookOption);
+
 export const EmailSetting = z.object({
   method: z.literal(NotificationMethod.EMAIL),
   frequency: z.nativeEnum(NotificationFrequency),
 });
 export type EmailSetting = z.infer<typeof EmailSetting>;
+
+export const DirectWebHookSetting = z.object({
+  method: z.literal(NotificationMethod.DIRECT_WEBHOOK),
+  frequency: z.nativeEnum(NotificationFrequency),
+  option: WebHookOptionZod,
+  userId: z.string().min(1),
+});
+export type DirectWebHookSetting = z.infer<typeof DirectWebHookSetting>;
 
 // Copied from 18xx.games.
 // See https://github.com/tobymao/18xx/wiki/Notifications

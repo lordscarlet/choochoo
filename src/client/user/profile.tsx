@@ -4,6 +4,7 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   TextField,
 } from "@mui/material";
 import {
@@ -18,9 +19,9 @@ import { useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { GameStatus, ListGamesApi } from "../../api/game";
 import {
+  isWebHookSetting,
   NotificationFrequency,
   NotificationMethod,
-  TurnNotificationSetting,
   WebHookSetting,
 } from "../../api/notifications";
 import { MyUserApi } from "../../api/user";
@@ -34,6 +35,7 @@ import {
   useSetNotificationPreferences,
 } from "../services/notifications/preferences";
 import { useUser } from "../services/user";
+import { useCheckboxState } from "../utils/form_state";
 import { UpdatePassword } from "./update_password";
 
 export function UserProfilePage() {
@@ -92,22 +94,29 @@ function NotificationSettings() {
   };
 
   const marketing = preferences.marketing;
-  const [setting, setSetting] = useState<TurnNotificationSetting | undefined>(
-    preferences.turnNotifications[0],
-  );
 
-  const email = setting?.method === NotificationMethod.EMAIL;
-  const enableWebHook = setting?.method === NotificationMethod.WEBHOOK;
+  const [email, setEmail] = useCheckboxState(
+    preferences.turnNotifications.some(
+      ({ method }) => method === NotificationMethod.EMAIL,
+    ),
+  );
+  const [webHook, setWebHook] = useState<WebHookSetting | undefined>(
+    preferences.turnNotifications.find(isWebHookSetting),
+  );
+  const enableWebHook = webHook != null;
 
   const onSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setPreferences({
         marketing,
-        turnNotifications: setting != null ? [setting] : [],
+        turnNotifications: [
+          ...(email ? [emailSettings] : []),
+          ...(webHook != null ? [webHook] : []),
+        ],
       });
     },
-    [marketing, setting, setPreferences],
+    [marketing, email, webHook, setPreferences],
   );
 
   const sendTestNotification = useCallback(
@@ -115,10 +124,13 @@ function NotificationSettings() {
       e.preventDefault();
       test({
         marketing,
-        turnNotifications: setting != null ? [setting] : [],
+        turnNotifications: [
+          ...(email ? [emailSettings] : []),
+          ...(webHook != null ? [webHook] : []),
+        ],
       });
     },
-    [test, marketing, setting],
+    [test, marketing, email, webHook],
   );
 
   const webHookUrlError = findErrorInNotifications(
@@ -130,45 +142,40 @@ function NotificationSettings() {
     "webHookUserId",
   );
 
-  const setEmail = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.checked) return setSetting(undefined);
-      setSetting(emailSettings);
-    },
-    [setSetting],
-  );
-
   const setEnableWebHook = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.checked) return setSetting(undefined);
-      setSetting({
+      if (!e.target.checked) {
+        setWebHook(undefined);
+        return;
+      }
+      setWebHook({
         method: NotificationMethod.WEBHOOK,
         frequency: NotificationFrequency.IMMEDIATELY,
         webHookUrl: "",
         webHookUserId: "",
       });
     },
-    [setSetting],
+    [setWebHook],
   );
 
   const setWebHookUrl = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      setSetting({
-        ...(setting as WebHookSetting),
+      setWebHook({
+        ...webHook!,
         webHookUrl: e.target.value,
       });
     },
-    [setSetting, setting],
+    [webHook, setWebHook],
   );
 
   const setWebHookUserId = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      setSetting({
-        ...(setting as WebHookSetting),
+      setWebHook({
+        ...webHook!,
         webHookUserId: e.target.value,
       });
     },
-    [setSetting, setting],
+    [webHook, setWebHook],
   );
 
   return (
@@ -181,8 +188,44 @@ function NotificationSettings() {
         autoComplete="off"
         onSubmit={onSubmit}
       >
-        {/* Disable email because it's expensive and apparently cumbersome. */}
-        <FormControl style={{ display: "none" }}>
+        <div>
+          <FormControl>
+            <FormControlLabel
+              sx={{ m: 1, minWidth: 80 }}
+              label="Custom Webhook"
+              control={
+                <Checkbox
+                  checked={enableWebHook}
+                  disabled={isPending}
+                  onChange={setEnableWebHook}
+                />
+              }
+            />
+          </FormControl>
+          <FormControl>
+            <TextField
+              required
+              label="Webhook URL"
+              value={webHook?.webHookUrl ?? ""}
+              disabled={!enableWebHook}
+              error={webHookUrlError != null}
+              helperText={webHookUrlError}
+              onChange={setWebHookUrl}
+            />
+          </FormControl>
+          <FormControl>
+            <TextField
+              required
+              label="Webhook User ID"
+              disabled={!enableWebHook}
+              value={webHook?.webHookUserId ?? ""}
+              error={webHookUserIdError != null}
+              helperText={webHookUserIdError}
+              onChange={setWebHookUserId}
+            />
+          </FormControl>
+        </div>
+        <FormControl error={email}>
           <FormControlLabel
             sx={{ m: 1, minWidth: 80 }}
             label="Email notifications"
@@ -194,41 +237,12 @@ function NotificationSettings() {
               />
             }
           />
-        </FormControl>
-        <FormControl>
-          <FormControlLabel
-            sx={{ m: 1, minWidth: 80 }}
-            label="Webhook"
-            control={
-              <Checkbox
-                checked={enableWebHook}
-                disabled={isPending}
-                onChange={setEnableWebHook}
-              />
-            }
-          />
-        </FormControl>
-        <FormControl>
-          <TextField
-            required
-            label="Webhook URL"
-            value={enableWebHook ? setting?.webHookUrl : ""}
-            disabled={!enableWebHook}
-            error={webHookUrlError != null}
-            helperText={webHookUrlError}
-            onChange={setWebHookUrl}
-          />
-        </FormControl>
-        <FormControl>
-          <TextField
-            required
-            label="Webhook User ID"
-            disabled={!enableWebHook}
-            value={enableWebHook ? setting?.webHookUserId : ""}
-            error={webHookUserIdError != null}
-            helperText={webHookUserIdError}
-            onChange={setWebHookUserId}
-          />
+          {email && (
+            <FormHelperText>
+              Email notifications are significantly more expensive than webooks.
+              Please consider setting up a webhook instead to support the site.
+            </FormHelperText>
+          )}
         </FormControl>
         <div>
           <Button type="submit" disabled={isPending}>
