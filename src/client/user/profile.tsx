@@ -7,25 +7,21 @@ import {
   FormHelperText,
   TextField,
 } from "@mui/material";
-import {
-  ChangeEvent,
-  FormEvent,
-  MouseEvent,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import { FormEvent, MouseEvent, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { GameStatus, ListGamesApi } from "../../api/game";
 import {
+  DirectWebHookSetting,
+  isDirectWebHookSetting,
   isWebHookSetting,
   NotificationFrequency,
   NotificationMethod,
+  NotificationPreferences,
+  WebHookOption,
   WebHookSetting,
 } from "../../api/notifications";
 import { MyUserApi } from "../../api/user";
-import { iterate } from "../../utils/functions";
 import { Loading } from "../components/loading";
 import { GameList } from "../home/game_list";
 import { useMe } from "../services/me";
@@ -35,7 +31,8 @@ import {
   useSetNotificationPreferences,
 } from "../services/notifications/preferences";
 import { useUser } from "../services/user";
-import { useCheckboxState } from "../utils/form_state";
+import { useCheckboxState, useTextInputState } from "../utils/form_state";
+import { useTypedMemo } from "../utils/hooks";
 import { UpdatePassword } from "./update_password";
 
 export function UserProfilePage() {
@@ -67,12 +64,60 @@ const emailSettings = {
 } as const;
 
 function findErrorInNotifications(
+  settings: NotificationPreferences | undefined,
+  method: NotificationMethod,
+  option: WebHookOption | undefined,
   validationError: ValidationError | undefined,
   key: string,
 ): string | undefined {
-  return iterate(5, (i) => `preferences.turnNotifications.${i}.${key}`)
-    .map((key) => validationError?.[key])
-    .find((i) => i != null);
+  if (settings == null) return undefined;
+  const index = settings.turnNotifications.findIndex(
+    (not) =>
+      not.method === method &&
+      (option == null || (not as DirectWebHookSetting).option === option),
+  );
+  if (index === -1) return undefined;
+  return validationError?.[`preferences.turnNotifications.${index}.${key}`];
+}
+
+function buildNotificationSettings(
+  marketing: boolean,
+  email: boolean,
+  enableWebHook: boolean,
+  webHookUrl: string,
+  webHookUserId: string,
+  enableAosDiscord: boolean,
+  aosUserId: string,
+  enableEotDiscord: boolean,
+  eotUserId: string,
+) {
+  const webHook: WebHookSetting = {
+    method: NotificationMethod.WEBHOOK,
+    frequency: NotificationFrequency.IMMEDIATELY,
+    webHookUrl,
+    webHookUserId,
+  };
+  const aosWebHook: DirectWebHookSetting = {
+    method: NotificationMethod.DIRECT_WEBHOOK,
+    frequency: NotificationFrequency.IMMEDIATELY,
+    option: WebHookOption.AOS,
+    webHookUserId: aosUserId,
+  };
+  const eotWebHook: DirectWebHookSetting = {
+    method: NotificationMethod.DIRECT_WEBHOOK,
+    frequency: NotificationFrequency.IMMEDIATELY,
+    option: WebHookOption.EOT,
+    webHookUserId: eotUserId,
+  };
+  return {
+    marketing,
+    turnNotifications: [
+      ...(email ? [emailSettings] : []),
+      ...(enableWebHook ? [webHook] : []),
+      ...(enableAosDiscord ? [aosWebHook] : []),
+      ...(enableEotDiscord ? [eotWebHook] : []),
+    ],
+  };
 }
 
 function NotificationSettings() {
@@ -80,6 +125,7 @@ function NotificationSettings() {
   const {
     validationError: validationErrorSet,
     setPreferences,
+    attempted,
     isPending,
   } = useSetNotificationPreferences();
   const {
@@ -100,82 +146,95 @@ function NotificationSettings() {
       ({ method }) => method === NotificationMethod.EMAIL,
     ),
   );
-  const [webHook, setWebHook] = useState<WebHookSetting | undefined>(
-    preferences.turnNotifications.find(isWebHookSetting),
+
+  const initialWebHook = preferences.turnNotifications.find(isWebHookSetting);
+  const [enableWebHook, setEnableWebHook] = useCheckboxState(
+    initialWebHook != null,
   );
-  const enableWebHook = webHook != null;
+  const [webHookUrl, setWebHookUrl] = useTextInputState(
+    initialWebHook?.webHookUrl ?? "",
+  );
+  const [webHookUserId, setWebHookUserId] = useTextInputState(
+    initialWebHook?.webHookUserId ?? "",
+  );
+
+  const aosDiscordWebHook = preferences.turnNotifications.find((not) =>
+    isDirectWebHookSetting(not, WebHookOption.AOS),
+  );
+  const [enableAosDiscord, setEnableAosDiscord] = useCheckboxState(
+    aosDiscordWebHook != null,
+  );
+  const [aosUserId, setAosUserId] = useTextInputState(
+    aosDiscordWebHook?.webHookUserId ?? "",
+  );
+
+  const eotDiscordWebHook = preferences.turnNotifications.find((not) =>
+    isDirectWebHookSetting(not, WebHookOption.EOT),
+  );
+  const [enableEotDiscord, setEnableEotDiscord] = useCheckboxState(
+    eotDiscordWebHook != null,
+  );
+  const [eotUserId, setEotUserId] = useTextInputState(
+    eotDiscordWebHook?.webHookUserId ?? "",
+  );
+
+  const newNotificationSettings = useTypedMemo(buildNotificationSettings, [
+    marketing,
+    email,
+    enableWebHook,
+    webHookUrl,
+    webHookUserId,
+    enableAosDiscord,
+    aosUserId,
+    enableEotDiscord,
+    eotUserId,
+  ]);
 
   const onSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      setPreferences({
-        marketing,
-        turnNotifications: [
-          ...(email ? [emailSettings] : []),
-          ...(webHook != null ? [webHook] : []),
-        ],
-      });
+      setPreferences(newNotificationSettings);
     },
-    [marketing, email, webHook, setPreferences],
+    [setPreferences, newNotificationSettings],
   );
 
   const sendTestNotification = useCallback(
     (e: MouseEvent) => {
       e.preventDefault();
-      test({
-        marketing,
-        turnNotifications: [
-          ...(email ? [emailSettings] : []),
-          ...(webHook != null ? [webHook] : []),
-        ],
-      });
+      test(newNotificationSettings);
     },
-    [test, marketing, email, webHook],
+    [test, newNotificationSettings],
   );
 
   const webHookUrlError = findErrorInNotifications(
+    attempted,
+    NotificationMethod.WEBHOOK,
+    undefined,
     validationError,
     "webHookUrl",
   );
   const webHookUserIdError = findErrorInNotifications(
+    attempted,
+    NotificationMethod.WEBHOOK,
+    undefined,
     validationError,
     "webHookUserId",
   );
 
-  const setEnableWebHook = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.checked) {
-        setWebHook(undefined);
-        return;
-      }
-      setWebHook({
-        method: NotificationMethod.WEBHOOK,
-        frequency: NotificationFrequency.IMMEDIATELY,
-        webHookUrl: "",
-        webHookUserId: "",
-      });
-    },
-    [setWebHook],
+  const aosUserIdError = findErrorInNotifications(
+    attempted,
+    NotificationMethod.DIRECT_WEBHOOK,
+    WebHookOption.AOS,
+    validationError,
+    "webHookUserId",
   );
 
-  const setWebHookUrl = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setWebHook({
-        ...webHook!,
-        webHookUrl: e.target.value,
-      });
-    },
-    [webHook, setWebHook],
-  );
-
-  const setWebHookUserId = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setWebHook({
-        ...webHook!,
-        webHookUserId: e.target.value,
-      });
-    },
-    [webHook, setWebHook],
+  const eotUserIdError = findErrorInNotifications(
+    attempted,
+    NotificationMethod.DIRECT_WEBHOOK,
+    WebHookOption.EOT,
+    validationError,
+    "webHookUserId",
   );
 
   return (
@@ -188,6 +247,58 @@ function NotificationSettings() {
         autoComplete="off"
         onSubmit={onSubmit}
       >
+        <div>
+          <FormControl>
+            <FormControlLabel
+              sx={{ m: 1, minWidth: 80 }}
+              label="AoS Discord"
+              control={
+                <Checkbox
+                  checked={enableAosDiscord}
+                  disabled={isPending}
+                  onChange={setEnableAosDiscord}
+                />
+              }
+            />
+          </FormControl>
+          <FormControl>
+            <TextField
+              required
+              label="AoS Discord User ID"
+              disabled={!enableAosDiscord}
+              value={aosUserId}
+              error={aosUserIdError != null}
+              helperText={aosUserIdError}
+              onChange={setAosUserId}
+            />
+          </FormControl>
+        </div>
+        <div>
+          <FormControl>
+            <FormControlLabel
+              sx={{ m: 1, minWidth: 80 }}
+              label="EoT Discord"
+              control={
+                <Checkbox
+                  checked={enableEotDiscord}
+                  disabled={isPending}
+                  onChange={setEnableEotDiscord}
+                />
+              }
+            />
+          </FormControl>
+          <FormControl>
+            <TextField
+              required
+              label="EoT Discord User ID"
+              disabled={!enableEotDiscord}
+              value={eotUserId}
+              error={eotUserIdError != null}
+              helperText={eotUserIdError}
+              onChange={setEotUserId}
+            />
+          </FormControl>
+        </div>
         <div>
           <FormControl>
             <FormControlLabel
@@ -206,7 +317,7 @@ function NotificationSettings() {
             <TextField
               required
               label="Webhook URL"
-              value={webHook?.webHookUrl ?? ""}
+              value={webHookUrl}
               disabled={!enableWebHook}
               error={webHookUrlError != null}
               helperText={webHookUrlError}
@@ -218,7 +329,7 @@ function NotificationSettings() {
               required
               label="Webhook User ID"
               disabled={!enableWebHook}
-              value={webHook?.webHookUserId ?? ""}
+              value={webHookUserId}
               error={webHookUserIdError != null}
               helperText={webHookUserIdError}
               onChange={setWebHookUserId}

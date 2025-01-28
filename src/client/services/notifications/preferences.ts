@@ -1,5 +1,5 @@
 import { useNotifications } from "@toolpad/core";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { NotificationPreferences } from "../../../api/notifications";
 import { tsr } from "../client";
 import { handleError } from "../network";
@@ -17,14 +17,21 @@ export function useSetNotificationPreferences() {
   const { mutate, error, isPending } = tsr.notifications.update.useMutation();
   const validationError = handleError(isPending, error);
   const notifications = useNotifications();
+  const [attempted, setAttempted] = useState<
+    NotificationPreferences | undefined
+  >();
 
   const setPreferences = useCallback(
-    (preferences: NotificationPreferences) =>
+    (preferences: NotificationPreferences) => {
+      setAttempted(undefined);
       mutate(
         {
           body: { preferences },
         },
         {
+          onError: () => {
+            setAttempted(preferences);
+          },
           onSuccess: ({ body }) => {
             tsrQueryClient.notifications.get.setQueryData(queryKey, () => ({
               headers: new Headers(),
@@ -37,11 +44,12 @@ export function useSetNotificationPreferences() {
             });
           },
         },
-      ),
+      );
+    },
     [mutate],
   );
 
-  return { setPreferences, isPending, validationError };
+  return { setPreferences, attempted, isPending, validationError };
 }
 export function useSendTestNotification() {
   const { mutate, error, isPending } = tsr.notifications.test.useMutation();

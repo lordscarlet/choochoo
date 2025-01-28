@@ -27,7 +27,7 @@ export const DirectWebHookSetting = z.object({
   method: z.literal(NotificationMethod.DIRECT_WEBHOOK),
   frequency: z.nativeEnum(NotificationFrequency),
   option: WebHookOptionZod,
-  userId: z.string().min(1),
+  webHookUserId: z.string().min(1),
 });
 export type DirectWebHookSetting = z.infer<typeof DirectWebHookSetting>;
 
@@ -44,6 +44,7 @@ export type WebHookSetting = z.infer<typeof WebHookSetting>;
 export const TurnNotificationSetting = z.discriminatedUnion("method", [
   WebHookSetting,
   EmailSetting,
+  DirectWebHookSetting,
 ]);
 export type TurnNotificationSetting = z.infer<typeof TurnNotificationSetting>;
 
@@ -51,6 +52,16 @@ export function isWebHookSetting(
   value: TurnNotificationSetting,
 ): value is WebHookSetting {
   return value.method === NotificationMethod.WEBHOOK;
+}
+
+export function isDirectWebHookSetting(
+  value: TurnNotificationSetting,
+  option?: WebHookOption,
+): value is DirectWebHookSetting {
+  return (
+    value.method === NotificationMethod.DIRECT_WEBHOOK &&
+    (option == null || value.option === option)
+  );
 }
 
 export const NotificationPreferences = z.object({

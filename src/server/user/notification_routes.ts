@@ -32,7 +32,7 @@ const router = initServer().router(notificationsContract, {
     await assertRole(req);
     await sendTestMessage(
       req.session.userId!,
-      body.preferences.turnNotifications[0],
+      body.preferences.turnNotifications,
     );
     return { status: 200, body: { success: true } };
   },

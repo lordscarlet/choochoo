@@ -90,10 +90,10 @@ export class UserDao extends Model<
     return asApi;
   }
 
-  getTurnNotificationSetting(
+  getTurnNotificationSettings(
     frequency: NotificationFrequency,
-  ): TurnNotificationSetting | undefined {
-    return this.notificationPreferences.turnNotifications.find(
+  ): TurnNotificationSetting[] {
+    return this.notificationPreferences.turnNotifications.filter(
       (preference) => preference.frequency === frequency,
     );
   }
