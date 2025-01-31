@@ -33,7 +33,7 @@ export class DetroitBankruptcyMapSettings implements MapSettings {
   readonly key = DetroitBankruptcyMapSettings.key;
   readonly name = "Detroit Bankruptcy";
   readonly minPlayers = 1;
-  readonly maxPlayers = 3;
+  readonly maxPlayers = 5;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.ALPHA;
   readonly interCityConnections = interCityConnections(map, [
