@@ -56,7 +56,7 @@ export class PlayerHelper {
     assert(this.players().length === 1);
     const [player] = this.players();
     const soloScore = this.getScore(player);
-    return compareScore(soloScore, this.soloGoalScore()) > 0;
+    return compareScore(soloScore, this.soloGoalScore()) <= 0;
   }
 
   /** Returns the players ordered by their score. Tied players end up in the same placement in the array. */
@@ -159,12 +159,17 @@ export function isNotEliminated(score: Score): score is number[] {
   return !isEliminated(score);
 }
 
+// Compares [score1] to [score2].
+// score1 < score2 = 1
+// score2 < score1 = -1
+// score1 = score2 = 0
 export function compareScore(score1: Score, score2: Score): number {
+  if (isEliminated(score1) && isEliminated(score2)) return 0;
   if (isEliminated(score1)) return 1;
   if (isEliminated(score2)) return -1;
   for (const [index, s1] of score1.entries()) {
-    if (s1 > score2[index]) return -1;
-    if (score2[index] > s1) return 1;
+    if (score2[index] < s1) return -1;
+    if (s1 < score2[index]) return 1;
   }
   return 0;
 }
