@@ -69,10 +69,10 @@ function InternalActiveGame() {
       <RetryButton />
       {!undoOnly && <PlayerStats />}
       {!undoOnly && <GameMap />}
-      {!undoOnly && !canEmitSelectAction && <SpecialActionTable />}
       {!undoOnly &&
         !canEmitProduction &&
         game.status === GameStatus.enum.ACTIVE && <GoodsTable />}
+      {!undoOnly && !canEmitSelectAction && <SpecialActionTable />}
       {!undoOnly && <AvailableCities />}
       <MapInfo gameKey={game.gameKey} variant={game.variant} />
     </div>
