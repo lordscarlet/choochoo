@@ -2,11 +2,11 @@ import { Set } from "immutable";
 import z from "zod";
 import { injectState } from "../../engine/framework/execution_context";
 import { MapKey } from "../../engine/framework/key";
-import { EmptyActionProcessor } from "../../engine/game/action";
 import { injectInitialPlayerCount } from "../../engine/game/state";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectActionPhase } from "../../engine/select_action/phase";
 import { SelectAction, SelectData } from "../../engine/select_action/select";
+import { SkipAction } from "../../engine/select_action/skip";
 import { Action, ActionZod } from "../../engine/state/action";
 import { assert } from "../../utils/validate";
 
@@ -67,21 +67,6 @@ export class DetroitSelectAction extends SelectAction {
 export class DetroitSelectActionPhase extends SelectActionPhase {
   configureActions() {
     super.configureActions();
-    this.installAction(DoneAction);
-  }
-}
-
-export class DoneAction extends EmptyActionProcessor {
-  static action = "done-select";
-  private readonly playerCount = injectInitialPlayerCount();
-
-  canEmit(): boolean {
-    return this.playerCount() === 1;
-  }
-
-  validate() {}
-
-  process(): boolean {
-    return true;
+    this.installAction(SkipAction);
   }
 }

@@ -7,6 +7,7 @@ import { PHASE } from "../../engine/game/phase";
 import { LocoAction } from "../../engine/move/loco";
 import { MovePassAction } from "../../engine/move/pass";
 import { SelectAction as ActionSelectionSelectAction } from "../../engine/select_action/select";
+import { SkipAction } from "../../engine/select_action/skip";
 import { ShareHelper } from "../../engine/shares/share_helper";
 import { TakeSharesAction } from "../../engine/shares/take_shares";
 import { Phase } from "../../engine/state/phase";
@@ -65,6 +66,11 @@ export function ActionSummary() {
 
 export function SpecialActionSelector() {
   const { canEmit, canEmitUserId } = useAction(ActionSelectionSelectAction);
+  const {
+    canEmit: canEmitSkip,
+    isPending,
+    emit: emitSkip,
+  } = useEmptyAction(SkipAction);
 
   if (canEmitUserId == null) {
     return <></>;
@@ -77,7 +83,16 @@ export function SpecialActionSelector() {
       </GenericMessage>
     );
   }
-  return <GenericMessage>You must select a special action.</GenericMessage>;
+  return (
+    <GenericMessage>
+      You must select a special action.
+      {canEmitSkip && (
+        <Button disabled={isPending} onClick={emitSkip}>
+          Skip
+        </Button>
+      )}
+    </GenericMessage>
+  );
 }
 
 export function EndGame() {
