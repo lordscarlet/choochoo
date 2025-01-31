@@ -298,6 +298,7 @@ export function useCreateGame(): {
 
 export function useDeleteGame(game: GameLiteApi) {
   const me = useMe();
+  const isAdmin = useIsAdmin();
   const dialogs = useDialogs();
   const notifications = useNotifications();
   const { mutate, error, isPending } = tsr.games.deleteGame.useMutation();
@@ -323,8 +324,10 @@ export function useDeleteGame(game: GameLiteApi) {
     );
   }, [game.id]);
 
-  const canPerform =
-    game.status === GameStatus.enum.LOBBY && game.playerIds[0] === me?.id;
+  const canBeDeleted =
+    game.status === GameStatus.enum.LOBBY || game.playerIds.length === 1;
+
+  const canPerform = isAdmin || (canBeDeleted && game.playerIds[0] === me?.id);
 
   return { canPerform, perform, isPending };
 }

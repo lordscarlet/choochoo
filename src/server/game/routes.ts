@@ -139,12 +139,25 @@ const router = initServer().router(gameContract, {
 
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null);
-    assert(game.status === GameStatus.enum.LOBBY, {
-      invalidInput: "cannot delete started game",
-    });
-    assert(game.playerIds[0] === user.id, { permissionDenied: true });
 
-    await game.destroy();
+    const isAdmin = user.role === UserRole.enum.ADMIN;
+    if (!isAdmin) {
+      assert(
+        game.status === GameStatus.enum.LOBBY || game.playerIds.length === 1,
+        {
+          invalidInput: "cannot delete started game unless it's a solo",
+        },
+      );
+      assert(game.playerIds[0] === user.id, { permissionDenied: true });
+    }
+
+    await sequelize.transaction(() =>
+      Promise.all([
+        game.destroy(),
+        LogDao.destroy({ where: { gameId: game.id } }),
+        GameHistoryDao.destroy({ where: { gameId: game.id } }),
+      ]),
+    );
 
     return { status: 200, body: { success: true } };
   },
