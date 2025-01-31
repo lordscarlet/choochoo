@@ -160,11 +160,11 @@ export function isNotEliminated(score: Score): score is number[] {
 }
 
 export function compareScore(score1: Score, score2: Score): number {
-  if (isEliminated(score1)) return -1;
-  if (isEliminated(score2)) return 1;
+  if (isEliminated(score1)) return 1;
+  if (isEliminated(score2)) return -1;
   for (const [index, s1] of score1.entries()) {
     if (s1 > score2[index]) return -1;
-    if (s1 < score2[index]) return 1;
+    if (score2[index] > s1) return 1;
   }
   return 0;
 }
