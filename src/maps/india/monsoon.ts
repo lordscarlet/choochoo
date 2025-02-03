@@ -23,7 +23,11 @@ export class IndiaIncomePhase extends IncomePhase {
     }
 
     for (const player of this.players()) {
-      const result = this.moneyManager.addMoney(player.color, cost);
+      const result = this.moneyManager.addMoney(
+        player.color,
+        cost,
+        /* forced= */ true,
+      );
       if (result.lostIncome > 0) {
         this.log.player(
           player,
