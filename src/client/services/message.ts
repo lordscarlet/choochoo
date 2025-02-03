@@ -1,6 +1,8 @@
+import { InfiniteData } from "@tanstack/react-query";
 import { useNotifications } from "@toolpad/core";
+import { DataResponse } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useMemo } from "react";
-import { MessageApi, PageCursor } from "../../api/message";
+import { MessageApi, messageContract, PageCursor } from "../../api/message";
 import { tsr } from "./client";
 import { handleError } from "./network";
 import { useJoinRoom, useSocket } from "./socket";
@@ -27,6 +29,17 @@ export function useSendChat(gameId?: number) {
   );
   return { sendChat, isPending };
 }
+
+function parseMessages(
+  data?: InfiniteData<DataResponse<typeof messageContract.list>>,
+): MessageApi[] {
+  return data == null
+    ? emptyMessages
+    : data.pages
+        .flatMap((page) => page.body.messages.map((m) => MessageApi.parse(m)))
+        .sort((a, b) => (a.id < b.id ? -1 : 1));
+}
+
 export function useMessages(gameId?: number): UseMessages {
   useJoinRoom(gameId);
   const socket = useSocket();
@@ -46,17 +59,7 @@ export function useMessages(gameId?: number): UseMessages {
       },
     });
 
-  const messages = useMemo(
-    () =>
-      data == null
-        ? emptyMessages
-        : data.pages
-            .flatMap((page) =>
-              page.body.messages.map((m) => MessageApi.parse(m)),
-            )
-            .sort((a, b) => (a.id < b.id ? -1 : 1)),
-    [data],
-  );
+  const messages = useMemo(() => parseMessages(data), [data]);
 
   useEffect(() => {
     if (error == null) return;
@@ -68,7 +71,11 @@ export function useMessages(gameId?: number): UseMessages {
 
   const updateLogs = useCallback(
     (updater: (logs: MessageApi[]) => MessageApi[]) => {
-      queryClient.messages.list.setQueryData(queryKey, () => {
+      queryClient.messages.list.setQueryData(queryKey, (d) => {
+        const data = d as
+          | InfiniteData<DataResponse<typeof messageContract.list>>
+          | undefined;
+        const messages = parseMessages(data);
         const newMessages = updater(messages);
         const nextPageCursors =
           data == null
@@ -96,12 +103,16 @@ export function useMessages(gameId?: number): UseMessages {
         } as any;
       });
     },
-    [queryClient, queryKey, messages, data],
+    [queryClient, queryKey],
   );
 
   useEffect(() => {
     const listener = (message: MessageApi) => {
-      updateLogs((logs) => logs.concat([message]));
+      updateLogs((logs) => {
+        console.log("received a new log", message, logs);
+
+        return logs.concat([message]);
+      });
     };
     socket.on("newLog", listener);
     return () => {
