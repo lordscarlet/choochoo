@@ -27,7 +27,7 @@ export class IndiaIncomePhase extends IncomePhase {
       if (result.lostIncome > 0) {
         this.log.player(
           player,
-          `cannot afford monsoon expenses, loses ${result.lostIncome}`,
+          `cannot afford monsoon expenses, loses ${result.lostIncome} income`,
         );
 
         if (result.outOfGame) {
