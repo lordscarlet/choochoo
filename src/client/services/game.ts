@@ -22,7 +22,7 @@ import { useInjected, useInjectedMemo } from "../utils/injection_context";
 import { tsr } from "./client";
 import { useIsAdmin, useMe } from "./me";
 import { handleError, toValidationError } from "./network";
-import { socket, useJoinRoom } from "./socket";
+import { useJoinRoom, useSocket } from "./socket";
 
 function getQueryKey(gameId: number | string): string[] {
   return ["games", `${gameId}`];
@@ -58,6 +58,7 @@ function checkMatches(baseQuery: ListGamesApi, game: GameLiteApi): boolean {
 }
 
 export function useGameList(baseQuery: ListGamesApi) {
+  const socket = useSocket();
   const tsrQueryClient = tsr.useQueryClient();
   const queryWithLimit: ListGamesApi = { pageSize: 20, ...baseQuery };
   const queryKeyFromFilter = Object.entries(queryWithLimit)
@@ -222,6 +223,7 @@ export function useSetGameSuccess() {
 
 export function useGame(): GameApi {
   const setGame = useSetGame();
+  const socket = useSocket();
 
   const gameId = parseInt(useParams().gameId!);
   const { data } = tsr.games.get.useSuspenseQuery({
@@ -232,11 +234,15 @@ export function useGame(): GameApi {
   useJoinRoom();
 
   useEffect(() => {
-    socket.on("gameUpdate", setGame);
+    function internalSetGame(game: GameApi) {
+      if (game.id !== gameId) return;
+      setGame(game);
+    }
+    socket.on("gameUpdate", internalSetGame);
     return () => {
-      socket.off("gameUpdate", setGame);
+      socket.off("gameUpdate", internalSetGame);
     };
-  }, []);
+  }, [gameId]);
 
   return data.body.game;
 }

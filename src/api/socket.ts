@@ -15,11 +15,12 @@ export interface ServerToClientEvents {
   gameUpdateLite(game: GameLiteApi): void;
 }
 
+export interface RoomSyncProps {
+  connectToHome: boolean;
+  games: number[];
+}
+
 export interface ClientToServerEvents {
-  joinHomeRoom(): void;
-  leaveHomeRoom(): void;
-  joinGameRoom(gameId: number): void;
-  leaveGameRoom(gameId: number): void;
-  emitAction(actionName: string, actionData: object): void;
+  roomSync(props: RoomSyncProps): void;
   submitMessage(message: string): void;
 }

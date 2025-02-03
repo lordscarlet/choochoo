@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { timeFormat } from "../../utils/functions";
-import { useMessages, useSendChat } from "../services/socket";
+import { useMessages, useSendChat } from "../services/message";
 import { useTextInputState } from "../utils/form_state";
 import * as styles from "./game_log.module.css";
 

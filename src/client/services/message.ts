@@ -1,31 +1,35 @@
 import { useNotifications } from "@toolpad/core";
 import { useCallback, useEffect, useMemo } from "react";
-import { io, Socket } from "socket.io-client";
 import { MessageApi, PageCursor } from "../../api/message";
-import { ClientToServerEvents, ServerToClientEvents } from "../../api/socket";
 import { tsr } from "./client";
-import { environment } from "./environment";
 import { handleError } from "./network";
+import { useJoinRoom, useSocket } from "./socket";
 
-export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-  environment.socketHost,
-);
+export const emptyMessages: MessageApi[] = [];
 
-socket.on("connect", () => {
-  console.log("got a connection");
-});
-
-interface UseMessages {
+export interface UseMessages {
   messages: MessageApi[];
   isLoading: boolean;
   fetchNextPage: () => void;
   hasNextPage: boolean;
 }
 
-const emptyMessages: MessageApi[] = [];
+export function useSendChat(gameId?: number) {
+  const { mutate, error, isPending } = tsr.messages.sendChat.useMutation();
+  handleError(isPending, error);
 
+  const sendChat = useCallback(
+    (message: string, onSuccess: () => void) => {
+      if (message == "") return;
+      mutate({ body: { message, gameId } }, { onSuccess });
+    },
+    [mutate],
+  );
+  return { sendChat, isPending };
+}
 export function useMessages(gameId?: number): UseMessages {
   useJoinRoom(gameId);
+  const socket = useSocket();
   const notifications = useNotifications();
   const queryClient = tsr.useQueryClient();
   const queryKey = ["messages", gameId];
@@ -116,35 +120,4 @@ export function useMessages(gameId?: number): UseMessages {
   }, [gameId, updateLogs]);
 
   return { messages, isLoading, fetchNextPage, hasNextPage };
-}
-
-export function useJoinRoom(gameId?: number) {
-  useEffect(() => {
-    if (gameId == null) {
-      socket.emit("joinHomeRoom");
-    } else {
-      socket.emit("joinGameRoom", gameId);
-    }
-    return () => {
-      if (gameId == null) {
-        socket.emit("leaveHomeRoom");
-      } else {
-        socket.emit("leaveGameRoom", gameId);
-      }
-    };
-  }, [gameId]);
-}
-
-export function useSendChat(gameId?: number) {
-  const { mutate, error, isPending } = tsr.messages.sendChat.useMutation();
-  handleError(isPending, error);
-
-  const sendChat = useCallback(
-    (message: string, onSuccess: () => void) => {
-      if (message == "") return;
-      mutate({ body: { message, gameId } }, { onSuccess });
-    },
-    [mutate],
-  );
-  return { sendChat, isPending };
 }

@@ -2,7 +2,11 @@ import { InstanceUpdateOptions } from "@sequelize/core";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { Server, ServerOptions, Socket } from "socket.io";
 import { GameApi } from "../api/game";
-import { ClientToServerEvents, ServerToClientEvents } from "../api/socket";
+import {
+  ClientToServerEvents,
+  RoomSyncProps,
+  ServerToClientEvents,
+} from "../api/socket";
 import { deepEquals } from "../utils/deep_equals";
 import { afterTransaction } from "../utils/transaction";
 import { GameDao, toApi } from "./game/dao";
@@ -58,34 +62,23 @@ export function emitLogDestroy(log: LogDao): void {
 function bindSocket(
   socket: Socket<ClientToServerEvents, ServerToClientEvents>,
 ) {
-  const rooms = new Map<string, number>();
+  function syncRooms(props: RoomSyncProps) {
+    const newRooms = new Set(props.games.map(roomName));
+    if (props.connectToHome) {
+      newRooms.add(roomName());
+    }
 
-  function joinRoom(gameId?: number) {
-    const name = roomName(gameId);
-    if (!rooms.has(name)) {
-      rooms.set(name, 1);
-      socket.join(name);
-    } else {
-      rooms.set(name, rooms.get(name)! + 1);
+    for (const room of newRooms) {
+      if (socket.rooms.has(room)) continue;
+      socket.join(room);
+    }
+    for (const room of socket.rooms) {
+      if (newRooms.has(room)) continue;
+      socket.leave(room);
     }
   }
 
-  function leaveRoom(gameId?: number) {
-    const name = roomName(gameId);
-    if (!rooms.has(name)) {
-      return;
-    } else if (rooms.get(name) === 1) {
-      rooms.delete(name);
-      socket.leave(name);
-    } else {
-      rooms.set(name, rooms.get(name)! - 1);
-    }
-  }
-
-  socket.on("joinHomeRoom", joinRoom);
-  socket.on("leaveHomeRoom", leaveRoom);
-  socket.on("joinGameRoom", joinRoom);
-  socket.on("leaveGameRoom", leaveRoom);
+  socket.on("roomSync", syncRooms);
 }
 
 Lifecycle.singleton.onStart(() => {

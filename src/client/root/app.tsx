@@ -11,6 +11,7 @@ import { AwaitingContextProvider } from "../components/awaiting_player";
 import { Loading } from "../components/loading";
 import { tsr } from "../services/client";
 import { AdminModeProvider } from "../services/me";
+import { SocketContextProvider } from "../services/socket";
 import { Router } from "./routes";
 
 const theme = createTheme({
@@ -29,28 +30,30 @@ export function App() {
 
   return (
     <Suspense fallback={<Loading />}>
-      <AdminModeProvider>
-        <ThemeProvider theme={theme}>
-          <DialogsProvider>
-            <NotificationsProvider>
-              <AwaitingContextProvider>
-                <ErrorBoundary
-                  onReset={reset}
-                  fallbackRender={({ resetErrorBoundary }) => (
-                    <ResetError resetErrorBoundary={resetErrorBoundary} />
-                  )}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    <tsr.ReactQueryProvider>
-                      <Router />
-                    </tsr.ReactQueryProvider>
-                  </QueryClientProvider>
-                </ErrorBoundary>
-              </AwaitingContextProvider>
-            </NotificationsProvider>
-          </DialogsProvider>
-        </ThemeProvider>
-      </AdminModeProvider>
+      <SocketContextProvider>
+        <AdminModeProvider>
+          <ThemeProvider theme={theme}>
+            <DialogsProvider>
+              <NotificationsProvider>
+                <AwaitingContextProvider>
+                  <ErrorBoundary
+                    onReset={reset}
+                    fallbackRender={({ resetErrorBoundary }) => (
+                      <ResetError resetErrorBoundary={resetErrorBoundary} />
+                    )}
+                  >
+                    <QueryClientProvider client={queryClient}>
+                      <tsr.ReactQueryProvider>
+                        <Router />
+                      </tsr.ReactQueryProvider>
+                    </QueryClientProvider>
+                  </ErrorBoundary>
+                </AwaitingContextProvider>
+              </NotificationsProvider>
+            </DialogsProvider>
+          </ThemeProvider>
+        </AdminModeProvider>
+      </SocketContextProvider>
     </Suspense>
   );
 }
