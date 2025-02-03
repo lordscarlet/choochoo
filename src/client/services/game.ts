@@ -235,6 +235,7 @@ export function useGame(): GameApi {
 
   useEffect(() => {
     function internalSetGame(game: GameApi) {
+      console.log("got new game", game.id, gameId);
       if (game.id !== gameId) return;
       setGame(game);
     }

@@ -84,26 +84,14 @@ function bindSocket(
 Lifecycle.singleton.onStart(() => {
   io.on("connection", bindSocket);
 
-  const previous = new WeakMap<GameDao, GameApi | undefined>();
-
   GameDao.hooks.addListener(
     "beforeSave",
     (game: GameDao, options: InstanceUpdateOptions) => {
+      const oldGame = game.isNewRecord
+        ? undefined
+        : toApi({ ...game.dataValues, ...game.previous() });
       afterTransaction(options, () => {
-        if (game.isNewRecord) {
-          previous.set(game, undefined);
-        } else {
-          previous.set(game, toApi({ ...game.dataValues, ...game.previous() }));
-        }
-      });
-    },
-  );
-
-  GameDao.hooks.addListener(
-    "afterSave",
-    (game: GameDao, options: InstanceUpdateOptions) => {
-      afterTransaction(options, () => {
-        emitGameUpdate(previous.get(game), game);
+        emitGameUpdate(oldGame, game);
       });
     },
   );
