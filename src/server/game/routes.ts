@@ -231,7 +231,14 @@ const router = initServer().router(gameContract, {
     };
   },
 
-  async undoAction({ req, params: { gameId }, body: { backToVersion } }) {
+  async undoAction({
+    req,
+    params: { gameId },
+    body: { backToVersion, adminOverride },
+  }) {
+    if (adminOverride) {
+      await assertRole(req, UserRole.enum.ADMIN);
+    }
     return await sequelize.transaction(async (transaction) => {
       const gameHistory = await GameHistoryDao.findOne({
         where: { gameId, previousGameVersion: backToVersion },
@@ -240,16 +247,18 @@ const router = initServer().router(gameContract, {
       const game = await GameDao.findByPk(gameId, { transaction });
       assert(game != null);
       assert(gameHistory != null);
-      assert(gameHistory.reversible, {
-        invalidInput: "cannot undo irreversible action",
-      });
       assert(
         game.version === gameHistory.previousGameVersion + 1,
         "can only undo one step",
       );
-      assert(gameHistory.userId === req.session.userId, {
-        permissionDenied: true,
-      });
+      if (!adminOverride) {
+        assert(gameHistory.reversible, {
+          invalidInput: "cannot undo irreversible action",
+        });
+        assert(gameHistory.userId === req.session.userId, {
+          permissionDenied: true,
+        });
+      }
 
       game.version = backToVersion;
       game.gameData = gameHistory.previousGameData;

@@ -537,35 +537,45 @@ export interface UndoAction {
 }
 
 export function useUndoAction(): UndoAction {
+  const isAdmin = useIsAdmin();
   const game = useGame();
   const onSuccess = useSetGameSuccess();
   const me = useMe();
+  const dialogs = useDialogs();
   const notifications = useNotifications();
   const { mutate, error, isPending } = tsr.games.undoAction.useMutation();
   handleError(isPending, error);
 
-  const undo = useCallback(
-    () =>
-      mutate(
-        {
-          params: { gameId: game.id },
-          body: { backToVersion: game.version - 1 },
-        },
-        {
-          onSuccess(r) {
-            onSuccess(r);
+  const canUndoBecausePlayer =
+    game.undoPlayerId != null && game.undoPlayerId === me?.id;
+  const canUndoBecauseAdmin = isAdmin;
+  const canUndo = canUndoBecausePlayer || canUndoBecauseAdmin;
 
-            notifications.show("Success", {
-              autoHideDuration: 2000,
-              severity: "success",
-            });
-          },
-        },
-      ),
-    [game.id, game.version],
-  );
+  const undo = useCallback(async () => {
+    const adminOverride = !canUndoBecausePlayer;
+    if (!canUndoBecausePlayer) {
+      const shouldContinue = await dialogs.confirm(
+        "This is an admin action, usually you cannot undo this action. Continue?",
+      );
+      if (!shouldContinue) return;
+    }
+    mutate(
+      {
+        params: { gameId: game.id },
+        body: { backToVersion: game.version - 1, adminOverride },
+      },
+      {
+        onSuccess(r) {
+          onSuccess(r);
 
-  const canUndo = game.undoPlayerId != null && game.undoPlayerId === me?.id;
+          notifications.show("Success", {
+            autoHideDuration: 2000,
+            severity: "success",
+          });
+        },
+      },
+    );
+  }, [game.id, game.version, canUndoBecausePlayer]);
 
   return { undo, canUndo, isPending };
 }
