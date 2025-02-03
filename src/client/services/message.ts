@@ -108,11 +108,7 @@ export function useMessages(gameId?: number): UseMessages {
 
   useEffect(() => {
     const listener = (message: MessageApi) => {
-      updateLogs((logs) => {
-        console.log("received a new log", message, logs);
-
-        return logs.concat([message]);
-      });
+      updateLogs((logs) => logs.concat([message]));
     };
     socket.on("newLog", listener);
     return () => {
