@@ -44,10 +44,10 @@ export class IndiaIncomePhase extends IncomePhase {
         return 0;
       case 6:
         this.log.log("Heavy monsoon season, every player pays $2");
-        return 2;
+        return -2;
       default:
         this.log.log("Light monsoon season, every player pays $2");
-        return 1;
+        return -1;
     }
   }
 }
