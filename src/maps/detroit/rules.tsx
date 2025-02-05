@@ -4,7 +4,7 @@ export function DetroitRules() {
       <p>Same as base game with the following changes:</p>
       <ul>
         <li>
-          <b>Limitted goods:</b> only 1 cube on the goods display for each city
+          <b>Limited goods:</b> only 1 cube on the goods display for each city
           and no production action.
         </li>
         <li>

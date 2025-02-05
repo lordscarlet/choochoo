@@ -4,7 +4,7 @@ export function CyprusRules() {
       <p>Same as base game with the following changes:</p>
       <ul>
         <li>
-          <b>Limitted builds:</b> only two builds per round (3 w/ Engineer).
+          <b>Limited builds:</b> only two builds per round (3 w/ Engineer).
         </li>
         <li>
           <b>Blocked actions:</b> Locomotive is not available on odd rounds,
