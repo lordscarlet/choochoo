@@ -7,7 +7,6 @@ import { reverse } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GameDao } from "../game/dao";
 import "../session";
-import { badwords } from "../util/badwords";
 import { LogDao } from "./log_dao";
 
 export const messageApp = express();
@@ -40,11 +39,6 @@ const router = initServer().router(messageContract, {
   },
 
   async sendChat({ body: { message, gameId }, req }) {
-    for (const badword of badwords) {
-      assert(!message.includes(badword), {
-        invalidInput: "cannot use foul language in message",
-      });
-    }
     assert(gameId == null || (await GameDao.findByPk(gameId)) != null, {
       notFound: true,
     });

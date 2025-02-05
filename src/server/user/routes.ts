@@ -4,7 +4,6 @@ import express from "express";
 import { userContract, UserRole } from "../../api/user";
 import { assert, fail } from "../../utils/validate";
 import "../session";
-import { badwords } from "../util/badwords";
 import { emailService } from "../util/email";
 import { assertRole } from "../util/enforce_role";
 import { UserDao } from "./dao";
@@ -93,11 +92,6 @@ const router = initServer().router(userContract, {
 
   async create({ req, body }) {
     try {
-      for (const badword of badwords) {
-        assert(!body.username.includes(badword), {
-          invalidInput: "cannot use bad words in username",
-        });
-      }
       const user = await UserDao.register(body);
       req.session.userId = user.id;
       // Don't await this, just let it go.
