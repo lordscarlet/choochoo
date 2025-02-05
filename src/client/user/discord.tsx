@@ -1,4 +1,5 @@
 import { Button } from "@mui/material";
+import { useLocation } from "react-router-dom";
 import { NotificationPreferences } from "../../api/notifications";
 import { useUnlink } from "../services/notifications/unlink";
 
@@ -9,6 +10,8 @@ export function DiscordNotificationSettings({
 }) {
   const unlink = useUnlink();
 
+  const location = useLocation();
+
   return (
     <form method="GET" action="https://discord.com/oauth2/authorize">
       <input type="hidden" name="client_id" value="1336123312228794368" />
@@ -17,7 +20,7 @@ export function DiscordNotificationSettings({
         name="redirect_uri"
         value={window.location.origin + "/app/users/link-discord"}
       />
-      <input type="hidden" name="state" value={window.location.pathname} />
+      <input type="hidden" name="state" value={location.pathname} />
       <input type="hidden" name="response_type" value="token" />
       <input type="hidden" name="scope" value="identify email" />
       <Button type="submit">
