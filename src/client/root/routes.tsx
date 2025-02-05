@@ -8,6 +8,7 @@ import { GamePage } from "../game/page";
 import { HomePage } from "../home/page";
 import { ActivatePage } from "../user/activate";
 import { ForgotPassword } from "../user/forgot_password";
+import { LinkDiscordPage } from "../user/link_discord";
 import { LoginPage } from "../user/login";
 import { LoginRequired } from "../user/login_required";
 import { UserProfilePage } from "../user/profile";
@@ -94,6 +95,14 @@ export function Router() {
               element: (
                 <LoginRequired>
                   <UserProfilePage />
+                </LoginRequired>
+              ),
+            },
+            {
+              path: "/app/users/link-discord",
+              element: (
+                <LoginRequired>
+                  <LinkDiscordPage />
                 </LoginRequired>
               ),
             },

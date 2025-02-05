@@ -12,7 +12,7 @@ import { useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { GameStatus, ListGamesApi } from "../../api/game";
 import {
-  DirectWebHookSetting,
+  DiscordWebHookSetting,
   isDirectWebHookSetting,
   isWebHookSetting,
   NotificationFrequency,
@@ -33,6 +33,7 @@ import {
 import { useUser } from "../services/user";
 import { useCheckboxState, useTextInputState } from "../utils/form_state";
 import { useTypedMemo } from "../utils/hooks";
+import { DiscordNotificationSettings } from "./discord";
 import { UpdatePassword } from "./update_password";
 
 export function UserProfilePage() {
@@ -74,7 +75,7 @@ function findErrorInNotifications(
   const index = settings.turnNotifications.findIndex(
     (not) =>
       not.method === method &&
-      (option == null || (not as DirectWebHookSetting).option === option),
+      (option == null || (not as DiscordWebHookSetting).option === option),
   );
   if (index === -1) return undefined;
   return validationError?.[`preferences.turnNotifications.${index}.${key}`];
@@ -87,9 +88,7 @@ function buildNotificationSettings(
   webHookUrl: string,
   webHookUserId: string,
   enableAosDiscord: boolean,
-  aosUserId: string,
   enableEotDiscord: boolean,
-  eotUserId: string,
 ) {
   const webHook: WebHookSetting = {
     method: NotificationMethod.WEBHOOK,
@@ -97,17 +96,15 @@ function buildNotificationSettings(
     webHookUrl,
     webHookUserId,
   };
-  const aosWebHook: DirectWebHookSetting = {
-    method: NotificationMethod.DIRECT_WEBHOOK,
+  const aosWebHook: DiscordWebHookSetting = {
+    method: NotificationMethod.DISCORD,
     frequency: NotificationFrequency.IMMEDIATELY,
     option: WebHookOption.AOS,
-    webHookUserId: aosUserId,
   };
-  const eotWebHook: DirectWebHookSetting = {
-    method: NotificationMethod.DIRECT_WEBHOOK,
+  const eotWebHook: DiscordWebHookSetting = {
+    method: NotificationMethod.DISCORD,
     frequency: NotificationFrequency.IMMEDIATELY,
     option: WebHookOption.EOT,
-    webHookUserId: eotUserId,
   };
   return {
     marketing,
@@ -164,18 +161,12 @@ function NotificationSettings() {
   const [enableAosDiscord, setEnableAosDiscord] = useCheckboxState(
     aosDiscordWebHook != null,
   );
-  const [aosUserId, setAosUserId] = useTextInputState(
-    aosDiscordWebHook?.webHookUserId ?? "",
-  );
 
   const eotDiscordWebHook = preferences.turnNotifications.find((not) =>
     isDirectWebHookSetting(not, WebHookOption.EOT),
   );
   const [enableEotDiscord, setEnableEotDiscord] = useCheckboxState(
     eotDiscordWebHook != null,
-  );
-  const [eotUserId, setEotUserId] = useTextInputState(
-    eotDiscordWebHook?.webHookUserId ?? "",
   );
 
   const newNotificationSettings = useTypedMemo(buildNotificationSettings, [
@@ -185,9 +176,7 @@ function NotificationSettings() {
     webHookUrl,
     webHookUserId,
     enableAosDiscord,
-    aosUserId,
     enableEotDiscord,
-    eotUserId,
   ]);
 
   const onSubmit = useCallback(
@@ -221,25 +210,10 @@ function NotificationSettings() {
     "webHookUserId",
   );
 
-  const aosUserIdError = findErrorInNotifications(
-    attempted,
-    NotificationMethod.DIRECT_WEBHOOK,
-    WebHookOption.AOS,
-    validationError,
-    "webHookUserId",
-  );
-
-  const eotUserIdError = findErrorInNotifications(
-    attempted,
-    NotificationMethod.DIRECT_WEBHOOK,
-    WebHookOption.EOT,
-    validationError,
-    "webHookUserId",
-  );
-
   return (
     <>
       <h2>Notification Preferences</h2>
+      <DiscordNotificationSettings preferences={preferences} />
       <Box
         component="form"
         sx={{ "& .MuiTextField-root": { m: 1, width: "25ch" } }}
@@ -255,21 +229,10 @@ function NotificationSettings() {
               control={
                 <Checkbox
                   checked={enableAosDiscord}
-                  disabled={isPending}
+                  disabled={isPending || preferences.discordId == null}
                   onChange={setEnableAosDiscord}
                 />
               }
-            />
-          </FormControl>
-          <FormControl>
-            <TextField
-              required
-              label="AoS Discord User ID"
-              disabled={!enableAosDiscord}
-              value={aosUserId}
-              error={aosUserIdError != null}
-              helperText={aosUserIdError}
-              onChange={setAosUserId}
             />
           </FormControl>
         </div>
@@ -281,21 +244,10 @@ function NotificationSettings() {
               control={
                 <Checkbox
                   checked={enableEotDiscord}
-                  disabled={isPending}
+                  disabled={isPending || preferences.discordId == null}
                   onChange={setEnableEotDiscord}
                 />
               }
-            />
-          </FormControl>
-          <FormControl>
-            <TextField
-              required
-              label="EoT Discord User ID"
-              disabled={!enableEotDiscord}
-              value={eotUserId}
-              error={eotUserIdError != null}
-              helperText={eotUserIdError}
-              onChange={setEotUserId}
             />
           </FormControl>
         </div>

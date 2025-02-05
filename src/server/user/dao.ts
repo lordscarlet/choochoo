@@ -23,6 +23,7 @@ import { compare, hash } from "bcrypt";
 import {
   NotificationFrequency,
   NotificationPreferences,
+  SetNotificationPreferences,
   TurnNotificationSetting,
 } from "../../api/notifications";
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from "../../api/user";
@@ -183,9 +184,12 @@ export class UserDao extends Model<
   }
 
   async setNotificationPreferences(
-    preferences: NotificationPreferences,
+    preferences: SetNotificationPreferences,
   ): Promise<void> {
-    this.notificationPreferences = preferences;
+    this.notificationPreferences = {
+      ...preferences,
+      discordId: this.notificationPreferences.discordId,
+    };
     await Promise.all([
       emailService.setIsExcludedFromCampaigns(
         this.email,

@@ -4,7 +4,7 @@ import z from "zod";
 export enum NotificationMethod {
   EMAIL = 1,
   WEBHOOK,
-  DIRECT_WEBHOOK,
+  DISCORD,
 }
 
 export enum NotificationFrequency {
@@ -23,13 +23,12 @@ export const EmailSetting = z.object({
 });
 export type EmailSetting = z.infer<typeof EmailSetting>;
 
-export const DirectWebHookSetting = z.object({
-  method: z.literal(NotificationMethod.DIRECT_WEBHOOK),
+export const DiscordWebHookSetting = z.object({
+  method: z.literal(NotificationMethod.DISCORD),
   frequency: z.nativeEnum(NotificationFrequency),
-  option: WebHookOptionZod,
-  webHookUserId: z.string().min(1),
+  option: WebHookOptionZod.or(z.string()),
 });
-export type DirectWebHookSetting = z.infer<typeof DirectWebHookSetting>;
+export type DiscordWebHookSetting = z.infer<typeof DiscordWebHookSetting>;
 
 // Copied from 18xx.games.
 // See https://github.com/tobymao/18xx/wiki/Notifications
@@ -44,7 +43,7 @@ export type WebHookSetting = z.infer<typeof WebHookSetting>;
 export const TurnNotificationSetting = z.discriminatedUnion("method", [
   WebHookSetting,
   EmailSetting,
-  DirectWebHookSetting,
+  DiscordWebHookSetting,
 ]);
 export type TurnNotificationSetting = z.infer<typeof TurnNotificationSetting>;
 
@@ -57,17 +56,25 @@ export function isWebHookSetting(
 export function isDirectWebHookSetting(
   value: TurnNotificationSetting,
   option?: WebHookOption,
-): value is DirectWebHookSetting {
+): value is DiscordWebHookSetting {
   return (
-    value.method === NotificationMethod.DIRECT_WEBHOOK &&
+    value.method === NotificationMethod.DISCORD &&
     (option == null || value.option === option)
   );
 }
 
-export const NotificationPreferences = z.object({
+export const SetNotificationPreferences = z.object({
   turnNotifications: z.array(TurnNotificationSetting),
   // Mailjet is the source of truth for this field.
   marketing: z.boolean(),
+  discordId: z.string().optional(),
+});
+export type SetNotificationPreferences = z.infer<
+  typeof SetNotificationPreferences
+>;
+
+export const NotificationPreferences = SetNotificationPreferences.extend({
+  discordId: z.string().optional(),
 });
 export type NotificationPreferences = z.infer<typeof NotificationPreferences>;
 
@@ -80,12 +87,22 @@ export const notificationsContract = initContract().router({
     path: "/notification-preferences",
   },
   update: {
-    body: z.object({ preferences: NotificationPreferences }),
+    body: z.object({
+      preferences: SetNotificationPreferences,
+    }),
     responses: {
       200: z.object({ preferences: NotificationPreferences }),
     },
     method: "PUT",
     path: "/notification-preferences",
+  },
+  linkDiscord: {
+    body: z.object({ accessToken: z.string() }),
+    responses: {
+      200: z.object({ preferences: NotificationPreferences }),
+    },
+    method: "PUT",
+    path: "/discord",
   },
   test: {
     body: z.object({ preferences: NotificationPreferences }),

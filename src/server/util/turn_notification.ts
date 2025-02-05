@@ -1,10 +1,10 @@
 import axios from "axios";
 import { URL } from "url";
 import {
-  DirectWebHookSetting,
+  DiscordWebHookSetting,
   NotificationFrequency,
   NotificationMethod,
-  TurnNotificationSetting,
+  NotificationPreferences,
   WebHookOption,
   WebHookSetting,
 } from "../../api/notifications";
@@ -29,10 +29,10 @@ export async function notifyTurn(game: GameDao): Promise<void> {
       switch (setting?.method) {
         case NotificationMethod.EMAIL:
           return emailService.sendTurnReminder(user, game.toApi());
-        case NotificationMethod.DIRECT_WEBHOOK:
+        case NotificationMethod.DISCORD:
         case NotificationMethod.WEBHOOK: {
           const message = `Your turn in ${game.name} [${game.getSummary()!}](https://www.choochoo.games/app/games/${game.id})`;
-          return callWebhook(message, setting);
+          return callWebhook(message, user.notificationPreferences, setting);
         }
         case undefined:
           return;
@@ -45,20 +45,20 @@ export async function notifyTurn(game: GameDao): Promise<void> {
 
 export async function sendTestMessage(
   userId: number,
-  settings: TurnNotificationSetting[],
+  preferences: NotificationPreferences,
 ): Promise<void> {
   const user = await UserDao.getUser(userId);
   assert(user != null);
   await Promise.all(
-    settings.map(async (setting) => {
+    preferences.turnNotifications.map(async (setting) => {
       switch (setting?.method) {
         case NotificationMethod.EMAIL: {
           return emailService.sendTestNotification(user);
         }
         case NotificationMethod.WEBHOOK:
-        case NotificationMethod.DIRECT_WEBHOOK: {
+        case NotificationMethod.DISCORD: {
           const message = `Test Message from Choo Choo Games.`;
-          return callWebhook(message, setting);
+          return callWebhook(message, preferences, setting);
         }
         case undefined:
           return;
@@ -71,10 +71,12 @@ export async function sendTestMessage(
 
 export async function callWebhook(
   message: string,
-  setting: WebHookSetting | DirectWebHookSetting,
+  preferences: NotificationPreferences,
+  setting: WebHookSetting | DiscordWebHookSetting,
 ): Promise<void> {
   const webHookUrl = toUrl(setting);
-  const encodedMessage = `<${getNotifyPrefix(webHookUrl)}${setting.webHookUserId}> ${message}`;
+  const webHookUserId = toUserId(preferences, setting);
+  const encodedMessage = `<${getNotifyPrefix(webHookUrl)}${webHookUserId}> ${message}`;
 
   if (environment.stage !== "production") {
     console.log(`submitting webhook (${webHookUrl}), "${encodedMessage}"`);
@@ -84,7 +86,21 @@ export async function callWebhook(
   await axios.post(webHookUrl, getPayload(webHookUrl, encodedMessage));
 }
 
-function toUrl(setting: WebHookSetting | DirectWebHookSetting): string {
+function toUserId(
+  preferences: NotificationPreferences,
+  setting: WebHookSetting | DiscordWebHookSetting,
+) {
+  switch (setting.method) {
+    case NotificationMethod.DISCORD:
+      return preferences.discordId!;
+    case NotificationMethod.WEBHOOK:
+      return setting.webHookUserId;
+    default:
+      assertNever(setting);
+  }
+}
+
+function toUrl(setting: WebHookSetting | DiscordWebHookSetting): string {
   if (setting.method === NotificationMethod.WEBHOOK) {
     return setting.webHookUrl;
   }
@@ -94,7 +110,10 @@ function toUrl(setting: WebHookSetting | DirectWebHookSetting): string {
     case WebHookOption.EOT:
       return "https://discord.com/api/webhooks/1333499625759572129/wAl78ONZ57T9J7c72n8-cjUT-mpjls3t7X8ql1GDTe6lpD49D9vfU1HM2GglxGruQZPV";
     default:
-      assertNever(setting.option);
+      if (typeof setting.option != 'string') {
+        assertNever(setting.option);
+      }
+      return setting.option;
   }
 }
 

@@ -1,5 +1,6 @@
 import { createExpressEndpoints, initServer } from "@ts-rest/express";
 
+import axios from "axios";
 import express from "express";
 import { notificationsContract } from "../../api/notifications";
 import { assert } from "../../utils/validate";
@@ -28,12 +29,33 @@ const router = initServer().router(notificationsContract, {
 
     return { status: 200, body: { preferences: user.notificationPreferences } };
   },
+
+  async linkDiscord({ req, body }) {
+    await assertRole(req);
+
+    const { accessToken } = body;
+
+    const result = await axios.get("https://discord.com/api/v10/users/@me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    const discordId = result.data.id;
+
+    const user = await UserDao.findByPk(req.session.userId);
+
+    assert(user != null);
+    user.notificationPreferences = {
+      ...user.notificationPreferences,
+      discordId,
+    };
+    await user.save();
+
+    return { status: 200, body: { preferences: user.notificationPreferences } };
+  },
+
   async test({ req, body }) {
     await assertRole(req);
-    await sendTestMessage(
-      req.session.userId!,
-      body.preferences.turnNotifications,
-    );
+    await sendTestMessage(req.session.userId!, body.preferences);
     return { status: 200, body: { success: true } };
   },
   async unsubscribe({ body }) {
