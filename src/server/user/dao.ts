@@ -22,6 +22,7 @@ import {
 import { compare, hash } from "bcrypt";
 import {
   NotificationFrequency,
+  NotificationMethod,
   NotificationPreferences,
   SetNotificationPreferences,
   TurnNotificationSetting,
@@ -178,7 +179,9 @@ export class UserDao extends Model<
     const user = await UserDao.findByUsernameOrEmail(email);
     assert(user != null, { invalidInput: true });
     await user.setNotificationPreferences({
-      turnNotifications: [],
+      turnNotifications: user.notificationPreferences.turnNotifications.filter(
+        (not) => not.method !== NotificationMethod.EMAIL,
+      ),
       marketing: false,
     });
   }
