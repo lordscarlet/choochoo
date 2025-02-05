@@ -2,11 +2,13 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loading } from "../components/loading";
 import { tsr } from "../services/client";
+import { useSetNotificationPreferencesCache } from "../services/notifications/set_cache";
 import { useSuccess } from "../utils/notify";
 
 export function LinkDiscordPage() {
   const navigate = useNavigate();
   const { mutate } = tsr.notifications.linkDiscord.useMutation();
+  const updateCache = useSetNotificationPreferencesCache();
   const notifySuccess = useSuccess();
   useEffect(() => {
     if (window.location.hash) {
@@ -16,7 +18,8 @@ export function LinkDiscordPage() {
       mutate(
         { body: { accessToken } },
         {
-          onSuccess() {
+          onSuccess({ body }) {
+            updateCache(body.preferences);
             notifySuccess();
             navigate(redirectPath);
           },
