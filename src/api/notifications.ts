@@ -31,10 +31,18 @@ export const DiscordWebHookSetting = z.object({
 });
 export type DiscordWebHookSetting = z.infer<typeof DiscordWebHookSetting>;
 
+const DISCORD_PREFIX = "https://discord.com/api/webhooks/";
+
 export const CustomDiscordWebHookSetting = z.object({
   method: z.literal(NotificationMethod.CUSTOM_DISCORD),
   frequency: z.nativeEnum(NotificationFrequency),
-  webHookUrl: z.string(),
+  webHookUrl: z
+    .string()
+    .startsWith(
+      DISCORD_PREFIX,
+      `Discord URL must start with "${DISCORD_PREFIX}"`,
+    )
+    .url(),
 });
 export type CustomDiscordWebHookSetting = z.infer<
   typeof CustomDiscordWebHookSetting
@@ -45,7 +53,13 @@ export type CustomDiscordWebHookSetting = z.infer<
 export const WebHookSetting = z.object({
   method: z.literal(NotificationMethod.WEBHOOK),
   frequency: z.nativeEnum(NotificationFrequency),
-  webHookUrl: z.string().min(1).url(),
+  webHookUrl: z
+    .string()
+    .min(1)
+    .url()
+    .refine((s) => !s.startsWith(DISCORD_PREFIX), {
+      message: 'Use "Discord Webhook" for discord webhooks',
+    }),
   webHookUserId: z.string().min(1),
 });
 export type WebHookSetting = z.infer<typeof WebHookSetting>;
