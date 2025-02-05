@@ -5,6 +5,7 @@ export enum NotificationMethod {
   EMAIL = 1,
   WEBHOOK,
   DISCORD,
+  CUSTOM_DISCORD,
 }
 
 export enum NotificationFrequency {
@@ -26,9 +27,18 @@ export type EmailSetting = z.infer<typeof EmailSetting>;
 export const DiscordWebHookSetting = z.object({
   method: z.literal(NotificationMethod.DISCORD),
   frequency: z.nativeEnum(NotificationFrequency),
-  option: WebHookOptionZod.or(z.string()),
+  option: WebHookOptionZod,
 });
 export type DiscordWebHookSetting = z.infer<typeof DiscordWebHookSetting>;
+
+export const CustomDiscordWebHookSetting = z.object({
+  method: z.literal(NotificationMethod.CUSTOM_DISCORD),
+  frequency: z.nativeEnum(NotificationFrequency),
+  webHookUrl: z.string(),
+});
+export type CustomDiscordWebHookSetting = z.infer<
+  typeof CustomDiscordWebHookSetting
+>;
 
 // Copied from 18xx.games.
 // See https://github.com/tobymao/18xx/wiki/Notifications
@@ -44,6 +54,7 @@ export const TurnNotificationSetting = z.discriminatedUnion("method", [
   WebHookSetting,
   EmailSetting,
   DiscordWebHookSetting,
+  CustomDiscordWebHookSetting,
 ]);
 export type TurnNotificationSetting = z.infer<typeof TurnNotificationSetting>;
 
@@ -53,7 +64,7 @@ export function isWebHookSetting(
   return value.method === NotificationMethod.WEBHOOK;
 }
 
-export function isDirectWebHookSetting(
+export function isDiscordWebHookSetting(
   value: TurnNotificationSetting,
   option?: WebHookOption,
 ): value is DiscordWebHookSetting {
@@ -61,6 +72,12 @@ export function isDirectWebHookSetting(
     value.method === NotificationMethod.DISCORD &&
     (option == null || value.option === option)
   );
+}
+
+export function isCustomDiscordWebHookSetting(
+  value: TurnNotificationSetting,
+): value is CustomDiscordWebHookSetting {
+  return value.method === NotificationMethod.CUSTOM_DISCORD;
 }
 
 export const SetNotificationPreferences = z.object({

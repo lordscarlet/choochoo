@@ -1,6 +1,7 @@
 import axios from "axios";
 import { URL } from "url";
 import {
+  CustomDiscordWebHookSetting,
   DiscordWebHookSetting,
   NotificationFrequency,
   NotificationMethod,
@@ -30,6 +31,7 @@ export async function notifyTurn(game: GameDao): Promise<void> {
         case NotificationMethod.EMAIL:
           return emailService.sendTurnReminder(user, game.toApi());
         case NotificationMethod.DISCORD:
+        case NotificationMethod.CUSTOM_DISCORD:
         case NotificationMethod.WEBHOOK: {
           const message = `Your turn in ${game.name} [${game.getSummary()!}](https://www.choochoo.games/app/games/${game.id})`;
           return callWebhook(message, user.notificationPreferences, setting);
@@ -56,6 +58,7 @@ export async function sendTestMessage(
           return emailService.sendTestNotification(user);
         }
         case NotificationMethod.WEBHOOK:
+        case NotificationMethod.CUSTOM_DISCORD:
         case NotificationMethod.DISCORD: {
           const message = `Test Message from Choo Choo Games.`;
           return callWebhook(message, preferences, setting);
@@ -72,7 +75,7 @@ export async function sendTestMessage(
 export async function callWebhook(
   message: string,
   preferences: NotificationPreferences,
-  setting: WebHookSetting | DiscordWebHookSetting,
+  setting: WebHookSetting | DiscordWebHookSetting | CustomDiscordWebHookSetting,
 ): Promise<void> {
   const webHookUrl = toUrl(setting);
   const webHookUserId = toUserId(preferences, setting);
@@ -88,10 +91,11 @@ export async function callWebhook(
 
 function toUserId(
   preferences: NotificationPreferences,
-  setting: WebHookSetting | DiscordWebHookSetting,
+  setting: WebHookSetting | DiscordWebHookSetting | CustomDiscordWebHookSetting,
 ) {
   switch (setting.method) {
     case NotificationMethod.DISCORD:
+    case NotificationMethod.CUSTOM_DISCORD:
       return preferences.discordId!;
     case NotificationMethod.WEBHOOK:
       return setting.webHookUserId;
@@ -100,8 +104,13 @@ function toUserId(
   }
 }
 
-function toUrl(setting: WebHookSetting | DiscordWebHookSetting): string {
-  if (setting.method === NotificationMethod.WEBHOOK) {
+function toUrl(
+  setting: WebHookSetting | DiscordWebHookSetting | CustomDiscordWebHookSetting,
+): string {
+  if (
+    setting.method === NotificationMethod.WEBHOOK ||
+    setting.method === NotificationMethod.CUSTOM_DISCORD
+  ) {
     return setting.webHookUrl;
   }
   switch (setting.option) {
@@ -110,10 +119,7 @@ function toUrl(setting: WebHookSetting | DiscordWebHookSetting): string {
     case WebHookOption.EOT:
       return "https://discord.com/api/webhooks/1333499625759572129/wAl78ONZ57T9J7c72n8-cjUT-mpjls3t7X8ql1GDTe6lpD49D9vfU1HM2GglxGruQZPV";
     default:
-      if (typeof setting.option != 'string') {
-        assertNever(setting.option);
-      }
-      return setting.option;
+      assertNever(setting.option);
   }
 }
 

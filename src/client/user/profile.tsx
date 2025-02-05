@@ -12,8 +12,10 @@ import { useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { GameStatus, ListGamesApi } from "../../api/game";
 import {
+  CustomDiscordWebHookSetting,
   DiscordWebHookSetting,
-  isDirectWebHookSetting,
+  isCustomDiscordWebHookSetting,
+  isDiscordWebHookSetting,
   isWebHookSetting,
   NotificationFrequency,
   NotificationMethod,
@@ -89,6 +91,8 @@ function buildNotificationSettings(
   webHookUserId: string,
   enableAosDiscord: boolean,
   enableEotDiscord: boolean,
+  enableCustomDiscord: boolean,
+  customDiscordWebHook: string,
 ) {
   const webHook: WebHookSetting = {
     method: NotificationMethod.WEBHOOK,
@@ -106,6 +110,11 @@ function buildNotificationSettings(
     frequency: NotificationFrequency.IMMEDIATELY,
     option: WebHookOption.EOT,
   };
+  const customDiscord: CustomDiscordWebHookSetting = {
+    method: NotificationMethod.CUSTOM_DISCORD,
+    frequency: NotificationFrequency.IMMEDIATELY,
+    webHookUrl: customDiscordWebHook,
+  };
   return {
     marketing,
     turnNotifications: [
@@ -113,6 +122,7 @@ function buildNotificationSettings(
       ...(enableWebHook ? [webHook] : []),
       ...(enableAosDiscord ? [aosWebHook] : []),
       ...(enableEotDiscord ? [eotWebHook] : []),
+      ...(enableCustomDiscord ? [customDiscord] : []),
     ],
   };
 }
@@ -156,17 +166,27 @@ function NotificationSettings() {
   );
 
   const aosDiscordWebHook = preferences.turnNotifications.find((not) =>
-    isDirectWebHookSetting(not, WebHookOption.AOS),
+    isDiscordWebHookSetting(not, WebHookOption.AOS),
   );
   const [enableAosDiscord, setEnableAosDiscord] = useCheckboxState(
     aosDiscordWebHook != null,
   );
 
   const eotDiscordWebHook = preferences.turnNotifications.find((not) =>
-    isDirectWebHookSetting(not, WebHookOption.EOT),
+    isDiscordWebHookSetting(not, WebHookOption.EOT),
   );
   const [enableEotDiscord, setEnableEotDiscord] = useCheckboxState(
     eotDiscordWebHook != null,
+  );
+
+  const customDiscordWebHook = preferences.turnNotifications.find((not) =>
+    isCustomDiscordWebHookSetting(not),
+  );
+  const [enableCustomDiscord, setEnableCustomDiscord] = useCheckboxState(
+    customDiscordWebHook != null,
+  );
+  const [discordWebHookUrl, setDiscordWebHookUrl] = useTextInputState(
+    customDiscordWebHook?.webHookUrl ?? "",
   );
 
   const newNotificationSettings = useTypedMemo(buildNotificationSettings, [
@@ -177,6 +197,8 @@ function NotificationSettings() {
     webHookUserId,
     enableAosDiscord,
     enableEotDiscord,
+    enableCustomDiscord,
+    discordWebHookUrl,
   ]);
 
   const onSubmit = useCallback(
@@ -193,6 +215,14 @@ function NotificationSettings() {
       test(newNotificationSettings);
     },
     [test, newNotificationSettings],
+  );
+
+  const discordWebHookUrlError = findErrorInNotifications(
+    attempted,
+    NotificationMethod.CUSTOM_DISCORD,
+    undefined,
+    validationError,
+    "webHookUrl",
   );
 
   const webHookUrlError = findErrorInNotifications(
@@ -248,6 +278,32 @@ function NotificationSettings() {
                   onChange={setEnableEotDiscord}
                 />
               }
+            />
+          </FormControl>
+        </div>
+        <div>
+          <FormControl>
+            <FormControlLabel
+              sx={{ m: 1, minWidth: 80 }}
+              label="Discord Webhook"
+              control={
+                <Checkbox
+                  checked={enableCustomDiscord}
+                  disabled={isPending}
+                  onChange={setEnableCustomDiscord}
+                />
+              }
+            />
+          </FormControl>
+          <FormControl>
+            <TextField
+              required
+              label="Discord Webhook URL"
+              value={discordWebHookUrl}
+              disabled={!enableCustomDiscord}
+              error={discordWebHookUrlError != null}
+              helperText={discordWebHookUrlError}
+              onChange={setDiscordWebHookUrl}
             />
           </FormControl>
         </div>
