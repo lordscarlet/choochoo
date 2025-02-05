@@ -1,11 +1,14 @@
 import { Button } from "@mui/material";
 import { NotificationPreferences } from "../../api/notifications";
+import { useUnlink } from "../services/notifications/unlink";
 
 export function DiscordNotificationSettings({
   preferences,
 }: {
   preferences: NotificationPreferences;
 }) {
+  const unlink = useUnlink();
+
   return (
     <form method="GET" action="https://discord.com/oauth2/authorize">
       <input type="hidden" name="client_id" value="1336123312228794368" />
@@ -20,6 +23,9 @@ export function DiscordNotificationSettings({
       <Button type="submit">
         {preferences.discordId != null ? "Update discord id" : "Link Discord"}
       </Button>
+      {preferences.discordId != null && (
+        <Button onClick={unlink}>Unlink discord</Button>
+      )}
     </form>
   );
 }

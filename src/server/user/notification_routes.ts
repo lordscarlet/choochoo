@@ -2,7 +2,10 @@ import { createExpressEndpoints, initServer } from "@ts-rest/express";
 
 import axios from "axios";
 import express from "express";
-import { notificationsContract } from "../../api/notifications";
+import {
+  NotificationMethod,
+  notificationsContract,
+} from "../../api/notifications";
 import { assert } from "../../utils/validate";
 import { emailService } from "../util/email";
 import { assertRole } from "../util/enforce_role";
@@ -47,6 +50,26 @@ const router = initServer().router(notificationsContract, {
     user.notificationPreferences = {
       ...user.notificationPreferences,
       discordId,
+    };
+    await user.save();
+
+    return { status: 200, body: { preferences: user.notificationPreferences } };
+  },
+
+  async unlinkDiscord({ req }) {
+    await assertRole(req);
+
+    const user = await UserDao.findByPk(req.session.userId);
+
+    assert(user != null);
+    user.notificationPreferences = {
+      ...user.notificationPreferences,
+      turnNotifications: user.notificationPreferences.turnNotifications.filter(
+        (not) =>
+          not.method !== NotificationMethod.DISCORD &&
+          not.method !== NotificationMethod.CUSTOM_DISCORD,
+      ),
+      discordId: undefined,
     };
     await user.save();
 

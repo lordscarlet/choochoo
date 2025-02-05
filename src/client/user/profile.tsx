@@ -7,7 +7,14 @@ import {
   FormHelperText,
   TextField,
 } from "@mui/material";
-import { FormEvent, MouseEvent, useCallback, useMemo } from "react";
+import {
+  FormEvent,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import { GameStatus, ListGamesApi } from "../../api/game";
@@ -27,11 +34,9 @@ import { MyUserApi } from "../../api/user";
 import { Loading } from "../components/loading";
 import { GameList } from "../home/game_list";
 import { useMe } from "../services/me";
-import {
-  useNotificationPreferences,
-  useSendTestNotification,
-  useSetNotificationPreferences,
-} from "../services/notifications/preferences";
+import { useNotificationPreferences } from "../services/notifications/preferences";
+import { useSendTestNotification } from "../services/notifications/send_test";
+import { useSetNotificationPreferences } from "../services/notifications/set";
 import { useUser } from "../services/user";
 import { useCheckboxState, useTextInputState } from "../utils/form_state";
 import { useTypedMemo } from "../utils/hooks";
@@ -129,6 +134,24 @@ function buildNotificationSettings(
 
 function NotificationSettings() {
   const preferences = useNotificationPreferences();
+  const [key, setKey] = useState(Date.now());
+
+  useEffect(() => {
+    setKey(Date.now());
+  }, [preferences]);
+
+  return (
+    <div key={key}>
+      <InternalNotificationSettings preferences={preferences} />
+    </div>
+  );
+}
+
+function InternalNotificationSettings({
+  preferences,
+}: {
+  preferences: NotificationPreferences;
+}) {
   const {
     validationError: validationErrorSet,
     setPreferences,
@@ -289,7 +312,7 @@ function NotificationSettings() {
               control={
                 <Checkbox
                   checked={enableCustomDiscord}
-                  disabled={isPending}
+                  disabled={isPending || preferences.discordId == null}
                   onChange={setEnableCustomDiscord}
                 />
               }

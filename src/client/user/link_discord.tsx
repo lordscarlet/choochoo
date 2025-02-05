@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loading } from "../components/loading";
 import { tsr } from "../services/client";
+import { useSuccess } from "../utils/notify";
 
 export function LinkDiscordPage() {
   const navigate = useNavigate();
   const { mutate } = tsr.notifications.linkDiscord.useMutation();
+  const notifySuccess = useSuccess();
   useEffect(() => {
     if (window.location.hash) {
       const params = new URLSearchParams(window.location.hash.substring(1));
@@ -15,6 +17,7 @@ export function LinkDiscordPage() {
         { body: { accessToken } },
         {
           onSuccess() {
+            notifySuccess();
             navigate(redirectPath);
           },
         },

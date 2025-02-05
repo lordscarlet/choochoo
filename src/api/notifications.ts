@@ -135,6 +135,14 @@ export const notificationsContract = initContract().router({
     method: "PUT",
     path: "/discord",
   },
+  unlinkDiscord: {
+    body: z.object({}),
+    responses: {
+      200: z.object({ preferences: NotificationPreferences }),
+    },
+    method: "DELETE",
+    path: "/discord",
+  },
   test: {
     body: z.object({ preferences: NotificationPreferences }),
     responses: {
