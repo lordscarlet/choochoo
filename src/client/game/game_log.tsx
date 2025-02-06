@@ -107,7 +107,7 @@ export function GameLog({ gameId }: GameLogProps) {
       <form onSubmit={onSubmit} className={styles["submit-form"]}>
         <input
           type="text"
-          maxLength={256}
+          maxLength={255}
           placeholder="Send message"
           value={newMessage}
           onChange={setNewMessage}
