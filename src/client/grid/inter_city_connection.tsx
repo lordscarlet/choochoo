@@ -2,12 +2,12 @@ import { useCallback, useMemo } from "react";
 import { Rotation } from "../../engine/game/map_settings";
 import { InterCityConnection } from "../../engine/state/inter_city_connection";
 import { Coordinates } from "../../utils/coordinates";
+import { coordinatesToCenter, movePointInDirection } from "../../utils/point";
 import { getPlayerColorCss } from "../components/player_color";
 import { Rotate } from "../components/rotation";
 import { ClickTarget } from "./click_target";
 import * as gridStyles from "./hex_grid.module.css";
 import * as styles from "./inter_city_connection.module.css";
-import { coordinatesToCenter, movePointInDirection } from "./point";
 
 interface InterCityConnectionRenderProps {
   connection: InterCityConnection;

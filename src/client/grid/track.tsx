@@ -1,8 +1,8 @@
 import { Rotation } from "../../engine/game/map_settings";
 import { TrackInfo } from "../../engine/map/track";
+import { getExitPoint, Point } from "../../utils/point";
 import { getPlayerColorCss } from "../components/player_color";
 import { Rotate } from "../components/rotation";
-import { getExitPoint, Point } from "./point";
 import * as styles from "./track.module.css";
 
 interface TrackProps {

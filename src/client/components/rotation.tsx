@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Rotation } from "../../engine/game/map_settings";
-import { Point } from "../grid/point";
+import { Point } from "../../utils/point";
 
 interface RotateProps {
   rotation?: Rotation;

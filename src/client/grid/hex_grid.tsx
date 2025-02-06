@@ -25,6 +25,7 @@ import { Coordinates } from "../../utils/coordinates";
 import { deepEquals } from "../../utils/deep_equals";
 import { DoubleHeight } from "../../utils/double_height";
 import { iterate } from "../../utils/functions";
+import { distanceToSide, Point } from "../../utils/point";
 import { Rotate } from "../components/rotation";
 import { SwedenProgressionGraphic } from "../game/sweden/progression_graphic";
 import { useTypedCallback } from "../utils/hooks";
@@ -37,7 +38,6 @@ import {
   hexGridContainer,
 } from "./hex_grid.module.css";
 import { InterCityConnectionRender } from "./inter_city_connection";
-import { distanceToSide, Point } from "./point";
 
 interface HexGridProps {
   grid: Grid;

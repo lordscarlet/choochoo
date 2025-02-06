@@ -1,7 +1,7 @@
-import { Exit, TOWN } from "../../engine/map/track";
-import { Direction } from "../../engine/state/tile";
-import { Coordinates } from "../../utils/coordinates";
-import { assertNever } from "../../utils/validate";
+import { Exit, TOWN } from "../engine/map/track";
+import { Direction } from "../engine/state/tile";
+import { Coordinates } from "./coordinates";
+import { assertNever } from "./validate";
 
 export function movePointInRadDirection(
   point: Point,

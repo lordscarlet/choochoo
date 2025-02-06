@@ -1,8 +1,13 @@
 import { useId, useMemo } from "react";
 import { Rotation } from "../../engine/game/map_settings";
+import {
+  movePointInRadDirection,
+  Point,
+  pointBetween,
+  polygon,
+} from "../../utils/point";
 import { Rotate } from "../components/rotation";
 import * as styles from "./hex_name.module.css";
-import { movePointInRadDirection, Point, pointBetween, polygon } from "./point";
 
 interface HexNameProps {
   name: string;

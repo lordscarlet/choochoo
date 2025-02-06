@@ -1,11 +1,11 @@
 import { Rotation } from "../../engine/game/map_settings";
 import { Good } from "../../engine/state/good";
 import { Coordinates } from "../../utils/coordinates";
+import { Point } from "../../utils/point";
 import { Rotate } from "../components/rotation";
 import { goodStyle } from "./good";
 import * as styles from "./good_block.module.css";
 import * as hexGridStyles from "./hex_grid.module.css";
-import { Point } from "./point";
 
 interface GoodBlockProps {
   good: Good;

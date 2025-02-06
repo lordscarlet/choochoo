@@ -1,8 +1,8 @@
 import { Rotation } from "../../engine/game/map_settings";
 import { City } from "../../engine/map/city";
 import { CityGroup, toLetter } from "../../engine/state/city_group";
+import { Point } from "../../utils/point";
 import { Rotate } from "../components/rotation";
-import { Point } from "./point";
 
 interface OnRollProps {
   city: City;

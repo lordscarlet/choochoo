@@ -35,7 +35,7 @@ import { Loading } from "../components/loading";
 import { GameList } from "../home/game_list";
 import { useMe } from "../services/me";
 import { useNotificationPreferences } from "../services/notifications/preferences";
-import { useSendTestNotification } from "../services/notifications/send_test";
+import { useSendTestNotification } from "../services/notifications/test_notification";
 import { useSetNotificationPreferences } from "../services/notifications/set";
 import { useUser } from "../services/user";
 import { useCheckboxState, useTextInputState } from "../utils/form_state";

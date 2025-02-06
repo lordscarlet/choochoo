@@ -1,5 +1,5 @@
-import { Point } from "../client/grid/point";
 import { Rotation } from "../engine/game/map_settings";
+import { Point } from "./point";
 import { assert, assertNever } from "./validate";
 
 export class DoubleHeight {
