@@ -13,6 +13,7 @@ import {
 } from "./end_game";
 import {
   DetroitBuildAction,
+  DetroitBuilderHelper,
   DetroitBuildPhase,
   DetroitClaimAction,
   DetroitConnectCities,
@@ -58,6 +59,7 @@ export class DetroitBankruptcyMapSettings implements MapSettings {
       DetroitConnectCities,
       DetroitBuildPhase,
       DetroitGoodsGrowthPhase,
+      DetroitBuilderHelper,
       DetroitSelectActionPhase,
       DetroitClaimAction,
     ];

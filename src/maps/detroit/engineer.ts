@@ -6,6 +6,7 @@ import {
   ConnectCitiesData,
 } from "../../engine/build/connect_cities";
 import { BuildCostCalculator } from "../../engine/build/cost";
+import { BuilderHelper } from "../../engine/build/helper";
 import { BuildPhase } from "../../engine/build/phase";
 import { inject, injectState } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
@@ -59,6 +60,14 @@ class FreeBuildManager {
       newCost: this.freeBuild() - currentCost,
       newCheapestBuild: currentCost,
     };
+  }
+}
+
+export class DetroitBuilderHelper extends BuilderHelper {
+  private readonly manager = inject(FreeBuildManager);
+
+  protected minimumBuildCost(): number {
+    return this.manager.newCost(2);
   }
 }
 

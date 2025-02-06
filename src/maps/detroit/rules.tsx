@@ -11,7 +11,8 @@ export function DetroitRules() {
           <b>In debt:</b> Every player starts with 5/25 shares and no cash.
         </li>
         <li>
-          <b>Engineer:</b> let&apos;s you build the cheapest build for free.
+          <b>Engineer:</b> in addition to 4 builds, lets you build the cheapest
+          build for free.
         </li>
         <li>
           <b>Moving goods:</b> must use mostly your track.
