@@ -9,6 +9,7 @@ import {
   WebHookOption,
   WebHookSetting,
 } from "../../api/notifications";
+import { MapRegistry } from "../../maps/registry";
 import { assert, assertNever } from "../../utils/validate";
 import { GameDao } from "../game/dao";
 import { UserDao } from "../user/dao";
@@ -33,7 +34,8 @@ export async function notifyTurn(game: GameDao): Promise<void> {
         case NotificationMethod.DISCORD:
         case NotificationMethod.CUSTOM_DISCORD:
         case NotificationMethod.WEBHOOK: {
-          const message = `Your turn in ${game.name} [${game.getSummary()!}](https://www.choochoo.games/app/games/${game.id})`;
+          const mapName = MapRegistry.singleton.get(game.gameKey).name;
+          const message = `Your turn in [${game.name} (${mapName}): ${game.getSummary()!}](https://www.choochoo.games/app/games/${game.id})`;
           return callWebhook(message, user.notificationPreferences, setting);
         }
         case undefined:
