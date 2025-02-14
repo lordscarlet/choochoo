@@ -31,28 +31,28 @@ export function App() {
   return (
     <Suspense fallback={<Loading />}>
       <SocketContextProvider>
-        <AdminModeProvider>
-          <ThemeProvider theme={theme}>
-            <DialogsProvider>
-              <NotificationsProvider>
-                <AwaitingContextProvider>
-                  <ErrorBoundary
-                    onReset={reset}
-                    fallbackRender={({ resetErrorBoundary }) => (
-                      <ResetError resetErrorBoundary={resetErrorBoundary} />
-                    )}
-                  >
-                    <QueryClientProvider client={queryClient}>
-                      <tsr.ReactQueryProvider>
+        <ThemeProvider theme={theme}>
+          <DialogsProvider>
+            <NotificationsProvider>
+              <AwaitingContextProvider>
+                <ErrorBoundary
+                  onReset={reset}
+                  fallbackRender={({ resetErrorBoundary }) => (
+                    <ResetError resetErrorBoundary={resetErrorBoundary} />
+                  )}
+                >
+                  <QueryClientProvider client={queryClient}>
+                    <tsr.ReactQueryProvider>
+                      <AdminModeProvider>
                         <Router />
-                      </tsr.ReactQueryProvider>
-                    </QueryClientProvider>
-                  </ErrorBoundary>
-                </AwaitingContextProvider>
-              </NotificationsProvider>
-            </DialogsProvider>
-          </ThemeProvider>
-        </AdminModeProvider>
+                      </AdminModeProvider>
+                    </tsr.ReactQueryProvider>
+                  </QueryClientProvider>
+                </ErrorBoundary>
+              </AwaitingContextProvider>
+            </NotificationsProvider>
+          </DialogsProvider>
+        </ThemeProvider>
       </SocketContextProvider>
     </Suspense>
   );

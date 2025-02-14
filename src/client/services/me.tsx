@@ -46,8 +46,10 @@ export const AdminModeEnabled = createContext<
 >([false, () => {}] as const);
 
 export function AdminModeProvider({ children }: { children: ReactNode }) {
+  const { adminUser, user } = useAllOfMe();
+  const defaultAdminMode = adminUser != null && adminUser.id !== user?.id;
   return (
-    <AdminModeEnabled.Provider value={useState(false)}>
+    <AdminModeEnabled.Provider value={useState(defaultAdminMode)}>
       {children}
     </AdminModeEnabled.Provider>
   );
