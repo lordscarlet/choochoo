@@ -48,10 +48,10 @@ jobs:
       #     prerelease: false
 
       - run: npm ci
-      - run: npm run build
+      - run: npm run package
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tagger.outputs.new_tag }}
           files: |
             bin/**
-            dist/*
+            builds/server.tar.gz
