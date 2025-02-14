@@ -18,7 +18,10 @@ async function removeDeleted() {
   const root = resolve("./");
   const binDir = resolve(root, "./bin");
   const srcDir = resolve(root, "./src");
-  for await (const jsFile of readdirRecursive(resolve(root, binDir))) {
+  if (!(await fileExists(binDir))) {
+    return;
+  }
+  for await (const jsFile of readdirRecursive(binDir)) {
     const tsFiles = toTsFiles({ root, binDir, srcDir, jsFile });
     if (tsFiles.length == 0) continue;
 
