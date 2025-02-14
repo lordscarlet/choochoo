@@ -53,5 +53,5 @@ jobs:
         with:
           tag_name: ${{ steps.tagger.outputs.new_tag }}
           files: |
-            bin/*
+            bin/**
             dist/*
