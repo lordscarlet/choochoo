@@ -1,6 +1,7 @@
 {
   "scripts": {
     "dev": "nodemon -V --watch src/ --ignore src/client src/server/index.ts",
+    "build": "npm run build-server && npm run build-client",
     "build-server": "ts-node src/scripts/remove_deleted.ts && tsc -b",
     "build-client": "NODE_ENV=production API_HOST=\"https://api.choochoo.games\" SOCKET_HOST=\"https://api.choochoo.games\" node bin/scripts/client_build.js",
     "prod": "node bin/server/index.js",
@@ -14,6 +15,10 @@
     "test": "ts-node node_modules/jasmine/bin/jasmine",
     "test-watch": "nodemon -V --ext ts,tsx --watch src/ --exec 'ts-node node_modules/jasmine/bin/jasmine'"
   },
+  "files": [
+    "./dist",
+    "./bin"
+  ],
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",

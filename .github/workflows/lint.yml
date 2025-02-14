@@ -26,6 +26,9 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
+      - name: Running tests
+        run: npm test
+
       - name: Run linters
         # Revert back to original lint-action branch once it's fixed.
         uses: YourDeveloperFriend/lint-action@master
