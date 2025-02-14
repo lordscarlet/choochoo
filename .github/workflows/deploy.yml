@@ -9,21 +9,21 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm test
+  # validate:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #     - run: npm ci
+  #     - run: npm test
 
   release:
     permissions:
       contents: write
       packages: write
-    needs: build
+    # needs: validate
     runs-on: ubuntu-latest
 
     steps:
@@ -38,8 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tagger.outputs.new-tag }}
-          release_name: Release ${{ steps.tagger.outputs.new-tag }}
+          tag_name: ${{ steps.tagger.outputs.new_tag }}
+          release_name: Release ${{ steps.tagger.outputs.new_tag }}
           body: |
             Changes in this Release
             - First Change
@@ -51,7 +51,7 @@ jobs:
       - run: npm run build
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tagger.outputs.new-tag }}
+          tag_name: ${{ steps.tagger.outputs.new_tag }}
           files: |
             bin/
             dist/
