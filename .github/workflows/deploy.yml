@@ -24,13 +24,25 @@ jobs:
       contents: write
     needs: build
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version:
+          - 12
+
     steps:
       - uses: actions/checkout@v3
+
+      - uses: phish108/autotag-action@v1.1.55
+        id: tagger
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN}}
+
       - uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: upcoming
+          tag_name: ${{ steps.tagger.outputs.new-tag }}
           release_name: Release ${{ github.ref }}
           body: |
             Changes in this Release
