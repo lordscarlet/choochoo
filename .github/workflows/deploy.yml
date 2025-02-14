@@ -25,18 +25,13 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version:
-          - 22
-
     steps:
       - uses: actions/checkout@v3
 
-      - uses: phish108/autotag-action@v1.1.55
+      - uses: anothrNick/github-tag-action@v1
         id: tagger
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
 
       - uses: actions/create-release@v1
         env:
