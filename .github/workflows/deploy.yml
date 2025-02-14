@@ -34,18 +34,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
 
-      - uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tagger.outputs.new_tag }}
-          release_name: Release ${{ steps.tagger.outputs.new_tag }}
-          body: |
-            Changes in this Release
-            - First Change
-            - Second Change
-          draft: false
-          prerelease: false
+      # - uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ steps.tagger.outputs.new_tag }}
+      #     release_name: Release ${{ steps.tagger.outputs.new_tag }}
+      #     body: |
+      #       Changes in this Release
+      #       - First Change
+      #       - Second Change
+      #     draft: false
+      #     prerelease: false
 
       - run: npm ci
       - run: npm run build
@@ -53,5 +53,5 @@ jobs:
         with:
           tag_name: ${{ steps.tagger.outputs.new_tag }}
           files: |
-            bin/
-            dist/
+            bin/*
+            dist/*
