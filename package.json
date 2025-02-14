@@ -61,7 +61,7 @@
     "umzug": "^3.8.2",
     "zod": "^3.23.8"
   },
-  "name": "aos",
+  "name": "choochoo",
   "version": "1.0.0",
   "main": "index.js",
   "devDependencies": {
@@ -93,5 +93,9 @@
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": "https://github.com/YourDeveloperFriend/choochoo"
 }

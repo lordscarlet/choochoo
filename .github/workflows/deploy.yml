@@ -19,6 +19,18 @@ jobs:
       - run: npm ci
       - run: npm test
 
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "release.tar.gz,foo/*.txt"
+        bodyFile: "body.md"
+
+
   publish-gpr:
     needs: build
     runs-on: ubuntu-latest
