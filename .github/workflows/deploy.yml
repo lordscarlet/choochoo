@@ -54,5 +54,5 @@ jobs:
           tag_name: ${{ steps.tagger.outputs.new_tag }}
           files: |
             package.json
-            bin/**
+            dist/*
             builds/server.tar.gz
