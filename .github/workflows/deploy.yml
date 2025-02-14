@@ -55,8 +55,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # - run: npm ci
-      # - run: npm run build-server
+      - run: npm ci
+      - run: npm run build-server
 
       - uses: easingthemes/ssh-deploy@v5.1.0
         with:
