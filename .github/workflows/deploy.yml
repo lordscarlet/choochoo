@@ -19,7 +19,33 @@ jobs:
   #     - run: npm ci
   #     - run: npm test
 
-  release:
+  # release:
+  #   permissions:
+  #     contents: write
+  #     packages: write
+  #   # needs: validate
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - uses: anothrNick/github-tag-action@v1
+  #       id: tagger
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+  #         WITH_V: true
+
+  #     - run: npm ci
+  #     - run: npm run package
+  #     - uses: softprops/action-gh-release@v2
+  #       with:
+  #         tag_name: ${{ steps.tagger.outputs.new_tag }}
+  #         files: |
+  #           package.json
+  #           dist/*
+  #           builds/server.tar.gz
+
+  deploy_server:
     permissions:
       contents: write
       packages: write
@@ -29,31 +55,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: anothrNick/github-tag-action@v1
-        id: tagger
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
-          WITH_V: true
+      # - run: npm ci
+      # - run: npm run build-server
 
-      # - uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: ${{ steps.tagger.outputs.new_tag }}
-      #     release_name: Release ${{ steps.tagger.outputs.new_tag }}
-      #     body: |
-      #       Changes in this Release
-      #       - First Change
-      #       - Second Change
-      #     draft: false
-      #     prerelease: false
-
-      - run: npm ci
-      - run: npm run package
-      - uses: softprops/action-gh-release@v2
+      - uses: easingthemes/ssh-deploy@v5.1.0
         with:
-          tag_name: ${{ steps.tagger.outputs.new_tag }}
-          files: |
-            package.json
-            dist/*
-            builds/server.tar.gz
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          SOURCE: "package.json"
+          REMOTE_HOST: api.choochoo.games
+          REMOTE_USER: ec2-user
+          TARGET: "/home/ec2-user/choochoo/"
+          SCRIPT_AFTER: "npm ci"
