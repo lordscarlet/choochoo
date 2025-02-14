@@ -9,7 +9,7 @@
     "deploy-client": "./src/scripts/deploy_client.sh",
     "deploy-server": "./src/scripts/deploy_server.sh",
     "create-migration": "./src/scripts/create_migration.sh",
-    "package": "npm run build && tar -cvzf ./builds/server.tar.gz ./bin",
+    "package": "npm run build && mkdir ./builds && tar -cvzf ./builds/server.tar.gz ./bin",
     "lint": "eslint src/",
     "format": "prettier src --write",
     "migrate": "node bin/scripts/migrations up",
