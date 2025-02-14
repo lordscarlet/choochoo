@@ -20,6 +20,7 @@ jobs:
       - run: npm test
 
   release:
+    permissions: write-all
     needs: build
     runs-on: ubuntu-latest
     steps:
