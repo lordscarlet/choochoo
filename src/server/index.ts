@@ -82,7 +82,7 @@ if (environment.cert != null) {
 
       /// Start
       server.listen(environment.port, () => {
-        console.log(`AoS listening on port ${environment.port}`);
+        console.log(`AoS listening on port ${environment.port}, running...`);
       });
     })
     .catch((e) => {
