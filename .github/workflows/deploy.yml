@@ -19,32 +19,6 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  # release:
-  #   permissions:
-  #     contents: write
-  #     packages: write
-  #   # needs: validate
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - uses: actions/checkout@v3
-
-  #     - uses: anothrNick/github-tag-action@v1
-  #       id: tagger
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
-  #         WITH_V: true
-
-  #     - run: npm ci
-  #     - run: npm run package
-  #     - uses: softprops/action-gh-release@v2
-  #       with:
-  #         tag_name: ${{ steps.tagger.outputs.new_tag }}
-  #         files: |
-  #           package.json
-  #           dist/*
-  #           builds/server.tar.gz
-
   deploy_server:
     needs: validate
     runs-on: ubuntu-latest
@@ -71,16 +45,6 @@ jobs:
             npm i
             pm2 reload index
             npm run migrate
-
-      # - uses: D3rHase/ssh-command-action@v0.3.1
-      #   with:
-      #     host: api.choochoo.games
-      #     user: ec2-user
-      #     private_key: ${{ secrets.SSH_KEY }}
-      #     # host_fingerprint: "256 SHA256:HWMSn9b5n8dEzy7EX/IyNJo1II/aXUcpVq2eX7dk/oM api.choochoo.games (ED25519)"
-      #     # SCRIPT_AFTER: "npm ci" # && pm2 reload index && npm run migrate"
-      #     command: |
-      #       npm ci
 
   deploy_client:
     needs: validate
