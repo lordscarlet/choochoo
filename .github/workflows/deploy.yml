@@ -87,7 +87,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - run: npm ci
-      - run: npm run build-client
+      - run: npm run build
       - run: mkdir deploy
 
       - run: gzip -c -9 src/client/index.html > deploy/index.html
