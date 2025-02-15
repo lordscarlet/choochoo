@@ -65,16 +65,7 @@ jobs:
           REMOTE_HOST: api.choochoo.games
           REMOTE_USER: ec2-user
           TARGET: "/home/ec2-user/choochoo/"
-          SCRIPT_AFTER_REQUIRED: "cd choochoo && npm ci"
-
-      # - uses: easingthemes/ssh-deploy@v5.1.0
-      #   with:
-      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-      #     SOURCE: "bin/"
-      #     REMOTE_HOST: api.choochoo.games
-      #     REMOTE_USER: ec2-user
-      #     TARGET: "/home/ec2-user/choochoo/bin/"
-      #     SCRIPT_AFTER_REQUIRED: "pm2 stop index && npm run migrate && pm2 start index"
+          SCRIPT_AFTER_REQUIRED: "npm ci && pm2 reload index"
 
   deploy_client:
     needs: validate
