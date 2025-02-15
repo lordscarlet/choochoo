@@ -45,36 +45,36 @@ jobs:
   #           dist/*
   #           builds/server.tar.gz
 
-  deploy_server:
-    needs: validate
-    runs-on: ubuntu-latest
+  # deploy_server:
+  #   needs: validate
+  #   runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
+  #   permissions:
+  #     contents: read
 
-    steps:
-      - uses: actions/checkout@v3
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - run: npm ci
-      - run: npm run build-server
+  #     - run: npm ci
+  #     - run: npm run build-server
 
-      - uses: easingthemes/ssh-deploy@v5.1.0
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-          SOURCE: "package.json"
-          REMOTE_HOST: api.choochoo.games
-          REMOTE_USER: ec2-user
-          TARGET: "/home/ec2-user/choochoo/"
-          SCRIPT_AFTER_REQUIRED: "cd choochoo && npm ci"
+  #     - uses: easingthemes/ssh-deploy@v5.1.0
+  #       with:
+  #         SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+  #         SOURCE: "package.json"
+  #         REMOTE_HOST: api.choochoo.games
+  #         REMOTE_USER: ec2-user
+  #         TARGET: "/home/ec2-user/choochoo/"
+  #         SCRIPT_AFTER_REQUIRED: "cd choochoo && npm ci"
 
-      - uses: easingthemes/ssh-deploy@v5.1.0
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-          SOURCE: "bin/"
-          REMOTE_HOST: api.choochoo.games
-          REMOTE_USER: ec2-user
-          TARGET: "/home/ec2-user/choochoo/bin/"
-          SCRIPT_AFTER_REQUIRED: "pm2 stop index && npm run migrate && pm2 start index"
+  #     - uses: easingthemes/ssh-deploy@v5.1.0
+  #       with:
+  #         SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+  #         SOURCE: "bin/"
+  #         REMOTE_HOST: api.choochoo.games
+  #         REMOTE_USER: ec2-user
+  #         TARGET: "/home/ec2-user/choochoo/bin/"
+  #         SCRIPT_AFTER_REQUIRED: "pm2 stop index && npm run migrate && pm2 start index"
 
   deploy_client:
     needs: validate
@@ -91,11 +91,8 @@ jobs:
       - run: mkdir deploy
       - run: mkdir deploy/dist
 
-      - run: gzip -c -9 src/client/index.html > deploy/index.html
-      - run: gzip -c -9 dist/index.min.js.map > deploy/dist/index.min.js.map
-      - run: gzip -c -9 dist/index.min.js > deploy/dist/index.min.js
-      - run: gzip -c -9 dist/index.min.css.map > deploy/dist/index.min.css.map
-      - run: gzip -c -9 dist/index.min.css > deploy/dist/index.min.css
+      - run: cp src/client/index.html deploy/
+      - run: cp dist deploy/
 
       - uses: reggionick/s3-deploy@v4
         with:
