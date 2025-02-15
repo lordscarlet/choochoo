@@ -89,6 +89,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: mkdir deploy
+      - run: mkdir deploy/dist
 
       - run: gzip -c -9 src/client/index.html > deploy/index.html
       - run: gzip -c -9 dist/index.min.js.map > deploy/dist/index.min.js.map
