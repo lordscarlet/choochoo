@@ -65,8 +65,15 @@ jobs:
           REMOTE_HOST: api.choochoo.games
           REMOTE_USER: ec2-user
           TARGET: "/home/ec2-user/choochoo/"
-          SCRIPT_AFTER: "npm ci" # && pm2 reload index && npm run migrate"
-          SCRIPT_AFTER_REQUIRED: true
+
+      - uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: api.choochoo.games
+          username: ec2-user
+          key: ${{ secrets.SSH_KEY }}
+          # SCRIPT_AFTER: "npm ci" # && pm2 reload index && npm run migrate"
+          script: |
+            npm ci
 
   deploy_client:
     needs: validate
