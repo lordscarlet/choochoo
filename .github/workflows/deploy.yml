@@ -68,7 +68,7 @@ jobs:
           SCRIPT_AFTER_REQUIRED: true
           SCRIPT_AFTER: |
             cd ~/choochoo
-            npm ci
+            npm i
             pm2 reload index
             npm run migrate
 
