@@ -46,11 +46,11 @@ jobs:
   #           builds/server.tar.gz
 
   deploy_server:
-    permissions:
-      contents: write
-      packages: write
     needs: validate
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v3
@@ -75,3 +75,34 @@ jobs:
           REMOTE_USER: ec2-user
           TARGET: "/home/ec2-user/choochoo/bin/"
           SCRIPT_AFTER_REQUIRED: "pm2 stop index && npm run migrate && pm2 start index"
+
+  deploy_client:
+    needs: validate
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: npm ci
+      - run: npm run build-client
+      - run: mkdir deploy
+
+      - run: gzip -c -9 src/client/index.html > deploy/index.html
+      - run: gzip -c -9 dist/index.min.js.map > deploy/dist/index.min.js.map
+      - run: gzip -c -9 dist/index.min.js > deploy/dist/index.min.js
+      - run: gzip -c -9 dist/index.min.css.map > deploy/dist/index.min.css.map
+      - run: gzip -c -9 dist/index.min.css > deploy/dist/index.min.css
+
+      - uses: reggionick/s3-deploy@v4
+        with:
+          folder: deploy
+          bucket: www.choochoo.games
+          bucket-region: us-east-1
+          dist-id: E16V74AIRBU7V5
+          invalidation: "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
