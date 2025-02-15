@@ -92,7 +92,7 @@ jobs:
       - run: mkdir deploy/dist
 
       - run: cp src/client/index.html deploy/
-      - run: cp dist deploy/
+      - run: cp -r dist deploy/
 
       - uses: reggionick/s3-deploy@v4
         with:
