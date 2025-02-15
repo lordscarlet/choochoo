@@ -71,7 +71,7 @@ jobs:
           host: api.choochoo.games
           user: ec2-user
           private_key: ${{ secrets.SSH_KEY }}
-          host_fingerprint: "256 SHA256:HkqVdTKH6oDOF7yeT57zKhBbOj+SKrjionr6zMSmOOw api.choochoo.games (ECDSA)"
+          host_fingerprint: "256 SHA256:HWMSn9b5n8dEzy7EX/IyNJo1II/aXUcpVq2eX7dk/oM api.choochoo.games (ED25519)"
           # SCRIPT_AFTER: "npm ci" # && pm2 reload index && npm run migrate"
           command: |
             npm ci
