@@ -98,7 +98,7 @@ export function Layout() {
                     <Lock fontSize="small" />
                   )}
                 </ListItemIcon>
-                Admin Mode
+                Admin Modes
               </DropdownMenuItem>
               <DropdownMenuItem component={Link} to="/app/admin/feedback">
                 <ListItemIcon>
