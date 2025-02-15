@@ -98,5 +98,6 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/YourDeveloperFriend"
   },
-  "repository": "https://github.com/YourDeveloperFriend/choochoo"
+  "repository": "https://github.com/YourDeveloperFriend/choochoo",
+  "foo": "bar"
 }
