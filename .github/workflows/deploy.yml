@@ -61,11 +61,11 @@ jobs:
       - uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-          SOURCE: "package.json package-lock.json"
+          SOURCE: "package.json package-lock.json bin"
           REMOTE_HOST: api.choochoo.games
           REMOTE_USER: ec2-user
           TARGET: "/home/ec2-user/choochoo/"
-          SCRIPT_AFTER: "npm ci && pm2 reload index"
+          SCRIPT_AFTER: "npm ci" # && pm2 reload index && npm run migrate"
           SCRIPT_AFTER_REQUIRED: true
 
   deploy_client:
