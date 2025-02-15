@@ -67,6 +67,7 @@ jobs:
           TARGET: "/home/ec2-user/choochoo/"
           SCRIPT_AFTER_REQUIRED: true
           SCRIPT_AFTER: |
+            cd ~/choochoo
             npm ci
 
       # - uses: D3rHase/ssh-command-action@v0.3.1
