@@ -121,6 +121,7 @@ export function CreateGamePage() {
       gameKey,
       allowPlayerSelections,
       artificialStart,
+      unlisted,
       createGame,
       minPlayers,
       maxPlayers,
@@ -249,6 +250,7 @@ export function CreateGamePage() {
           label="Unlisted Game"
           control={
             <Checkbox
+              checked={unlisted}
               value={unlisted}
               disabled={isPending}
               onChange={setUnlisted}
