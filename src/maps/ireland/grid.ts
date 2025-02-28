@@ -51,7 +51,7 @@ export const map = grid([
   [
     UNPASSABLE,
     city("Belfast", PURPLE, white(2)),
-    PLAIN,
+    WATER,
     PLAIN,
     MOUNTAIN,
     plain({ unpassableEdges: [Direction.BOTTOM_RIGHT] }),
@@ -210,8 +210,8 @@ export const map = grid([
         claimableCost: [6],
       },
     }),
-    WATER,
-    WATER,
+    PLAIN,
+    PLAIN,
     plain({ unpassableEdges: [Direction.TOP_RIGHT] }),
   ],
   [
