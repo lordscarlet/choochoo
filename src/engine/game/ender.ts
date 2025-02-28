@@ -49,7 +49,7 @@ export class Ender {
     this.onEndGame();
 
     this.logEndGame(reason);
-    const danglers = this.grid().getDanglers();
+    const danglers = this.grid().getAllDanglers();
     for (const dangler of danglers) {
       this.gridHelper.setRouteOwner(dangler, undefined);
     }

@@ -131,11 +131,14 @@ export class Grid {
     return this.get(coordinates.neighbor(dir));
   }
 
-  getDanglers(color?: PlayerColor): Track[] {
+  getDanglers(color: PlayerColor | undefined): Track[] {
+    return this.getAllDanglers().filter((track) => track.getOwner() === color);
+  }
+
+  getAllDanglers(): Track[] {
     return [...this.values()]
       .filter(isLand)
       .flatMap((land) => land.getTrack())
-      .filter((track) => track.getOwner() === color)
       .filter((track) => this.dangles(track));
   }
 
