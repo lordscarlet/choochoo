@@ -46,8 +46,9 @@ export class BuilderHelper {
 
   trackManifest(): Map<TileType, TileManifestEntry> {
     const manifest = this.calculateManifest();
-    const invariantType = [...manifest.entries()].find(([_, {remaining}]) => remaining < 0)?.[0];
-    assert(invariantType == null, 'Oops, we have used too much of tile ' + invariantType);
+    // TODO: I need to figure out what to do with games where we went over.
+    // const invariantType = [...manifest.entries()].find(([_, {remaining}]) => remaining < 0)?.[0];
+    // assert(invariantType == null, 'Oops, we have used too much of tile ' + invariantType);
     return manifest;
   }
 
