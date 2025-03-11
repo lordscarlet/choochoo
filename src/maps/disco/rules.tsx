@@ -4,6 +4,9 @@ export function DiscoInfernoRules() {
       <p>Same as base game with the following changes:</p>
       <ul>
         <li>
+          <b>Players:</b> start with $15.
+        </li>
+        <li>
           <b>New Cities:</b> start with cubes
         </li>
         <li>
