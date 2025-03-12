@@ -150,7 +150,7 @@ export type ListGamesApi = z.infer<typeof ListGamesApi>;
 
 const c = initContract();
 
-const GameIdParams = z.object({ gameId: z.coerce.number() });
+export const GameIdParams = z.object({ gameId: z.coerce.number() });
 
 export const gameContract = c.router({
   get: {

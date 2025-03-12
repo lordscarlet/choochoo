@@ -91,6 +91,14 @@ export function Router() {
               ),
             },
             {
+              path: "/app/games/:gameId/histories/:historyId",
+              element: (
+                <LoginRequired>
+                  <GamePage />
+                </LoginRequired>
+              ),
+            },
+            {
               path: "/app/users/:userId",
               element: (
                 <LoginRequired>

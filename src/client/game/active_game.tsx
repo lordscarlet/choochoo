@@ -29,6 +29,7 @@ import { BiddingInfo } from "./bidding_info";
 import { Editor } from "./editor";
 import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
+import { HistorySelector } from "./history_selector";
 import { MapInfo } from "./map_info";
 import { PlayerStats } from "./player_stats";
 import { SpecialActionTable } from "./special_action_table";
@@ -56,7 +57,8 @@ function InternalActiveGame() {
   return (
     <div>
       {!undoOnly && <Header />}
-      <GameLog gameId={game.id} />
+      <GameLog />
+      <HistorySelector />
       <TurnOrder />
       <Editor />
       <UndoButton />

@@ -1,5 +1,5 @@
 import { useDialogs, useNotifications } from "@toolpad/core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
 import {
@@ -10,6 +10,7 @@ import {
   GameStatus,
   ListGamesApi,
 } from "../../api/game";
+import { GameHistoryApi } from "../../api/history";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { InvalidInputError } from "../../utils/error";
@@ -24,8 +25,8 @@ import { useIsAdmin, useMe } from "./me";
 import { handleError, toValidationError } from "./network";
 import { useJoinRoom, useSocket } from "./socket";
 
-function getQueryKey(gameId: number | string): string[] {
-  return ["games", `${gameId}`];
+function getQueryKey(gameId: number | string, historyId?: number): string[] {
+  return ["games", `${gameId}`, `${historyId}`];
 }
 
 function checkMatch(game: GameLiteApi, entry: Entry<ListGamesApi>): boolean {
@@ -221,11 +222,27 @@ export function useSetGameSuccess() {
   );
 }
 
+export function useGameHistory(gameId: number, historyId: number) {
+  const { data } = tsr.histories.get.useSuspenseQuery({
+    queryKey: getQueryKey(gameId, historyId),
+    queryData: { params: { gameId, historyId } },
+  });
+  return useMemo(
+    () => GameHistoryApi.parse(data.body.history),
+    [data.body.history],
+  );
+}
+
 export function useGame(): GameApi {
+  const { gameId: gameIdUnparsed, historyId: historyIdUnparsed } = useParams();
+  const gameId = parseInt(gameIdUnparsed!);
+  if (historyIdUnparsed != null) {
+    const historyId = parseInt(historyIdUnparsed);
+    return useGameHistory(gameId, historyId);
+  }
   const setGame = useSetGame();
   const socket = useSocket();
 
-  const gameId = parseInt(useParams().gameId!);
   const { data } = tsr.games.get.useSuspenseQuery({
     queryKey: getQueryKey(gameId),
     queryData: { params: { gameId } },
@@ -469,6 +486,14 @@ export function useGameVersionState<T>(initialValue: T): [T, (t: T) => void] {
   return [externalState, externalSetState];
 }
 
+export function isGameHistory(game: GameApi): game is GameHistoryApi {
+  return "historyId" in game;
+}
+
+export function canEditGame(game: GameApi): boolean {
+  return !isGameHistory(game);
+}
+
 export function useAction<T extends object>(
   action: ActionConstructor<T>,
 ): ActionHandler<T> {
@@ -518,7 +543,8 @@ export function useAction<T extends object>(
     phaseDelegator.get().canEmit(action);
 
   const canEmitUserId = actionCanBeEmitted ? game.activePlayerId : undefined;
-  const canEmit = me?.id === game.activePlayerId && actionCanBeEmitted;
+  const canEmit =
+    me?.id === game.activePlayerId && actionCanBeEmitted && canEditGame(game);
   const getErrorMessage = useCallback(
     (data: T) => {
       try {
@@ -555,7 +581,8 @@ export function useUndoAction(): UndoAction {
   const canUndoBecausePlayer =
     game.undoPlayerId != null && game.undoPlayerId === me?.id;
   const canUndoBecauseAdmin = isAdmin;
-  const canUndo = canUndoBecausePlayer || canUndoBecauseAdmin;
+  const canUndo =
+    canEditGame(game) && (canUndoBecausePlayer || canUndoBecauseAdmin);
 
   const undo = useCallback(async () => {
     const adminOverride = !canUndoBecausePlayer;
@@ -632,7 +659,7 @@ export function useRetryAction(): RetryAction {
     );
   }, [game.id, game.version]);
 
-  const canRetry = useIsAdmin();
+  const canRetry = useIsAdmin() && canEditGame(game);
 
   return { retry, canRetry, isPending };
 }

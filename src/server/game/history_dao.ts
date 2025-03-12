@@ -19,9 +19,11 @@ import {
   UpdatedAt,
   Version,
 } from "@sequelize/core/decorators-legacy";
+import { GameStatus } from "../../api/game";
+import { GameHistoryLiteApi } from "../../api/history";
 import { SomeRequired } from "../../utils/types";
 import { UserDao } from "../user/dao";
-import { GameDao } from "./dao";
+import { GameDao, toSummary } from "./dao";
 
 const gameVersionIndex = "game-history-game-id";
 
@@ -90,6 +92,33 @@ export class GameHistoryDao extends Model<
 
   isActionHistory(): this is PerformActionGameHistoryDao {
     return this.previousGameVersion > 0;
+  }
+
+  static findHistory(gameId: number, historyId: number) {
+    return GameHistoryDao.findOne({
+      where: { gameId, previousGameVersion: historyId },
+    });
+  }
+
+  toLiteApi(game: GameDao): GameHistoryLiteApi {
+    const historyApi: GameHistoryLiteApi = {
+      historyId: this.previousGameVersion,
+      version: this.previousGameVersion,
+      gameData: this.previousGameData ?? undefined,
+      id: this.gameId,
+      gameKey: game.gameKey,
+      name: game.name,
+      playerIds: game.playerIds,
+      status: GameStatus.enum.ACTIVE,
+      activePlayerId: this.userId ?? undefined,
+      config: game.config,
+      actionName: this.actionName!,
+      variant: game.variant,
+      unlisted: game.unlisted,
+      undoPlayerId: undefined,
+    };
+    historyApi.summary = toSummary(historyApi);
+    return historyApi;
   }
 }
 

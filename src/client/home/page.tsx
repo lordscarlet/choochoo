@@ -2,7 +2,7 @@ import { Button } from "@mui/material";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { GameStatus, ListGamesApi } from "../../api/game";
-import { GameLog } from "../game/game_log";
+import { ChatLog } from "../game/game_log";
 import { useMe } from "../services/me";
 import { GameList } from "./game_list";
 
@@ -47,7 +47,7 @@ export function HomePage() {
   return (
     <div>
       <h1>Choo Choo Games</h1>
-      <GameLog />
+      <ChatLog />
       <Button component={Link} to="/app/games/create" variant="contained">
         Create Game
       </Button>

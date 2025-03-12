@@ -144,7 +144,7 @@ export function toLiteApi(
   };
 }
 
-function toSummary(
+export function toSummary(
   game: GameApi | InferAttributes<GameDao>,
 ): string | undefined {
   if ("summary" in game) {

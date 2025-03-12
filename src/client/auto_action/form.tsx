@@ -24,7 +24,7 @@ import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { Action, getSelectedActionString } from "../../engine/state/action";
 import { AutoAction } from "../../engine/state/auto_action";
 import { HelpIcon } from "../components/help";
-import { useGame } from "../services/game";
+import { canEditGame, useGame } from "../services/game";
 import { useMe } from "../services/me";
 import {
   useCheckboxState,
@@ -40,8 +40,10 @@ export function AutoActionForm() {
   const game = useGame();
   const autoAction = useAutoAction(game.id);
   const [expanded, setExpanded] = useState(false);
+  const canEdit = canEditGame(game);
 
   if (
+    !canEdit ||
     me == null ||
     game.status !== GameStatus.enum.ACTIVE ||
     !game.playerIds.includes(me.id)

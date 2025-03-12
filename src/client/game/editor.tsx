@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import { ChangeEvent, useCallback, useMemo, useState } from "react";
-import { useGame, useSetGameData } from "../services/game";
+import { canEditGame, useGame, useSetGameData } from "../services/game";
 import { useIsAdmin } from "../services/me";
 
 export function Editor() {
@@ -16,6 +16,8 @@ export function Editor() {
     version: game.version,
   });
   const { setGameData, isPending } = useSetGameData();
+
+  const canEdit = canEditGame(game) && !isPending;
 
   const setNewContentFromTextArea = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -43,17 +45,17 @@ export function Editor() {
 
   return (
     <>
-      <Button onClick={toggle}>{isOpen ? "Close editor" : "Edit"}</Button>
+      <Button onClick={toggle}>{isOpen ? "Close editor" : "View Data"}</Button>
 
       {isOpen && (
         <textarea
           value={actualContent}
           onChange={setNewContentFromTextArea}
-          disabled={isPending}
+          disabled={!canEdit}
         />
       )}
       {isOpen && (
-        <Button onClick={submit} disabled={isPending}>
+        <Button onClick={submit} disabled={!canEdit}>
           Submit
         </Button>
       )}
