@@ -28,6 +28,8 @@ const router = initServer().router(gameHistoryContract, {
           gameId: params.gameId,
           previousGameVersion: { [Op.lt]: params.historyId },
         },
+        limit: 50,
+        order: [["id", "ASC"]],
       }),
     ]);
     assert(historyDao != null, { notFound: true });
