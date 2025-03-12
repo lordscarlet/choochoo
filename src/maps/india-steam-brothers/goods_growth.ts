@@ -22,7 +22,8 @@ export class IndiaSteamBrothersBuildAction extends BuildAction {
 
   private getNewConnectedCities(data: BuildData): City[] {
     const currentColor = this.currentPlayer().color;
-    return calculateTrackInfo(data)
+    return calculateTrackInfo(this.newTile(data))
+      .filter((track) => track.owner === currentColor)
       .flatMap(({ exits }) => exits)
       .filter((exit) => exit !== TOWN)
       .map((exit) => this.grid().connection(data.coordinates, exit))
