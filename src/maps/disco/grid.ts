@@ -80,7 +80,7 @@ export const map = startsLowerGrid([
     UNPASSABLE,
     discoTown("Celebration"),
     ...duplicate(5, FIRE),
-    discoCity("Summer", RED),
+    discoCity("Summer", YELLOW),
     ...duplicate(4, UNPASSABLE),
     FIRE,
   ],
