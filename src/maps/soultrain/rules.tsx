@@ -33,7 +33,9 @@ export function SoulTrainRules() {
         <li>
           <b>Earth to Heaven:</b> begins once there are 10 or less goods in
           Hell, at which point no goods can be delivered to Earth cities or pass
-          through Earth cities of the same color.
+          through Earth cities of the same color. At the start of this phase,
+          all new cities in Hell will be moved to Heaven, chosen by the players
+          in turn order.
         </li>
         <li>
           <b>Game ends:</b> two turns after the Earth to Heaven phase begins.
