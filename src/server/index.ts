@@ -63,8 +63,15 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     res.json({ success: false, error: err.message, code: err.errorCode });
   } else {
     if (err instanceof DatabaseError) {
-      console.log("database error", err.parameters, err.cause);
+      console.error("database error", err.parameters, err.cause);
     }
+    console.error(
+      "Failed on request",
+      req.path,
+      req.params,
+      req.query,
+      req.body && JSON.stringify(req.body),
+    );
     console.error(err);
     res.status(500);
     res.json({ success: false });
