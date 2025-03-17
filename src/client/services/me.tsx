@@ -1,8 +1,6 @@
 import { useNotifications } from "@toolpad/core";
 import {
-  Dispatch,
   ReactNode,
-  SetStateAction,
   createContext,
   useCallback,
   useContext,
@@ -42,14 +40,25 @@ export function useMe(): MyUserApi | undefined {
 }
 
 export const AdminModeEnabled = createContext<
-  [boolean, Dispatch<SetStateAction<boolean>>]
+  [boolean, (newAdminMode: boolean) => void]
 >([false, () => {}] as const);
 
 export function AdminModeProvider({ children }: { children: ReactNode }) {
   const { adminUser, user } = useAllOfMe();
   const defaultAdminMode = adminUser != null && adminUser.id !== user?.id;
+  const [adminMode, setAdminMode] = useState(defaultAdminMode);
+  const { login } = useLoginBypass(adminUser?.id);
+  const externalSetAdminMode = useCallback(
+    (newAdminMode: boolean) => {
+      if (!newAdminMode && adminUser != null && adminUser.id !== user!.id) {
+        login();
+      }
+      setAdminMode(newAdminMode);
+    },
+    [adminUser, user, setAdminMode],
+  );
   return (
-    <AdminModeEnabled.Provider value={useState(defaultAdminMode)}>
+    <AdminModeEnabled.Provider value={[adminMode, externalSetAdminMode]}>
       {children}
     </AdminModeEnabled.Provider>
   );
@@ -121,7 +130,7 @@ export function useLogin() {
   return { login, validationError, isPending };
 }
 
-export function useLoginBypass(userId: number) {
+export function useLoginBypass(userId?: number) {
   const isAdmin = useIsAdmin();
   const me = useMe();
   const tsrQueryClient = tsr.useQueryClient();
@@ -131,7 +140,7 @@ export function useLoginBypass(userId: number) {
   const login = useCallback(
     () =>
       mutate(
-        { params: { userId } },
+        { params: { userId: userId! } },
         {
           onSuccess: (data) => {
             tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
@@ -145,7 +154,7 @@ export function useLoginBypass(userId: number) {
     [userId],
   );
 
-  const canUseLoginBypass = me?.id !== userId && isAdmin;
+  const canUseLoginBypass = userId != null && me?.id !== userId && isAdmin;
   return { login, isPending, error, canUseLoginBypass };
 }
 
