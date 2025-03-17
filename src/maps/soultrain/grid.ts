@@ -28,7 +28,7 @@ function city(name: string, color: Good, dimension: Dimension) {
   return {
     ...nativeCity(name, color),
     mapSpecific,
-    startingNumCubes: dimension === Dimension.EARTH ? 0 : 1,
+    startingNumCubes: dimension === Dimension.EARTH ? 0 : 3,
   };
 }
 
