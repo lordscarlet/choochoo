@@ -50,7 +50,7 @@ export class IndiaSteamBrothersIncomePhase extends IncomePhase {
         this.log.log("Heavy monsoon season, every player pays $2");
         return -2;
       default:
-        this.log.log("Light monsoon season, every player pays $2");
+        this.log.log("Light monsoon season, every player pays $1");
         return -1;
     }
   }
