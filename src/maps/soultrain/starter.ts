@@ -35,7 +35,12 @@ export class SoulTrainStarter extends GameStarter {
 
   protected drawCubesFor(bag: Good[], location: SpaceData): SpaceData {
     if (location.type === SpaceType.FIRE && location.townName != null) {
-      return { ...location, goods: draw(1, bag) };
+      if (
+        location.townName !== "September" &&
+        location.townName !== "Car Wash"
+      ) {
+        return { ...location, goods: draw(1, bag) };
+      }
     }
     return super.drawCubesFor(bag, location);
   }
