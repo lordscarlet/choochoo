@@ -16,16 +16,13 @@ export function deepEquals<T>(
   } else if (t2 == null) {
     return t1 == null;
   } else if (Array.isArray(t1)) {
-    assert(Array.isArray(t2), `Expected array, found ${t2}: ` + pathStr);
     return (
+      Array.isArray(t2) &&
       t1.length === t2.length &&
       t1.every((v, i) => deepEquals(t2[i], v, path.concat(`${i}`)))
     );
   } else if (ImmutableSet.isSet(t1) || t1 instanceof Set) {
-    assert(
-      ImmutableSet.isSet(t2) || t2 instanceof Set,
-      `Expected set, found ${t2}: ` + pathStr,
-    );
+    if (!(ImmutableSet.isSet(t2) && t2 instanceof Set)) return false;
     const t2List = [...t2];
     return (
       t1.size === t2.size &&
@@ -34,10 +31,7 @@ export function deepEquals<T>(
       )
     );
   } else if (ImmutableMap.isMap(t1) || t1 instanceof Map) {
-    assert(
-      ImmutableMap.isMap(t2) || t2 instanceof Map,
-      `Expected map, found ${t2}: ` + pathStr,
-    );
+    if (!(ImmutableMap.isMap(t2) || t2 instanceof Map)) return false;
     if (t1.size !== t2.size) return false;
     const t2KeyList = [...t2.keys()];
     return [...t1].every(([k1, v1]) => {
