@@ -11,6 +11,7 @@ import { AutoActionForm } from "../auto_action/form";
 import { useAwaitingPlayer } from "../components/awaiting_player";
 import { Username, UsernameList } from "../components/username";
 import { GameMap } from "../grid/game_map";
+import { DeleteButton } from "../home/game_card";
 import {
   useAction,
   useGame,
@@ -62,6 +63,7 @@ function InternalActiveGame() {
       <TurnOrder />
       <Editor />
       <UndoButton />
+      <DeleteButton game={game} />
       <SwitchToActive />
       <SwitchToUndo />
       {!undoOnly && <ActionSummary />}
