@@ -5,7 +5,7 @@ export const UserRole = z.enum(["ACTIVATE_EMAIL", "USER", "ADMIN", "BLOCKED"]);
 export type UserRole = z.infer<typeof UserRole>;
 
 const UsernameOrEmail = z.string().trim().min(1);
-const Password = z.string().min(8).max(32);
+const Password = z.string().min(8);
 
 export const CreateUserApi = z.object({
   email: z.string().trim().email(),
