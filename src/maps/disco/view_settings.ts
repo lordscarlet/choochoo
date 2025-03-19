@@ -32,6 +32,6 @@ export class DiscoInfernoViewSettings
       movesRemaining === 1
         ? "1 move remaining"
         : `${movesRemaining} moves remaining`;
-    return `You must continue the chain reaction from ${lastStopName} (${tag})`;
+    return `You may continue the chain reaction from ${lastStopName} (${tag})`;
   }
 }
