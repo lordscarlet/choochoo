@@ -1,12 +1,15 @@
 import Mailjet from "node-mailjet";
 import z from "zod";
-import { GameApi } from "../../api/game";
-import { MyUserApi } from "../../api/user";
-import { UserDao } from "../user/dao";
+import { EmailSetting } from "../../api/notifications";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
+import {
+  TestTurnNotifySetting,
+  TurnNotifyService,
+  TurnNotifySetting,
+} from "./notify";
 
-export abstract class EmailService {
+export abstract class EmailService implements TurnNotifyService<EmailSetting> {
   protected abstract sendEmail(email: SendEmailProps): Promise<void>;
   abstract subscribe(email: string): Promise<void>;
   abstract setIsExcludedFromCampaigns(email: string): Promise<void>;
@@ -39,7 +42,9 @@ export abstract class EmailService {
     }
   }
 
-  async sendTestNotification(user: MyUserApi): Promise<void> {
+  async sendTestNotification({
+    user,
+  }: TestTurnNotifySetting<EmailSetting>): Promise<void> {
     await this.sendEmail({
       email: user.email,
       subject: `Test notification`,
@@ -65,11 +70,14 @@ ${this.makeUnsubscribeLink(user.email)}
     });
   }
 
-  async sendTurnReminder(user: UserDao, game: GameApi): Promise<void> {
+  async sendTurnReminder({
+    user,
+    game,
+  }: TurnNotifySetting<EmailSetting>): Promise<void> {
     const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
     await this.sendEmail({
       email: user.email,
-      subject: `It's your turn!`,
+      subject: `Update on "${game.name}"`,
       text: `
 It's your turn to play!
 Everyone in the "${game.name}" game is waiting for you.
@@ -84,6 +92,37 @@ ${this.makeUnsubscribeLink(user.email)}
 <p>Everyone in the <a href="${gameLink}">"${game.name}" game</a> is waiting for you.</p>
 <p>Click or copy and paste the following link to take your turn.</p>
 <p><a href="${gameLink}">Take your turn</a></p>
+<p>-Nathan</p>
+<p></p>
+<p>
+  This email was sent by Choo Choo games. You can unsubscribe here:
+  <a href="${this.makeUnsubscribeLink(user.email)}">Unsubscribe</a>
+</p>`,
+    });
+  }
+
+  async sendGameEndNotification({
+    user,
+    game,
+  }: TurnNotifySetting<EmailSetting>): Promise<void> {
+    const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
+    await this.sendEmail({
+      email: user.email,
+      subject: `Update on "${game.name}"`,
+      text: `
+The game has ended!
+The "${game.name}" game has ended.
+Copy and paste the following link to see the final results: ${gameLink}.
+- Nathan
+
+This email was sent by Choo Choo games. You can unsubscribe here:
+${this.makeUnsubscribeLink(user.email)}
+`,
+      html: `
+<h3>The game has ended!</h3>
+<p>The <a href="${gameLink}">"${game.name}" game</a> has ended.</p>
+<p>Click or copy and paste the following link to see the final results.</p>
+<p><a href="${gameLink}">Final Results</a></p>
 <p>-Nathan</p>
 <p></p>
 <p>
