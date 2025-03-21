@@ -95,7 +95,7 @@ if (environment.cert != null) {
       });
     })
     .catch((e) => {
-      console.log("unknown system error");
+      console.error("unknown system error");
       console.error(e);
       process.exit();
     });

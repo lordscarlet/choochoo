@@ -69,7 +69,7 @@ export async function startGame(
   );
 
   notifyTurn(newGame).catch((e) => {
-    console.log("Failed during processAsync");
+    console.error("Failed during processAsync");
     console.error(e);
   });
 
@@ -81,6 +81,7 @@ export async function performAction(
   playerId: number,
   actionName: string,
   actionData: unknown,
+  dryRun?: boolean,
 ): Promise<GameDao> {
   return await sequelize.transaction(
     { nestMode: TransactionNestMode.separate },
@@ -107,6 +108,8 @@ export async function performAction(
         actionName,
         actionData,
       });
+
+      if (dryRun) return game;
 
       const gameHistory = GameHistoryDao.build({
         previousGameVersion: game.version,
@@ -146,8 +149,8 @@ export async function performAction(
       transaction.afterCommit(() => {
         if (!playerChanged) return;
         console.log("notifying turn");
-        notifyTurn(newGame).catch((e) => {
-          console.log("Failed during processAsync");
+        notifyTurnUnlessAutoAction(newGame).catch((e) => {
+          console.error("Failed during processAsync");
           console.error(e);
         });
 
@@ -166,28 +169,41 @@ export async function performAction(
   );
 }
 
-async function checkForAutoAction(gameId: number) {
+export async function notifyTurnUnlessAutoAction(game: GameDao): Promise<void> {
+  const hasAutoAction = await checkForAutoAction(game.id, /* dryRun= */ true);
+  if (!hasAutoAction) {
+    return notifyTurn(game);
+  }
+}
+
+async function checkForAutoAction(
+  gameId: number,
+  dryRun?: boolean,
+): Promise<boolean> {
   let autoAction: AutoAction | undefined = undefined;
   try {
     const game = await GameDao.findByPk(gameId, { transaction: null });
 
-    if (game == null || game.activePlayerId == null) return;
+    if (game == null || game.activePlayerId == null) return false;
 
     autoAction = game.autoAction?.users[game.activePlayerId];
 
-    if (autoAction == null) return;
+    if (autoAction == null) return false;
 
     await performAction(
       gameId,
       game.activePlayerId,
       AUTO_ACTION_NAME,
       autoAction,
+      dryRun,
     );
+    return true;
   } catch (e) {
-    if (e instanceof NoAutoActionError) return;
+    if (e instanceof NoAutoActionError) return false;
 
-    console.log("failed to process auto action", gameId, autoAction);
+    console.error("failed to process auto action", gameId, autoAction);
     console.error(e);
+    return false;
   }
 }
 
@@ -202,7 +218,7 @@ Lifecycle.singleton.onStart(() => {
             game.playerIds.length === game.config.maxPlayers
           ) {
             startGame(game.id).catch((e) => {
-              console.log("error starting game");
+              console.error("error starting game");
               console.error(e);
             });
           }

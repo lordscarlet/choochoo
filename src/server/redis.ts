@@ -13,7 +13,7 @@ export const redisClient = new Redis({
 export const subClient = redisClient.duplicate();
 
 redisClient.on("error", (e) => {
-  console.log("redis connection error");
+  console.error("redis connection error");
   console.error(e);
   process.exit();
 });

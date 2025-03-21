@@ -72,6 +72,6 @@ function toTsFiles({ binDir, srcDir, jsFile }: ToTsFileProps): string[] {
 }
 
 removeDeleted().catch((e) => {
-  console.log("error removing deleted");
+  console.error("error removing deleted");
   console.error(e);
 });

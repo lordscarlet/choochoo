@@ -246,7 +246,7 @@ class MailjetEmailService extends EmailService {
         ],
       });
     } catch (e) {
-      console.log("failed to send an email");
+      console.error("failed to send an email");
       console.error(e);
     }
   }
