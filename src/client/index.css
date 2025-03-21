@@ -20,7 +20,7 @@ body.dark-mode {
 }
 
 /* Dark mode semantic-ui components, with styling copied from the default "inverted" components. */
-body.dark-mode .ui.header {
+body.dark-mode {
   color: #fff;
 }
 body.dark-mode .ui.segment {
