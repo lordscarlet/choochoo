@@ -47,7 +47,7 @@ export function HomePage() {
 
   return (
     <div>
-      <Header as="h1">Create a new Game</Header>
+      <Header as="h1">Choo Choo Games</Header>
       <ChatLog />
       <Button component={Link} to="/app/games/create" variant="contained">
         Create Game
