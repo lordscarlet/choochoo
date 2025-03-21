@@ -297,6 +297,10 @@ const router = initServer().router(gameContract, {
       invalidInput: "There are not that many steps to retry",
     });
 
+    const users = await Promise.all(
+      game.playerIds.map((id) => UserDao.getUser(id)),
+    );
+
     let previousAction: GameHistoryDao | undefined;
     let currentGameData: string;
     let currentGameVersion: number;
@@ -310,7 +314,10 @@ const router = initServer().router(gameContract, {
     if (!firstAction.isActionHistory()) {
       const { gameData, logs, activePlayerId, seed } =
         EngineDelegator.singleton.start({
-          playerIds: game.playerIds,
+          players: users.map((user) => ({
+            playerId: user!.id,
+            preferredColors: user!.preferredColors,
+          })),
           game: game.toLimitedGame(),
           seed: firstAction.seed!,
         });

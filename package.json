@@ -40,6 +40,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
+    "framer-motion": "^12.5.0",
     "immutable": "^5.0.0",
     "install": "^0.13.0",
     "ioredis": "^5.4.2",

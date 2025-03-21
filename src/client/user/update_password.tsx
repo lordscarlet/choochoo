@@ -1,6 +1,7 @@
 import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Header, Segment } from "semantic-ui-react";
 import { useMe, useUpdatePassword } from "../services/me";
 import { useTextInputState } from "../utils/form_state";
 
@@ -41,8 +42,8 @@ export function UpdatePassword({ updateCode, onSuccess }: UpdatePasswordProps) {
   const isInvalid = me == null && updateCode == null;
 
   return (
-    <>
-      <h1>Update password</h1>
+    <Segment>
+      <Header as="h2">Update password</Header>
       {isInvalid && (
         <p>
           Must provide an update code. Are you trying to{" "}
@@ -93,6 +94,6 @@ export function UpdatePassword({ updateCode, onSuccess }: UpdatePasswordProps) {
           )}
         </Box>
       )}
-    </>
+    </Segment>
   );
 }

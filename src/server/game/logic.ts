@@ -10,6 +10,7 @@ import { afterTransaction } from "../../utils/transaction";
 import { assert } from "../../utils/validate";
 import { LogDao } from "../messages/log_dao";
 import { sequelize } from "../sequelize";
+import { UserDao } from "../user/dao";
 import { Lifecycle } from "../util/lifecycle";
 import { notifyTurn } from "../util/turn_notification";
 import { GameDao } from "./dao";
@@ -20,6 +21,7 @@ export async function startGame(
   enforceOwner?: number,
 ): Promise<GameApi> {
   const game = await GameDao.findByPk(gameId);
+
   assert(game != null);
   assert(game.status === GameStatus.enum.LOBBY, {
     invalidInput: "cannot start a game that has already been started",
@@ -32,9 +34,16 @@ export async function startGame(
     "not enough players to start the game",
   );
 
+  const users = await Promise.all(
+    game.playerIds.map((id) => UserDao.getUser(id)),
+  );
+
   const { gameData, logs, activePlayerId, seed } =
     EngineDelegator.singleton.start({
-      playerIds: game.playerIds,
+      players: users.map((user) => ({
+        playerId: user!.id,
+        preferredColors: user!.preferredColors,
+      })),
       game: game.toLimitedGame(),
     });
 

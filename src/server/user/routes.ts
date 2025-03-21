@@ -37,6 +37,25 @@ const router = initServer().router(userContract, {
     return { status: 200, body: { success: true } };
   },
 
+  async updateMe({ body, req }) {
+    const userId = req.session.userId;
+    assert(userId != null, { unauthorized: "must be signed in" });
+    const user = await UserDao.findByPk(userId);
+    assert(user != null, { unauthorized: "must be logged in" });
+    assert(body.user.id === user.id, { permissionDenied: "cannot change id" });
+    assert(body.user.role === user.role, {
+      permissionDenied: "cannot change role",
+    });
+
+    user.preferredColors = body.user.preferredColors ?? null;
+    user.email = body.user.email;
+    user.username = body.user.username;
+    await user.save();
+    await user.updateCache();
+
+    return { status: 200, body: { user: user.toMyApi() } };
+  },
+
   async updatePassword({ body, req }) {
     let user: UserDao | null;
     if (body.updateCode != null) {

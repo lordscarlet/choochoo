@@ -21,7 +21,7 @@ import { PHASE, PhaseEngine } from "./phase";
 import { PhaseDelegator } from "./phase_delegator";
 import { PlayerHelper } from "./player";
 import { ROUND, RoundEngine } from "./round";
-import { GameStarter } from "./starter";
+import { GameStarter, PlayerUser } from "./starter";
 import { CURRENT_PLAYER } from "./state";
 import { TurnEngine } from "./turn";
 
@@ -42,11 +42,11 @@ export class GameEngine {
   readonly hasEnded = inject(Memory).remember(false);
 
   start(
-    playerIds: number[],
+    players: PlayerUser[],
     startingMap: GridData,
     connections: InterCityConnection[],
   ) {
-    this.starter.startGame(playerIds, startingMap, connections);
+    this.starter.startGame(players, startingMap, connections);
     this.lifecycle.set(new StartRound(1));
     this.runLifecycle();
   }

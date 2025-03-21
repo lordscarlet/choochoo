@@ -16,6 +16,7 @@ import {
   useState,
 } from "react";
 import { useParams } from "react-router-dom";
+import { Container, Header, Segment } from "semantic-ui-react";
 import { ValidationError } from "../../api/error";
 import { GameStatus, ListGamesApi } from "../../api/game";
 import {
@@ -35,12 +36,13 @@ import { Loading } from "../components/loading";
 import { GameList } from "../home/game_list";
 import { useMe } from "../services/me";
 import { useNotificationPreferences } from "../services/notifications/preferences";
-import { useSendTestNotification } from "../services/notifications/test_notification";
 import { useSetNotificationPreferences } from "../services/notifications/set";
+import { useSendTestNotification } from "../services/notifications/test_notification";
 import { useUser } from "../services/user";
 import { useCheckboxState, useTextInputState } from "../utils/form_state";
 import { useTypedMemo } from "../utils/hooks";
 import { DiscordNotificationSettings } from "./discord";
+import { PreferredColors } from "./preferred_colors";
 import { UpdatePassword } from "./update_password";
 
 export function UserProfilePage() {
@@ -55,14 +57,17 @@ export function UserProfilePage() {
 
 function MeProfile({ me }: { me: MyUserApi }) {
   return (
-    <div>
-      <h1>Profile Settings</h1>
-      <p>Username: {me.username}</p>
-      <p>Email: {me.email}</p>
+    <Container>
+      <Header as="h1">Profile Settings</Header>
+      <Segment>
+        <p>Username: {me.username}</p>
+        <p>Email: {me.email}</p>
+      </Segment>
       <UpdatePassword />
+      <PreferredColors />
       <NotificationSettings />
       <UserGameList userId={me.id} />
-    </div>
+    </Container>
   );
 }
 
@@ -264,8 +269,8 @@ function InternalNotificationSettings({
   );
 
   return (
-    <>
-      <h2>Notification Preferences</h2>
+    <Segment>
+      <Header as="h2">Notification Preferences</Header>
       <DiscordNotificationSettings preferences={preferences} />
       <Box
         component="form"
@@ -395,7 +400,7 @@ function InternalNotificationSettings({
           </Button>
         </div>
       </Box>
-    </>
+    </Segment>
   );
 }
 

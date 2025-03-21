@@ -28,6 +28,7 @@ import {
   TurnNotificationSetting,
 } from "../../api/notifications";
 import { CreateUserApi, MyUserApi, UserApi, UserRole } from "../../api/user";
+import { PlayerColor } from "../../engine/state/player";
 import { afterTransaction } from "../../utils/transaction";
 import { assert, isPositiveInteger } from "../../utils/validate";
 import { emailService } from "../util/email";
@@ -62,6 +63,9 @@ export class UserDao extends Model<
 
   @Attribute(DataTypes.JSONB)
   declare notificationPreferences: NotificationPreferences;
+
+  @Attribute(DataTypes.ARRAY(DataTypes.SMALLINT))
+  declare preferredColors: PlayerColor[] | null;
 
   @Version
   @NotNull
@@ -101,10 +105,10 @@ export class UserDao extends Model<
   }
 
   updateCache() {
-    userCache.set(this);
+    userCache.set(this.toMyApi());
   }
 
-  static toApi(user: MyUserApi): UserApi {
+  static toApi(user: MyUserApi | UserDao): UserApi {
     return {
       id: user.id,
       username: user.username,
@@ -120,11 +124,16 @@ export class UserDao extends Model<
       ...this.toApi(),
       email: this.email,
       role: this.role,
+      preferredColors: this.preferredColors ?? undefined,
     };
   }
 
   comparePassword(password: string): Promise<boolean> {
     return compare(password, this.password);
+  }
+
+  static findById(id: number): Promise<UserDao | null> {
+    return UserDao.findByPk(id);
   }
 
   static hashPassword(password: string): Promise<string> {

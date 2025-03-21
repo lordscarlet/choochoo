@@ -1,5 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
+import { PlayerColorZod } from "../engine/state/player";
 
 export const UserRole = z.enum(["ACTIVATE_EMAIL", "USER", "ADMIN", "BLOCKED"]);
 export type UserRole = z.infer<typeof UserRole>;
@@ -40,6 +41,7 @@ export const MyUserApi = z.object({
   email: z.string(),
   username: z.string(),
   role: UserRole,
+  preferredColors: PlayerColorZod.array().optional(),
 });
 export type MyUserApi = z.infer<typeof MyUserApi>;
 
@@ -92,6 +94,14 @@ export const userContract = c.router({
     },
     method: "POST",
     path: "/users/forgot-password",
+  },
+  updateMe: {
+    body: z.object({ user: MyUserApi }),
+    responses: {
+      200: z.object({ user: MyUserApi }),
+    },
+    method: "PUT",
+    path: "/users/me",
   },
   updatePassword: {
     body: UpdatePasswordRequest,

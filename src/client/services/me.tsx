@@ -39,6 +39,39 @@ export function useMe(): MyUserApi | undefined {
   return useAllOfMe().user;
 }
 
+function useUpdateMeCache() {
+  const tsrQueryClient = tsr.useQueryClient();
+  return useCallback((user?: MyUserApi) => {
+    tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
+      ...r!,
+      status: 200,
+      body: { user },
+    }));
+  }, []);
+}
+
+export function useUpdateMe() {
+  const { mutate, error, isPending } = tsr.users.updateMe.useMutation();
+  const validationError = handleError(isPending, error);
+  const updateCache = useUpdateMeCache();
+
+  const updateMe = useCallback(
+    (user: MyUserApi) => {
+      mutate(
+        { body: { user } },
+        {
+          onSuccess: ({ body }) => {
+            updateCache(body.user);
+          },
+        },
+      );
+    },
+    [mutate],
+  );
+
+  return { validationError, updateMe, isPending };
+}
+
 export const AdminModeEnabled = createContext<
   [boolean, (newAdminMode: boolean) => void]
 >([false, () => {}] as const);
@@ -99,10 +132,10 @@ export function useSubscribe() {
 
 export function useLogin() {
   const notifications = useNotifications();
-  const tsrQueryClient = tsr.useQueryClient();
   const navigate = useNavigate();
   const { mutate, error, isPending } = tsr.users.login.useMutation();
   const validationError = handleError(isPending, error);
+  const updateCache = useUpdateMeCache();
 
   const login = useCallback(
     (body: LoginUserApi) =>
@@ -110,11 +143,7 @@ export function useLogin() {
         { body },
         {
           onSuccess: (data) => {
-            tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
-              ...r!,
-              status: 200,
-              body: { user: data.body.user },
-            }));
+            updateCache(data.body.user);
             if (body.activationCode) {
               notifications.show("Welcome! CCMF!", {
                 autoHideDuration: 2000,
@@ -133,9 +162,9 @@ export function useLogin() {
 export function useLoginBypass(userId?: number) {
   const isAdmin = useIsAdmin();
   const me = useMe();
-  const tsrQueryClient = tsr.useQueryClient();
   const { mutate, error, isPending } = tsr.users.loginBypass.useMutation();
   handleError(isPending, error);
+  const updateCache = useUpdateMeCache();
 
   const login = useCallback(
     () =>
@@ -143,11 +172,7 @@ export function useLoginBypass(userId?: number) {
         { params: { userId: userId! } },
         {
           onSuccess: (data) => {
-            tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
-              ...r!,
-              status: 200,
-              body: data.body,
-            }));
+            updateCache(data.body.user);
           },
         },
       ),
@@ -159,10 +184,10 @@ export function useLoginBypass(userId?: number) {
 }
 
 export function useRegister() {
-  const tsrQueryClient = tsr.useQueryClient();
   const navigate = useNavigate();
   const { mutate, error, isPending } = tsr.users.create.useMutation();
   const validationError = handleError(isPending, error);
+  const updateCache = useUpdateMeCache();
 
   const register = useCallback(
     (body: CreateUserApi) =>
@@ -170,11 +195,7 @@ export function useRegister() {
         { body },
         {
           onSuccess: (data) => {
-            tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
-              ...r!,
-              status: 200,
-              body: { user: data.body.user },
-            }));
+            updateCache(data.body.user);
             navigate("/");
           },
         },
@@ -224,10 +245,10 @@ export function useUpdatePassword() {
 }
 
 export function useLogout() {
-  const tsrQueryClient = tsr.useQueryClient();
   const { mutate, error, isPending } = tsr.users.logout.useMutation();
   handleError(isPending, error);
   const notifications = useNotifications();
+  const updateCache = useUpdateMeCache();
 
   const logout = useCallback(() => {
     mutate(
@@ -235,11 +256,7 @@ export function useLogout() {
       {
         onSuccess({ status, body }) {
           assert(status === 200 && body.success);
-          tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
-            ...r!,
-            status: 200,
-            body: { user: undefined },
-          }));
+          updateCache(undefined);
           notifications.show("Logout successful", {
             autoHideDuration: 2000,
             severity: "success",
@@ -276,12 +293,12 @@ export function useResendActivationCode() {
 }
 
 export function useActivateAccount() {
-  const tsrQueryClient = tsr.useQueryClient();
   const { mutate, error, isError, isPending } =
     tsr.users.activateAccount.useMutation();
   handleError(isPending, error);
   const notifications = useNotifications();
   const navigate = useNavigate();
+  const updateCache = useUpdateMeCache();
 
   const activate = useCallback((activationCode: string) => {
     mutate(
@@ -289,11 +306,7 @@ export function useActivateAccount() {
       {
         onSuccess({ status, body }) {
           assert(status === 200);
-          tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
-            ...r!,
-            status: 200,
-            body: { user: body.user },
-          }));
+          updateCache(body.user);
           notifications.show("Success! CCMF!", {
             autoHideDuration: 2000,
             severity: "success",

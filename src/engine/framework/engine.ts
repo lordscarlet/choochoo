@@ -12,6 +12,7 @@ import { Memory } from "../game/memory";
 import { PHASE } from "../game/phase";
 import { Random } from "../game/random";
 import { ROUND, RoundEngine } from "../game/round";
+import { PlayerUser } from "../game/starter";
 import { injectCurrentPlayer } from "../game/state";
 import { MOVE_STATE } from "../move/state";
 import { getPhaseString, Phase } from "../state/phase";
@@ -64,7 +65,7 @@ export class EngineDelegator {
 }
 
 interface StartProps {
-  playerIds: number[];
+  players: PlayerUser[];
   game: LimitedGame;
   seed?: string;
 }
@@ -90,15 +91,15 @@ export class EngineProcessor {
   private readonly autoActionManager = inject(AutoActionManager);
   private readonly gameMemory = inject(GameMemory);
 
-  start({ game, playerIds, seed }: StartProps): GameState {
+  start({ game, players, seed }: StartProps): GameState {
     return this.process(game, () => {
       this.random.setSeed(seed);
       const mapSettings = MapRegistry.singleton.get(game.gameKey);
-      assert(playerIds.length >= mapSettings.minPlayers, {
+      assert(players.length >= mapSettings.minPlayers, {
         invalidInput: "not enough players to start",
       });
       this.gameEngine.start(
-        playerIds,
+        players,
         mapSettings.startingGrid,
         mapSettings.interCityConnections ?? [],
       );

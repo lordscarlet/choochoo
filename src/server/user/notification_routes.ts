@@ -16,16 +16,16 @@ export const notificationApp = express();
 
 const router = initServer().router(notificationsContract, {
   async get({ req }) {
-    await assertRole(req);
-    const user = await UserDao.findByPk(req.session.userId);
+    const myUser = await assertRole(req);
+    const user = await UserDao.findByPk(myUser.id);
 
     assert(user != null);
     return { status: 200, body: { preferences: user.notificationPreferences } };
   },
   async update({ req, body }) {
-    await assertRole(req);
+    const myUser = await assertRole(req);
 
-    const user = await UserDao.findByPk(req.session.userId);
+    const user = await UserDao.findByPk(myUser.id);
 
     assert(user != null);
     await user.setNotificationPreferences(body.preferences);
@@ -34,7 +34,7 @@ const router = initServer().router(notificationsContract, {
   },
 
   async linkDiscord({ req, body }) {
-    await assertRole(req);
+    const myUser = await assertRole(req);
 
     const { accessToken } = body;
 
@@ -44,7 +44,7 @@ const router = initServer().router(notificationsContract, {
 
     const discordId = result.data.id;
 
-    const user = await UserDao.findByPk(req.session.userId);
+    const user = await UserDao.findByPk(myUser.id);
 
     assert(user != null);
     user.notificationPreferences = {
@@ -57,9 +57,9 @@ const router = initServer().router(notificationsContract, {
   },
 
   async unlinkDiscord({ req }) {
-    await assertRole(req);
+    const myUser = await assertRole(req);
 
-    const user = await UserDao.findByPk(req.session.userId);
+    const user = await UserDao.findByPk(myUser.id);
 
     assert(user != null);
     user.notificationPreferences = {

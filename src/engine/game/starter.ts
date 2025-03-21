@@ -1,4 +1,4 @@
-import { duplicate } from "../../utils/functions";
+import { duplicate, partition } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { GridHelper } from "../map/grid_helper";
@@ -22,6 +22,11 @@ import {
   TURN_ORDER,
 } from "./state";
 
+export interface PlayerUser {
+  playerId: number;
+  preferredColors?: PlayerColor[];
+}
+
 export class GameStarter {
   protected readonly gridVersionHelper = inject(GridVersionHelper);
   protected readonly grid = injectState(GRID);
@@ -34,14 +39,14 @@ export class GameStarter {
   protected readonly random = inject(Random);
 
   startGame(
-    playerIds: number[],
+    players: PlayerUser[],
     startingMap: GridData,
     connections: InterCityConnection[],
   ) {
     this.onBeginStartGame();
     this.initializeStartingCubes();
     this.drawCubesForCities(startingMap);
-    this.initializePlayers(playerIds);
+    this.initializePlayers(players);
     this.initializeAvailableCities();
     this.interCityConnections.initState(connections);
     this.onStartGame();
@@ -89,11 +94,22 @@ export class GameStarter {
     return allPlayerColors;
   }
 
-  initializePlayers(playerIds: number[]) {
-    const shuffledColors = this.random.shuffle(this.allPlayerColors());
-    const players = playerIds.map((id, index) =>
-      this.buildPlayer(id, shuffledColors[index]),
-    );
+  initializePlayers(playerUsers: PlayerUser[]) {
+    const shuffledColors = new Set(this.random.shuffle(this.allPlayerColors()));
+    const map = partition(playerUsers, (u) => u.preferredColors != null);
+    const playersShuffled = this.random
+      .shuffle(map.get(true) ?? [])
+      .concat(map.get(false) ?? []);
+
+    const players: PlayerData[] = [];
+    for (const playerUser of playersShuffled) {
+      const chosenColor =
+        playerUser.preferredColors?.find((c) => shuffledColors.has(c)) ??
+        shuffledColors[Symbol.iterator]().next().value;
+      assert(chosenColor != null);
+      players.push(this.buildPlayer(playerUser.playerId, chosenColor));
+      shuffledColors.delete(chosenColor);
+    }
 
     this.players.initState(players);
     this.turnOrder.initState(
