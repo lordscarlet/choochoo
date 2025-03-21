@@ -1,6 +1,7 @@
 import { Button } from "@mui/material";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { Header } from "semantic-ui-react";
 import { GameStatus, ListGamesApi } from "../../api/game";
 import { ChatLog } from "../game/game_log";
 import { useMe } from "../services/me";
@@ -46,7 +47,7 @@ export function HomePage() {
 
   return (
     <div>
-      <h1>Choo Choo Games</h1>
+      <Header as="h1">Create a new Game</Header>
       <ChatLog />
       <Button component={Link} to="/app/games/create" variant="contained">
         Create Game
