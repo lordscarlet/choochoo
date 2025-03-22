@@ -25,37 +25,39 @@ export async function notifyTurn(game: GameDao): Promise<void> {
 
   await Promise.all(
     settings.map((setting) =>
-      getNotifier(setting).sendTestNotification({
+      getNotifier(setting).sendTurnReminder({
         user: user.toMyApi(),
         notificationPreferences: user.notificationPreferences,
         turnNotificationSetting: setting,
+        game: game.toApi(),
       }),
     ),
   );
 }
 
 export async function notifyEndGame(game: GameDao): Promise<void> {
-  const users = await UserDao.findAll(
-    {
-      where: { id: { [Op.in]: game.playerIds } },
-      transaction: null,
-    },
-  );
-  await Promise.all(users.map(async (user) => {
-    const settings = user.getTurnNotificationSettings(
-      NotificationFrequency.IMMEDIATELY,
-    );
+  const users = await UserDao.findAll({
+    where: { id: { [Op.in]: game.playerIds } },
+    transaction: null,
+  });
+  await Promise.all(
+    users.map(async (user) => {
+      const settings = user.getTurnNotificationSettings(
+        NotificationFrequency.IMMEDIATELY,
+      );
 
-    await Promise.all(
-      settings.map((setting) =>
-        getNotifier(setting).sendTestNotification({
-          user: user.toMyApi(),
-          notificationPreferences: user.notificationPreferences,
-          turnNotificationSetting: setting,
-        }),
-      ),
-    );
-  }));
+      await Promise.all(
+        settings.map((setting) =>
+          getNotifier(setting).sendGameEndNotification({
+            user: user.toMyApi(),
+            notificationPreferences: user.notificationPreferences,
+            turnNotificationSetting: setting,
+            game: game.toApi(),
+          }),
+        ),
+      );
+    }),
+  );
 }
 
 export async function sendTestMessage(
