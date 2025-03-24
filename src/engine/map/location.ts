@@ -98,9 +98,13 @@ export type MakeOptional<T, Optional extends string> = Pick<
 
 export type BaseTileData = MakeOptional<TileData, "owners">;
 
-export function trackEquals(track1: TrackInfo, track2: TrackInfo): boolean {
+export function trackEquals(
+  track1: TrackInfo,
+  track2: TrackInfo,
+  ignoreOwner = false,
+): boolean {
   return (
-    track1.owner === track2.owner &&
+    (ignoreOwner || track1.owner === track2.owner) &&
     track1.exits.every((exit) => track2.exits.includes(exit))
   );
 }

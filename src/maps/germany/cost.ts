@@ -1,23 +1,31 @@
-import { BuildCostCalculator } from "../../engine/build/cost";
-import { Coordinates } from "../../utils/coordinates";
-import { TileType } from "../../engine/state/tile";
-import { Action } from "../../engine/state/action";
-import { injectCurrentPlayer } from "../../engine/game/state";
-import { injectState } from "../../engine/framework/execution_context";
-import { RAW_BUILD_COSTS } from "./build";
 import _ from "lodash";
+import { BuildCostCalculator } from "../../engine/build/cost";
+import { injectState } from "../../engine/framework/execution_context";
+import { injectCurrentPlayer } from "../../engine/game/state";
+import { Action } from "../../engine/state/action";
+import { Direction, TileType } from "../../engine/state/tile";
+import { Coordinates } from "../../utils/coordinates";
+import { RAW_BUILD_COSTS } from "./build";
 
 export class GermanyCostCalculator extends BuildCostCalculator {
   protected readonly currentPlayer = injectCurrentPlayer();
   private readonly rawBuildCosts = injectState(RAW_BUILD_COSTS);
 
-  public rawCostOf(coordinates: Coordinates, newTileType: TileType): number {
-    return super.costOf(coordinates, newTileType);
+  public rawCostOf(
+    coordinates: Coordinates,
+    newTileType: TileType,
+    orientation: Direction,
+  ): number {
+    return super.costOf(coordinates, newTileType, orientation);
   }
 
-  costOf(coordinates: Coordinates, newTileType: TileType): number {
+  costOf(
+    coordinates: Coordinates,
+    newTileType: TileType,
+    orientation: Direction,
+  ): number {
     // Keep track of the raw base costs of builds in this action
-    const baseCost = this.rawCostOf(coordinates, newTileType);
+    const baseCost = this.rawCostOf(coordinates, newTileType, orientation);
     const oldBuildCosts = this.rawBuildCosts();
     const newBuildCosts = oldBuildCosts.slice();
     newBuildCosts.push(baseCost);

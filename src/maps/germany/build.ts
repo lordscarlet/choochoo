@@ -1,11 +1,11 @@
-import { BuilderHelper } from "../../engine/build/helper";
-import { Key } from "../../engine/framework/key";
 import z from "zod";
+import { BuildAction, BuildData } from "../../engine/build/build";
+import { BuilderHelper } from "../../engine/build/helper";
 import { BuildPhase } from "../../engine/build/phase";
 import { inject, injectState } from "../../engine/framework/execution_context";
-import { BuildAction, BuildData } from "../../engine/build/build";
-import { GermanyCostCalculator } from "./cost";
+import { Key } from "../../engine/framework/key";
 import { assert } from "../../utils/validate";
+import { GermanyCostCalculator } from "./cost";
 
 export class GermanyBuilderHelper extends BuilderHelper {
   getMaxBuilds(): number {
@@ -28,6 +28,7 @@ export class GermanyBuildAction extends BuildAction {
     const cost = this.germanyCostCalculator.rawCostOf(
       data.coordinates,
       data.tileType,
+      data.orientation,
     );
 
     const result = super.process(data);

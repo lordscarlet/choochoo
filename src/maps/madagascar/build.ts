@@ -9,7 +9,7 @@ import {
 } from "../../engine/game/state";
 import { Action } from "../../engine/state/action";
 import { PlayerColor } from "../../engine/state/player";
-import { TileType } from "../../engine/state/tile";
+import { Direction, TileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { remove } from "../../utils/functions";
 
@@ -48,8 +48,12 @@ export class MadagascarBuilderHelper extends BuilderHelper {
 export class MadagascarBuildCostCalculator extends BuildCostCalculator {
   private readonly currentPlayer = injectCurrentPlayer();
 
-  costOf(coordinates: Coordinates, newTileType: TileType): number {
-    const baseCost = super.costOf(coordinates, newTileType);
+  costOf(
+    coordinates: Coordinates,
+    newTileType: TileType,
+    orientation: Direction,
+  ): number {
+    const baseCost = super.costOf(coordinates, newTileType, orientation);
     if (this.currentPlayer().selectedAction === Action.HIGH_COSTS) {
       return baseCost + 4;
     }

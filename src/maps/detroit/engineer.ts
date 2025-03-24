@@ -15,7 +15,7 @@ import { Land } from "../../engine/map/location";
 import { Track } from "../../engine/map/track";
 import { Action } from "../../engine/state/action";
 import { InterCityConnection } from "../../engine/state/inter_city_connection";
-import { TileType } from "../../engine/state/tile";
+import { Direction, TileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 
@@ -88,8 +88,14 @@ export class DetroitBuildPhase extends BuildPhase {
 export class DetroitCostCalculator extends BuildCostCalculator {
   private readonly manager = inject(FreeBuildManager);
 
-  costOf(coordinates: Coordinates, newTileType: TileType): number {
-    return this.manager.newCost(super.costOf(coordinates, newTileType));
+  costOf(
+    coordinates: Coordinates,
+    newTileType: TileType,
+    orientation: Direction,
+  ): number {
+    return this.manager.newCost(
+      super.costOf(coordinates, newTileType, orientation),
+    );
   }
 }
 
@@ -99,7 +105,11 @@ export class DetroitBuildAction extends BuildAction {
   process(data: BuildData): boolean {
     const result = super.process(data);
     this.manager.registerBuild(
-      this.costCalculator.costOf(data.coordinates, data.tileType),
+      this.costCalculator.costOf(
+        data.coordinates,
+        data.tileType,
+        data.orientation,
+      ),
     );
 
     return result;

@@ -9,7 +9,7 @@ import { injectCurrentPlayer } from "../../engine/game/state";
 import { Action } from "../../engine/state/action";
 import { SpaceType } from "../../engine/state/location_type";
 import { LandType } from "../../engine/state/space";
-import { TileType } from "../../engine/state/tile";
+import { Direction, TileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 
@@ -36,8 +36,12 @@ export class SoulTrainCalculator extends BuildCostCalculator {
   private readonly manager = inject(EngineerManager);
   private readonly currentPlayer = injectCurrentPlayer();
 
-  costOf(coordinates: Coordinates, newTileType: TileType): number {
-    const cost = super.costOf(coordinates, newTileType);
+  costOf(
+    coordinates: Coordinates,
+    newTileType: TileType,
+    orientation: Direction,
+  ): number {
+    const cost = super.costOf(coordinates, newTileType, orientation);
     if (this.currentPlayer().selectedAction !== Action.ENGINEER) {
       return cost;
     }
@@ -62,7 +66,11 @@ export class SoulTrainBuildAction extends BuildAction {
   process(data: BuildData): boolean {
     const result = super.process(data);
     this.manager.registerBuild(
-      this.costCalculator.costOf(data.coordinates, data.tileType),
+      this.costCalculator.costOf(
+        data.coordinates,
+        data.tileType,
+        data.orientation,
+      ),
     );
     return result;
   }

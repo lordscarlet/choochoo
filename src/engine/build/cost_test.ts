@@ -39,12 +39,14 @@ describe(BuildCostCalculator.name, () => {
     from?: TileType,
     to: TileType,
     type?: LandData['type'],
+    fromOrientation?: Direction;
+    toOrientation?: Direction;
   }
 
   injector.initResettableState(GRID, new Map());
   injector.initResettableState(INTER_CITY_CONNECTIONS, []);
 
-  function calculateCost({ from, to, type }: CalculateCostProps) {
+  function calculateCost({ from, to, type, fromOrientation, toOrientation }: CalculateCostProps) {
     const coordinates = Coordinates.from({ q: 0, r: 0 });
     const grid = new Map<Coordinates, SpaceData>([
       [coordinates, {
@@ -52,7 +54,7 @@ describe(BuildCostCalculator.name, () => {
         townName: isTownTile(to) ? 'Foo Town' : undefined,
         tile: from && {
           tileType: from,
-          orientation: Direction.TOP,
+          orientation: fromOrientation ?? Direction.TOP,
           owners: [undefined],
         },
       }],
@@ -60,7 +62,7 @@ describe(BuildCostCalculator.name, () => {
     injector.state().set(GRID, grid);
 
     const calculator = new BuildCostCalculator();
-    return calculator.costOf(coordinates, to);
+    return calculator.costOf(coordinates, to, toOrientation ?? Direction.TOP);
   }
 
   it('calculates simple track', () => {
@@ -150,8 +152,12 @@ describe(BuildCostCalculator.name, () => {
   });
 
   it('rerouting a complex tile costs 2', () => {
-    expect(calculateCost({ from: ComplexTileType.X, to: STRAIGHT_TIGHT })).toBe(2);
+    expect(calculateCost({ from: ComplexTileType.X, fromOrientation: Direction.TOP_LEFT, to: STRAIGHT_TIGHT })).toBe(2);
     expect(calculateCost({ from: CURVE_TIGHT_1, to: COEXISTING_CURVES })).toBe(2);
+  });
+
+  it('rerouting two tracks costs $4', () => {
+    expect(calculateCost({ from: CROSSING_CURVES, to: ComplexTileType.X })).toBe(4);
   });
 
   it('upgrading to a complex coexisting costs 2', () => {

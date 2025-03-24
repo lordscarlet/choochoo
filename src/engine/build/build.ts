@@ -46,7 +46,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     const maxTrack = this.helper.getMaxBuilds();
     assert(this.helper.buildsRemaining() > 0, { invalidInput: `You can only build at most ${maxTrack} track` });
 
-    assert(this.currentPlayer().money >= this.costCalculator.costOf(coordinates, data.tileType), { invalidInput: 'Cannot afford to place track' });
+    assert(this.currentPlayer().money >= this.costCalculator.costOf(coordinates, data.tileType, data.orientation), { invalidInput: 'Cannot afford to place track' });
 
     assert(!this.hasBuiltHere(coordinates), { invalidInput: 'cannot build in the same location twice in one turn' });
     const invalidBuildReason = this.validator.getInvalidBuildReason(coordinates, { ...data, playerColor: this.currentPlayer().color });
@@ -55,7 +55,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
 
   process(data: BuildData): boolean {
     const coordinates = data.coordinates;
-    this.moneyManager.addMoneyForCurrentPlayer(-this.costCalculator.costOf(coordinates, data.tileType));
+    this.moneyManager.addMoneyForCurrentPlayer(-this.costCalculator.costOf(coordinates, data.tileType, data.orientation));
     const newTile = this.newTile(data);
     this.log.currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${this.grid().displayName(data.coordinates)}`);
     this.gridHelper.update(coordinates, (hex) => {
