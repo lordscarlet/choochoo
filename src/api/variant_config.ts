@@ -13,6 +13,7 @@ export const EmptyVariantConfig = z.object({
     GameKey.SWEDEN,
     GameKey.DISCO_INFERNO,
     GameKey.SOUL_TRAIN,
+    GameKey.ST_LUCIA,
   ]),
 });
 export type EmptyVariantConfig = z.infer<typeof EmptyVariantConfig>;

@@ -11,6 +11,7 @@ import { MadagascarViewSettings } from "./madagascar/view_settings";
 import { ReversteamViewSettings } from "./reversteam/view_settings";
 import { RustBeltViewSettings } from "./rust_belt/view_settings";
 import { SoulTrainViewSettings } from "./soultrain/view_settings";
+import { StLuciaViewSettings } from "./st-lucia/view_settings";
 import { SwedenRecyclingViewSettings } from "./sweden/view_settings";
 import { MapViewSettings } from "./view_settings";
 
@@ -31,6 +32,7 @@ export class ViewRegistry {
     this.add(new KoreaWallaceViewSettings());
     this.add(new GermanyViewSettings());
     this.add(new DetroitBankruptcyViewSettings());
+    this.add(new StLuciaViewSettings());
   }
 
   values(): Iterable<MapViewSettings> {

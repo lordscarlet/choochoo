@@ -24,6 +24,9 @@ export enum Phase {
 
   // Soul Train
   EARTH_TO_HEAVEN = 14,
+
+  // St Lucia
+  ST_LUCIA_TURN_ORDER = 15,
 }
 
 export const PhaseZod = z.nativeEnum(Phase);
@@ -32,6 +35,7 @@ export function getPhaseString(phase: Phase): string {
   switch (phase) {
     case Phase.SHARES:
       return "Issue shares";
+    case Phase.ST_LUCIA_TURN_ORDER:
     case Phase.TURN_ORDER:
       return "Bid for turn order";
     case Phase.ACTION_SELECTION:

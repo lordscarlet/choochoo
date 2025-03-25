@@ -1,4 +1,4 @@
-import { Button, Tooltip } from "@mui/material";
+import { Button } from "@mui/material";
 import { ReactNode, useCallback } from "react";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
@@ -18,9 +18,14 @@ import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { ProductionPassAction } from "../../maps/disco/production";
 import { PassAction as DeurbanizationPassAction } from "../../maps/ireland/deurbanization";
 import { PlaceAction } from "../../maps/soultrain/earth_to_heaven";
+import {
+  StLuciaBidAction,
+  StLuciaPassAction,
+} from "../../maps/st-lucia/bidding";
 import { iterate } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
 import { DropdownMenu, DropdownMenuItem } from "../components/dropdown_menu";
+import { MaybeTooltip } from "../components/maybe_tooltip";
 import { Username } from "../components/username";
 import { useAction, useEmptyAction } from "../services/game";
 import {
@@ -60,6 +65,8 @@ export function ActionSummary() {
       return <DiscoProduction />;
     case Phase.EARTH_TO_HEAVEN:
       return <EarthToHeaven />;
+    case Phase.ST_LUCIA_TURN_ORDER:
+      return <StLuciaTurnOrder />;
     case Phase.GOODS_GROWTH:
     case Phase.INCOME:
     case Phase.EXPENSES:
@@ -69,6 +76,62 @@ export function ActionSummary() {
     default:
       assertNever(currentPhase);
   }
+}
+
+export function StLuciaTurnOrder() {
+  const {
+    canEmit,
+    canEmitUserId,
+    emit: emitBid,
+    isPending: bidIsPending,
+    getErrorMessage,
+  } = useAction(StLuciaBidAction);
+  const { emit: emitPass, isPending: passIsPending } =
+    useEmptyAction(StLuciaPassAction);
+
+  const isPending = bidIsPending || passIsPending;
+
+  const bidZero = useCallback(() => {
+    emitBid({ bid: 0 });
+  }, [emitBid]);
+
+  const bidFive = useCallback(() => {
+    emitBid({ bid: 5 });
+  }, [emitBid]);
+
+  const bidZeroErrorMessage = getErrorMessage({ bid: 0 });
+  const bidFiveErrorMessage = getErrorMessage({ bid: 5 });
+
+  if (canEmitUserId == null) {
+    return <></>;
+  }
+
+  if (!canEmit) {
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must bid.
+      </GenericMessage>
+    );
+  }
+
+  return (
+    <div>
+      You must bid.
+      <Button onClick={emitPass} disabled={isPending}>
+        Take second player
+      </Button>
+      {bidZeroErrorMessage == null && (
+        <Button onClick={bidZero} disabled={isPending}>
+          Bid $0
+        </Button>
+      )}
+      <MaybeTooltip tooltip={bidFiveErrorMessage}>
+        <Button onClick={bidFive} disabled={isPending}>
+          Claim first for $5
+        </Button>
+      </MaybeTooltip>
+    </div>
+  );
 }
 
 export function EarthToHeaven() {
@@ -176,21 +239,15 @@ export function MoveGoods() {
   }
 
   const locoDisabledReason = getErrorMessage();
-  const locoButton = (
-    <Button onClick={emitLoco} disabled={locoDisabledReason != null}>
-      Locomotive
-    </Button>
-  );
 
   return (
     <div>
       <GenericMessage>{message ?? "You must move a good."}</GenericMessage>
-      {locoDisabledReason != null && (
-        <Tooltip title={locoDisabledReason} placement="bottom">
-          <span>{locoButton}</span>
-        </Tooltip>
-      )}
-      {locoDisabledReason == null && locoButton}
+      <MaybeTooltip tooltip={locoDisabledReason}>
+        <Button onClick={emitLoco} disabled={locoDisabledReason != null}>
+          Locomotive
+        </Button>
+      </MaybeTooltip>
       <Button onClick={emitPass}>Pass</Button>
     </div>
   );

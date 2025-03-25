@@ -1,4 +1,3 @@
-import { Tooltip } from "@mui/material";
 import { useCallback } from "react";
 import { GameStatus } from "../../api/game";
 import { injectPlayerAction } from "../../engine/game/state";
@@ -8,6 +7,7 @@ import { Action, getSelectedActionString } from "../../engine/state/action";
 import { ViewRegistry } from "../../maps/view_registry";
 import { MapViewSettings } from "../../maps/view_settings";
 import { assertNever } from "../../utils/validate";
+import { MaybeTooltip } from "../components/maybe_tooltip";
 import { Username } from "../components/username";
 import { useAction, useGame } from "../services/game";
 import { useInject, useInjected } from "../utils/injection_context";
@@ -66,31 +66,23 @@ function SpecialAction({ action }: { action: Action }) {
       <>{caption}</>
     );
 
-  const render = (
-    <div className={className} onClick={chooseAction}>
-      <div className={styles.name}>{getSelectedActionString(action)}</div>
-      <div className={styles.description}>
-        {getSelectedActionDescription(action, mapSettings)}
+  return (
+    <MaybeTooltip tooltip={disabledReason}>
+      <div className={className} onClick={chooseAction}>
+        <div className={styles.name}>{getSelectedActionString(action)}</div>
+        <div className={styles.description}>
+          {getSelectedActionDescription(action, mapSettings)}
+        </div>
+        <div>
+          <PlayerCircle
+            disabled={disabledReason != null}
+            color={player?.color}
+            caption={captionEl}
+          />
+        </div>
       </div>
-      <div>
-        <PlayerCircle
-          disabled={disabledReason != null}
-          color={player?.color}
-          caption={captionEl}
-        />
-      </div>
-    </div>
+    </MaybeTooltip>
   );
-
-  if (disabledReason != null) {
-    return (
-      <Tooltip title={disabledReason} placement="bottom">
-        {render}
-      </Tooltip>
-    );
-  } else {
-    return render;
-  }
 }
 
 function getSelectedActionDescription(

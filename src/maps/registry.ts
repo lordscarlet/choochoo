@@ -12,6 +12,7 @@ import { MadagascarMapSettings } from "./madagascar/settings";
 import { ReversteamMapSettings } from "./reversteam/settings";
 import { RustBeltMapSettings } from "./rust_belt/settings";
 import { SoulTrainMapSettings } from "./soultrain/settings";
+import { StLuciaMapSettings } from "./st-lucia/settings";
 import { SwedenRecyclingMapSettings } from "./sweden/settings";
 
 export class MapRegistry {
@@ -31,6 +32,7 @@ export class MapRegistry {
     this.add(new GermanyMapSettings());
     this.add(new SoulTrainMapSettings());
     this.add(new DetroitBankruptcyMapSettings());
+    this.add(new StLuciaMapSettings());
   }
 
   values(): Iterable<MapSettings> {

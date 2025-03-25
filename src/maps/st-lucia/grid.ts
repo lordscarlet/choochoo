@@ -1,0 +1,58 @@
+import { duplicate } from "../../utils/functions";
+import { grid, MOUNTAIN, PLAIN, RIVER, town, UNPASSABLE } from "../factory";
+
+export const map = grid([
+  [
+    ...duplicate(5, UNPASSABLE),
+    town("Anse La Raye"),
+    RIVER,
+    town("Anse Chastenet"),
+    PLAIN,
+  ],
+  [...duplicate(4, UNPASSABLE), PLAIN, PLAIN, RIVER, ...duplicate(3, PLAIN)],
+  [
+    UNPASSABLE,
+    UNPASSABLE,
+    town("Castries"),
+    RIVER,
+    PLAIN,
+    PLAIN,
+    MOUNTAIN,
+    MOUNTAIN,
+    town("Fond St. Jacques"),
+    PLAIN,
+    PLAIN,
+  ],
+  [
+    ...duplicate(3, PLAIN),
+    RIVER,
+    town("Barre de Fisle"),
+    MOUNTAIN,
+    town("Mome Gimie"),
+    MOUNTAIN,
+    PLAIN,
+    town("Laborie"),
+  ],
+  [town("Le Cap"), PLAIN, ...duplicate(6, MOUNTAIN), RIVER, RIVER, PLAIN],
+  [
+    PLAIN,
+    PLAIN,
+    town("Grand Anse"),
+    PLAIN,
+    RIVER,
+    ...duplicate(4, PLAIN),
+    RIVER,
+  ],
+  [
+    UNPASSABLE,
+    PLAIN,
+    PLAIN,
+    PLAIN,
+    RIVER,
+    town("Dennery"),
+    PLAIN,
+    PLAIN,
+    town("Micoud"),
+    PLAIN,
+  ],
+]);

@@ -17,6 +17,7 @@ export abstract class EmptyActionProcessor
 {
   assertInput = EmptyAction.parse;
 
-  abstract validate(): void;
+  validate(): void {}
+
   abstract process(): boolean;
 }

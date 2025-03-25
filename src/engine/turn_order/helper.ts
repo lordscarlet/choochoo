@@ -8,12 +8,12 @@ import { PlayerColor, PlayerData, stringToPlayerColor } from "../state/player";
 import { TURN_ORDER_STATE } from "./state";
 
 export class TurnOrderHelper {
-  private readonly turnOrder = injectState(TURN_ORDER);
-  private readonly turnOrderState = injectState(TURN_ORDER_STATE);
-  private readonly currentPlayer = injectCurrentPlayer();
-  private readonly moneyManager = inject(MoneyManager);
-  private readonly log = inject(Log);
-  private readonly autoActionManager = inject(AutoActionManager);
+  protected readonly turnOrder = injectState(TURN_ORDER);
+  protected readonly turnOrderState = injectState(TURN_ORDER_STATE);
+  protected readonly currentPlayer = injectCurrentPlayer();
+  protected readonly moneyManager = inject(MoneyManager);
+  protected readonly log = inject(Log);
+  protected readonly autoActionManager = inject(AutoActionManager);
 
   getMinBid(): number {
     return this.getCurrentMaxBid() + 1;

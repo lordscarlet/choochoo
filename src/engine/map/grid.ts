@@ -264,17 +264,13 @@ export class Grid {
     if (space instanceof City) {
       return this.findRoutesToLocationFromCity(space, toCoordinates);
     }
-    return this.findRoutesToLocationFromTown(space, toCoordinates);
+    return this.findRoutesToLocationFromLocation(space, toCoordinates);
   }
 
-  private findRoutesToLocationFromTown(
+  private findRoutesToLocationFromLocation(
     location: Land,
     coordinates: Coordinates,
   ): Track[] {
-    assert(
-      location.hasTown(),
-      "cannot call findRoutesToLocation from a non-town hex",
-    );
     return location
       .getTrack()
       .filter((track) => this.endsWith(track, coordinates))
