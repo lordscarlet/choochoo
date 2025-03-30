@@ -45,7 +45,7 @@ const router = initServer().router(messageContract, {
     const log = await LogDao.create({
       message,
       gameId,
-      userId: req.session.userId,
+      userId: req.session.adminUserId ?? req.session.userId,
     });
     return { status: 200, body: { message: log.toApi() } };
   },
