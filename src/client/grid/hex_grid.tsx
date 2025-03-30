@@ -50,6 +50,7 @@ interface HexGridProps {
   clickTargets?: Set<ClickTarget>;
   fullMapVersion?: boolean;
   gameKey?: GameKey;
+  children?: ReactNode;
 }
 
 function onClickCb(grid: Grid, onClick?: (space: Space, good?: Good) => void) {
@@ -97,6 +98,7 @@ export function HexGrid({
   grid,
   clickTargets,
   gameKey,
+  children,
 }: HexGridProps) {
   const allowZoom = fullMapVersion;
   const [zoom, setZoom] = useZoom(allowZoom);
@@ -341,6 +343,7 @@ export function HexGrid({
                 />
               ))}
               {fullMapVersion && <SwedenProgressionGraphic />}
+              {children}
             </Rotate>
           </g>
         </svg>

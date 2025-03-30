@@ -12,7 +12,7 @@ export function StLuciaRules() {
           bids first.
         </li>
         <li>
-          <b>Game lasts:</b> for 4 turns.
+          <b>Game lasts:</b> for 8 turns.
         </li>
         <li>
           <b>Rivers and Plains:</b> start with one cube.

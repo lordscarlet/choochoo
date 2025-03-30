@@ -1,26 +1,6 @@
 import * as React from "react";
 import { FormEvent, useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { GameKey } from "../../api/game_key";
-import { UserRole } from "../../api/user";
-import { VariantConfig } from "../../api/variant_config";
-import {
-  ReleaseStage,
-  releaseStageToString,
-} from "../../engine/game/map_settings";
-import { Grid } from "../../engine/map/grid";
-import { ViewRegistry } from "../../maps/view_registry";
-import { HexGrid } from "../grid/hex_grid";
-import { environment, Stage } from "../services/environment";
-import { useCreateGame } from "../services/game";
-import { useMe } from "../services/me";
-import {
-  useNumberInputState,
-  useSelectState,
-  useSemanticUiCheckboxState,
-  useTextInputState,
-} from "../utils/form_state";
-import { MapInfo } from "./map_info";
 import {
   Button,
   Container,
@@ -32,6 +12,27 @@ import {
   Header,
   Segment,
 } from "semantic-ui-react";
+import { GameKey } from "../../api/game_key";
+import { UserRole } from "../../api/user";
+import { VariantConfig } from "../../api/variant_config";
+import {
+  ReleaseStage,
+  releaseStageToString,
+} from "../../engine/game/map_settings";
+import { Grid } from "../../engine/map/grid";
+import { ViewRegistry } from "../../maps/view_registry";
+import * as mapStyles from "../grid/hex.module.css";
+import { HexGrid } from "../grid/hex_grid";
+import { environment, Stage } from "../services/environment";
+import { useCreateGame } from "../services/game";
+import { useIsAdmin, useMe } from "../services/me";
+import {
+  useNumberInputState,
+  useSelectState,
+  useSemanticUiCheckboxState,
+  useTextInputState,
+} from "../utils/form_state";
+import { MapInfo } from "./map_info";
 
 export function CreateGamePage() {
   const me = useMe();
@@ -139,6 +140,8 @@ export function CreateGamePage() {
       variant: variant as VariantConfig,
     });
   }, [name, gameKey, artificialStart, minPlayers, maxPlayers, variant]);
+
+  const [riverPath, setRiverPath] = useState<string | undefined>();
 
   const grid = useMemo(() => {
     if (gameKey == null) return undefined;
@@ -255,6 +258,7 @@ export function CreateGamePage() {
 
       <Segment>
         <MapInfo gameKey={gameKey} variant={variant} />
+        <RiverEditor path={riverPath} setRiverPath={setRiverPath} />
         {grid && (
           <HexGrid
             key={gameKey}
@@ -262,9 +266,36 @@ export function CreateGamePage() {
             rotation={selectedMap.rotation}
             grid={grid}
             fullMapVersion={true}
-          />
+          >
+            {riverPath && <River path={riverPath} />}
+          </HexGrid>
         )}
       </Segment>
     </Container>
+  );
+}
+
+function River({ path }: { path: string }) {
+  return <path className={mapStyles.riverPath} d={path} />;
+}
+
+function RiverEditor({
+  path,
+  setRiverPath,
+}: {
+  path?: string;
+  setRiverPath: (path?: string) => void;
+}) {
+  const isAdmin = useIsAdmin();
+  if (!isAdmin) return <></>;
+  return (
+    <input
+      type="text"
+      value={path}
+      size={100}
+      onChange={(e) =>
+        setRiverPath(e.target.value.length ? e.target.value : undefined)
+      }
+    />
   );
 }
