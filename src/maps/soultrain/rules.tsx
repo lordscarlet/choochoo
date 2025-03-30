@@ -35,7 +35,8 @@ export function SoulTrainRules() {
           Hell, at which point no goods can be delivered to Earth cities or pass
           through Earth cities of the same color. At the start of this phase,
           all new cities in Hell will be moved to Heaven, chosen by the players
-          in turn order.
+          in turn order. All track will be removed from Hell, and players will
+          receive $1 income for every 3 pieces of track removed.
         </li>
         <li>
           <b>Game ends:</b> two turns after the Earth to Heaven phase begins.
