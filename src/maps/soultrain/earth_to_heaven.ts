@@ -76,7 +76,7 @@ export class PlaceAction implements ActionProcessor<PlaceData> {
     });
 
     this.toUrbanize.update((cities) => {
-      cities.splice(cities.indexOf(data.city));
+      cities.splice(cities.indexOf(data.city), 1);
     });
     return true;
   }
