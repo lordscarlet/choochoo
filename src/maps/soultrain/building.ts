@@ -77,6 +77,10 @@ export class SoulTrainBuildAction extends BuildAction {
 }
 
 export class SoulTrainBuilderHelper extends BuilderHelper {
+  protected minimumBuildCost(): number {
+    return 1;
+  }
+
   getMaxBuilds(): number {
     return 6;
   }
