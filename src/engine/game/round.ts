@@ -12,12 +12,6 @@ export class RoundEngine {
   protected readonly playerCount = injectInitialPlayerCount();
   protected readonly currentRound = injectState(ROUND);
 
-  startFirstRound(): void {
-    // The rounds go from 1 to max rounds
-    this.currentRound.initState(1);
-    this.start(1);
-  }
-
   start(round: number) {
     this.currentRound.initState(round);
     this.log.log(`Start round #${this.currentRound()}`);

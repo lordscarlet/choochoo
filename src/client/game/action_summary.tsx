@@ -84,23 +84,11 @@ export function StLuciaTurnOrder() {
     canEmitUserId,
     emit: emitBid,
     isPending: bidIsPending,
-    getErrorMessage,
-  } = useAction(StLuciaBidAction);
+  } = useEmptyAction(StLuciaBidAction);
   const { emit: emitPass, isPending: passIsPending } =
     useEmptyAction(StLuciaPassAction);
 
   const isPending = bidIsPending || passIsPending;
-
-  const bidZero = useCallback(() => {
-    emitBid({ bid: 0 });
-  }, [emitBid]);
-
-  const bidFive = useCallback(() => {
-    emitBid({ bid: 5 });
-  }, [emitBid]);
-
-  const bidZeroErrorMessage = getErrorMessage({ bid: 0 });
-  const bidFiveErrorMessage = getErrorMessage({ bid: 5 });
 
   if (canEmitUserId == null) {
     return <></>;
@@ -118,18 +106,11 @@ export function StLuciaTurnOrder() {
     <div>
       You must bid.
       <Button onClick={emitPass} disabled={isPending}>
-        Take second player
+        Pass
       </Button>
-      {bidZeroErrorMessage == null && (
-        <Button onClick={bidZero} disabled={isPending}>
-          Bid $0
-        </Button>
-      )}
-      <MaybeTooltip tooltip={bidFiveErrorMessage}>
-        <Button onClick={bidFive} disabled={isPending}>
-          Claim first for $5
-        </Button>
-      </MaybeTooltip>
+      <Button onClick={emitBid} disabled={isPending}>
+        Claim first for $5
+      </Button>
     </div>
   );
 }

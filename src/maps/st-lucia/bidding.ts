@@ -1,10 +1,7 @@
 import z from "zod";
 import { inject, injectState } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
-import {
-  ActionProcessor,
-  EmptyActionProcessor,
-} from "../../engine/game/action";
+import { EmptyActionProcessor } from "../../engine/game/action";
 import { Log } from "../../engine/game/log";
 import { MoneyManager } from "../../engine/game/money_manager";
 import { PhaseEngine } from "../../engine/game/phase";
@@ -13,6 +10,7 @@ import { ActionBundle, PhaseModule } from "../../engine/game/phase_module";
 import { RoundEngine } from "../../engine/game/round";
 import {
   injectCurrentPlayer,
+  injectPlayerAction,
   injectPlayersByTurnOrder,
   TURN_ORDER,
 } from "../../engine/game/state";
@@ -20,6 +18,13 @@ import { Action } from "../../engine/state/action";
 import { Phase } from "../../engine/state/phase";
 import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
 import { assert } from "../../utils/validate";
+
+const StLuciaState = z.object({
+  firstPlayer: PlayerColorZod,
+});
+type StLuciaState = z.infer<typeof StLuciaState>;
+
+const ST_LUCIA_STATE = new Key("stLuciaState", { parse: StLuciaState.parse });
 
 const StLuciaTurnOrderState = z.object({
   newTurnOrder: PlayerColorZod.array().optional(),
@@ -37,29 +42,10 @@ export class StLuciaTurnOrderHelper {
 
   beginTurnOrderPhase(): void {
     this.state.initState({});
-
-    const colors = this.players().map(({ color }) => color);
-    const firstPlayer = this.getFirstPlayer();
-    this.turnOrder.set([
-      firstPlayer,
-      colors[0] === firstPlayer ? colors[1] : colors[0],
-    ]);
-  }
-
-  private getFirstPlayer(): PlayerColor {
-    return (
-      this.players().find(
-        (player) => player.selectedAction === Action.TURN_ORDER_PASS,
-      ) ?? this.players()[1]!
-    ).color;
   }
 
   claimFirstPlayer(firstPlayer: PlayerColor): void {
     this.claimPlayer(firstPlayer, true);
-  }
-
-  claimSecondPlayer(secondPlayer: PlayerColor): void {
-    this.claimPlayer(secondPlayer, false);
   }
 
   private claimPlayer(player: PlayerColor, isFirst: boolean): void {
@@ -71,27 +57,19 @@ export class StLuciaTurnOrderHelper {
   }
 
   resolveEndRound(): void {
-    this.turnOrder.set(this.getNewTurnOrder());
+    const { newTurnOrder } = this.state();
+    if (newTurnOrder != null) {
+      this.turnOrder.set(newTurnOrder);
+    }
     this.state.delete();
   }
 
   shouldFinishEarly(): boolean {
     return this.state().newTurnOrder != null;
   }
-
-  getNewTurnOrder(): PlayerColor[] {
-    const { newTurnOrder } = this.state();
-    assert(newTurnOrder != null);
-    return newTurnOrder;
-  }
 }
 
-export const BidData = z.object({
-  bid: z.union([z.literal(0), z.literal(5)]),
-});
-export type BidData = z.infer<typeof BidData>;
-
-export class StLuciaBidAction implements ActionProcessor<BidData> {
+export class StLuciaBidAction extends EmptyActionProcessor {
   static readonly action = "stLuciaBid";
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly log = inject(Log);
@@ -99,39 +77,26 @@ export class StLuciaBidAction implements ActionProcessor<BidData> {
   private readonly moneyManager = inject(MoneyManager);
   private readonly turnOrder = injectState(TURN_ORDER);
 
-  readonly assertInput = BidData.parse;
-
-  validate(data: BidData): void {
-    assert(
-      data.bid === 5 || this.turnOrder()[0] === this.currentPlayer().color,
-      { invalidInput: "must exceed previous player's bid" },
-    );
-    assert(this.currentPlayer().money >= data.bid, {
+  validate(): void {
+    assert(this.currentPlayer().money >= 5, {
       invalidInput: "cannot afford bid",
     });
   }
 
-  process(data: BidData): boolean {
-    if (data.bid === 5) {
-      this.helper.claimFirstPlayer(this.currentPlayer().color);
-      this.moneyManager.addMoneyForCurrentPlayer(-5);
-      this.log.currentPlayer("claims first for $5");
-    } else {
-      this.log.currentPlayer("bids $0");
-    }
+  process(): boolean {
+    this.helper.claimFirstPlayer(this.currentPlayer().color);
+    this.moneyManager.addMoneyForCurrentPlayer(-5);
+    this.log.currentPlayer("claims first for $5");
     return true;
   }
 }
 
 export class StLuciaPassAction extends EmptyActionProcessor {
   static readonly action = "stLuciaPass";
-  private readonly currentPlayer = injectCurrentPlayer();
   private readonly log = inject(Log);
-  private readonly helper = inject(StLuciaTurnOrderHelper);
 
   process(): boolean {
-    this.log.currentPlayer("takes second player");
-    this.helper.claimSecondPlayer(this.currentPlayer().color);
+    this.log.currentPlayer("passes");
     return true;
   }
 }
@@ -197,6 +162,34 @@ export class StLuciaPhaseEngine extends PhaseEngine {
 }
 
 export class StLuciaRoundEngine extends RoundEngine {
+  private readonly state = injectState(ST_LUCIA_STATE);
+  private readonly turnOrder = injectState(TURN_ORDER);
+  private readonly turnOrderPass = injectPlayerAction(Action.TURN_ORDER_PASS);
+
+  start(round: number): void {
+    if (round === 1) {
+      this.state.initState({ firstPlayer: this.turnOrder()[0] });
+    } else {
+      const previousFirstPlayer = this.state().firstPlayer;
+      const otherPlayer =
+        this.turnOrder()[0] === previousFirstPlayer
+          ? this.turnOrder()[1]
+          : this.turnOrder()[0];
+      this.state.set({ firstPlayer: otherPlayer });
+      const realFirstPlayer = this.turnOrderPass();
+      if (realFirstPlayer != null) {
+        this.turnOrder.set([
+          realFirstPlayer.color,
+          previousFirstPlayer == realFirstPlayer.color
+            ? otherPlayer
+            : previousFirstPlayer,
+        ]);
+      }
+    }
+
+    return super.start(round);
+  }
+
   maxRounds(): number {
     return 8;
   }
