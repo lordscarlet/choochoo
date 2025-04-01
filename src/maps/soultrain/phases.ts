@@ -71,7 +71,7 @@ export class SoulTrainRoundEngine extends RoundEngine {
       )
       .map((space) => space.getGoods().length)
       .reduce((a, b) => a + b, 0);
-    if (count <= 10) {
+    if (count <= 1000) {
       this.cleanUpHell();
       this.addHeaven();
       return super.start(1);
@@ -88,7 +88,7 @@ export class SoulTrainRoundEngine extends RoundEngine {
     let start = topLeft.coordinates;
     for (const [index, column] of heaven.entries()) {
       let current = start;
-      for (const land of column.reverse()) {
+      for (const land of [...column].reverse()) {
         current = current.neighbor(Direction.TOP);
         if (land == null) continue;
         this.gridHelper.set(current, land);
