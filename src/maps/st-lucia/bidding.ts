@@ -184,6 +184,8 @@ export class StLuciaRoundEngine extends RoundEngine {
             ? otherPlayer
             : previousFirstPlayer,
         ]);
+      } else {
+        this.turnOrder.set([otherPlayer, previousFirstPlayer]);
       }
     }
 
