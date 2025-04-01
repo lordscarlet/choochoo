@@ -31,6 +31,7 @@ import { Editor } from "./editor";
 import { GameLog } from "./game_log";
 import { GoodsTable } from "./goods_table";
 import { HistorySelector } from "./history_selector";
+import { IncomeTrack } from "./income_track";
 import { MapInfo } from "./map_info";
 import { PlayerStats } from "./player_stats";
 import { SpecialActionTable } from "./special_action_table";
@@ -73,6 +74,7 @@ function InternalActiveGame() {
       {!undoOnly && canEmitSelectAction && <SpecialActionTable />}
       <RetryButton />
       {!undoOnly && <PlayerStats />}
+      <IncomeTrack />
       {!undoOnly && <GameMap />}
       {!undoOnly &&
         !canEmitProduction &&

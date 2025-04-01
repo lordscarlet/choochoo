@@ -1,0 +1,32 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  height: 72px;
+}
+
+.cell {
+  width: 72px;
+  height: 72px;
+  border: 1px solid black;
+  z-index: 1;
+}
+
+::global(.dark-mode) .cell {
+  border: 1px solid white;
+}
+
+.decrease {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell > * {
+  height: 8px;
+  overflow: visible;
+}
