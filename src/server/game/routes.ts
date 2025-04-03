@@ -318,7 +318,7 @@ const router = initServer().router(gameContract, {
             playerId: user!.id,
             preferredColors: user!.preferredColors,
           })),
-          game: game.toLimitedGame(),
+          game: { ...game.toLimitedGame(), gameData: undefined },
           seed: firstAction.seed!,
         });
       currentGameData = gameData;
