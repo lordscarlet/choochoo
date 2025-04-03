@@ -71,7 +71,7 @@ export class SoulTrainRoundEngine extends RoundEngine {
       )
       .map((space) => space.getGoods().length)
       .reduce((a, b) => a + b, 0);
-    if (count <= 1000) {
+    if (count <= 10) {
       this.cleanUpHell();
       this.addHeaven();
       return super.start(1);
