@@ -9,23 +9,12 @@ export enum CityGroup {
 export const WHITE = CityGroup.WHITE;
 export const BLACK = CityGroup.BLACK;
 
-export function cityGroupColor(group: CityGroup) {
+export function cityGroupToString(group: CityGroup) {
   switch (group) {
     case CityGroup.WHITE:
-      return "white";
+      return "White";
     case CityGroup.BLACK:
-      return "black";
-    default:
-      assertNever(group);
-  }
-}
-
-export function cityGroupTextColor(group: CityGroup): string {
-  switch (group) {
-    case CityGroup.WHITE:
-      return "black";
-    case CityGroup.BLACK:
-      return "white";
+      return "Black";
     default:
       assertNever(group);
   }

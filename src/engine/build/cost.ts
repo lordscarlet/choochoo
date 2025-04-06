@@ -56,6 +56,7 @@ export class BuildCostCalculator {
     switch (type) {
       case SpaceType.MOUNTAIN: return 2;
       case SpaceType.RIVER: return 1;
+      case SpaceType.DARK_MOUNTAIN: return 3;
       case SpaceType.PLAIN:
       case SpaceType.SWAMP:
       case SpaceType.STREET:
@@ -73,6 +74,7 @@ export class BuildCostCalculator {
 
   protected getCostOfLandType(type: LandType): number {
     switch (type) {
+      case SpaceType.DARK_MOUNTAIN: return 5;
       case SpaceType.MOUNTAIN: return 4;
       case SpaceType.RIVER: return 3;
       case SpaceType.PLAIN: return 2;

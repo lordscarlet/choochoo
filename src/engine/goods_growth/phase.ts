@@ -9,7 +9,7 @@ import {
 } from "../game/state";
 import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
-import { CityGroup } from "../state/city_group";
+import { CityGroup, cityGroupToString } from "../state/city_group";
 import { goodToString } from "../state/good";
 import { Phase } from "../state/phase";
 import { PlayerColor } from "../state/player";
@@ -71,23 +71,19 @@ export class GoodsGrowthPhase extends PhaseModule {
   }
 
   onEnd(): void {
-    const rolls = new Map<CityGroup, number[]>([
-      [
-        CityGroup.WHITE,
-        this.random.rollDice(this.getRollCount(CityGroup.WHITE)).sort(),
-      ],
-      [
-        CityGroup.BLACK,
-        this.random.rollDice(this.getRollCount(CityGroup.BLACK)).sort(),
-      ],
-    ]);
-    this.log.log(`White rolled ${rolls.get(CityGroup.WHITE)!.join(", ")}`);
-    this.log.log(`Black rolled ${rolls.get(CityGroup.BLACK)!.join(", ")}`);
-    const cities = this.grid.findAllCities();
-    for (const city of cities) {
-      for (const [index, { group, onRoll }] of city.onRoll().entries()) {
-        const numRolled = rolls.get(group)!.filter((r) => r === onRoll).length;
-        this.helper.moveGoodsToCity(city.coordinates, index, numRolled);
+    for (const cityGroup of [CityGroup.WHITE, CityGroup.BLACK]) {
+      const rolls = this.random.rollDice(this.getRollCount(cityGroup)).sort();
+      if (rolls.length === 0) continue;
+      this.log.log(
+        `${cityGroupToString(cityGroup)} rolled ${rolls.join(", ")}`,
+      );
+      const cities = this.grid.findAllCities();
+      for (const city of cities) {
+        for (const [index, { group, onRoll }] of city.onRoll().entries()) {
+          if (group !== cityGroup) continue;
+          const numRolled = rolls.filter((r) => r === onRoll).length;
+          this.helper.moveGoodsToCity(city.coordinates, index, numRolled);
+        }
       }
     }
   }

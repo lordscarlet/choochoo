@@ -28,6 +28,10 @@ export function Pallet() {
     type: SpaceType.MOUNTAIN,
     townName: "Foo bar",
   });
+  const darkMountain = new Land(Coordinates.from({ q: 0, r: 0 }), {
+    type: SpaceType.DARK_MOUNTAIN,
+    townName: "Foo bar",
+  });
   const desert = new Land(Coordinates.from({ q: 0, r: 0 }), {
     type: SpaceType.DESERT,
     townName: "Foo bar",
@@ -50,18 +54,22 @@ export function Pallet() {
               />
               {[SimpleTileType.CURVE, TownTileType.STRAIGHT].map((tileType) => (
                 <>
-                  {[plain, river, mountain, desert].map((space, index) => (
-                    <ModifiedSpace
-                      key={index}
-                      space={space}
-                      settings={ViewRegistry.singleton.get(GameKey.REVERSTEAM)}
-                      tile={{
-                        tileType,
-                        orientation: Direction.TOP,
-                        owners: [playerColor, playerColor],
-                      }}
-                    />
-                  ))}
+                  {[plain, river, mountain, darkMountain, desert].map(
+                    (space, index) => (
+                      <ModifiedSpace
+                        key={index}
+                        space={space}
+                        settings={ViewRegistry.singleton.get(
+                          GameKey.REVERSTEAM,
+                        )}
+                        tile={{
+                          tileType,
+                          orientation: Direction.TOP,
+                          owners: [playerColor, playerColor],
+                        }}
+                      />
+                    ),
+                  )}
                 </>
               ))}
             </div>

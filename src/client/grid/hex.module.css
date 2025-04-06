@@ -54,6 +54,14 @@
   fill: #433a32;
 }
 
+.location.darkMountain {
+  fill: #4f463c;
+}
+
+:global(.dark-mode) .location.darkMountain {
+  fill: #382513;
+}
+
 .location.desert {
   fill: #ffffcc;
 }

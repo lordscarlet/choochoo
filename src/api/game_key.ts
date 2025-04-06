@@ -16,6 +16,7 @@ export enum GameKey {
   RUST_BELT = "rust-belt",
   SOUL_TRAIN = "soul-train",
   SWEDEN = "SwedenRecycling",
+  JAMAICA = "jamaica",
 }
 
 export const GameKeyZod = z.nativeEnum(GameKey);

@@ -23,8 +23,11 @@ export class InjectionContext {
 
   constructor(mapKey: GameKey) {
     for (const override of MapRegistry.singleton.get(mapKey).getOverrides()) {
-      const original = Object.getPrototypeOf(override);
-      this.overrides.set(original, override);
+      let current = Object.getPrototypeOf(override);
+      do {
+        this.overrides.set(current, override);
+        current = Object.getPrototypeOf(current);
+      } while (current !== Object.getPrototypeOf(Object));
     }
 
     // Carve out a special path for DependencyStack

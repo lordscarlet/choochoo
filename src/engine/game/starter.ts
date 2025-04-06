@@ -85,7 +85,7 @@ export class GameStarter {
       goods: draw(location.startingNumCubes ?? 0, bag),
       onRoll: location.onRoll.map((onRollData) => ({
         ...onRollData,
-        goods: this.getDrawnCubesFor(bag, false),
+        goods: this.getDrawnCubesFor(bag, location.color, false),
       })),
     };
   }
@@ -137,7 +137,7 @@ export class GameStarter {
         color,
         onRoll: [
           {
-            goods: this.getDrawnCubesFor(bag, true),
+            goods: this.getDrawnCubesFor(bag, color, true),
             group,
             onRoll,
           },
@@ -149,7 +149,11 @@ export class GameStarter {
     this.bag.set(bag);
   }
 
-  protected getDrawnCubesFor(bag: Good[], urbanized: boolean): Good[] {
+  protected getDrawnCubesFor(
+    bag: Good[],
+    cityColor: Good | Good[],
+    urbanized: boolean,
+  ): Good[] {
     if (!this.isProductionEnabled()) return [];
     return draw(urbanized ? 2 : 3, bag);
   }

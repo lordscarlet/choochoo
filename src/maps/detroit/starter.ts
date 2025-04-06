@@ -31,7 +31,11 @@ export class DetroitStarter extends GameStarter {
     };
   }
 
-  protected getDrawnCubesFor(bag: Good[], _: boolean): Good[] {
+  protected getDrawnCubesFor(
+    bag: Good[],
+    _: Good | Good[],
+    __: boolean,
+  ): Good[] {
     return draw(1, bag);
   }
 }

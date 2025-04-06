@@ -11,7 +11,6 @@ import { RoundEngine } from "../../engine/game/round";
 import {
   injectCurrentPlayer,
   injectPlayerAction,
-  injectPlayersByTurnOrder,
   TURN_ORDER,
 } from "../../engine/game/state";
 import { Action } from "../../engine/state/action";
@@ -36,7 +35,6 @@ const TURN_ORDER_STATE = new Key("stLuciaTurnOrder", {
 });
 
 export class StLuciaTurnOrderHelper {
-  private readonly players = injectPlayersByTurnOrder();
   private readonly state = injectState(TURN_ORDER_STATE);
   private readonly turnOrder = injectState(TURN_ORDER);
 

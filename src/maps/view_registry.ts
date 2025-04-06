@@ -6,6 +6,7 @@ import { DiscoInfernoViewSettings } from "./disco/view_settings";
 import { GermanyViewSettings } from "./germany/view_settings";
 import { IndiaSteamBrothersViewSettings } from "./india-steam-brothers/view_settings";
 import { IrelandViewSettings } from "./ireland/view_settings";
+import { JamaicaViewSettings } from "./jamaica/view_settings";
 import { KoreaWallaceViewSettings } from "./korea-wallace/view_settings";
 import { MadagascarViewSettings } from "./madagascar/view_settings";
 import { PittsburghViewSettings } from "./pittsburgh/view_settings";
@@ -35,6 +36,7 @@ export class ViewRegistry {
     this.add(new DetroitBankruptcyViewSettings());
     this.add(new StLuciaViewSettings());
     this.add(new PittsburghViewSettings());
+    this.add(new JamaicaViewSettings());
   }
 
   values(): Iterable<MapViewSettings> {

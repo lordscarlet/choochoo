@@ -7,6 +7,7 @@ import { DiscoInfernoMapSettings } from "./disco/settings";
 import { GermanyMapSettings } from "./germany/settings";
 import { IndiaSteamBrothersMapSettings } from "./india-steam-brothers/settings";
 import { IrelandMapSettings } from "./ireland/settings";
+import { JamaicaMapSettings } from "./jamaica/settings";
 import { KoreaWallaceMapSettings } from "./korea-wallace/settings";
 import { MadagascarMapSettings } from "./madagascar/settings";
 import { PittsburghMapSettings } from "./pittsburgh/settings";
@@ -35,6 +36,7 @@ export class MapRegistry {
     this.add(new DetroitBankruptcyMapSettings());
     this.add(new StLuciaMapSettings());
     this.add(new PittsburghMapSettings());
+    this.add(new JamaicaMapSettings());
   }
 
   values(): Iterable<MapSettings> {

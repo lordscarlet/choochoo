@@ -39,7 +39,7 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
     );
   }
 
-  private findCity(data: ProductionData): City | undefined {
+  protected findCity(data: ProductionData): City | undefined {
     return [...this.grid.findAllCities()].find(
       (city) =>
         this.findOnRoll(city.onRoll(), data) != null &&
