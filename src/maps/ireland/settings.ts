@@ -19,7 +19,7 @@ export class IrelandMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 4;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.ALPHA;
+  readonly stage = ReleaseStage.BETA;
   readonly rotation = Rotation.CLOCKWISE;
 
   getOverrides() {
