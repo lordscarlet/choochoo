@@ -14,7 +14,7 @@ export class PittsburghMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.BETA;
+  readonly stage = ReleaseStage.ALPHA;
 
   getOverrides() {
     return [
