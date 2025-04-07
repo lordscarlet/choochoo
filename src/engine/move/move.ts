@@ -155,26 +155,36 @@ export class MoveAction implements ActionProcessor<MoveData> {
     }
   }
 
+  protected calculateIncome(
+    action: MoveData,
+  ): Map<PlayerColor | undefined, number> {
+    return new Map(
+      [...partition(action.path, (step) => step.owner).entries()].map(
+        ([owner, steps]) => [owner, steps.length],
+      ),
+    );
+  }
+
   process(action: MoveData): boolean {
     this.gridHelper.update(action.startingCity, (location) => {
       assert(location.goods != null);
       location.goods.splice(location.goods.indexOf(action.good), 1);
     });
 
-    const partitioned = partition(action.path, (step) => step.owner);
-
     this.log.currentPlayer(
       `moves a ${goodToString(action.good)} good from ${this.grid().displayName(action.startingCity)} to ${this.grid().displayName(peek(action.path).endingStop)}`,
     );
 
+    const income = this.calculateIncome(action);
+
     this.players.update((players) => {
       for (const player of players) {
-        if (!partitioned.has(player.color)) continue;
+        if (!income.has(player.color)) continue;
         assert(
           !player.outOfGame,
           "unexpected out of game player still owns track",
         );
-        const incomeBonus = partitioned.get(player.color)?.length ?? 0;
+        const incomeBonus = income.get(player.color) ?? 0;
         this.log.player(player, `earns ${incomeBonus} income`);
         player.income += incomeBonus;
       }

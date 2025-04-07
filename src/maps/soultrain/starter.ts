@@ -33,7 +33,11 @@ export class SoulTrainStarter extends GameStarter {
     );
   }
 
-  protected drawCubesFor(bag: Good[], location: SpaceData): SpaceData {
+  protected drawCubesFor(
+    bag: Good[],
+    location: SpaceData,
+    playerCount: number,
+  ): SpaceData {
     if (location.type === SpaceType.FIRE && location.townName != null) {
       if (
         location.townName !== "September" &&
@@ -42,7 +46,7 @@ export class SoulTrainStarter extends GameStarter {
         return { ...location, goods: draw(1, bag) };
       }
     }
-    return super.drawCubesFor(bag, location);
+    return super.drawCubesFor(bag, location, playerCount);
   }
 
   getAvailableCities(): Array<[Good | Good[], CityGroup, OnRoll]> {

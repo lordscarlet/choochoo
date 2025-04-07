@@ -29,6 +29,9 @@ export enum Action {
 
   // Pittsburgh
   COMMONWEALTH = 17,
+
+  // Moon
+  LOW_GRAVITATION = 18,
 }
 
 export const ActionZod = z.nativeEnum(Action);
@@ -71,6 +74,8 @@ export function getSelectedActionString(action?: Action) {
       return "One Move";
     case Action.COMMONWEALTH:
       return "Commonwealth";
+    case Action.LOW_GRAVITATION:
+      return "Low Gravitation";
     default:
       assertNever(action);
   }

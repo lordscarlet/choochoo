@@ -45,7 +45,7 @@ export class GameStarter {
   ) {
     this.onBeginStartGame();
     this.initializeStartingCubes();
-    this.drawCubesForCities(startingMap);
+    this.drawCubesForCities(startingMap, players.length);
     this.initializePlayers(players);
     this.initializeAvailableCities();
     this.interCityConnections.initState(connections);
@@ -68,21 +68,33 @@ export class GameStarter {
     );
   }
 
-  drawCubesForCities(startingMap: GridData) {
+  drawCubesForCities(startingMap: GridData, playerCount: number) {
     const bag = [...this.bag()];
     this.grid.initState(new Map());
     for (const [coordinates, location] of startingMap.entries()) {
-      this.gridHelper.set(coordinates, this.drawCubesFor(bag, location));
+      this.gridHelper.set(
+        coordinates,
+        this.drawCubesFor(bag, location, playerCount),
+      );
     }
     this.bag.set(bag);
     this.gridVersionHelper.updateGridVersion();
   }
 
-  protected drawCubesFor(bag: Good[], location: SpaceData): SpaceData {
+  protected drawCubesFor(
+    bag: Good[],
+    location: SpaceData,
+    playerCount: number,
+  ): SpaceData {
     if (location.type !== SpaceType.CITY) return location;
+    const numCubes =
+      location.startingNumCubes ??
+      (location.startingNumCubesPerPlayer != null
+        ? location.startingNumCubesPerPlayer * playerCount
+        : 0);
     return {
       ...location,
-      goods: draw(location.startingNumCubes ?? 0, bag),
+      goods: draw(numCubes, bag),
       onRoll: location.onRoll.map((onRollData) => ({
         ...onRollData,
         goods: this.getDrawnCubesFor(bag, location.color, false),

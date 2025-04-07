@@ -10,9 +10,9 @@ import { Good } from "../state/good";
 import { SpaceType } from "../state/location_type";
 
 export class GoodsHelper {
-  private readonly bag = injectState(BAG);
-  private readonly random = inject(Random);
-  private readonly grid = inject(GridHelper);
+  protected readonly bag = injectState(BAG);
+  protected readonly random = inject(Random);
+  protected readonly grid = inject(GridHelper);
 
   getTotalUpcomingGoodsSlots(urbanized: boolean) {
     return urbanized ? 2 : 3;

@@ -8,23 +8,18 @@ interface OnRollProps {
   city: City;
   center: Point;
   size: number;
-  cityGroup: CityGroup;
   rotation?: Rotation;
 }
 
-export function OnRoll({
-  city,
-  center,
-  cityGroup,
-  size,
-  rotation,
-}: OnRollProps) {
+export function OnRoll({ city, center, size, rotation }: OnRollProps) {
+  const onRoll = city.onRoll();
+  if (onRoll.length === 0) return <></>;
   return (
     <>
       <circle
         cx={center.x}
         cy={center.y}
-        fill={cityGroup == CityGroup.WHITE ? "#ffffff" : "#222222"}
+        fill={onRoll[0].group == CityGroup.WHITE ? "#ffffff" : "#222222"}
         r={size * 0.4}
       />
       <Rotate rotation={rotation} reverse={true} center={center}>
@@ -39,8 +34,8 @@ export function OnRoll({
           textAnchor="middle"
         >
           {city.isUrbanized()
-            ? toLetter(city.onRoll()[0])
-            : city.onRoll()[0].onRoll}
+            ? toLetter(onRoll[0])
+            : onRoll.map(({ onRoll }) => onRoll).join(",")}
         </text>
       </Rotate>
       ;

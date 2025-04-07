@@ -5,6 +5,7 @@ export const EmptyVariantConfig = z.object({
   gameKey: z.enum([
     GameKey.DETROIT,
     GameKey.GERMANY,
+    GameKey.MOON,
     GameKey.INDIA_STEAM_BROTHERS,
     GameKey.KOREA_WALLACE,
     GameKey.MADAGASCAR,

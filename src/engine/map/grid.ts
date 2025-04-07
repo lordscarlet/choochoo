@@ -128,6 +128,10 @@ export class Grid {
   }
 
   getNeighbor(coordinates: Coordinates, dir: Direction): Space | undefined {
+    if (this.mapSettings.getNeighbor) {
+      const result = this.mapSettings.getNeighbor(this, coordinates, dir);
+      if (result != null) return result;
+    }
     return this.get(coordinates.neighbor(dir));
   }
 
@@ -172,7 +176,7 @@ export class Grid {
     direction: Direction,
   ): City | Track | OwnedInterCityConnection | undefined {
     const current = this.grid.get(fromCoordinates);
-    const neighbor = this.grid.get(fromCoordinates.neighbor(direction));
+    const neighbor = this.getNeighbor(fromCoordinates, direction);
     if (neighbor == null) return undefined;
 
     if (neighbor instanceof City) {

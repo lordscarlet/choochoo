@@ -10,6 +10,7 @@ import { IrelandMapSettings } from "./ireland/settings";
 import { JamaicaMapSettings } from "./jamaica/settings";
 import { KoreaWallaceMapSettings } from "./korea-wallace/settings";
 import { MadagascarMapSettings } from "./madagascar/settings";
+import { MoonMapSettings } from "./moon/settings";
 import { PittsburghMapSettings } from "./pittsburgh/settings";
 import { ReversteamMapSettings } from "./reversteam/settings";
 import { RustBeltMapSettings } from "./rust_belt/settings";
@@ -37,6 +38,7 @@ export class MapRegistry {
     this.add(new StLuciaMapSettings());
     this.add(new PittsburghMapSettings());
     this.add(new JamaicaMapSettings());
+    this.add(new MoonMapSettings());
   }
 
   values(): Iterable<MapSettings> {
