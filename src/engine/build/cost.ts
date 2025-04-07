@@ -57,6 +57,7 @@ export class BuildCostCalculator {
       case SpaceType.MOUNTAIN: return 2;
       case SpaceType.RIVER: return 1;
       case SpaceType.DARK_MOUNTAIN: return 3;
+      case SpaceType.CRATER: return 1;
       case SpaceType.PLAIN:
       case SpaceType.SWAMP:
       case SpaceType.STREET:
@@ -82,6 +83,7 @@ export class BuildCostCalculator {
       case SpaceType.LAKE: return 6;
       case SpaceType.STREET: return 4;
       case SpaceType.HILL: return 3;
+      case SpaceType.CRATER: return 3;
       case SpaceType.DESERT: return 3;
       case SpaceType.FIRE: return 3;
       case SpaceType.SKY: return 1;

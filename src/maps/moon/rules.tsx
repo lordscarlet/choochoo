@@ -10,6 +10,10 @@ export function MoonRules() {
           <b>Builds</b>: are limited to 2 (3 w/ engineer).
         </li>
         <li>
+          <b>Craters</b>: cost $3 and mountains cost $4. Towns cost $2 +
+          $1/exit.
+        </li>
+        <li>
           <b>Connections</b>: must either be off the Moon Base, or traced back
           to the Moon Base (through any player).
         </li>

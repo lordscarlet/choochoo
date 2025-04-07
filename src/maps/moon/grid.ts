@@ -1,21 +1,23 @@
 import { BLACK, CityGroup, WHITE } from "../../engine/state/city_group";
 import { BLUE, Good, PURPLE, RED, YELLOW } from "../../engine/state/good";
+import { SpaceType } from "../../engine/state/location_type";
 import { OnRoll } from "../../engine/state/roll";
 import { CityData, LandData } from "../../engine/state/space";
 import { duplicate } from "../../utils/functions";
 import {
   customCity,
   grid,
-  HILL,
   MOUNTAIN,
   city as origCity,
   UNPASSABLE,
 } from "../factory";
 import { MoonMapData, Side } from "./state";
 
+const CRATER: LandData = { type: SpaceType.CRATER };
+
 function town(townName: string, side: Side): LandData {
   const mapSpecific: MoonMapData = { side };
-  return { ...HILL, townName, mapSpecific };
+  return { ...CRATER, townName, mapSpecific };
 }
 
 function city(
@@ -38,60 +40,60 @@ function city(
 }
 
 export const map = grid([
-  [...duplicate(3, UNPASSABLE), ...duplicate(4, HILL)],
+  [...duplicate(3, UNPASSABLE), ...duplicate(4, CRATER)],
   [
     ...duplicate(2, UNPASSABLE),
-    HILL,
+    CRATER,
     town("Copernicus", Side.LEFT),
     MOUNTAIN,
     town("Bullialdus", Side.LEFT),
-    HILL,
+    CRATER,
   ],
-  [UNPASSABLE, UNPASSABLE, HILL, ...duplicate(4, MOUNTAIN), HILL],
+  [UNPASSABLE, UNPASSABLE, CRATER, ...duplicate(4, MOUNTAIN), CRATER],
   [
     UNPASSABLE,
-    HILL,
+    CRATER,
     town("Eratos Thènes", Side.LEFT),
     MOUNTAIN,
     town("Ptolemaeus", Side.LEFT),
     MOUNTAIN,
     MOUNTAIN,
-    HILL,
+    CRATER,
   ],
   [
     UNPASSABLE,
-    HILL,
-    HILL,
+    CRATER,
+    CRATER,
     MOUNTAIN,
     MOUNTAIN,
-    HILL,
+    CRATER,
     city("Mare Humorum", YELLOW, WHITE, [3, 4], Side.LEFT),
-    HILL,
-    HILL,
+    CRATER,
+    CRATER,
   ],
   [
-    HILL,
-    HILL,
+    CRATER,
+    CRATER,
     city("Mare Imbrium", RED, WHITE, [1, 2], Side.LEFT),
     MOUNTAIN,
-    HILL,
-    HILL,
+    CRATER,
+    CRATER,
     MOUNTAIN,
-    HILL,
-    HILL,
+    CRATER,
+    CRATER,
   ],
   [
-    HILL,
+    CRATER,
     town("Mare Frigoris", Side.LEFT),
     MOUNTAIN,
     MOUNTAIN,
-    ...duplicate(3, HILL),
+    ...duplicate(3, CRATER),
     MOUNTAIN,
     city("Mare Nubium", YELLOW, WHITE, [5, 6], Side.LEFT),
-    HILL,
+    CRATER,
   ],
   [
-    ...duplicate(4, HILL),
+    ...duplicate(4, CRATER),
     customCity({
       name: "Moon Base",
       color: [],
@@ -99,48 +101,48 @@ export const map = grid([
       startingNumCubesPerPlayer: 2,
       goods: [],
     }),
-    ...duplicate(4, HILL),
+    ...duplicate(4, CRATER),
   ],
-  [HILL, HILL, MOUNTAIN, ...duplicate(4, HILL), MOUNTAIN, HILL, HILL],
+  [CRATER, CRATER, MOUNTAIN, ...duplicate(4, CRATER), MOUNTAIN, CRATER, CRATER],
   [
-    HILL,
+    CRATER,
     city("Mare Serenitatis", PURPLE, BLACK, [5, 6], Side.RIGHT),
     MOUNTAIN,
-    HILL,
+    CRATER,
     MOUNTAIN,
     town("Theophilus", Side.RIGHT),
     MOUNTAIN,
     city("Mare Nectaris", BLUE, BLACK, [1, 2], Side.RIGHT),
-    HILL,
+    CRATER,
   ],
   [
     UNPASSABLE,
-    HILL,
-    HILL,
+    CRATER,
+    CRATER,
     city("Mare Tranquillitatis", PURPLE, BLACK, [3, 4], Side.RIGHT),
-    HILL,
+    CRATER,
     MOUNTAIN,
     MOUNTAIN,
-    HILL,
-    HILL,
+    CRATER,
+    CRATER,
   ],
   [
     UNPASSABLE,
-    ...duplicate(3, HILL),
+    ...duplicate(3, CRATER),
     town("Palms Somnii", Side.RIGHT),
     MOUNTAIN,
     town("Mare Fecundiatis", Side.RIGHT),
-    HILL,
+    CRATER,
   ],
-  [UNPASSABLE, UNPASSABLE, HILL, ...duplicate(4, MOUNTAIN), HILL],
+  [UNPASSABLE, UNPASSABLE, CRATER, ...duplicate(4, MOUNTAIN), CRATER],
   [
     UNPASSABLE,
     UNPASSABLE,
-    HILL,
+    CRATER,
     town("Mare Undarum", Side.RIGHT),
     MOUNTAIN,
     town("Mare Spumans", Side.RIGHT),
-    HILL,
+    CRATER,
   ],
-  [UNPASSABLE, UNPASSABLE, UNPASSABLE, ...duplicate(4, HILL)],
+  [UNPASSABLE, UNPASSABLE, UNPASSABLE, ...duplicate(4, CRATER)],
 ]);

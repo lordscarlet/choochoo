@@ -62,6 +62,14 @@
   fill: #382513;
 }
 
+.location.crater {
+  fill: #8a8885;
+}
+
+:global(.dark-mode) .location.crater {
+  fill: #4a4848;
+}
+
 .location.desert {
   fill: #ffffcc;
 }
