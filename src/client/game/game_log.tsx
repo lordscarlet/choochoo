@@ -92,7 +92,11 @@ function LogMessage({ message }: { message: string }) {
     <>
       {messageParsed.map((part, index) => (
         <span key={index}>
-          {typeof part === "string" ? part : <Username userId={part} />}
+          {typeof part === "string" ? (
+            part
+          ) : (
+            <Username userId={part} useAt={true} useLink={true} />
+          )}
         </span>
       ))}
     </>
@@ -150,7 +154,7 @@ export function LogMessages({
                 {log.userId != null && (
                   <>
                     <span className={styles["username"]}>
-                      <Username userId={log.userId} />
+                      <Username userId={log.userId} useLink={true} />
                     </span>
                     :
                   </>

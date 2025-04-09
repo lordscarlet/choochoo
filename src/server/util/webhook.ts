@@ -37,6 +37,19 @@ abstract class BaseWebHookNotifier
     );
   }
 
+  sendChatMention(
+    setting: TurnNotifySetting<AnyWebHookSetting>,
+  ): Promise<void> {
+    const { game } = setting;
+    const mapName = MapRegistry.singleton.get(game.gameKey).name;
+    const message = `You were pinged in [${game.name} (${mapName}): ${game.summary!}](https://www.choochoo.games/app/games/${game.id})`;
+    return this.callWebhook(
+      message,
+      setting.notificationPreferences,
+      setting.turnNotificationSetting,
+    );
+  }
+
   sendGameEndNotification(
     setting: TurnNotifySetting<AnyWebHookSetting>,
   ): Promise<void> {

@@ -70,6 +70,35 @@ ${this.makeUnsubscribeLink(user.email)}
     });
   }
 
+  async sendChatMention({
+    user,
+    game,
+  }: TurnNotifySetting<EmailSetting>): Promise<void> {
+    const gameLink = `https://www.choochoo.games/app/games/${game.id}`;
+    await this.sendEmail({
+      email: user.email,
+      subject: `Mentioned on "${game.name}"`,
+      text: `
+Someone pinged you in the chat for the "${game.name}" game.
+Copy and paste the following link to respond: ${gameLink}.
+- Nathan
+
+This email was sent by Choo Choo games. You can unsubscribe here:
+${this.makeUnsubscribeLink(user.email)}
+`,
+      html: `
+<h3>Someone pinged you in the chat for the <a href="${gameLink}">"${game.name}" game</a>.</h3>
+<p>Click or copy and paste the following link to respond.</p>
+<p><a href="${gameLink}">Respond</a></p>
+<p>-Nathan</p>
+<p></p>
+<p>
+  This email was sent by Choo Choo games. You can unsubscribe here:
+  <a href="${this.makeUnsubscribeLink(user.email)}">Unsubscribe</a>
+</p>`,
+    });
+  }
+
   async sendTurnReminder({
     user,
     game,

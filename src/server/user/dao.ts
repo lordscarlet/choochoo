@@ -146,7 +146,11 @@ export class UserDao extends Model<
     if (usernameOrEmail.indexOf("@") != -1) {
       return UserDao.findOne({ where: { email: usernameOrEmail } });
     }
-    return UserDao.findOne({ where: { username: usernameOrEmail } });
+    return UserDao.findByUsername(usernameOrEmail);
+  }
+
+  static async findByUsername(username: string): Promise<UserDao | null> {
+    return UserDao.findOne({ where: { username } });
   }
 
   static async login(

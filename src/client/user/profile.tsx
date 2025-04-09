@@ -407,11 +407,15 @@ function InternalNotificationSettings({
 function UserProfile({ userId }: { userId: number }) {
   const user = useUser(userId);
   if (user == null) return <Loading />;
+
   return (
-    <div>
-      Username: {user.username}
+    <Container>
+      <Header as="h1">Profile Settings</Header>
+      <Segment>
+        <p>Username: {user.username}</p>
+      </Segment>
       <UserGameList userId={userId} />
-    </div>
+    </Container>
   );
 }
 

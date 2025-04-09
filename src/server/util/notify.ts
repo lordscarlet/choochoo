@@ -22,4 +22,6 @@ export interface TurnNotifyService<T extends TurnNotificationSetting> {
   sendGameEndNotification(setting: TurnNotifySetting<T>): Promise<void>;
 
   sendTestNotification(setting: TestTurnNotifySetting<T>): Promise<void>;
+
+  sendChatMention(setting: TurnNotifySetting<T>): Promise<void>;
 }

@@ -48,11 +48,12 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
         </Typography>
         {game.activePlayerId && (
           <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            Active Player: <Username userId={game.activePlayerId} />
+            Active Player:{" "}
+            <Username userId={game.activePlayerId} useLink={true} />
           </Typography>
         )}
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Players: <UsernameList userIds={game.playerIds} />
+          Players: <UsernameList userIds={game.playerIds} useLink={true} />
         </Typography>
         {game.status === GameStatus.enum.LOBBY && (
           <Typography variant="body2" sx={{ color: "text.secondary" }}>

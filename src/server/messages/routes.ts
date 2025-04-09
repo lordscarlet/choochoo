@@ -3,11 +3,16 @@ import express from "express";
 
 import { Op, WhereOptions } from "@sequelize/core";
 import { messageContract } from "../../api/message";
-import { reverse } from "../../utils/functions";
+import { isNotNull, reverse } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GameDao } from "../game/dao";
 import "../session";
+import { UserDao } from "../user/dao";
+import { assertRole } from "../util/enforce_role";
 import { LogDao } from "./log_dao";
+import { MyUserApi, UserRole } from "../../api/user";
+import { NotificationFrequency } from "../../api/notifications";
+import { getNotifier } from "../util/turn_notification";
 
 export const messageApp = express();
 
@@ -39,16 +44,72 @@ const router = initServer().router(messageContract, {
   },
 
   async sendChat({ body: { message, gameId }, req }) {
-    assert(gameId == null || (await GameDao.findByPk(gameId)) != null, {
+    const game = gameId != null ? await GameDao.findByPk(gameId) : undefined;
+    const user = await assertRole(req);
+    assert(gameId == null || game != null, {
       notFound: true,
     });
-    const log = await LogDao.create({
+
+    const users = (
+      await Promise.all(
+        [
+          ...new Set(
+            [...message.matchAll(/@[a-z0-9_]*/g)].map(([username]) =>
+              username.substring(1),
+            ),
+          ),
+        ].map((username) => UserDao.findByUsername(username)),
+      )
+    ).filter(isNotNull);
+
+    const refactored = users.reduce(
+      (message, user) =>
+        replaceAll(message, `@${user.username}`, `<@user-${user.id}>`),
       message,
+    );
+    const log = await LogDao.create({
+      message: refactored,
       gameId,
       userId: req.session.adminUserId ?? req.session.userId,
     });
+
+    notifyMentions(user, game, users);
+
     return { status: 200, body: { message: log.toApi() } };
   },
 });
+
+async function notifyMentions(user: MyUserApi, game: GameDao|null|undefined, users: UserDao[]): Promise<void> {
+  if (game == null || users.length === 0) return;
+  if (!game.playerIds.includes(user.id) && user.role !== UserRole.enum.ADMIN) return;
+
+  await Promise.all(users.map((user) => {
+    if (user == null) return;
+    const settings = user.getTurnNotificationSettings(
+      NotificationFrequency.IMMEDIATELY,
+    );
+  
+    return Promise.all(
+      settings.map((setting) =>
+        getNotifier(setting).sendChatMention({
+          user: user.toMyApi(),
+          notificationPreferences: user.notificationPreferences,
+          turnNotificationSetting: setting,
+          game: game.toApi(),
+        }),
+      ),
+    );
+  }));
+}
+
+function replaceAll(value: string, find: string, replace: string): string {
+  let newValue = value;
+  let oldValue = newValue;
+  do {
+    oldValue = newValue;
+    newValue = newValue.replace(find, replace);
+  } while (newValue !== oldValue);
+  return newValue;
+}
 
 createExpressEndpoints(messageContract, router, messageApp);
