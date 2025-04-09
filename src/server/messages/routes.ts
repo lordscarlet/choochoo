@@ -3,16 +3,16 @@ import express from "express";
 
 import { Op, WhereOptions } from "@sequelize/core";
 import { messageContract } from "../../api/message";
+import { NotificationFrequency } from "../../api/notifications";
+import { MyUserApi, UserRole } from "../../api/user";
 import { isNotNull, reverse } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { GameDao } from "../game/dao";
 import "../session";
 import { UserDao } from "../user/dao";
 import { assertRole } from "../util/enforce_role";
-import { LogDao } from "./log_dao";
-import { MyUserApi, UserRole } from "../../api/user";
-import { NotificationFrequency } from "../../api/notifications";
 import { getNotifier } from "../util/turn_notification";
+import { LogDao } from "./log_dao";
 
 export const messageApp = express();
 
@@ -79,27 +79,39 @@ const router = initServer().router(messageContract, {
   },
 });
 
-async function notifyMentions(user: MyUserApi, game: GameDao|null|undefined, users: UserDao[]): Promise<void> {
+async function notifyMentions(
+  user: MyUserApi,
+  game: GameDao | null | undefined,
+  users: UserDao[],
+): Promise<void> {
   if (game == null || users.length === 0) return;
-  if (!game.playerIds.includes(user.id) && user.role !== UserRole.enum.ADMIN) return;
+  if (!game.playerIds.includes(user.id) && user.role !== UserRole.enum.ADMIN)
+    return;
 
-  await Promise.all(users.map((user) => {
-    if (user == null) return;
-    const settings = user.getTurnNotificationSettings(
-      NotificationFrequency.IMMEDIATELY,
-    );
-  
-    return Promise.all(
-      settings.map((setting) =>
-        getNotifier(setting).sendChatMention({
-          user: user.toMyApi(),
-          notificationPreferences: user.notificationPreferences,
-          turnNotificationSetting: setting,
-          game: game.toApi(),
-        }),
-      ),
-    );
-  }));
+  const filtered = users.filter(
+    (user) =>
+      game.playerIds.includes(user.id) || user.role === UserRole.enum.ADMIN,
+  );
+
+  await Promise.all(
+    filtered.map((user) => {
+      if (user == null) return;
+      const settings = user.getTurnNotificationSettings(
+        NotificationFrequency.IMMEDIATELY,
+      );
+
+      return Promise.all(
+        settings.map((setting) =>
+          getNotifier(setting).sendChatMention({
+            user: user.toMyApi(),
+            notificationPreferences: user.notificationPreferences,
+            turnNotificationSetting: setting,
+            game: game.toApi(),
+          }),
+        ),
+      );
+    }),
+  );
 }
 
 function replaceAll(value: string, find: string, replace: string): string {
