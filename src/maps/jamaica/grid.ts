@@ -18,7 +18,7 @@ export const map = grid([
   [MOUNTAIN, PLAIN],
   [UNPASSABLE, MOUNTAIN, PLAIN],
   [
-    city("Montego Bay", PURPLE, [white(1), white(2), white(3)], 4),
+    city("Montego Bay", PURPLE, [white(1), white(2), white(3)]),
     MOUNTAIN,
     MOUNTAIN,
   ],
@@ -30,7 +30,7 @@ export const map = grid([
     UNPASSABLE,
     MOUNTAIN,
     MOUNTAIN,
-    city("Port Royal", YELLOW, [white(4), white(5), white(6)], 4),
+    city("Port Royal", YELLOW, [white(4), white(5), white(6)]),
   ],
   [UNPASSABLE, MOUNTAIN, MOUNTAIN],
   [UNPASSABLE, UNPASSABLE, DARK_MOUNTAIN, PLAIN],

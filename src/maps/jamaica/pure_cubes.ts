@@ -2,7 +2,9 @@ import { GameStarter } from "../../engine/game/starter";
 import { CityGroup } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
 import { OnRoll } from "../../engine/state/roll";
+import { CityData } from "../../engine/state/space";
 import { duplicate } from "../../utils/functions";
+import { assert } from "../../utils/validate";
 
 export class JamaicaStarter extends GameStarter {
   getAvailableCities(): Array<[Good | Good[], CityGroup, OnRoll]> {
@@ -14,13 +16,34 @@ export class JamaicaStarter extends GameStarter {
     ];
   }
 
-  protected getDrawnCubesFor(
+  protected getPlacedGoodsFor(
+    bag: Good[],
+    playerCount: number,
+    location: CityData,
+  ): Good[] {
+    return this.drawRespectingColor(bag, location.color, 4);
+  }
+
+  protected getGoodsGrowthGoodsFor(
     bag: Good[],
     cityColor: Good | Good[],
     _: boolean,
   ): Good[] {
-    return duplicate(2, undefined).map((_) => {
-      const index = bag.findIndex((good) => good !== cityColor);
+    return this.drawRespectingColor(bag, cityColor, 2);
+  }
+
+  private drawRespectingColor(
+    bag: Good[],
+    cityColor: Good | Good[],
+    numCubes: number,
+  ): Good[] {
+    const cityColorSingular =
+      Array.isArray(cityColor) && cityColor.length === 1
+        ? cityColor[0]
+        : cityColor;
+    assert(!Array.isArray(cityColorSingular));
+    return duplicate(numCubes, undefined).map((_) => {
+      const index = bag.findIndex((good) => good !== cityColorSingular);
       return bag.splice(index, 1)[0];
     });
   }

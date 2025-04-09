@@ -11,7 +11,7 @@ import { InterCityConnection } from "../state/inter_city_connection";
 import { SpaceType } from "../state/location_type";
 import { allPlayerColors, PlayerColor, PlayerData } from "../state/player";
 import { OnRoll } from "../state/roll";
-import { SpaceData } from "../state/space";
+import { CityData, SpaceData } from "../state/space";
 import { Random } from "./random";
 import {
   AVAILABLE_CITIES,
@@ -87,19 +87,27 @@ export class GameStarter {
     playerCount: number,
   ): SpaceData {
     if (location.type !== SpaceType.CITY) return location;
+    return {
+      ...location,
+      goods: this.getPlacedGoodsFor(bag, playerCount, location),
+      onRoll: location.onRoll.map((onRollData) => ({
+        ...onRollData,
+        goods: this.getGoodsGrowthGoodsFor(bag, location.color, false),
+      })),
+    };
+  }
+
+  protected getPlacedGoodsFor(
+    bag: Good[],
+    playerCount: number,
+    location: CityData,
+  ): Good[] {
     const numCubes =
       location.startingNumCubes ??
       (location.startingNumCubesPerPlayer != null
         ? location.startingNumCubesPerPlayer * playerCount
         : 0);
-    return {
-      ...location,
-      goods: draw(numCubes, bag),
-      onRoll: location.onRoll.map((onRollData) => ({
-        ...onRollData,
-        goods: this.getDrawnCubesFor(bag, location.color, false),
-      })),
-    };
+    return draw(numCubes, bag);
   }
 
   allPlayerColors(): PlayerColor[] {
@@ -149,7 +157,7 @@ export class GameStarter {
         color,
         onRoll: [
           {
-            goods: this.getDrawnCubesFor(bag, color, true),
+            goods: this.getGoodsGrowthGoodsFor(bag, color, true),
             group,
             onRoll,
           },
@@ -161,7 +169,7 @@ export class GameStarter {
     this.bag.set(bag);
   }
 
-  protected getDrawnCubesFor(
+  protected getGoodsGrowthGoodsFor(
     bag: Good[],
     cityColor: Good | Good[],
     urbanized: boolean,
