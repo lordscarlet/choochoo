@@ -1,4 +1,5 @@
 import { Button } from "@mui/material";
+import { useDialogs } from "@toolpad/core";
 import { ReactNode, useCallback } from "react";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
@@ -389,11 +390,28 @@ export function Deurbanization() {
 
 export function Build() {
   const { emit: emitPass, canEmit, canEmitUserId } = useEmptyAction(DoneAction);
+  const notify = useDialogs();
   const [buildsRemaining, canUrbanize] = useInject(() => {
     const helper = inject(BuilderHelper);
     if (!canEmit) return [undefined, undefined];
     return [helper.buildsRemaining(), helper.canUrbanize()];
   }, [canEmit]);
+
+  const emitPassClick = useCallback(() => {
+    if (!canUrbanize) {
+      emitPass();
+      return;
+    }
+    notify
+      .confirm(
+        "You still have an urbanize available, are you sure you are done building?",
+      )
+      .then((stillPass) => {
+        if (stillPass) {
+          emitPass();
+        }
+      });
+  }, [emitPass, canUrbanize]);
 
   if (canEmitUserId == null) {
     return <></>;
@@ -410,7 +428,7 @@ export function Build() {
   return (
     <div>
       You can build {buildsRemaining} more track{canUrbanize && " and urbanize"}
-      .<Button onClick={emitPass}>Done Building</Button>
+      .<Button onClick={emitPassClick}>Done Building</Button>
     </div>
   );
 }
