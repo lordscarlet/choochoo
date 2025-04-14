@@ -63,6 +63,17 @@ export class GameDao extends Model<
   @NotNull
   declare unlisted: boolean;
 
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare turnDuration: number;
+
+  @Attribute({ type: DataTypes.INTEGER, allowNull: true })
+  declare turnStartTime?: CreationOptional<Date | null>;
+
+  @Attribute(DataTypes.ARRAY(DataTypes.INTEGER))
+  @NotNull
+  declare concedingPlayers: number[];
+
   @Attribute(DataTypes.JSONB)
   declare config: MapConfig;
 
@@ -122,6 +133,8 @@ export function toApi(game: InferAttributes<GameDao> | GameApi): GameApi {
   return {
     ...toLiteApi(game),
     version: game.version,
+    concedingPlayers: game.concedingPlayers,
+    turnStartTime: game.turnStartTime?.toString() ?? undefined,
     gameData: game.gameData ?? undefined,
     undoPlayerId: game.undoPlayerId ?? undefined,
   };
@@ -136,6 +149,7 @@ export function toLiteApi(
     variant: game.variant,
     name: game.name,
     status: game.status,
+    turnDuration: game.turnDuration,
     playerIds: [...game.playerIds],
     activePlayerId: game.activePlayerId ?? undefined,
     config: game.config,

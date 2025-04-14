@@ -67,6 +67,10 @@ export class UserDao extends Model<
   @Attribute(DataTypes.ARRAY(DataTypes.SMALLINT))
   declare preferredColors: PlayerColor[] | null;
 
+  @Attribute(DataTypes.INTEGER)
+  @NotNull
+  declare abandons: number;
+
   @Version
   @NotNull
   declare internalVersion: CreationOptional<number>;
@@ -112,6 +116,7 @@ export class UserDao extends Model<
     return {
       id: user.id,
       username: user.username,
+      abandons: user.abandons,
     };
   }
 
@@ -176,6 +181,7 @@ export class UserDao extends Model<
       {
         username: user.username,
         email: user.email,
+        abandons: 0,
         password,
         role: UserRole.enum.ACTIVATE_EMAIL,
         notificationPreferences: {

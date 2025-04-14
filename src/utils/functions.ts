@@ -150,3 +150,14 @@ export function arrayEqualsIgnoreOrder<T>(arr1: T[], arr2: T[]): boolean {
   }
   return true;
 }
+
+export function formatMillisecondDuration(millis: number): string {
+  const format = new (Intl as any).DurationFormat("en", { style: "short" });
+  const totalMinutes = Math.round(millis / 60000);
+  const duration = {
+    minutes: totalMinutes % 60,
+    hours: Math.floor(totalMinutes / 60) % 24,
+    days: Math.floor(totalMinutes / 60 / 24),
+  };
+  return format.format(duration);
+}

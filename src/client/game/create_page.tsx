@@ -12,6 +12,11 @@ import {
   Header,
   Segment,
 } from "semantic-ui-react";
+import {
+  allTurnDurations,
+  TurnDuration,
+  turnDurationToString,
+} from "../../api/game";
 import { GameKey } from "../../api/game_key";
 import { UserRole } from "../../api/user";
 import { VariantConfig } from "../../api/variant_config";
@@ -29,6 +34,7 @@ import { useIsAdmin, useMe } from "../services/me";
 import {
   useNumberInputState,
   useSelectState,
+  useSemanticSelectState,
   useSemanticUiCheckboxState,
   useTextInputState,
 } from "../utils/form_state";
@@ -53,6 +59,9 @@ export function CreateGamePage() {
   );
   const [name, setName] = useTextInputState("");
   const [gameKey, _, setGameKeyState] = useSelectState(initialMapValue);
+  const [turnDuration, setTurnDuration] = useSemanticSelectState(
+    TurnDuration.ONE_DAY,
+  );
 
   const map = ViewRegistry.singleton.get(gameKey);
   const allowPlayerSelections = map.minPlayers !== map.maxPlayers;
@@ -110,6 +119,7 @@ export function CreateGamePage() {
         name,
         gameKey,
         artificialStart,
+        turnDuration,
         minPlayers,
         maxPlayers,
         unlisted,
@@ -125,6 +135,7 @@ export function CreateGamePage() {
       createGame,
       minPlayers,
       maxPlayers,
+      turnDuration,
       variant,
     ],
   );
@@ -136,10 +147,19 @@ export function CreateGamePage() {
       artificialStart,
       minPlayers,
       maxPlayers,
+      turnDuration,
       unlisted,
       variant: variant as VariantConfig,
     });
-  }, [name, gameKey, artificialStart, minPlayers, maxPlayers, variant]);
+  }, [
+    name,
+    gameKey,
+    artificialStart,
+    minPlayers,
+    maxPlayers,
+    variant,
+    turnDuration,
+  ]);
 
   const [riverPath, setRiverPath] = useState<string | undefined>();
 
@@ -191,6 +211,22 @@ export function CreateGamePage() {
             error={validationError?.gameKey}
             autoWidth
             placeholder="Map"
+            onBlur={validateGameInternal}
+          />
+          <FormSelect
+            options={allTurnDurations.map((duration) => ({
+              key: duration,
+              value: duration,
+              text: turnDurationToString(duration),
+            }))}
+            required
+            label="Turn Duration"
+            value={turnDuration}
+            disabled={isPending}
+            onChange={setTurnDuration}
+            error={validationError?.turnDuration}
+            autoWidth
+            placeholder="Turn Duration"
             onBlur={validateGameInternal}
           />
           <FormInput

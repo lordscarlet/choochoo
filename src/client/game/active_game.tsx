@@ -33,6 +33,7 @@ import { GoodsTable } from "./goods_table";
 import { HistorySelector } from "./history_selector";
 import { IncomeTrack } from "./income_track";
 import { MapInfo } from "./map_info";
+import { GameOptions } from "./options";
 import { PlayerStats } from "./player_stats";
 import { SpecialActionTable } from "./special_action_table";
 import { SwitchToActive, SwitchToUndo } from "./switch";
@@ -83,6 +84,7 @@ function InternalActiveGame() {
       {!undoOnly && <AvailableCities />}
       <TileManifest />
       <MapInfo gameKey={game.gameKey} variant={game.variant} />
+      <GameOptions />
     </div>
   );
 }

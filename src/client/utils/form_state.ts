@@ -1,8 +1,7 @@
 import { SelectChangeEvent } from "@mui/material";
-import * as React from "react";
-import { ChangeEvent, useCallback, useState } from "react";
+import { ChangeEvent, SyntheticEvent, useCallback, useState } from "react";
+import { CheckboxProps, DropdownProps } from "semantic-ui-react";
 import { FormNumber } from "../../utils/types";
-import { CheckboxProps } from "semantic-ui-react";
 
 export function useSemanticUiCheckboxState(
   initialValue = false,
@@ -65,6 +64,17 @@ export function useSelectState<T>(
   return [
     state,
     useCallback((e) => setState(e.target.value as T), [setState]),
+    setState,
+  ];
+}
+
+export function useSemanticSelectState<T>(
+  initialValue: T,
+): [T, (e: SyntheticEvent, data: DropdownProps) => void, (value: T) => void] {
+  const [state, setState] = useState(initialValue);
+  return [
+    state,
+    useCallback((_, data) => setState(data.value as T), [setState]),
     setState,
   ];
 }

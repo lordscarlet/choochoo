@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.row p {
+  align-content: center;
+}
+
+.buttonContainer {
+  width: 180px;
+}

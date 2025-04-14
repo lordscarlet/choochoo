@@ -33,13 +33,12 @@ export type LoginUserApi = z.infer<typeof LoginUserApi>;
 export const UserApi = z.object({
   id: z.number(),
   username: z.string(),
+  abandons: z.number(),
 });
 export type UserApi = z.infer<typeof UserApi>;
 
-export const MyUserApi = z.object({
-  id: z.number(),
+export const MyUserApi = UserApi.extend({
   email: z.string(),
-  username: z.string(),
   role: UserRole,
   preferredColors: PlayerColorZod.array().optional(),
 });

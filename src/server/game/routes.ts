@@ -7,7 +7,7 @@ import { GameDao } from "./dao";
 import { Op, WhereOptions } from "@sequelize/core";
 import { UserRole } from "../../api/user";
 import { EngineDelegator } from "../../engine/framework/engine";
-import { peek } from "../../utils/functions";
+import { peek, remove } from "../../utils/functions";
 import { LogDao } from "../messages/log_dao";
 import { sequelize } from "../sequelize";
 import "../session";
@@ -15,7 +15,7 @@ import { UserDao } from "../user/dao";
 import { assertRole } from "../util/enforce_role";
 import { environment, Stage } from "../util/environment";
 import { GameHistoryDao } from "./history_dao";
-import { performAction, startGame } from "./logic";
+import { abandonGame, performAction, startGame } from "./logic";
 
 export const gameApp = express();
 
@@ -83,6 +83,7 @@ const router = initServer().router(gameContract, {
         "status",
         "activePlayerId",
         "playerIds",
+        "turnDuration",
         "unlisted",
       ],
       where,
@@ -123,6 +124,8 @@ const router = initServer().router(gameContract, {
       gameKey: body.gameKey,
       name: body.name,
       status: GameStatus.enum.LOBBY,
+      turnDuration: body.turnDuration,
+      concedingPlayers: [],
       playerIds,
       variant: body.variant,
       config: {
@@ -416,6 +419,62 @@ const router = initServer().router(gameContract, {
       ]);
     });
 
+    return { status: 200, body: { game: game.toApi() } };
+  },
+  async concede({ req, params, body }) {
+    await assertRole(req);
+    const userId = req.session.userId;
+    assert(userId != null);
+    const game = await GameDao.findByPk(params.gameId);
+    assert(game != null, { notFound: true });
+    assert(game.playerIds.includes(userId), { permissionDenied: true });
+    assert(game.status === GameStatus.enum.ACTIVE, {
+      invalidInput: "Can only concede an active game",
+    });
+    const hasConceded = game.concedingPlayers.includes(userId);
+    if (body.concede) {
+      if (!hasConceded) {
+        game.concedingPlayers = game.concedingPlayers.concat([userId]);
+      }
+    } else {
+      if (hasConceded) {
+        game.concedingPlayers = remove(game.concedingPlayers, userId);
+      }
+    }
+    assert(game.concedingPlayers.length < game.playerIds.length);
+    if (game.concedingPlayers.length === game.playerIds.length - 1) {
+      game.status = GameStatus.enum.ENDED;
+    }
+    await game.save();
+    return { status: 200, body: { game: game.toApi() } };
+  },
+  async abandon({ req, params }) {
+    await assertRole(req);
+    const userId = req.session.userId;
+    assert(userId != null);
+    const game = await GameDao.findByPk(params.gameId);
+    assert(game != null, { notFound: true });
+    assert(game.playerIds.includes(userId), { permissionDenied: true });
+    await abandonGame(game, userId);
+    return { status: 200, body: { game: game.toApi() } };
+  },
+  async kick({ req, params }) {
+    await assertRole(req);
+    const userId = req.session.userId;
+    assert(userId != null);
+    const game = await GameDao.findByPk(params.gameId);
+    assert(game != null, { notFound: true });
+    assert(game.playerIds.includes(userId), { permissionDenied: true });
+    assert(game.status === GameStatus.enum.ACTIVE, {
+      invalidInput: "Can only kick an active game",
+    });
+    assert(game.activePlayerId != null);
+    assert(
+      game.turnStartTime != null &&
+        game.turnStartTime.getTime() + game.turnDuration < Date.now(),
+      { invalidInput: "cannot kick until kick duration has passed" },
+    );
+    await abandonGame(game, game.activePlayerId);
     return { status: 200, body: { game: game.toApi() } };
   },
 });

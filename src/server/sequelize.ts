@@ -8,7 +8,7 @@ import { LogDao } from "./messages/log_dao";
 import { UserDao } from "./user/dao";
 import { environment } from "./util/environment";
 
-export const sequelize = new Sequelize({
+export const sequelize = new Sequelize({ 
   dialect: PostgresDialect,
   url: environment.postgresUrl.toString(),
   logging: console.log,

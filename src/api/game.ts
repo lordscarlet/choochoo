@@ -69,6 +69,7 @@ export const CreateGameApi = z
         "Can only use letters, numbers, spaces, _, and - characters",
       ),
     variant: VariantConfig,
+    turnDuration: z.number(),
     artificialStart: z.boolean(),
     unlisted: z.boolean(),
   })
@@ -105,6 +106,43 @@ export const LogEntry = z.object({
   date: z.string(),
 });
 
+const minutes = 1000 * 60;
+
+export enum TurnDuration {
+  FIVE_MINUTES = 5 * minutes,
+  TEN_MINUTES = 10 * minutes,
+  ONE_HOUR = 60 * minutes,
+  ONE_DAY = 24 * 60 * minutes,
+  TEN_DAYS = 10 * 24 * 60 * minutes,
+}
+
+export const allTurnDurations = [
+  TurnDuration.FIVE_MINUTES,
+  TurnDuration.TEN_MINUTES,
+  TurnDuration.ONE_HOUR,
+  TurnDuration.ONE_DAY,
+  TurnDuration.TEN_DAYS,
+];
+
+export const TurnDurationZod = z.nativeEnum(TurnDuration);
+
+export function turnDurationToString(duration: number): string {
+  switch (duration) {
+    case TurnDuration.FIVE_MINUTES:
+      return "Ten minutes";
+    case TurnDuration.TEN_MINUTES:
+      return "Ten minutes";
+    case TurnDuration.ONE_HOUR:
+      return "One hour";
+    case TurnDuration.ONE_DAY:
+      return "One day";
+    case TurnDuration.TEN_DAYS:
+      return "Ten days";
+    default:
+      return `${Math.round(duration / 60000)} minutes`;
+  }
+}
+
 export const GameLiteApi = z.object({
   id: z.number(),
   gameKey: GameKeyZod,
@@ -114,6 +152,7 @@ export const GameLiteApi = z.object({
   activePlayerId: z.number().optional(),
   config: MapConfig,
   variant: VariantConfig,
+  turnDuration: TurnDurationZod.or(z.number()),
   summary: z.string().optional(),
   unlisted: z.boolean(),
 });
@@ -121,6 +160,8 @@ export type GameLiteApi = z.infer<typeof GameLiteApi>;
 
 export const GameApi = GameLiteApi.extend({
   version: z.number(),
+  turnStartTime: z.string().optional(),
+  concedingPlayers: z.number().array(),
   gameData: z.string().optional(),
   undoPlayerId: z.number().optional(),
 });
@@ -263,5 +304,35 @@ export const gameContract = c.router({
       200: z.object({ game: GameApi }),
     },
     summary: "Retries the last couple of moves of the game",
+  },
+  concede: {
+    method: "POST",
+    pathParams: GameIdParams,
+    path: "/games/:gameId/concede",
+    body: z.object({ concede: z.boolean() }),
+    responses: {
+      200: z.object({ game: GameApi }),
+    },
+    summary: "Proposes to concede the current game",
+  },
+  abandon: {
+    method: "POST",
+    pathParams: GameIdParams,
+    path: "/games/:gameId/abandon",
+    body: z.object({}),
+    responses: {
+      200: z.object({ game: GameApi }),
+    },
+    summary: "Abandons the game",
+  },
+  kick: {
+    method: "POST",
+    pathParams: GameIdParams,
+    path: "/games/:gameId/kick",
+    body: z.object({}),
+    responses: {
+      200: z.object({ game: GameApi }),
+    },
+    summary: "Kicks the current player if they haven't responded in a while",
   },
 });

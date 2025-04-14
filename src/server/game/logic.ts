@@ -48,6 +48,7 @@ export async function startGame(
       game: game.toLimitedGame(),
     });
 
+  game.turnStartTime = new Date();
   game.gameData = gameData;
   game.status = GameStatus.enum.ACTIVE;
   game.activePlayerId = activePlayerId ?? null;
@@ -131,6 +132,9 @@ export async function performAction(
 
       const playerChanged = game.activePlayerId !== activePlayerId;
 
+      if (activePlayerId != null && activePlayerId != game.activePlayerId) {
+        game.turnStartTime = new Date();
+      }
       game.version = game.version + 1;
       game.gameData = gameData;
       game.activePlayerId = activePlayerId ?? null;
@@ -181,6 +185,23 @@ export async function notifyTurnUnlessAutoAction(game: GameDao): Promise<void> {
   if (!hasAutoAction) {
     return notifyTurn(game);
   }
+}
+
+export async function abandonGame(
+  game: GameDao,
+  userId: number,
+): Promise<void> {
+  assert(game.playerIds.includes(userId), { permissionDenied: true });
+  assert(game.status === GameStatus.enum.ACTIVE, {
+    invalidInput: "Can only abandon an active game",
+  });
+  game.status = GameStatus.enum.ABANDONED;
+  const user = await UserDao.findByPk(userId);
+  assert(user != null);
+  user.abandons++;
+  await sequelize.transaction(async () => {
+    await Promise.all([game.save(), user.save()]);
+  });
 }
 
 async function checkForAutoAction(

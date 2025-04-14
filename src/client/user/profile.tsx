@@ -62,6 +62,7 @@ function MeProfile({ me }: { me: MyUserApi }) {
       <Segment>
         <p>Username: {me.username}</p>
         <p>Email: {me.email}</p>
+        <p># Abandons: {me.abandons}</p>
       </Segment>
       <UpdatePassword />
       <PreferredColors />
@@ -413,6 +414,7 @@ function UserProfile({ userId }: { userId: number }) {
       <Header as="h1">Profile Settings</Header>
       <Segment>
         <p>Username: {user.username}</p>
+        <p># Abandons: {user.abandons}</p>
       </Segment>
       <UserGameList userId={userId} />
     </Container>

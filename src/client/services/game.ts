@@ -16,12 +16,17 @@ import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { InvalidInputError } from "../../utils/error";
 import { ErrorCode } from "../../utils/error_code";
-import { entries, peek } from "../../utils/functions";
+import {
+  entries,
+  formatMillisecondDuration,
+  peek,
+} from "../../utils/functions";
 import { Entry, WithFormNumber } from "../../utils/types";
 import { assert, assertNever } from "../../utils/validate";
 import { useUpdateAutoActionCache } from "../auto_action/hooks";
 import { useMostRecentValue } from "../utils/hooks";
 import { useInjected, useInjectedMemo } from "../utils/injection_context";
+import { useSuccess } from "../utils/notify";
 import { tsr } from "./client";
 import { useIsAdmin, useMe } from "./me";
 import {
@@ -690,4 +695,83 @@ export function useRetryAction(): RetryAction {
   const canRetry = useIsAdmin() && canEditGame(game);
 
   return { retry, canRetry, isPending };
+}
+
+export function useConcede() {
+  const game = useGame();
+  const me = useMe();
+  const onSuccess = useSuccess();
+  const { mutate, isPending, error } = tsr.games.concede.useMutation();
+  handleError(isPending, error);
+
+  const hasConceded = me != null && game.concedingPlayers.includes(me.id);
+
+  const concede = useCallback(() => {
+    mutate(
+      {
+        params: { gameId: game.id },
+        body: { concede: !hasConceded },
+      },
+      { onSuccess },
+    );
+  }, [game.id, hasConceded]);
+
+  return { concede, hasConceded, isPending };
+}
+
+export function useAbandon() {
+  const game = useGame();
+  const onSuccess = useSuccess();
+  const dialogs = useDialogs();
+  const { mutate, isPending, error } = tsr.games.abandon.useMutation();
+  handleError(isPending, error);
+
+  const abandon = useCallback(() => {
+    dialogs
+      .confirm(
+        "Are you sure you want to abandon the game? This will hurt your reputation.",
+      )
+      .then((result) => {
+        if (!result) return;
+        mutate(
+          {
+            params: { gameId: game.id },
+          },
+          { onSuccess },
+        );
+      });
+  }, [game.id]);
+
+  return { abandon, isPending };
+}
+
+export function useKick() {
+  const game = useGame();
+  const onSuccess = useSuccess();
+  const dialogs = useDialogs();
+  const { mutate, isPending, error } = tsr.games.kick.useMutation();
+  handleError(isPending, error);
+
+  const kick = useCallback(() => {
+    dialogs
+      .confirm(
+        "Are you sure you want to kick the current player? This will hurt their reputation.",
+      )
+      .then((result) => {
+        if (!result) return;
+        mutate(
+          {
+            params: { gameId: game.id },
+          },
+          { onSuccess },
+        );
+      });
+  }, [game.id]);
+
+  const timeRemaining =
+    game.turnDuration - (Date.now() - new Date(game.turnStartTime!).getTime());
+  const kickTimeRemaining =
+    timeRemaining > 0 ? formatMillisecondDuration(timeRemaining) : undefined;
+
+  return { kick, kickTimeRemaining, isPending };
 }

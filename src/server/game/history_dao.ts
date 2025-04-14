@@ -104,6 +104,8 @@ export class GameHistoryDao extends Model<
     const historyApi: GameHistoryLiteApi = {
       historyId: this.previousGameVersion,
       version: this.previousGameVersion,
+      turnDuration: game.turnDuration,
+      concedingPlayers: game.concedingPlayers,
       gameData: this.previousGameData ?? undefined,
       id: this.gameId,
       gameKey: game.gameKey,

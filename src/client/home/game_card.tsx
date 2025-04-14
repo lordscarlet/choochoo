@@ -7,7 +7,12 @@ import {
   Typography,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { GameLiteApi, GameStatus, gameStatusToString } from "../../api/game";
+import {
+  GameLiteApi,
+  GameStatus,
+  gameStatusToString,
+  turnDurationToString,
+} from "../../api/game";
 import { ViewRegistry } from "../../maps/view_registry";
 import { assertNever } from "../../utils/validate";
 import { useAwaitingPlayer } from "../components/awaiting_player";
@@ -60,6 +65,10 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
             Seats: {seats(game)}
           </Typography>
         )}
+
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          Turn Length: {turnDurationToString(game.turnDuration)}
+        </Typography>
         {variantString != null && (
           <Typography variant="body2" sx={{ color: "text.secondary" }}>
             Variants: {variantString.join(", ")}
