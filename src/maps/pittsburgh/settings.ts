@@ -1,6 +1,6 @@
 import { GameKey } from "../../api/game_key";
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
-import { PittsburghFunkyBuilding } from "./build_cost";
+import { PittsburghBuilderHelper, PittsburghFunkyBuilding } from "./build_cost";
 import {
   PittsburghAllowedActions,
   PittsburghBuildDiscountManager,
@@ -18,6 +18,7 @@ export class PittsburghMapSettings implements MapSettings {
 
   getOverrides() {
     return [
+      PittsburghBuilderHelper,
       PittsburghFunkyBuilding,
       PittsburghAllowedActions,
       PittsburghBuildDiscountManager,

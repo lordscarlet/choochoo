@@ -1,5 +1,6 @@
-import { BuildAction, BuildData } from "../../engine/build/build";
+import { Map } from "immutable";
 import { BuildCostCalculator } from "../../engine/build/cost";
+import { BuilderHelper } from "../../engine/build/helper";
 import { Land } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
 import {
@@ -9,14 +10,14 @@ import {
   TileType,
 } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
-import { assert } from "../../utils/validate";
 
-export class PittsburghBuildAction extends BuildAction {
-  validate(data: BuildData): void {
-    super.validate(data);
-    assert(data.tileType !== ComplexTileType.X, {
-      invalidInput: "cannot build complex tile with two straights",
-    });
+export class PittsburghBuilderHelper extends BuilderHelper {
+  protected minimumBuildCost(): number {
+    return 0;
+  }
+
+  protected startingManifest(): Map<TileType, number> {
+    return super.startingManifest().delete(ComplexTileType.X);
   }
 }
 

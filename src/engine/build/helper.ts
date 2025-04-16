@@ -1,4 +1,5 @@
 
+import { ImmutableMap } from "../../utils/immutable";
 import { assert, assertNever } from "../../utils/validate";
 import { inject, injectState } from "../framework/execution_context";
 import { injectCurrentPlayer, injectGrid } from "../game/state";
@@ -61,8 +62,8 @@ export class BuilderHelper {
     return 2;
   }
 
-  private calculateManifest(newTile?: TileType): Map<TileType, TileManifestEntry> {
-    const manifest = new Map<TileType, TileManifestEntry>([
+  protected startingManifest(): ImmutableMap<TileType, number> {
+    return ImmutableMap<TileType, number>([
       [SimpleTileType.STRAIGHT, 48],
       [SimpleTileType.CURVE, 55],
       [SimpleTileType.TIGHT, 7],
@@ -78,7 +79,11 @@ export class BuilderHelper {
       [ComplexTileType.COEXISTING_CURVES, 1],
       [ComplexTileType.CURVE_TIGHT_1, 1],
       [ComplexTileType.CURVE_TIGHT_2, 1],
-    ].map(([type, count]) => [type, toManifestEntry(count)]));
+    ]);
+  }
+
+  private calculateManifest(newTile?: TileType): Map<TileType, TileManifestEntry> {
+    const manifest = new Map([...this.startingManifest()].map(([type, count]) => [type, toManifestEntry(count)]));
 
     const townTiles = new Map<TownTileType, number>();
 
