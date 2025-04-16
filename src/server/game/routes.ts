@@ -455,7 +455,7 @@ const router = initServer().router(gameContract, {
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
     assert(game.playerIds.includes(userId), { permissionDenied: true });
-    await abandonGame(game, userId);
+    await abandonGame(game, userId, /* kicked= */ false);
     return { status: 200, body: { game: game.toApi() } };
   },
   async kick({ req, params }) {
@@ -474,7 +474,7 @@ const router = initServer().router(gameContract, {
         game.turnStartTime.getTime() + game.turnDuration < Date.now(),
       { invalidInput: "cannot kick until kick duration has passed" },
     );
-    await abandonGame(game, game.activePlayerId);
+    await abandonGame(game, game.activePlayerId, /* kicked= */ true);
     return { status: 200, body: { game: game.toApi() } };
   },
 });

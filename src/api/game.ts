@@ -129,7 +129,7 @@ export const TurnDurationZod = z.nativeEnum(TurnDuration);
 export function turnDurationToString(duration: number): string {
   switch (duration) {
     case TurnDuration.FIVE_MINUTES:
-      return "Ten minutes";
+      return "Five minutes";
     case TurnDuration.TEN_MINUTES:
       return "Ten minutes";
     case TurnDuration.ONE_HOUR:

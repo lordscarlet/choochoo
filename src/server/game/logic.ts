@@ -190,17 +190,32 @@ export async function notifyTurnUnlessAutoAction(game: GameDao): Promise<void> {
 export async function abandonGame(
   game: GameDao,
   userId: number,
+  kicked: boolean,
 ): Promise<void> {
   assert(game.playerIds.includes(userId), { permissionDenied: true });
   assert(game.status === GameStatus.enum.ACTIVE, {
     invalidInput: "Can only abandon an active game",
   });
   game.status = GameStatus.enum.ABANDONED;
+  game.activePlayerId = null;
   const user = await UserDao.findByPk(userId);
   assert(user != null);
   user.abandons++;
-  await sequelize.transaction(async () => {
-    await Promise.all([game.save(), user.save()]);
+  await sequelize.transaction(async (transaction) => {
+    await Promise.all([
+      game.save({ transaction }),
+      user.save({ transaction }),
+      LogDao.createForGame(
+        game.id,
+        game.version,
+        [
+          kicked
+            ? `<@user-${userId}> ran out of time and was kicked from the game.`
+            : `<@user-${userId}> abandoned the game.`,
+        ],
+        transaction,
+      ),
+    ]);
   });
 }
 

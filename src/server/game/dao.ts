@@ -22,6 +22,7 @@ import { VariantConfig } from "../../api/variant_config";
 import { EngineDelegator } from "../../engine/framework/engine";
 import { LimitedGame, toLimitedGame } from "../../engine/game/game_memory";
 import { AutoAction } from "../../engine/state/auto_action";
+import { assertNever } from "../../utils/validate";
 
 @Table({ modelName: "Game" })
 export class GameDao extends Model<
@@ -67,7 +68,7 @@ export class GameDao extends Model<
   @NotNull
   declare turnDuration: number;
 
-  @Attribute({ type: DataTypes.INTEGER, allowNull: true })
+  @Attribute({ type: DataTypes.DATE, allowNull: true })
   declare turnStartTime?: CreationOptional<Date | null>;
 
   @Attribute(DataTypes.ARRAY(DataTypes.INTEGER))
@@ -164,6 +165,16 @@ export function toSummary(
   if ("summary" in game) {
     return game.summary;
   }
-  if (game.status != GameStatus.enum.ACTIVE) return undefined;
-  return EngineDelegator.singleton.readSummary(toLimitedGame(game));
+  switch (game.status) {
+    case GameStatus.enum.LOBBY:
+      return undefined;
+    case GameStatus.enum.ACTIVE:
+      return EngineDelegator.singleton.readSummary(toLimitedGame(game));
+    case GameStatus.enum.ENDED:
+      return "Ended";
+    case GameStatus.enum.ABANDONED:
+      return "Abandoned";
+    default:
+      assertNever(game.status);
+  }
 }
