@@ -15,7 +15,7 @@ import { UserDao } from "../user/dao";
 import { assertRole } from "../util/enforce_role";
 import { environment, Stage } from "../util/environment";
 import { GameHistoryDao } from "./history_dao";
-import { abandonGame, performAction, startGame } from "./logic";
+import { abandonGame, inTheLead, performAction, startGame } from "./logic";
 
 export const gameApp = express();
 
@@ -441,8 +441,17 @@ const router = initServer().router(gameContract, {
         game.concedingPlayers = remove(game.concedingPlayers, userId);
       }
     }
-    assert(game.concedingPlayers.length < game.playerIds.length);
-    if (game.concedingPlayers.length === game.playerIds.length - 1) {
+    assert(game.concedingPlayers.length <= game.playerIds.length);
+    const remaining = game.playerIds.filter(
+      (playerId) => !game.concedingPlayers.includes(playerId),
+    );
+    const noneRemaining = remaining.length === 0;
+    const leadPlayer = inTheLead(game);
+    const onlyLeadPlayerRemaining =
+      remaining.length === 1 &&
+      leadPlayer.length === 1 &&
+      leadPlayer[0] === remaining[0];
+    if (noneRemaining || onlyLeadPlayerRemaining) {
       game.status = GameStatus.enum.ENDED;
     }
     await game.save();

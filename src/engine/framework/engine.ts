@@ -10,6 +10,7 @@ import { GameMemory, LimitedGame } from "../game/game_memory";
 import { Log } from "../game/log";
 import { Memory } from "../game/memory";
 import { PHASE } from "../game/phase";
+import { PlayerHelper } from "../game/player";
 import { Random } from "../game/random";
 import { ROUND, RoundEngine } from "../game/round";
 import { PlayerUser } from "../game/starter";
@@ -62,6 +63,10 @@ export class EngineDelegator {
   readSummary(game: LimitedGame): string {
     return this.getEngine(game.gameKey).readSummary(game);
   }
+
+  inTheLead(game: LimitedGame): number[] {
+    return this.getEngine(game.gameKey).inTheLead(game);
+  }
 }
 
 interface StartProps {
@@ -82,6 +87,7 @@ export class EngineProcessor {
   private readonly state = inject(StateStore);
   private readonly random = inject(Random);
   private readonly log = inject(Log);
+  private readonly playerHelper = inject(PlayerHelper);
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly memory = inject(Memory);
   private readonly round = injectState(ROUND);
@@ -131,6 +137,14 @@ export class EngineProcessor {
           ? `Move goods round ${this.moveState().moveRound + 1}`
           : getPhaseString(this.phase()),
       ].join(" - ");
+    });
+  }
+
+  inTheLead(game: LimitedGame): number[] {
+    return this.process(game, () => {
+      return this.playerHelper
+        .getPlayersOrderedByScore()[0]
+        .map(({ playerId }) => playerId);
     });
   }
 

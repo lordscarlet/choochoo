@@ -251,6 +251,10 @@ async function checkForAutoAction(
   }
 }
 
+export function inTheLead(game: GameDao): number[] {
+  return EngineDelegator.singleton.inTheLead(game.toLimitedGame());
+}
+
 Lifecycle.singleton.onStart(() => {
   GameDao.hooks.addListener(
     "afterSave",
