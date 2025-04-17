@@ -159,14 +159,15 @@ export class Grid {
 
   /** Returns a list of exits that cannot be redirected. */
   private exitInfo(track: Track): [ExitInfo, ExitInfo] {
+    const isClaimableRoute = track.isClaimable() || track.wasClaimed();
     return tupleMap(track.getExits(), (exit) => {
       const otherExit = track.otherExit(exit);
       const connects =
         exit === TOWN || this.connection(track.coordinates, exit) != null;
       return {
         exit,
-        dangles: !connects,
-        immovable: connects || otherExit === TOWN,
+        dangles: !isClaimableRoute && !connects,
+        immovable: isClaimableRoute || connects || otherExit === TOWN,
       };
     });
   }

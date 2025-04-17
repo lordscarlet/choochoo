@@ -65,6 +65,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
       this.gridHelper.update(t.coordinates, (space) => {
         assert(space.type !== SpaceType.CITY);
         space.tile!.owners[t.ownerIndex] = this.currentPlayerColor();
+        space.mapSpecific = {foo: 'bar'};
       });
     }
 
