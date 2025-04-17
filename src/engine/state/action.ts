@@ -32,6 +32,9 @@ export enum Action {
 
   // Moon
   LOW_GRAVITATION = 18,
+
+  // Heavy Cardboard
+  HEAVY_LIFTING = 19,
 }
 
 export const ActionZod = z.nativeEnum(Action);
@@ -76,6 +79,8 @@ export function getSelectedActionString(action?: Action) {
       return "Commonwealth";
     case Action.LOW_GRAVITATION:
       return "Low Gravitation";
+    case Action.HEAVY_LIFTING:
+      return "Heavy Lifting";
     default:
       assertNever(action);
   }

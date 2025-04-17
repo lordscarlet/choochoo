@@ -5,6 +5,7 @@ import { CyprusMapSettings } from "./cyprus/settings";
 import { DetroitBankruptcyMapSettings } from "./detroit/settings";
 import { DiscoInfernoMapSettings } from "./disco/settings";
 import { GermanyMapSettings } from "./germany/settings";
+import { HeavyCardboardMapSettings } from "./heavy_cardboard/settings";
 import { IndiaSteamBrothersMapSettings } from "./india-steam-brothers/settings";
 import { IrelandMapSettings } from "./ireland/settings";
 import { JamaicaMapSettings } from "./jamaica/settings";
@@ -39,6 +40,7 @@ export class MapRegistry {
     this.add(new PittsburghMapSettings());
     this.add(new JamaicaMapSettings());
     this.add(new MoonMapSettings());
+    this.add(new HeavyCardboardMapSettings());
   }
 
   values(): Iterable<MapSettings> {
