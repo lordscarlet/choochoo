@@ -20,7 +20,7 @@ export function HexName(props: HexNameProps) {
   const pathId = useId();
 
   // There are some odd things that happen when the name gets too long.
-  const division = 4 + Math.floor(props.name.length / 12);
+  const division = 4 + Math.floor(props.name.length / 10);
 
   return (
     <Rotate rotation={props.rotation} reverse={true} center={props.center}>
