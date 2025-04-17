@@ -102,7 +102,7 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
 
   process(data: HeavyLiftingData): boolean {
     this.playerHelper.updateCurrentPlayer((player) => {
-      player.income += 1 + this.round();
+      player.income += Math.min(6, 1 + this.round());
     });
     this.gridHelper.update(data.startingCity, (city) => {
       city.goods!.splice(city.goods!.indexOf(data.good), 1);
