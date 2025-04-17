@@ -1,4 +1,5 @@
 import { useDialogs, useNotifications } from "@toolpad/core";
+import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ValidationError } from "../../api/error";
@@ -14,6 +15,7 @@ import { GameHistoryApi } from "../../api/history";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionConstructor } from "../../engine/game/phase_module";
 import { InvalidInputError } from "../../utils/error";
+import { ErrorCode } from "../../utils/error_code";
 import { entries, peek } from "../../utils/functions";
 import { Entry, WithFormNumber } from "../../utils/types";
 import { assert, assertNever } from "../../utils/validate";
@@ -22,7 +24,12 @@ import { useMostRecentValue } from "../utils/hooks";
 import { useInjected, useInjectedMemo } from "../utils/injection_context";
 import { tsr } from "./client";
 import { useIsAdmin, useMe } from "./me";
-import { handleError, toValidationError } from "./network";
+import {
+  handleError,
+  isErrorBody,
+  toValidationError,
+  useErrorNotifier,
+} from "./network";
 import { useJoinRoom, useSocket } from "./socket";
 
 function getQueryKey(gameId: number | string, historyId?: number): string[] {
@@ -497,20 +504,21 @@ export function canEditGame(game: GameApi): boolean {
 export function useAction<T extends object>(
   action: ActionConstructor<T>,
 ): ActionHandler<T> {
+  const dialogs = useDialogs();
   const me = useMe();
   const game = useGame();
   const onSuccess = useSetGameSuccess();
   const updateAutoActionCache = useUpdateAutoActionCache(game.id);
   const phaseDelegator = useInjected(PhaseDelegator);
   const notifications = useNotifications();
-  const { mutate, isPending, error } = tsr.games.performAction.useMutation();
+  const { mutate, isPending } = tsr.games.performAction.useMutation();
   const actionInstance = useInjectedMemo(action);
-  handleError(isPending, error);
+  const errorNotifier = useErrorNotifier();
 
   const actionName = action.action;
 
   const emit = useCallback(
-    (actionData: T) => {
+    (actionData: T, confirmed = false) => {
       if ("view" in actionData && actionData["view"] instanceof Window) {
         notifications.show("Error performing action", {
           autoHideDuration: 2000,
@@ -521,8 +529,28 @@ export function useAction<T extends object>(
         );
       }
       mutate(
-        { params: { gameId: game.id }, body: { actionName, actionData } },
         {
+          params: { gameId: game.id },
+          body: { actionName, actionData, confirmed },
+        },
+        {
+          onError: (error) => {
+            if (
+              isFetchError(error) ||
+              !isErrorBody(error.body) ||
+              error.body.code !== ErrorCode.MUST_CONFIRM_ACTION
+            ) {
+              errorNotifier(error);
+            } else {
+              dialogs
+                .confirm("This action is not reversible. Continue?")
+                .then((confirmed) => {
+                  if (confirmed) {
+                    emit(actionData, true);
+                  }
+                });
+            }
+          },
           onSuccess: (r) => {
             onSuccess(r);
             updateAutoActionCache(r.body.auto);

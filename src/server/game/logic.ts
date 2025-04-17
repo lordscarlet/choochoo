@@ -6,6 +6,7 @@ import {
   AutoAction,
   NoAutoActionError,
 } from "../../engine/state/auto_action";
+import { ErrorCode } from "../../utils/error_code";
 import { afterTransaction } from "../../utils/transaction";
 import { assert } from "../../utils/validate";
 import { LogDao } from "../messages/log_dao";
@@ -81,6 +82,7 @@ export async function performAction(
   playerId: number,
   actionName: string,
   actionData: unknown,
+  confirmed: boolean,
   dryRun?: boolean,
 ): Promise<GameDao> {
   return await sequelize.transaction(
@@ -110,6 +112,11 @@ export async function performAction(
       });
 
       if (dryRun) return game;
+
+      assert(confirmed || reversible, {
+        invalidInput: "must confirm action",
+        errorCode: ErrorCode.MUST_CONFIRM_ACTION,
+      });
 
       const gameHistory = GameHistoryDao.build({
         previousGameVersion: game.version,
@@ -195,6 +202,7 @@ async function checkForAutoAction(
       game.activePlayerId,
       AUTO_ACTION_NAME,
       autoAction,
+      /** confirmed= */ true,
       dryRun,
     );
     return true;

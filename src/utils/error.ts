@@ -15,8 +15,8 @@ export class UserError extends Error {
 }
 
 export class InvalidInputError extends UserError {
-  constructor(msg: string) {
-    super(400, msg);
+  constructor(msg: string, errorCode?: ErrorCode) {
+    super(400, msg, errorCode);
   }
 }
 
@@ -49,6 +49,7 @@ interface ErrorData {
   permissionDenied?: true | string;
   notFound?: true | string;
   unauthorized?: true | string;
+  errorCode?: ErrorCode;
 }
 
 export type ErrorInput = ErrorData | string;
@@ -59,6 +60,7 @@ export function emitError(err: ErrorInput): never {
   } else if (err.invalidInput != null) {
     throw new InvalidInputError(
       err.invalidInput === true ? "invalidInput" : err.invalidInput,
+      err.errorCode,
     );
   } else if (err.permissionDenied != null) {
     throw new PermissionDeniedError(

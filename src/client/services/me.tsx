@@ -41,13 +41,16 @@ export function useMe(): MyUserApi | undefined {
 
 function useUpdateMeCache() {
   const tsrQueryClient = tsr.useQueryClient();
-  return useCallback((user?: MyUserApi) => {
-    tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
-      ...r!,
-      status: 200,
-      body: { user },
-    }));
-  }, []);
+  return useCallback(
+    (user: MyUserApi | undefined, adminUser: MyUserApi | undefined) => {
+      tsrQueryClient.users.getMe.setQueryData(ME_KEY, (r) => ({
+        ...r!,
+        status: 200,
+        body: { user, adminUser },
+      }));
+    },
+    [],
+  );
 }
 
 export function useUpdateMe() {
@@ -61,7 +64,7 @@ export function useUpdateMe() {
         { body: { user } },
         {
           onSuccess: ({ body }) => {
-            updateCache(body.user);
+            updateCache(body.user, undefined);
           },
         },
       );
@@ -143,7 +146,7 @@ export function useLogin() {
         { body },
         {
           onSuccess: (data) => {
-            updateCache(data.body.user);
+            updateCache(data.body.user, undefined);
             if (body.activationCode) {
               notifications.show("Welcome! CCMF!", {
                 autoHideDuration: 2000,
@@ -172,7 +175,7 @@ export function useLoginBypass(userId?: number) {
         { params: { userId: userId! } },
         {
           onSuccess: (data) => {
-            updateCache(data.body.user);
+            updateCache(data.body.user, data.body.adminUser);
           },
         },
       ),
@@ -195,7 +198,7 @@ export function useRegister() {
         { body },
         {
           onSuccess: (data) => {
-            updateCache(data.body.user);
+            updateCache(data.body.user, undefined);
             navigate("/");
           },
         },
@@ -256,7 +259,7 @@ export function useLogout() {
       {
         onSuccess({ status, body }) {
           assert(status === 200 && body.success);
-          updateCache(undefined);
+          updateCache(undefined, undefined);
           notifications.show("Logout successful", {
             autoHideDuration: 2000,
             severity: "success",
@@ -306,7 +309,7 @@ export function useActivateAccount() {
       {
         onSuccess({ status, body }) {
           assert(status === 200);
-          updateCache(body.user);
+          updateCache(body.user, undefined);
           notifications.show("Success! CCMF!", {
             autoHideDuration: 2000,
             severity: "success",

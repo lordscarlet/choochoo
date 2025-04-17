@@ -42,6 +42,7 @@ export function gameStatusToString(game: GameLiteApi): string {
 export const ActionApi = z.object({
   actionName: z.string(),
   actionData: z.unknown(),
+  confirmed: z.boolean(),
 });
 
 export type ActionApi = z.infer<typeof ActionApi>;

@@ -223,6 +223,7 @@ const router = initServer().router(gameContract, {
       userId,
       body.actionName,
       body.actionData,
+      body.confirmed,
     );
 
     return {
