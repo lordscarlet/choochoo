@@ -2,6 +2,7 @@ import { Coordinates } from "../../utils/coordinates";
 import { deepEquals } from "../../utils/deep_equals";
 import { assertNever } from "../../utils/validate";
 import { Good } from "../state/good";
+import { SpaceType } from "../state/location_type";
 import { LandData, LandType } from "../state/space";
 import {
   allDirections,
@@ -12,7 +13,9 @@ import {
   TileType,
   TownTileType,
 } from "../state/tile";
-import { rotateDirectionClockwise } from "./direction";
+import { City } from "./city";
+import { getOpposite, rotateDirectionClockwise } from "./direction";
+import { Space } from "./grid";
 import { Exit, rotateExitClockwise, TOWN, Track, TrackInfo } from "./track";
 
 export function isLand(s: unknown): s is Land {
@@ -81,6 +84,17 @@ export class Land {
 
   unpassableExits(): Direction[] {
     return this.data.unpassableEdges ?? [];
+  }
+
+  connectionAllowed(exit: Direction, neighbor: Space | undefined): boolean {
+    if (neighbor == null) return false;
+    if (!this.canExit(exit) || !neighbor.canExit(getOpposite(exit)))
+      return false;
+    if (neighbor instanceof City) return true;
+    return (
+      neighbor.getLandType() !== SpaceType.UNPASSABLE &&
+      neighbor.getLandType() !== SpaceType.WATER
+    );
   }
 
   getMapSpecific<T>(parser: (t: unknown) => T): T | undefined {

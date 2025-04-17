@@ -1,11 +1,15 @@
 import { GameKey } from "../../api/game_key";
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import { HeavyCardboardClaimAction } from "./ferries";
 import { map } from "./grid";
 import {
   HeavyCardboardGoodsGrowth,
   HeavyCardboardStarter,
 } from "./heavy_cardboard_city";
-import { HeavyCardboardBuildPhase } from "./heavy_lifting";
+import {
+  HeavyCardboardActions,
+  HeavyCardboardBuildPhase,
+} from "./heavy_lifting";
 
 export class HeavyCardboardMapSettings implements MapSettings {
   readonly key = GameKey.HEAVY_CARDBOARD;
@@ -20,6 +24,8 @@ export class HeavyCardboardMapSettings implements MapSettings {
       HeavyCardboardBuildPhase,
       HeavyCardboardStarter,
       HeavyCardboardGoodsGrowth,
+      HeavyCardboardActions,
+      HeavyCardboardClaimAction,
     ];
   }
 }

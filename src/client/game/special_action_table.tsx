@@ -134,6 +134,8 @@ function getSelectedActionDescription(
       return "Reduces the cost of one $10 buid to $7.";
     case Action.LOW_GRAVITATION:
       return "Allows you to use other's links as if they are your own for both moves.";
+    case Action.HEAVY_LIFTING:
+      return "Allows you to move goods across open land. See rules for more information.";
     default:
       assertNever(action);
   }

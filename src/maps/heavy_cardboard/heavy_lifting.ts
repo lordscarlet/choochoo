@@ -13,11 +13,13 @@ import { City } from "../../engine/map/city";
 import { GridHelper } from "../../engine/map/grid_helper";
 import { Land } from "../../engine/map/location";
 import { MoveHelper } from "../../engine/move/helper";
+import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { Action } from "../../engine/state/action";
 import { GoodZod } from "../../engine/state/good";
 import { SpaceType } from "../../engine/state/location_type";
 import { allDirections } from "../../engine/state/tile";
 import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
+import { ImmutableSet } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
 
 export class HeavyCardboardBuildPhase extends BuildPhase {
@@ -109,5 +111,14 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
     });
     this.bag.update((goods) => goods.push(data.good));
     return true;
+  }
+}
+
+export class HeavyCardboardActions extends AllowedActions {
+  getActions(): ImmutableSet<Action> {
+    return super
+      .getActions()
+      .remove(Action.PRODUCTION)
+      .add(Action.HEAVY_LIFTING);
   }
 }

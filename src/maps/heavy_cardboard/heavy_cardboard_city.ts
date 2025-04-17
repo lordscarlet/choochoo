@@ -45,5 +45,8 @@ export class HeavyCardboardGoodsGrowth extends GoodsGrowthPhase {
 }
 
 function isHeavyCardboardCity(city: CityData): boolean {
-  return city.sameCity === HEAVY_CARDBOARD_SAME_CITY && city.mapSpecific.center;
+  return (
+    city.sameCity === HEAVY_CARDBOARD_SAME_CITY &&
+    city.mapSpecific?.center === true
+  );
 }

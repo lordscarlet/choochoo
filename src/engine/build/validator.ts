@@ -72,11 +72,7 @@ export class Validator {
       for (const exit of track.exits) {
         if (exit === TOWN) continue;
         const neighbor = grid.getNeighbor(space.coordinates, exit);
-        if (neighbor == null || (neighbor instanceof Land &&
-            (neighbor.getLandType() === SpaceType.UNPASSABLE || neighbor.getLandType() === SpaceType.WATER))) {
-          return 'cannot have an exit to unpassable terrain';
-        }
-        if (!space.canExit(exit) || !neighbor.canExit(getOpposite(exit))) {
+        if (!space.connectionAllowed(exit, neighbor)) {
           return 'cannot build towards an unpassable edge';
         }
       }
@@ -137,8 +133,10 @@ export class Validator {
       if (secondEndExit === TOWN) {
         return false;
       }
-      if (firstCoordinates.neighbor(firstEndExit).equals(secondCoordinates.neighbor(secondEndExit))) {
-        return grid.get(firstCoordinates.neighbor(firstEndExit)) instanceof City;
+      const first = grid.get(firstCoordinates.neighbor(firstEndExit))!;
+      const second = grid.get(secondCoordinates.neighbor(secondEndExit))!;
+      if (first instanceof City && second instanceof City) {
+        return first.isSameCity(second);
       }
       return false;
     });
