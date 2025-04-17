@@ -5,7 +5,6 @@ import { ClaimAction, ClaimData } from "../../engine/build/claim";
 import { ConnectCitiesAction } from "../../engine/build/connect_cities";
 import { inject } from "../../engine/framework/execution_context";
 import { City } from "../../engine/map/city";
-import { getOpposite } from "../../engine/map/direction";
 import { Grid, Space } from "../../engine/map/grid";
 import { GridVersionHelper } from "../../engine/map/grid_version_helper";
 import { Land } from "../../engine/map/location";
@@ -15,7 +14,6 @@ import { MoveAction, MoveData, Path } from "../../engine/move/move";
 import { Good } from "../../engine/state/good";
 import { OwnedInterCityConnection } from "../../engine/state/inter_city_connection";
 import { PlayerData } from "../../engine/state/player";
-import { isDirection } from "../../engine/state/tile";
 import {
   ProductionAction as DiscoProductionAction,
   ProductionData,
@@ -31,7 +29,7 @@ import {
 import { PlaceAction } from "../../maps/soultrain/earth_to_heaven";
 import { ViewRegistry } from "../../maps/view_registry";
 import { Coordinates } from "../../utils/coordinates";
-import { peek } from "../../utils/functions";
+import { arrayEqualsIgnoreOrder, peek, removeKey } from "../../utils/functions";
 import { useAction, useGameVersionState } from "../services/game";
 import { useTypedCallback, useTypedMemo } from "../utils/hooks";
 import {
@@ -46,39 +44,33 @@ import { BuildingDialog, PlaceDialog } from "./building_dialog";
 import { ClickTarget } from "./click_target";
 import { HexGrid } from "./hex_grid";
 
+interface EnhancedPath extends Path {
+  startingConnection: Track | OwnedInterCityConnection;
+}
+
+interface EnhancedMoveData extends MoveData {
+  path: EnhancedPath[];
+}
+
 function buildPaths(
   grid: Grid,
   startingStop: Coordinates,
   endingStop: Coordinates,
-): Path[] {
+): EnhancedPath[] {
   return [...grid.findRoutesToLocation(startingStop, endingStop)].map(
     (connection) => {
       if (connection instanceof Track) {
-        const track = connection;
-        if (track.coordinates.equals(startingStop)) {
-          // Town track, return non-town exit.
-          return {
-            owner: track.getOwner(),
-            endingStop,
-            startingExit: track.getExits().find(isDirection)!,
-          };
-        }
         return {
-          owner: track.getOwner(),
+          owner: connection.getOwner(),
           endingStop,
-          startingExit: getOpposite(
-            track
-              .getExits()
-              .filter(isDirection)
-              .find((e) => track.coordinates.neighbor(e).equals(startingStop))!,
-          ),
+          startingConnection: connection,
         };
       } else {
         // InterCityConnection
         return {
           owner: connection.owner!.color,
+          startingConnection: connection,
           endingStop,
-          startingExit: startingStop.getDirection(endingStop),
         };
       }
     },
@@ -86,8 +78,8 @@ function buildPaths(
 }
 
 function onSelectGoodCb(
-  moveActionProgress: MoveData | undefined,
-  setMoveActionProgress: (data: MoveData | undefined) => void,
+  moveActionProgress: EnhancedMoveData | undefined,
+  setMoveActionProgress: (data: EnhancedMoveData | undefined) => void,
 ) {
   return function (space: Space, good: Good): boolean {
     if (moveActionProgress != null) {
@@ -109,11 +101,11 @@ function onSelectGoodCb(
 
 function onMoveToSpaceCb(
   moveHelper: Memoized<MoveHelper>,
-  moveActionProgress: MoveData | undefined,
-  setMoveActionProgress: (data: MoveData | undefined) => void,
+  moveActionProgress: EnhancedMoveData | undefined,
+  setMoveActionProgress: (data: EnhancedMoveData | undefined) => void,
   grid: Grid,
   player: PlayerData | undefined,
-  maybeConfirmDelivery: (data: MoveData) => void,
+  maybeConfirmDelivery: (data: EnhancedMoveData) => void,
 ) {
   return (space?: Space) => {
     if (space == null || moveActionProgress == null || player == null) return;
@@ -143,9 +135,18 @@ function onMoveToSpaceCb(
         maybeConfirmDelivery(moveActionProgress);
         return;
       }
-      const previousRouteExit = peek(moveActionProgress.path).startingExit;
-      const previousRouteExitIndex = paths.findIndex(
-        (p) => p.startingExit === previousRouteExit,
+      const previousStartingConnection = peek(
+        moveActionProgress.path,
+      ).startingConnection;
+      const previousRouteExitIndex = paths.findIndex((p) =>
+        p.startingConnection instanceof Track
+          ? previousStartingConnection instanceof Track &&
+            p.startingConnection.equals(previousStartingConnection)
+          : !(previousStartingConnection instanceof Track) &&
+            arrayEqualsIgnoreOrder(
+              p.startingConnection.connects,
+              previousStartingConnection.connects,
+            ),
       );
       const nextPath = paths[(previousRouteExitIndex + 1) % paths.length];
       const newData = {
@@ -182,44 +183,30 @@ function onMoveToSpaceCb(
 
 function getHighlightedConnections(
   grid: Grid,
-  moveActionProgress: MoveData | undefined,
+  moveActionProgress: EnhancedMoveData | undefined,
 ): OwnedInterCityConnection[] {
   if (moveActionProgress == null) return [];
-  return moveActionProgress.path.flatMap((p, index) => {
-    const startingStop =
-      index === 0
-        ? moveActionProgress.startingCity
-        : moveActionProgress.path[index - 1].endingStop;
-    const connection = grid.connection(startingStop, p.startingExit);
-    if (
-      connection == null ||
-      connection instanceof City ||
-      connection instanceof Track
-    ) {
+  return moveActionProgress.path.flatMap(({ startingConnection }) => {
+    if (startingConnection instanceof Track) {
       return [];
     }
-    return [connection];
+    return [startingConnection];
   });
 }
 
 function getHighlightedTrack(
   grid: Grid,
-  moveActionProgress: MoveData | undefined,
+  moveActionProgress: EnhancedMoveData | undefined,
 ): Track[] {
   if (moveActionProgress == null) return [];
-  return moveActionProgress.path.flatMap((p, index) => {
-    const startingStop =
-      index === 0
-        ? moveActionProgress.startingCity
-        : moveActionProgress.path[index - 1].endingStop;
-    const connection = grid.connection(startingStop, p.startingExit);
-    if (!(connection instanceof Track)) return [];
-    return grid.getRoute(connection);
+  return moveActionProgress.path.flatMap(({ startingConnection }) => {
+    if (!(startingConnection instanceof Track)) return [];
+    return grid.getRoute(startingConnection);
   });
 }
 
 function getSelectedGood(
-  moveActionProgress: MoveData | undefined,
+  moveActionProgress: EnhancedMoveData | undefined,
 ): { good: Good; coordinates: Coordinates } | undefined {
   if (!moveActionProgress) return undefined;
   return {
@@ -298,7 +285,7 @@ function maybeConfirmDeliveryCb(
   grid: Grid,
   emitMove: (moveData: MoveData) => void,
 ) {
-  return (moveActionProgress: MoveData | undefined) => {
+  return (moveActionProgress: EnhancedMoveData | undefined) => {
     if (moveActionProgress == null) return;
     if (moveActionProgress.path.length === 0) return;
     const endingStop = grid.get(peek(moveActionProgress.path).endingStop);
@@ -313,7 +300,12 @@ function maybeConfirmDeliveryCb(
         })
         .then((confirmed) => {
           if (!confirmed) return;
-          emitMove(moveActionProgress);
+          emitMove({
+            ...moveActionProgress,
+            path: moveActionProgress.path.map((step) =>
+              removeKey(step, "startingConnection"),
+            ),
+          });
         });
     }
   };
@@ -383,7 +375,7 @@ export function GameMap() {
   const dialogs = useDialogs();
 
   const [moveActionProgress, setMoveActionProgress] = useGameVersionState<
-    MoveData | undefined
+    EnhancedMoveData | undefined
   >(undefined);
 
   const onSelectGood = useTypedCallback(onSelectGoodCb, [

@@ -3,6 +3,7 @@ import { Good } from "../state/good";
 import { OnRollData } from "../state/roll";
 import { CityData } from "../state/space";
 import { Direction } from "../state/tile";
+import { Space } from "./grid";
 
 export function isCity(s: unknown): s is City {
   return s instanceof City;
@@ -44,6 +45,15 @@ export class City {
 
   canExit(_: Direction): boolean {
     return true;
+  }
+
+  isSameCity(other?: Space): boolean {
+    return (
+      other instanceof City &&
+      (other.coordinates === this.coordinates ||
+        (this.data.sameCity != null &&
+          this.data.sameCity === other.data.sameCity))
+    );
   }
 
   getMapSpecific<T>(parser: (t: unknown) => T): T | undefined {

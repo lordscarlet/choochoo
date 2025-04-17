@@ -13,6 +13,7 @@ export const MutableCityData = z.object({
   urbanized: z.boolean().optional(),
   onRoll: z.array(OnRollData),
   mapSpecific: z.any().optional(),
+  sameCity: z.number().optional(),
   startingNumCubes: z.number().optional(),
   startingNumCubesPerPlayer: z.number().optional(),
 });

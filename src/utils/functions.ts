@@ -64,6 +64,12 @@ export function remove<T>(array: T[], value: T): T[] {
   return array.slice(0, index).concat(array.slice(index + 1));
 }
 
+export function removeKey<T, R extends keyof T>(obj: T, key: R): Omit<T, R> {
+  const result = { ...obj };
+  delete result[key];
+  return result as Omit<T, R>;
+}
+
 export function replaceAll<T>(array: T[], newArray: T[]): void {
   array.splice(0, array.length);
   array.push(...newArray);

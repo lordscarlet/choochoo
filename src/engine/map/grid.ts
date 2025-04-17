@@ -282,11 +282,18 @@ export class Grid {
   }
 
   private findRoutesToLocationFromCity(
-    city: City,
+    originCity: City,
     coordinates: Coordinates,
   ): Array<Track | OwnedInterCityConnection> {
-    return allDirections
-      .map((direction) => this.connection(city.coordinates, direction))
+    const allCities = this.cities().filter((otherCity) =>
+      originCity.isSameCity(otherCity),
+    );
+    return allCities
+      .flatMap((city) =>
+        allDirections.map((direction) =>
+          this.connection(city.coordinates, direction),
+        ),
+      )
       .filter(isNotNull)
       .filter(
         (connection): connection is Track | OwnedInterCityConnection =>

@@ -17,15 +17,12 @@ import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
 import { Track } from "../map/track";
 import { Good, goodToString } from "../state/good";
-import { PlayerColor } from "../state/player";
-import { DirectionZod } from "../state/tile";
+import { PlayerColor, playerColorToString } from "../state/player";
 import { MoveHelper } from "./helper";
 
 export const Path = z.object({
   owner: z.nativeEnum(PlayerColor).optional(),
   endingStop: CoordinatesZod,
-  // The direction from the previous endingStop that points to the track.
-  startingExit: DirectionZod,
 });
 
 export type Path = z.infer<typeof Path>;
@@ -118,40 +115,26 @@ export class MoveAction implements ActionProcessor<MoveData> {
     // Validate that the route is valid
     let fromCity: City | Land = startingCity;
     for (const step of action.path) {
-      const toCoordinates = step.endingStop;
-      const startingRouteTrackOrConnection =
-        fromCity instanceof City
-          ? this.grid().connection(fromCity.coordinates, step.startingExit)
-          : fromCity.trackExiting(step.startingExit);
-      assert(startingRouteTrackOrConnection != null, {
-        invalidInput: `no route found from ${fromCity.coordinates} exiting ${step.startingExit}`,
-      });
-      assert(
-        !(startingRouteTrackOrConnection instanceof City),
-        `cannot move from city to city`,
-      );
-      if (startingRouteTrackOrConnection instanceof Track) {
-        assert(startingRouteTrackOrConnection.getOwner() === step.owner, {
-          invalidInput: `route not owned by ${step.owner}`,
-        });
-        assert(
-          this.grid().canMoveGoodsAcrossTrack(startingRouteTrackOrConnection),
-          { invalidInput: "cannot move track across route" },
-        );
-        assert(
-          this.grid().endsWith(startingRouteTrackOrConnection, step.endingStop),
-          {
-            invalidInput: `indicated track does not end with ${step.endingStop}`,
-          },
-        );
-      } else {
-        // InterCityConnection
-        assert(startingRouteTrackOrConnection.owner.color === step.owner, {
-          invalidInput: `route not owned by ${step.owner}`,
-        });
-      }
+      const routes = [
+        ...grid.findRoutesToLocation(fromCity.coordinates, step.endingStop),
+      ];
 
-      fromCity = grid.get(toCoordinates)!;
+      assert(routes.length > 0, {
+        invalidInput: `no routes found between ${this.grid().displayName(fromCity.coordinates)} and ${this.grid().displayName(step.endingStop)}`,
+      });
+
+      assert(
+        routes.some((v) =>
+          v instanceof Track
+            ? v.getOwner() === step.owner
+            : v.owner.color === step.owner,
+        ),
+        {
+          invalidInput: `no routes found between ${this.grid().displayName(fromCity.coordinates)} and ${this.grid().displayName(step.endingStop)} owned by ${playerColorToString(step.owner)}`,
+        },
+      );
+
+      fromCity = grid.get(step.endingStop)!;
     }
   }
 
