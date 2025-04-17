@@ -24,8 +24,8 @@ import {
   white,
 } from "../factory";
 import { startFrom } from "../tile_factory";
+import { HEAVY_CARDBOARD_SAME_CITY } from "./heavy_cardboard_city";
 
-const HEAVY_CARDBOARD_SAME_CITY = 1;
 const HEAVY_CARDBOARD_CITY: CityData = {
   type: SpaceType.CITY,
   sameCity: HEAVY_CARDBOARD_SAME_CITY,
@@ -112,7 +112,11 @@ export const map = grid([
     PLAIN,
     MOUNTAIN,
     HEAVY_CARDBOARD_CITY,
-    { ...HEAVY_CARDBOARD_CITY, name: "Heavy Cardboard" },
+    {
+      ...HEAVY_CARDBOARD_CITY,
+      name: "Heavy Cardboard",
+      mapSpecific: { center: true },
+    },
     HEAVY_CARDBOARD_CITY,
     MOUNTAIN,
     ...duplicate(3, PLAIN),

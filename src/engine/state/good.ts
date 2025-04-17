@@ -1,4 +1,5 @@
 import z from "zod";
+import { ImmutableSet } from "../../utils/immutable";
 import { assertNever } from "../../utils/validate";
 
 export enum Good {
@@ -14,6 +15,8 @@ export const BLACK = Good.BLACK;
 export const RED = Good.RED;
 export const PURPLE = Good.PURPLE;
 export const YELLOW = Good.YELLOW;
+
+export const allGoods = ImmutableSet([BLUE, BLACK, RED, PURPLE, YELLOW]);
 
 export const GoodZod = z.nativeEnum(Good);
 

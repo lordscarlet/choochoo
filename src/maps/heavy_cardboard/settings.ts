@@ -1,6 +1,10 @@
 import { GameKey } from "../../api/game_key";
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
 import { map } from "./grid";
+import {
+  HeavyCardboardGoodsGrowth,
+  HeavyCardboardStarter,
+} from "./heavy_cardboard_city";
 import { HeavyCardboardBuildPhase } from "./heavy_lifting";
 
 export class HeavyCardboardMapSettings implements MapSettings {
@@ -12,6 +16,10 @@ export class HeavyCardboardMapSettings implements MapSettings {
   readonly stage = ReleaseStage.ALPHA;
 
   getOverrides() {
-    return [HeavyCardboardBuildPhase];
+    return [
+      HeavyCardboardBuildPhase,
+      HeavyCardboardStarter,
+      HeavyCardboardGoodsGrowth,
+    ];
   }
 }
