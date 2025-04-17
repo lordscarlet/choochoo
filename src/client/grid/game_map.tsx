@@ -19,6 +19,10 @@ import {
   ProductionData,
 } from "../../maps/disco/production";
 import {
+  HeavyLiftingAction,
+  HeavyLiftingData,
+} from "../../maps/heavy_cardboard/heavy_lifting";
+import {
   SelectCityAction,
   SelectCityData,
 } from "../../maps/india-steam-brothers/production";
@@ -99,6 +103,23 @@ function onSelectGoodCb(
   };
 }
 
+function useMaybeConfirmEmitHeavyLifting() {
+  const dialogs = useDialogs();
+  const { getErrorMessage, emit, canEmit } = useAction(HeavyLiftingAction);
+  return useCallback(
+    async (data: HeavyLiftingData) => {
+      if (!canEmit) return false;
+      if (getErrorMessage(data) != null) return false;
+      if (!(await dialogs.confirm("Use heavy cardboard move?"))) {
+        return false;
+      }
+      emit(data);
+      return true;
+    },
+    [dialogs, emit, canEmit, getErrorMessage],
+  );
+}
+
 function onMoveToSpaceCb(
   moveHelper: Memoized<MoveHelper>,
   moveActionProgress: EnhancedMoveData | undefined,
@@ -106,13 +127,26 @@ function onMoveToSpaceCb(
   grid: Grid,
   player: PlayerData | undefined,
   maybeConfirmDelivery: (data: EnhancedMoveData) => void,
+  maybeConfirmEmitHeavyCardboardMove: (
+    data: HeavyLiftingData,
+  ) => Promise<boolean>,
 ) {
-  return (space?: Space) => {
+  return async (space?: Space) => {
     if (space == null || moveActionProgress == null || player == null) return;
     const entirePath = [
       moveActionProgress.startingCity,
       ...moveActionProgress.path.map((p) => p.endingStop),
     ];
+    if (moveActionProgress.path.length === 0) {
+      const actionData: HeavyLiftingData = {
+        startingCity: moveActionProgress.startingCity,
+        good: moveActionProgress.good,
+        endingCity: space.coordinates,
+      };
+      if (await maybeConfirmEmitHeavyCardboardMove(actionData)) {
+        return;
+      }
+    }
     const entirePathIndex = entirePath.findIndex((p) =>
       p.equals(space.coordinates),
     );
@@ -390,6 +424,8 @@ export function GameMap() {
     emitMove,
   ]);
 
+  const maybeConfirmEmitHeavyLifting = useMaybeConfirmEmitHeavyLifting();
+
   const onMoveToSpace = useTypedCallback(onMoveToSpaceCb, [
     moveHelper,
     moveActionProgress,
@@ -397,6 +433,7 @@ export function GameMap() {
     grid,
     player,
     maybeConfirmDelivery,
+    maybeConfirmEmitHeavyLifting,
   ]);
 
   const highlightedTrack = useTypedMemo(getHighlightedTrack, [

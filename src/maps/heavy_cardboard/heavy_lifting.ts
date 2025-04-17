@@ -50,6 +50,12 @@ export const HEAVY_LIFTING = new Key("heavyLifting", {
 
 export class HeavyCardboardMovePhase extends MovePhase {
   private readonly heavyLifting = injectState(HEAVY_LIFTING);
+
+  configureActions(): void {
+    super.configureActions();
+    this.installAction(HeavyLiftingAction);
+  }
+
   onStart(): void {
     super.onStart();
     this.heavyLifting.initState({ usedHeavyLifting: false });
@@ -62,9 +68,9 @@ export class HeavyCardboardMovePhase extends MovePhase {
 }
 
 export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
-  private readonly heavyLifting = injectState(HEAVY_LIFTING);
   static readonly action = "heavy-lifting";
 
+  private readonly heavyLifting = injectState(HEAVY_LIFTING);
   private readonly moveHelper = inject(MoveHelper);
   private readonly gridHelper = inject(GridHelper);
   private readonly playerHelper = inject(PlayerHelper);
@@ -98,16 +104,28 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
       invalidInput: "must deliver to matching city",
     });
 
-    assert(this.canTracePath(startingCity, endingCity), {
+    const canTrace = this.canTracePath(
+      startingCity.coordinates,
+      endingCity.coordinates,
+    );
+    assert(canTrace, {
       invalidInput: "must be within 6 spaces",
     });
   }
 
-  private canTracePath(startingCity: City, endingCity: City): boolean {
-    return this.withinDistance(
-      startingCity.coordinates,
-      endingCity.coordinates,
-      5,
+  private canTracePath(
+    current: Coordinates,
+    destination: Coordinates,
+    distance = 6,
+    checked = new Set<Coordinates>(),
+  ): boolean {
+    return allDirections.some((direction) =>
+      this.withinDistance(
+        current.neighbor(direction),
+        destination,
+        distance,
+        checked,
+      ),
     );
   }
 
@@ -115,20 +133,18 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
     current: Coordinates,
     destination: Coordinates,
     distance: number,
+    checked: Set<Coordinates>,
   ): boolean {
+    if (checked.has(current)) return false;
+    checked.add(current);
     if (current === destination) return true;
     const space = this.gridHelper.lookup(current);
     if (!(space instanceof Land)) return false;
+    if (space.getTrack().length > 0) return false;
     const newDistance =
       distance - (space.getLandType() === SpaceType.MOUNTAIN ? 2 : 1);
     if (newDistance < 0) return false;
-    return allDirections.some((direction) =>
-      this.withinDistance(
-        current.neighbor(direction),
-        destination,
-        newDistance,
-      ),
-    );
+    return this.canTracePath(current, destination, newDistance, checked);
   }
 
   process(data: HeavyLiftingData): boolean {

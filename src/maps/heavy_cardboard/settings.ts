@@ -9,6 +9,7 @@ import {
 import {
   HeavyCardboardActions,
   HeavyCardboardBuildPhase,
+  HeavyCardboardMovePhase,
 } from "./heavy_lifting";
 
 export class HeavyCardboardMapSettings implements MapSettings {
@@ -26,6 +27,7 @@ export class HeavyCardboardMapSettings implements MapSettings {
       HeavyCardboardGoodsGrowth,
       HeavyCardboardActions,
       HeavyCardboardClaimAction,
+      HeavyCardboardMovePhase,
     ];
   }
 }
