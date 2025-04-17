@@ -1,6 +1,7 @@
 import z from "zod";
 import { BuildPhase } from "../../engine/build/phase";
 import { inject, injectState } from "../../engine/framework/execution_context";
+import { Key } from "../../engine/framework/key";
 import { ActionProcessor } from "../../engine/game/action";
 import { PlayerHelper } from "../../engine/game/player";
 import { ROUND } from "../../engine/game/round";
@@ -13,6 +14,7 @@ import { City } from "../../engine/map/city";
 import { GridHelper } from "../../engine/map/grid_helper";
 import { Land } from "../../engine/map/location";
 import { MoveHelper } from "../../engine/move/helper";
+import { MovePhase } from "../../engine/move/phase";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { Action } from "../../engine/state/action";
 import { GoodZod } from "../../engine/state/good";
@@ -36,7 +38,31 @@ export const HeavyLiftingData = z.object({
 });
 export type HeavyLiftingData = z.infer<typeof HeavyLiftingData>;
 
+export const HeavyLiftingState = z.object({
+  usedHeavyLifting: z.boolean(),
+});
+
+export type HeavyLiftingState = z.infer<typeof HeavyLiftingState>;
+
+export const HEAVY_LIFTING = new Key("heavyLifting", {
+  parse: HeavyLiftingState.parse,
+});
+
+export class HeavyCardboardMovePhase extends MovePhase {
+  private readonly heavyLifting = injectState(HEAVY_LIFTING);
+  onStart(): void {
+    super.onStart();
+    this.heavyLifting.initState({ usedHeavyLifting: false });
+  }
+
+  onEnd(): void {
+    this.heavyLifting.delete();
+    super.onEnd();
+  }
+}
+
 export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
+  private readonly heavyLifting = injectState(HEAVY_LIFTING);
   static readonly action = "heavy-lifting";
 
   private readonly moveHelper = inject(MoveHelper);
@@ -50,7 +76,10 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
   assertInput = HeavyLiftingData.parse;
 
   canEmit(): boolean {
-    return this.currentPlayer().color === this.heavyPlayer()?.color;
+    return (
+      this.currentPlayer().color === this.heavyPlayer()?.color &&
+      !this.heavyLifting().usedHeavyLifting
+    );
   }
 
   validate(data: HeavyLiftingData): void {
@@ -110,6 +139,7 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
       city.goods!.splice(city.goods!.indexOf(data.good), 1);
     });
     this.bag.update((goods) => goods.push(data.good));
+    this.heavyLifting.update((state) => ({ ...state, usedHeavyLifting: true }));
     return true;
   }
 }
