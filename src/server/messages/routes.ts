@@ -85,8 +85,9 @@ async function notifyMentions(
   users: UserDao[],
 ): Promise<void> {
   if (game == null || users.length === 0) return;
-  if (!game.playerIds.includes(user.id) && user.role !== UserRole.enum.ADMIN)
+  if (!game.playerIds.includes(user.id) && user.role !== UserRole.enum.ADMIN) {
     return;
+  }
 
   const filtered = users.filter(
     (user) =>
