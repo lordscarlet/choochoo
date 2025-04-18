@@ -104,13 +104,13 @@ export class Land {
   }
 }
 
-export type MakeOptional<T, Optional extends string> = Pick<
+type MakeOptional<T, Optional extends string> = Pick<
   T,
   Exclude<keyof T, Optional>
 > &
   Pick<Partial<T>, keyof T>;
 
-export type BaseTileData = MakeOptional<TileData, "owners">;
+type BaseTileData = MakeOptional<TileData, "owners">;
 
 export function trackEquals(
   track1: TrackInfo,
@@ -141,7 +141,7 @@ export function calculateTrackInfo(tileData?: BaseTileData): TrackInfo[] {
   }));
 }
 
-export function rotateTrackInfoClockwise(trackInfo: TrackInfo): TrackInfo {
+function rotateTrackInfoClockwise(trackInfo: TrackInfo): TrackInfo {
   return { exits: trackInfo.exits.map(rotateExitClockwise) as [Exit, Exit] };
 }
 

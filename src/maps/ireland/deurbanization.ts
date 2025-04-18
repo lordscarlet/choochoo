@@ -14,7 +14,7 @@ import { PlayerColor } from "../../engine/state/player";
 import { CoordinatesZod } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 
-export class DeurbanizationPhase extends PhaseModule {
+class DeurbanizationPhase extends PhaseModule {
   static readonly phase = Phase.DEURBANIZATION;
 
   private readonly deurbanizationPlayer = injectPlayerAction(

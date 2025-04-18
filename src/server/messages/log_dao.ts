@@ -111,4 +111,4 @@ export class LogDao extends Model<
   }
 }
 
-export type CreateLogModel = CreationAttributes<LogDao>;
+type CreateLogModel = CreationAttributes<LogDao>;

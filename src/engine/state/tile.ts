@@ -88,10 +88,6 @@ export const allDirections = [
   Direction.BOTTOM_LEFT,
 ];
 
-export function isDirection(v: unknown): v is Direction {
-  return Direction[v as number] != null;
-}
-
 export const TileType = z.union([
   z.nativeEnum(TownTileType),
   z.nativeEnum(SimpleTileType),

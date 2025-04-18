@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 const autoHideDuration = 2000;
 
-export function useNotify(severity: "success" | "error") {
+function useNotify(severity: "success" | "error") {
   const notifications = useNotifications();
 
   return useCallback((message: string) => {
@@ -16,8 +16,4 @@ export function useSuccess() {
   return useCallback(() => {
     notify("Success");
   }, []);
-}
-
-export function useShowError() {
-  return useNotify("error");
 }

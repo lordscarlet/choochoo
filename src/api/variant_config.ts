@@ -1,7 +1,7 @@
 import z from "zod";
 import { GameKey } from "./game_key";
 
-export const EmptyVariantConfig = z.object({
+const EmptyVariantConfig = z.object({
   gameKey: z.enum([
     GameKey.DETROIT,
     GameKey.GERMANY,
@@ -20,7 +20,7 @@ export const EmptyVariantConfig = z.object({
     GameKey.ST_LUCIA,
   ]),
 });
-export type EmptyVariantConfig = z.infer<typeof EmptyVariantConfig>;
+type EmptyVariantConfig = z.infer<typeof EmptyVariantConfig>;
 
 export const IrelandVariantConfig = z.object({
   gameKey: z.literal(GameKey.IRELAND),

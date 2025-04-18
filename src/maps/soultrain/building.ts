@@ -15,7 +15,7 @@ import { assert } from "../../utils/validate";
 
 const RUNNING_COST = new Key("runningCost", { parse: z.number().parse });
 
-export class EngineerManager {
+class EngineerManager {
   private readonly runningCost = injectState(RUNNING_COST);
 
   getRunningCost(): number {

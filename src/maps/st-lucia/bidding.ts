@@ -34,7 +34,7 @@ const TURN_ORDER_STATE = new Key("stLuciaTurnOrder", {
   parse: StLuciaTurnOrderState.parse,
 });
 
-export class StLuciaTurnOrderHelper {
+class StLuciaTurnOrderHelper {
   private readonly state = injectState(TURN_ORDER_STATE);
   private readonly turnOrder = injectState(TURN_ORDER);
 

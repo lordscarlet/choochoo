@@ -247,7 +247,7 @@ function dollarFormat(num: number | string): string {
   return `$${num}`;
 }
 
-export function Bid() {
+function Bid() {
   const {
     emit: emitBid,
     canEmit,

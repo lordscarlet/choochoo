@@ -1,15 +1,13 @@
 import { Button } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { GameStatus } from "../../api/game";
-import { inject } from "../../engine/framework/execution_context";
-import { PlayerHelper } from "../../engine/game/player";
 import { injectPlayersByTurnOrder } from "../../engine/game/state";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { SelectAction } from "../../engine/select_action/select";
 import { ViewRegistry } from "../../maps/view_registry";
 import { AutoActionForm } from "../auto_action/form";
 import { useAwaitingPlayer } from "../components/awaiting_player";
-import { Username, UsernameList } from "../components/username";
+import { Username } from "../components/username";
 import { GameMap } from "../grid/game_map";
 import { DeleteButton } from "../home/game_card";
 import {
@@ -118,36 +116,6 @@ function Header() {
       [{game.name}] {ViewRegistry.singleton.get(game.gameKey).name} -{" "}
       {game.summary}
     </h1>
-  );
-}
-
-export function GameOver() {
-  const game = useGame();
-  const winnerIds = useInject(() => {
-    if (game.status !== GameStatus.enum.ENDED) return;
-    const helper = inject(PlayerHelper);
-    return helper.getPlayersOrderedByScore()[0].map(({ playerId }) => playerId);
-  }, [game]);
-
-  if (winnerIds == null) return <></>;
-
-  return (
-    <>
-      <p>Game over.</p>
-      <p>
-        {winnerIds.length === 0 ? (
-          "No one wins."
-        ) : winnerIds.length === 1 ? (
-          <>
-            <Username userId={winnerIds[0]} /> wins!
-          </>
-        ) : (
-          <>
-            Winners: <UsernameList userIds={winnerIds} />
-          </>
-        )}
-      </p>
-    </>
   );
 }
 

@@ -15,11 +15,11 @@ import {
   SoulTrainMapData,
 } from "./map_data";
 
-export const DeliveryRestriction = z.object({
+const DeliveryRestriction = z.object({
   from: DimensionZod,
   to: DimensionZod,
 });
-export type DeliveryRestriction = z.infer<typeof DeliveryRestriction>;
+type DeliveryRestriction = z.infer<typeof DeliveryRestriction>;
 
 export const DELIVERY_RESTRICTION = new Key("deliveryRestriction", {
   parse: DeliveryRestriction.parse,

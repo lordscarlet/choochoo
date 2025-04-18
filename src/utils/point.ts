@@ -3,7 +3,7 @@ import { Direction } from "../engine/state/tile";
 import { Coordinates } from "./coordinates";
 import { assertNever } from "./validate";
 
-export function movePointInRadDirection(
+function movePointInRadDirection(
   point: Point,
   size: number,
   rad: number,
@@ -11,14 +11,6 @@ export function movePointInRadDirection(
   return {
     x: Math.round(point.x + Math.cos(rad) * size),
     y: Math.round(point.y + Math.sin(rad) * size),
-  };
-}
-
-export function offsetPoint(point: Point, offset?: Point): Point {
-  if (offset == null) return point;
-  return {
-    x: point.x + offset.x,
-    y: point.y + offset.y,
   };
 }
 
@@ -41,17 +33,6 @@ export function coordinatesToCenter(
 export interface Point {
   x: number;
   y: number;
-}
-
-export function pointBetween(
-  point1: Point,
-  point2: Point,
-  portion = 0.5,
-): Point {
-  return {
-    x: point1.x * portion + point2.x * (1 - portion),
-    y: point1.y * portion + point2.y * (1 - portion),
-  };
 }
 
 const RIGHT = 0;
@@ -98,7 +79,7 @@ export function edgeCorners(
   );
 }
 
-export function edgeAngles(direction: Direction): number[] {
+function edgeAngles(direction: Direction): number[] {
   switch (direction) {
     case Direction.TOP_LEFT:
       return [LEFT, TOP_LEFT];
@@ -121,7 +102,7 @@ export function getExitPoint(center: Point, exit: Exit, size: number): Point {
   return movePointInDirection(center, size, exit);
 }
 
-export function directionToRad(direction: Direction): number {
+function directionToRad(direction: Direction): number {
   switch (direction) {
     case Direction.TOP_RIGHT:
       return (Math.PI * 11) / 6;

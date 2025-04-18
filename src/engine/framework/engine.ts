@@ -17,7 +17,6 @@ import { PlayerUser } from "../game/starter";
 import { injectCurrentPlayer } from "../game/state";
 import { MOVE_STATE } from "../move/state";
 import { getPhaseString, Phase } from "../state/phase";
-import { SimpleConstructor } from "./dependency_stack";
 import { inject, injectState, setInjectionContext } from "./execution_context";
 import { InjectionContext } from "./inject";
 import { StateStore } from "./state";
@@ -172,44 +171,5 @@ export class EngineProcessor {
       autoActionMutations: this.autoActionManager.getMutations(),
       seed: this.random.getSeed(),
     };
-  }
-}
-
-export class InjectionRunner {
-  private static readonly ctxs = new Map<string, InjectionContext>();
-
-  private constructor() {}
-
-  private static getInjectionContext(mapKey: GameKey): InjectionContext {
-    if (!this.ctxs.has(mapKey)) {
-      this.ctxs.set(mapKey, new InjectionContext(mapKey));
-    }
-    return this.ctxs.get(mapKey)!;
-  }
-
-  static runFunction<T>(
-    mapKey: GameKey,
-    gameData: string | undefined,
-    fn: () => T,
-  ): T {
-    const ctx = this.getInjectionContext(mapKey);
-    try {
-      setInjectionContext(ctx);
-      if (gameData != null) {
-        ctx.get(StateStore).merge(gameData);
-      }
-      return fn();
-    } finally {
-      ctx.get(Memory).reset();
-      setInjectionContext();
-    }
-  }
-
-  static get<T>(
-    mapKey: GameKey,
-    gameData: string | undefined,
-    ctor: SimpleConstructor<T>,
-  ): T {
-    return this.runFunction(mapKey, gameData, () => inject(ctor));
   }
 }

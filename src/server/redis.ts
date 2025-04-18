@@ -18,14 +18,14 @@ redisClient.on("error", (e) => {
   process.exit();
 });
 
-export const redisStore = new RedisStore({
+const redisStore = new RedisStore({
   client: redisClient,
   prefix: "choo:",
 });
 
 export const redisSession = express();
 
-export const sessionParser = session({
+const sessionParser = session({
   store: redisStore,
   resave: false,
   saveUninitialized: false,

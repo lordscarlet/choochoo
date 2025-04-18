@@ -12,7 +12,7 @@ export function HistorySelector() {
   return <InternalHistorySelector history={game} />;
 }
 
-export function InternalHistorySelector({
+function InternalHistorySelector({
   history,
 }: {
   history: GameHistoryApi;

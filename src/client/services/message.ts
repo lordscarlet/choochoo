@@ -7,7 +7,7 @@ import { tsr } from "./client";
 import { handleError } from "./network";
 import { useJoinRoom, useSocket } from "./socket";
 
-export const emptyMessages: MessageApi[] = [];
+const emptyMessages: MessageApi[] = [];
 
 interface UseMessages {
   messages: MessageApi[];

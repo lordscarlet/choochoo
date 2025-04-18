@@ -143,27 +143,23 @@ export class PlayerHelper {
   }
 }
 
-export const ELIMINATED = "Eliminated";
-export type Eliminated = typeof ELIMINATED;
+const ELIMINATED = "Eliminated";
+type Eliminated = typeof ELIMINATED;
 
 // Use a number array to represent a score, for tie breaking purposes.
 // The earlier the number in the array, the more important it is for scoring purposes.
 // If two scores have the same values, then it's a tie. Ties are possible for a lot of games.
 export type Score = Eliminated | number[];
 
-export function isEliminated(score: Score): score is Eliminated {
+function isEliminated(score: Score): score is Eliminated {
   return score === ELIMINATED;
-}
-
-export function isNotEliminated(score: Score): score is number[] {
-  return !isEliminated(score);
 }
 
 // Compares [score1] to [score2].
 // score1 < score2 = 1
 // score2 < score1 = -1
 // score1 = score2 = 0
-export function compareScore(score1: Score, score2: Score): number {
+function compareScore(score1: Score, score2: Score): number {
   if (isEliminated(score1) && isEliminated(score2)) return 0;
   if (isEliminated(score1)) return 1;
   if (isEliminated(score2)) return -1;

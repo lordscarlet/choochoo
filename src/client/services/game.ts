@@ -214,7 +214,7 @@ export function useGameList(baseQuery: ListGamesApi) {
   };
 }
 
-export function useSetGame() {
+function useSetGame() {
   const tsrQueryClient = tsr.useQueryClient();
   return (game: GameApi) => {
     tsrQueryClient.games.get.setQueryData(
@@ -224,7 +224,7 @@ export function useSetGame() {
   };
 }
 
-export function useSetGameSuccess() {
+function useSetGameSuccess() {
   const setGame = useSetGame();
   return useCallback(
     ({ body }: { status: 200; body: { game: GameApi } }) => {
@@ -234,7 +234,7 @@ export function useSetGameSuccess() {
   );
 }
 
-export function useGameHistory(gameId: number, historyId: number) {
+function useGameHistory(gameId: number, historyId: number) {
   const { data } = tsr.histories.get.useSuspenseQuery({
     queryKey: getQueryKey(gameId, historyId),
     queryData: { params: { gameId, historyId } },

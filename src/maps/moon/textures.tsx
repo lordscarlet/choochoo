@@ -61,7 +61,7 @@ interface OffboardProps {
   content: number;
 }
 
-export function Offboard({ center, offset, content }: OffboardProps) {
+function Offboard({ center, offset, content }: OffboardProps) {
   const center1 = { x: center.x - offset.x, y: center.y - offset.y };
   const center2 = { x: center.x + offset.x, y: center.y + offset.y };
 

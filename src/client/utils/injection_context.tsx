@@ -30,10 +30,10 @@ import { Immutable } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
 import { useGame } from "../services/game";
 
-export const InjectionContextContext = createContext<
+const InjectionContextContext = createContext<
   InjectionContext | undefined
 >(undefined);
-export const MapKeyContext = createContext<GameKey | undefined>(undefined);
+const MapKeyContext = createContext<GameKey | undefined>(undefined);
 
 function useInjectionContext(): InjectionContext {
   const ctx = useContext(InjectionContextContext);

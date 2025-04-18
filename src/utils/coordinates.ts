@@ -88,7 +88,7 @@ export class Coordinates {
   }
 }
 
-export const RawCoordinates = z.object({ q: z.number(), r: z.number() });
+const RawCoordinates = z.object({ q: z.number(), r: z.number() });
 
 export const CoordinatesZod = RawCoordinates.transform(Coordinates.from);
 

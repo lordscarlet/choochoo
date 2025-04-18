@@ -6,15 +6,15 @@ export function isPositiveInteger(num: unknown): num is number {
   return isNumber(num) && isPositive(num) && isInteger(num);
 }
 
-export function isNumber(num: unknown): num is number {
+function isNumber(num: unknown): num is number {
   return typeof num === "number";
 }
 
-export function isPositive(num: unknown): num is number {
+function isPositive(num: unknown): num is number {
   return isNumber(num) && num >= 0;
 }
 
-export function isInteger(num: unknown): num is number {
+function isInteger(num: unknown): num is number {
   return isNumber(num) && Math.floor(num) === num;
 }
 

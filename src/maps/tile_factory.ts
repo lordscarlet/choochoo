@@ -16,7 +16,8 @@ export function startFrom(startFrom: Direction): TrackFactory {
   return new TrackFactory(startFrom);
 }
 
-export function townTile(
+// eslint-disable-next-line
+function townTile(
   directions: Direction[],
   owners: Array<PlayerColor | undefined>,
 ): MutableTileData {
@@ -56,13 +57,6 @@ export function townTile(
     }
   }
   fail(`found no track with exits ${directions.join(",")}`);
-}
-
-export function complex(
-  _1: MutableTileData,
-  _2: MutableTileData,
-): MutableTileData {
-  throw new Error("not implemented yet");
 }
 
 class TrackFactory {

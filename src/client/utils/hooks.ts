@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { isNotNull } from "../../utils/functions";
 import { Tuple } from "../../utils/types";
 
@@ -14,13 +14,6 @@ export function useTypedMemo<Deps extends Tuple, T>(
   deps: NoInfer<Deps>,
 ): T {
   return useMemo(() => cb(...deps), deps);
-}
-
-export function useTypedEffect<Deps extends Tuple>(
-  cb: (...deps: Deps) => (() => void) | void,
-  deps: NoInfer<Deps>,
-): void {
-  return useEffect(() => cb(...deps), deps);
 }
 
 export function useMostRecentValue<T>(

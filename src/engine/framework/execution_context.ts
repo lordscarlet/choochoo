@@ -13,7 +13,7 @@ export function setInjectionContext(ctx?: InjectionContext) {
   injectionContext = ctx;
 }
 
-export function getInjectionContext(): InjectionContext {
+function getInjectionContext(): InjectionContext {
   assert(injectionContext != null);
   return injectionContext;
 }

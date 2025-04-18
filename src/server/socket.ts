@@ -35,7 +35,7 @@ function roomName(gameId?: number | null) {
   return gameId == undefined ? HOME_ROOM : "gameId-" + gameId;
 }
 
-export function emitGameUpdate(
+function emitGameUpdate(
   oldGame: GameApi | undefined,
   game: GameDao,
 ): void {
@@ -47,15 +47,15 @@ export function emitGameUpdate(
   io.to(roomName()).emit("gameUpdateLite", gameLiteApi);
 }
 
-export function emitGameDestroy(gameId: number): void {
+function emitGameDestroy(gameId: number): void {
   io.to(roomName()).emit("gameDestroy", gameId);
 }
 
-export function emitLogCreate(log: LogDao): void {
+function emitLogCreate(log: LogDao): void {
   io.to(roomName(log.gameId)).emit("newLog", log.toApi());
 }
 
-export function emitLogDestroy(log: LogDao): void {
+function emitLogDestroy(log: LogDao): void {
   io.to(roomName(log.gameId)).emit("destroyLog", log.id);
 }
 

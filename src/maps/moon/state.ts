@@ -5,7 +5,7 @@ export enum Side {
   RIGHT = "RIGHT",
 }
 
-export const SideZod = z.nativeEnum(Side);
+const SideZod = z.nativeEnum(Side);
 
 export const MoonMapData = z.object({
   side: SideZod,

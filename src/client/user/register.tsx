@@ -1,9 +1,8 @@
 import { Box, Button, FormControl, TextField } from "@mui/material";
 import { FormEvent, useCallback, useEffect } from "react";
-import { Link, RouteObject, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMe, useRegister } from "../services/me";
 import { useTextInputState } from "../utils/form_state";
-import { LoginPage } from "./login";
 
 export function RegisterPage() {
   const [email, setEmail] = useTextInputState("");
@@ -84,8 +83,3 @@ export function RegisterPage() {
     </Box>
   );
 }
-
-export const loginRoute: RouteObject = {
-  path: "/users/login",
-  element: <LoginPage />,
-};

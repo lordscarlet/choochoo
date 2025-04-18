@@ -16,7 +16,7 @@ export enum WebHookOption {
   AOS = 1,
   EOT,
 }
-export const WebHookOptionZod = z.nativeEnum(WebHookOption);
+const WebHookOptionZod = z.nativeEnum(WebHookOption);
 
 export const EmailSetting = z.object({
   method: z.literal(NotificationMethod.EMAIL),

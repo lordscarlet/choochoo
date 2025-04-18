@@ -38,13 +38,13 @@ export const HeavyLiftingData = z.object({
 });
 export type HeavyLiftingData = z.infer<typeof HeavyLiftingData>;
 
-export const HeavyLiftingState = z.object({
+const HeavyLiftingState = z.object({
   usedHeavyLifting: z.boolean(),
 });
 
-export type HeavyLiftingState = z.infer<typeof HeavyLiftingState>;
+type HeavyLiftingState = z.infer<typeof HeavyLiftingState>;
 
-export const HEAVY_LIFTING = new Key("heavyLifting", {
+const HEAVY_LIFTING = new Key("heavyLifting", {
   parse: HeavyLiftingState.parse,
 });
 

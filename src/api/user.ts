@@ -53,8 +53,8 @@ export const ListUsersApi = z.object({
 });
 export type ListUsersApi = z.infer<typeof ListUsersApi>;
 
-export const UserParams = z.object({ userId: z.coerce.number() });
-export type UserParams = z.infer<typeof UserParams>;
+const UserParams = z.object({ userId: z.coerce.number() });
+type UserParams = z.infer<typeof UserParams>;
 
 export const ResendActivationCodeRequest = z.object({
   userId: z.number().optional(),

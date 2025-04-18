@@ -141,7 +141,7 @@ export function toApi(game: InferAttributes<GameDao> | GameApi): GameApi {
   };
 }
 
-export function toLiteApi(
+function toLiteApi(
   game: GameApi | InferAttributes<GameDao>,
 ): GameLiteApi {
   return {

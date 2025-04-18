@@ -28,7 +28,7 @@ export function insertBefore<T>(arr: T[], entry: T, newEntry: T): T[] {
   return arr.slice(0, index).concat(newEntry).concat(arr.slice(index));
 }
 
-export function lpad(
+function lpad(
   input: number | string,
   minLength: number,
   padWith: string,
@@ -70,36 +70,9 @@ export function removeKey<T, R extends keyof T>(obj: T, key: R): Omit<T, R> {
   return result as Omit<T, R>;
 }
 
-export function replaceAll<T>(array: T[], newArray: T[]): void {
-  array.splice(0, array.length);
-  array.push(...newArray);
-}
-
-export function iterateHexGrid<T>(
-  grid: Map<number, Map<number, T>>,
-  fn: (value: T) => void,
-) {
-  for (const row of grid.values()) {
-    for (const cell of row.values()) {
-      fn(cell);
-    }
-  }
-}
-
 export function isPrimitive(value: unknown): value is Primitive {
   const primitives = new Set(["boolean", "number", "string"]);
   return primitives.has(typeof value);
-}
-
-export function pick<T extends object, R extends keyof T>(
-  value: T,
-  keys: R[],
-): Pick<T, R> {
-  const partial: Partial<T> = {};
-  for (const key of keys) {
-    partial[key] = value[key];
-  }
-  return partial as Pick<T, R>;
 }
 
 export function partition<R, T>(arr: R[], fn: (r: R) => T): Map<T, R[]> {
@@ -152,6 +125,7 @@ export function arrayEqualsIgnoreOrder<T>(arr1: T[], arr2: T[]): boolean {
 }
 
 export function formatMillisecondDuration(millis: number): string {
+  // eslint-disable-next-line
   const format = new (Intl as any).DurationFormat("en", { style: "short" });
   const totalMinutes = Math.round(millis / 60000);
   const duration = {

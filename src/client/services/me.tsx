@@ -22,7 +22,7 @@ import { handleError } from "./network";
 
 const ME_KEY = ["users", "me"];
 
-export function useAllOfMe() {
+function useAllOfMe() {
   const { data, isFetching, error } = tsr.users.getMe.useSuspenseQuery({
     queryKey: ME_KEY,
   });
@@ -75,7 +75,7 @@ export function useUpdateMe() {
   return { validationError, updateMe, isPending };
 }
 
-export const AdminModeEnabled = createContext<
+const AdminModeEnabled = createContext<
   [boolean, (newAdminMode: boolean) => void]
 >([false, () => {}] as const);
 
@@ -111,26 +111,6 @@ export function useIsAdmin(ignoreAdminMode = false): boolean {
   if (!adminModeEnabled && !ignoreAdminMode) return false;
 
   return adminUser != null || user?.role === UserRole.enum.ADMIN;
-}
-
-export function useSubscribe() {
-  const { mutate, error, isPending } = tsr.users.subscribe.useMutation();
-  const validationError = handleError(isPending, error);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  const subscribe = useCallback(
-    (email: string) =>
-      mutate(
-        { body: { email } },
-        {
-          onSuccess: (_) => {
-            setIsSuccess(true);
-          },
-        },
-      ),
-    [],
-  );
-  return { subscribe, isSuccess, validationError, isPending };
 }
 
 export function useLogin() {

@@ -32,13 +32,13 @@ export class UnauthorizedError extends UserError {
   }
 }
 
-export class PermissionDeniedError extends UserError {
+class PermissionDeniedError extends UserError {
   constructor(msg: string) {
     super(403, msg);
   }
 }
 
-export class NotFoundError extends UserError {
+class NotFoundError extends UserError {
   constructor(msg: string) {
     super(404, msg);
   }

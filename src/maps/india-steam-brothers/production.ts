@@ -25,10 +25,10 @@ export const InProgressProduction = z.object({
 });
 export type InProgressProduction = z.infer<typeof InProgressProduction>;
 
-export const ProductionState = z.object({
+const ProductionState = z.object({
   production: InProgressProduction.optional(),
 });
-export type ProductionState = z.infer<typeof ProductionState>;
+type ProductionState = z.infer<typeof ProductionState>;
 
 export const PRODUCTION_STATE = new Key("productionState", {
   parse: ProductionState.parse,
@@ -50,7 +50,7 @@ export class IndiaSteamBrothersPhaseDelegator extends PhaseDelegator {
   }
 }
 
-export class IndiaSteamBrothersGoodsGrowthPhase extends PhaseModule {
+class IndiaSteamBrothersGoodsGrowthPhase extends PhaseModule {
   static readonly phase = Phase.MANUAL_GOODS_GROWTH;
   private readonly state = injectState(PRODUCTION_STATE);
 

@@ -35,7 +35,7 @@ export async function notifyTurn(game: GameDao): Promise<void> {
   );
 }
 
-export async function notifyEndGame(game: GameDao): Promise<void> {
+async function notifyEndGame(game: GameDao): Promise<void> {
   const users = await UserDao.findAll({
     where: { id: { [Op.in]: game.playerIds } },
     transaction: null,

@@ -3,7 +3,7 @@ import { AutoAction } from "../state/auto_action";
 import { Memory } from "./memory";
 import { injectCurrentPlayer } from "./state";
 
-export type AutoActionMutation = (autoAction: AutoAction) => void;
+type AutoActionMutation = (autoAction: AutoAction) => void;
 
 export interface AutoActionMutationConfig {
   playerId: number;

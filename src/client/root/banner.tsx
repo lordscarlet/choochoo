@@ -15,14 +15,14 @@ export function Banner() {
   return <NotificationPreferencesBanner />;
 }
 
-export function NotificationPreferencesBanner() {
+function NotificationPreferencesBanner() {
   const me = useMe();
   if (!me || me.role !== UserRole.enum.USER) return <></>;
 
   return <InternalNotificationPreferencesBanner />;
 }
 
-export function InternalNotificationPreferencesBanner() {
+function InternalNotificationPreferencesBanner() {
   const preferences = useNotificationPreferences();
 
   if (preferences.turnNotifications.length === 0) {
@@ -32,7 +32,7 @@ export function InternalNotificationPreferencesBanner() {
   return <FixNotificationPreferencesBanner preferences={preferences} />;
 }
 
-export function SetNotificationPreferencesBanner() {
+function SetNotificationPreferencesBanner() {
   const me = useMe()!;
 
   return (
@@ -49,7 +49,7 @@ export function SetNotificationPreferencesBanner() {
   );
 }
 
-export function FixNotificationPreferencesBanner({
+function FixNotificationPreferencesBanner({
   preferences,
 }: {
   preferences: NotificationPreferences;

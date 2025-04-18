@@ -1,9 +1,7 @@
-import { z } from "zod";
 import { Coordinates } from "../../utils/coordinates";
 import { assert, fail } from "../../utils/validate";
 import { PlayerColor } from "../state/player";
 import { Direction } from "../state/tile";
-import { City } from "./city";
 import { rotateDirectionClockwise } from "./direction";
 
 export class Track {
@@ -62,13 +60,11 @@ export function tupleMap<T, R>(tuple: [T, T], updateFn: (t: T) => R): [R, R] {
   return tuple.map(updateFn) as [R, R];
 }
 
-export type RoutePart = Track | City | Town;
-
 export const TOWN = 9;
 
-export type Town = typeof TOWN;
+type Town = typeof TOWN;
+
 export type Exit = Direction | Town;
-export const ExitZod = z.union([z.nativeEnum(Direction), z.literal(TOWN)]);
 
 export interface TrackInfo {
   exits: [Exit, Exit];

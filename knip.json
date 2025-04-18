@@ -6,5 +6,11 @@
     "src/scripts/*"
   ],
   "project": ["**/*.{js,ts,tsx}"],
-  "ignore": ["src/scripts/*", "src/migrations/*", "src/testing/*", "*_test.ts"]
+  "ignore": [
+    "src/scripts/*",
+    "src/migrations/*",
+    "src/testing/*",
+    "*_test.ts",
+    "src/maps/montreal_metro/**/*"
+  ]
 }

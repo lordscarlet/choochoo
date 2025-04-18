@@ -4,10 +4,10 @@ import { Key, MapKey } from "../../engine/framework/key";
 import { TURN_ORDER } from "../../engine/game/state";
 import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
 
-export const GarbageCount = new Key("GarbageCount", {
+const GarbageCount = new Key("GarbageCount", {
   parse: z.number().parse,
 });
-export const OwnedGarbage = new MapKey(
+const OwnedGarbage = new MapKey(
   "OwnedGarbage",
   PlayerColorZod.parse,
   z.number().parse,

@@ -120,7 +120,7 @@ interface GameButtonProps {
   game: GameLiteApi;
 }
 
-export function ViewButton({ game }: GameButtonProps) {
+function ViewButton({ game }: GameButtonProps) {
   if (
     game.status !== GameStatus.enum.ACTIVE &&
     game.status !== GameStatus.enum.ENDED
@@ -134,7 +134,7 @@ export function ViewButton({ game }: GameButtonProps) {
   );
 }
 
-export function LeaveButton({ game }: GameButtonProps) {
+function LeaveButton({ game }: GameButtonProps) {
   const { canPerform, perform, isPending } = useLeaveGame(game);
   if (!canPerform) {
     return <></>;
@@ -147,7 +147,7 @@ export function LeaveButton({ game }: GameButtonProps) {
   );
 }
 
-export function JoinButton({ game }: GameButtonProps) {
+function JoinButton({ game }: GameButtonProps) {
   const { canPerform, perform, isPending } = useJoinGame(game);
   if (!canPerform) {
     return <></>;
@@ -160,7 +160,7 @@ export function JoinButton({ game }: GameButtonProps) {
   );
 }
 
-export function StartButton({ game }: GameButtonProps) {
+function StartButton({ game }: GameButtonProps) {
   const { canPerform, perform, isPending } = useStartGame(game);
   if (!canPerform) {
     return <></>;

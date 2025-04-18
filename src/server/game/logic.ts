@@ -180,7 +180,7 @@ export async function performAction(
   );
 }
 
-export async function notifyTurnUnlessAutoAction(game: GameDao): Promise<void> {
+async function notifyTurnUnlessAutoAction(game: GameDao): Promise<void> {
   const hasAutoAction = await checkForAutoAction(game.id, /* dryRun= */ true);
   if (!hasAutoAction) {
     return notifyTurn(game);

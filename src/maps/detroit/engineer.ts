@@ -19,7 +19,7 @@ import { Direction, TileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 
-export const ENGINEER_FREE_BUILD = new Key("engineerFreeBuild", z.number());
+const ENGINEER_FREE_BUILD = new Key("engineerFreeBuild", z.number());
 
 class FreeBuildManager {
   private readonly freeBuild = injectState(ENGINEER_FREE_BUILD);

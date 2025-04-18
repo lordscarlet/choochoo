@@ -43,7 +43,7 @@ const ActionApi = z.object({
   confirmed: z.boolean(),
 });
 
-export type ActionApi = z.infer<typeof ActionApi>;
+type ActionApi = z.infer<typeof ActionApi>;
 
 function numPlayersMessage(gameKey: GameKey): string {
   const { name, minPlayers, maxPlayers } = MapRegistry.singleton.get(gameKey);
@@ -98,12 +98,6 @@ export const CreateGameApi = z
 
 export type CreateGameApi = z.infer<typeof CreateGameApi>;
 
-export const LogEntry = z.object({
-  userId: z.number().optional(),
-  message: z.string(),
-  date: z.string(),
-});
-
 const minutes = 1000 * 60;
 
 export enum TurnDuration {
@@ -122,7 +116,7 @@ export const allTurnDurations = [
   TurnDuration.TEN_DAYS,
 ];
 
-export const TurnDurationZod = z.nativeEnum(TurnDuration);
+const TurnDurationZod = z.nativeEnum(TurnDuration);
 
 export function turnDurationToString(duration: number): string {
   switch (duration) {
@@ -165,7 +159,7 @@ export const GameApi = GameLiteApi.extend({
 });
 export type GameApi = z.infer<typeof GameApi>;
 
-export const OrderByOptions = z.union([
+const OrderByOptions = z.union([
   z.literal("id"),
   z.literal("updatedAt"),
 ]);

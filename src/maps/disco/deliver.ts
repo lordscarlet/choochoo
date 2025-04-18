@@ -13,11 +13,11 @@ import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
 import { peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 
-export const DiscoMoveState = z.object({
+const DiscoMoveState = z.object({
   movesRemaining: z.number(),
   lastStop: CoordinatesZod.optional(),
 });
-export type DiscoMoveState = z.infer<typeof DiscoMoveState>;
+type DiscoMoveState = z.infer<typeof DiscoMoveState>;
 
 const DISCO_MOVE_STATE = new Key("discoMoveState", {
   parse: DiscoMoveState.parse,

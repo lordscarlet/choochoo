@@ -3,14 +3,14 @@ import { CoordinatesZod } from "../../utils/coordinates";
 import { Key } from "../framework/key";
 import { DanglerInfo } from "../map/grid";
 
-export const MutableBuildState = z.object({
+const MutableBuildState = z.object({
   previousBuilds: z.array(CoordinatesZod),
   buildCount: z.number().optional(),
   hasUrbanized: z.boolean(),
   danglers: z.array(DanglerInfo),
 });
 
-export type MutableBuildState = z.infer<typeof MutableBuildState>;
+type MutableBuildState = z.infer<typeof MutableBuildState>;
 
 export const BUILD_STATE = new Key('BuildState', {
   parse: MutableBuildState.parse,

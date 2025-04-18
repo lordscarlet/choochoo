@@ -9,7 +9,7 @@ import {
   TurnNotifySetting,
 } from "./notify";
 
-export abstract class EmailService implements TurnNotifyService<EmailSetting> {
+abstract class EmailService implements TurnNotifyService<EmailSetting> {
   protected abstract sendEmail(email: SendEmailProps): Promise<void>;
   abstract subscribe(email: string): Promise<void>;
   abstract setIsExcludedFromCampaigns(email: string): Promise<void>;

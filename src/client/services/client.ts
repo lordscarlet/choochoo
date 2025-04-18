@@ -1,7 +1,6 @@
 import {
   ApiFetcherArgs,
   ClientArgs,
-  initClient,
   initContract,
   tsRestFetchApi,
 } from "@ts-rest/core";
@@ -19,7 +18,7 @@ import { isErrorBody, isNetworkError } from "./network";
 
 const c = initContract();
 
-export const contract = c.router(
+const contract = c.router(
   {
     games: gameContract,
     histories: gameHistoryContract,
@@ -47,7 +46,7 @@ async function generateXsrfToken(): Promise<string> {
   return response.xsrfToken;
 }
 
-export const clientArgs: ClientArgs = {
+const clientArgs: ClientArgs = {
   baseUrl: `${environment.apiHost}/api`,
   baseHeaders: {
     "x-app-source": "ts-rest",
@@ -70,7 +69,5 @@ async function attemptApi(
   args.headers["xsrf-token"] = await xsrfToken;
   return tsRestFetchApi(args);
 }
-
-export const networkClient = initClient(contract, clientArgs);
 
 export const tsr = initTsrReactQuery(contract, clientArgs);
