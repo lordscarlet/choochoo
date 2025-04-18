@@ -38,7 +38,7 @@ export function TileManifest() {
   );
 }
 
-export function TileInfo({
+function TileInfo({
   tileType,
   info,
 }: {

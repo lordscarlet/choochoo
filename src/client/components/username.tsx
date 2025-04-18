@@ -38,7 +38,7 @@ interface MaybeLinkProps {
   useLink?: boolean;
 }
 
-export function MaybeLink({
+function MaybeLink({
   username,
   userId,
   useAt,

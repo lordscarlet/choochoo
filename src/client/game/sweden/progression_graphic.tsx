@@ -15,7 +15,7 @@ export function SwedenProgressionGraphic() {
   return <ProgressionGraphic />;
 }
 
-export function ProgressionGraphic() {
+function ProgressionGraphic() {
   const garbageCount = useInject(() => {
     const incinerator = inject(Incinerator);
     return incinerator.getGarbageCount();

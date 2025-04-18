@@ -169,7 +169,7 @@ export function GoodsTable() {
   );
 }
 
-export function PlaceGood({
+function PlaceGood({
   good,
   toggleSelectedGood,
 }: {

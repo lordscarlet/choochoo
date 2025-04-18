@@ -1,13 +1,7 @@
-import { useId, useMemo } from "react";
+import { useId } from "react";
 import { Rotation } from "../../engine/game/map_settings";
-import {
-  movePointInRadDirection,
-  Point,
-  pointBetween,
-  polygon,
-} from "../../utils/point";
+import { Point } from "../../utils/point";
 import { Rotate } from "../components/rotation";
-import * as styles from "./hex_name.module.css";
 
 interface HexNameProps {
   name: string;
@@ -43,41 +37,3 @@ export function HexName(props: HexNameProps) {
     </Rotate>
   );
 }
-export function HexNameFlatTop({ name, center, size }: HexNameProps) {
-  const containerCorners = useMemo(() => {
-    const right = movePointInRadDirection(center, size, 0);
-    const bottomRight = movePointInRadDirection(center, size, Math.PI / 3);
-    const bottomLeft = movePointInRadDirection(center, size, (Math.PI * 2) / 3);
-    const left = movePointInRadDirection(center, size, Math.PI);
-    const topLeft = movePointInRadDirection(center, size, (Math.PI * 4) / 3);
-    const topRight = movePointInRadDirection(center, size, (Math.PI * 5) / 3);
-    return polygon([
-      left,
-      pointBetween(topLeft, left, hexNameDiff),
-      pointBetween(topRight, right, hexNameDiff),
-      right,
-      pointBetween(bottomRight, right, hexNameDiff),
-      pointBetween(bottomLeft, left, hexNameDiff),
-    ]);
-  }, [center, size]);
-
-  return (
-    <>
-      <polygon
-        points={containerCorners}
-        className={styles.hexNameContainer}
-        strokeWidth="1"
-      />
-      <text
-        x={center.x}
-        y={center.y}
-        dominantBaseline="middle"
-        textAnchor="middle"
-      >
-        {name}
-      </text>
-    </>
-  );
-}
-
-export const hexNameDiff = 0.25;

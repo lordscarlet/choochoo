@@ -29,7 +29,7 @@ export function GameLog() {
   return <ChatLog gameId={game.id} />;
 }
 
-export function GameHistoryLog({ history }: { history: GameHistoryApi }) {
+function GameHistoryLog({ history }: { history: GameHistoryApi }) {
   return <LogMessages messages={history.logs} />;
 }
 
@@ -109,7 +109,7 @@ interface LogMessagesProps {
   disableNextPage?: boolean;
 }
 
-export function LogMessages({
+function LogMessages({
   messages,
   fetchNextPage,
   disableNextPage,

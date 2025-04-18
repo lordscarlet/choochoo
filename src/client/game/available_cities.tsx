@@ -30,7 +30,7 @@ export function AvailableCities() {
   );
 }
 
-export function AvailableCity({ city }: { city: MutableAvailableCity }) {
+function AvailableCity({ city }: { city: MutableAvailableCity }) {
   const mapSettings = MapRegistry.singleton.get(useGameKey());
   const grid = useMemo(() => {
     const newCity = new City(Coordinates.from({ q: 0, r: 0 }), {

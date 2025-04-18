@@ -446,7 +446,7 @@ interface EdgeBoundaryProps {
   direction: Direction;
 }
 
-export function EdgeBoundary({ center, size, direction }: EdgeBoundaryProps) {
+function EdgeBoundary({ center, size, direction }: EdgeBoundaryProps) {
   const [corner1, corner2] = useMemo(
     () => edgeCorners(center, size, direction),
     [center.x, center.y, size, direction],

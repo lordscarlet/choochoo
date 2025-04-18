@@ -89,7 +89,7 @@ function InternalActiveGame() {
   );
 }
 
-export function TurnOrder() {
+function TurnOrder() {
   const turnOrder = useInject(() => injectPlayersByTurnOrder()(), []);
   const current = useCurrentPlayer();
 
@@ -111,7 +111,7 @@ export function TurnOrder() {
   );
 }
 
-export function Header() {
+function Header() {
   const game = useGame();
   return (
     <h1 className={styles.header}>
@@ -151,7 +151,7 @@ export function GameOver() {
   );
 }
 
-export function UndoButton() {
+function UndoButton() {
   const { undo, canUndo, isPending } = useUndoAction();
   if (!canUndo) {
     return <></>;
@@ -163,7 +163,7 @@ export function UndoButton() {
   );
 }
 
-export function RetryButton() {
+function RetryButton() {
   const { retry, canRetry, isPending } = useRetryAction();
   if (!canRetry) {
     return <></>;

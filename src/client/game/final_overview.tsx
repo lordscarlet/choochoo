@@ -15,7 +15,7 @@ export function FinalOverview() {
   return <FinalOverviewInternal />;
 }
 
-export function FinalOverviewInternal() {
+function FinalOverviewInternal() {
   const playerHelper = useInjectedMemo(PlayerHelper);
 
   const playersOrdered = useMemo(() => {
@@ -52,7 +52,7 @@ export function FinalOverviewInternal() {
   );
 }
 
-export function FinalOverviewRows(props: RowProps) {
+function FinalOverviewRows(props: RowProps) {
   const settings = ViewRegistry.singleton.get(useGameKey());
   return (
     <>

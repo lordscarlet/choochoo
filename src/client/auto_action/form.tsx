@@ -68,7 +68,7 @@ interface InternalAutoActionFormProps {
   setExpanded(expanded: boolean): void;
 }
 
-export function InternalAutoActionForm({
+function InternalAutoActionForm({
   gameId,
   autoAction,
   expanded,

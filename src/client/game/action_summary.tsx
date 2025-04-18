@@ -79,7 +79,7 @@ export function ActionSummary() {
   }
 }
 
-export function StLuciaTurnOrder() {
+function StLuciaTurnOrder() {
   const {
     canEmit,
     canEmitUserId,
@@ -116,7 +116,7 @@ export function StLuciaTurnOrder() {
   );
 }
 
-export function EarthToHeaven() {
+function EarthToHeaven() {
   const { canEmit, canEmitUserId } = useAction(PlaceAction);
 
   if (canEmitUserId == null) {
@@ -134,7 +134,7 @@ export function EarthToHeaven() {
   return <div>You must place a new city.</div>;
 }
 
-export function DiscoProduction() {
+function DiscoProduction() {
   const { canEmit, emit, isPending, canEmitUserId } =
     useEmptyAction(ProductionPassAction);
 
@@ -161,7 +161,7 @@ export function DiscoProduction() {
   );
 }
 
-export function SpecialActionSelector() {
+function SpecialActionSelector() {
   const { canEmit, canEmitUserId } = useAction(ActionSelectionSelectAction);
   const {
     canEmit: canEmitSkip,
@@ -192,11 +192,11 @@ export function SpecialActionSelector() {
   );
 }
 
-export function EndGame() {
+function EndGame() {
   return <GenericMessage>This game is over.</GenericMessage>;
 }
 
-export function MoveGoods() {
+function MoveGoods() {
   const {
     emit: emitLoco,
     canEmit,
@@ -317,7 +317,7 @@ export function GenericMessage({ children }: { children: ReactNode }) {
   return <div>{children}</div>;
 }
 
-export function TakeShares() {
+function TakeShares() {
   const { canEmit, canEmitUserId, emit, isPending } =
     useAction(TakeSharesAction);
   const numShares = useInjected(ShareHelper).getSharesTheyCanTake();
@@ -358,7 +358,7 @@ export function TakeShares() {
   );
 }
 
-export function Deurbanization() {
+function Deurbanization() {
   const {
     emit: emitPass,
     canEmit,
@@ -388,7 +388,7 @@ export function Deurbanization() {
   );
 }
 
-export function Build() {
+function Build() {
   const { emit: emitPass, canEmit, canEmitUserId } = useEmptyAction(DoneAction);
   const notify = useDialogs();
   const [buildsRemaining, canUrbanize] = useInject(() => {

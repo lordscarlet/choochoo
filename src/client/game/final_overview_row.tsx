@@ -10,7 +10,7 @@ export interface RowProps {
 
 export type RowFactory = (props: RowProps) => ReactElement;
 
-export function Color({ players }: RowProps) {
+function Color({ players }: RowProps) {
   return (
     <tr>
       <th></th>
@@ -93,7 +93,7 @@ export function TrackVps({ players }: RowProps) {
   );
 }
 
-export function IncomeStat({ players }: RowProps) {
+function IncomeStat({ players }: RowProps) {
   return (
     <tr>
       <th className={styles.label}>Income</th>
@@ -104,7 +104,7 @@ export function IncomeStat({ players }: RowProps) {
   );
 }
 
-export function SharesStat({ players }: RowProps) {
+function SharesStat({ players }: RowProps) {
   return (
     <tr>
       <th className={styles.label}>Shares</th>
@@ -115,7 +115,7 @@ export function SharesStat({ players }: RowProps) {
   );
 }
 
-export function TrackStat({ players }: RowProps) {
+function TrackStat({ players }: RowProps) {
   const playerHelper = useInjected(PlayerHelper);
   return (
     <tr>
@@ -127,7 +127,7 @@ export function TrackStat({ players }: RowProps) {
   );
 }
 
-export function MoneyStat({ players }: RowProps) {
+function MoneyStat({ players }: RowProps) {
   return (
     <tr>
       <th className={styles.label}>Money</th>
