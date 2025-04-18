@@ -1,7 +1,7 @@
 import { InfiniteData } from "@tanstack/react-query";
-import { useNotifications } from "@toolpad/core";
 import { DataResponse } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useMemo } from "react";
+import { toast } from "react-toastify";
 import { MessageApi, messageContract, PageCursor } from "../../api/message";
 import { tsr } from "./client";
 import { handleError } from "./network";
@@ -43,7 +43,6 @@ function parseMessages(
 export function useMessages(gameId?: number): UseMessages {
   useJoinRoom(gameId);
   const socket = useSocket();
-  const notifications = useNotifications();
   const queryClient = tsr.useQueryClient();
   const queryKey = ["messages", gameId];
   const { data, isLoading, error, fetchNextPage, hasNextPage } =
@@ -63,10 +62,7 @@ export function useMessages(gameId?: number): UseMessages {
 
   useEffect(() => {
     if (error == null) return;
-    notifications.show("Failed to load messages", {
-      autoHideDuration: 2000,
-      severity: "error",
-    });
+    toast.error("Failed to load messages");
   }, [error]);
 
   const updateLogs = useCallback(

@@ -1,6 +1,6 @@
-import { useNotifications } from "@toolpad/core";
 import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect } from "react";
+import { toast } from "react-toastify";
 import { ZodError } from "zod";
 import { ValidationError, ZodErrorResponse } from "../../api/error";
 
@@ -29,14 +29,9 @@ export function isErrorBody(t: unknown): t is ErrorBody {
 }
 
 export function useErrorNotifier(): (error: Error | NetworkError) => void {
-  const notifications = useNotifications();
   return useCallback(
-    (error: Error | NetworkError) =>
-      notifications.show(toMessage(error), {
-        severity: "error",
-        autoHideDuration: 2000,
-      }),
-    [notifications],
+    (error: Error | NetworkError) => toast.error(toMessage(error)),
+    [],
   );
 }
 

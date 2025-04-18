@@ -1,11 +1,10 @@
-import { useNotifications } from "@toolpad/core";
 import { useCallback } from "react";
+import { toast } from "react-toastify";
 import { SubmitFeedbackApi } from "../../../api/feedback";
 import { tsr } from "../client";
 import { handleError } from "../network";
 
 export function useSubmitFeedback() {
-  const notifications = useNotifications();
   const { mutate, error, isPending } = tsr.feedback.submit.useMutation();
   const validationError = handleError(isPending, error);
 
@@ -15,15 +14,12 @@ export function useSubmitFeedback() {
         { body },
         {
           onSuccess: (_) => {
-            notifications.show("Feedback submitted", {
-              autoHideDuration: 2000,
-              severity: "success",
-            });
+            toast.success("Feedback submitted");
             onSubmit?.();
           },
         },
       ),
-    [notifications],
+    [],
   );
   return { submitFeedback, validationError, isPending };
 }

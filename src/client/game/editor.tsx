@@ -1,11 +1,13 @@
 import { Button } from "@mui/material";
 import { ChangeEvent, useCallback, useMemo, useState } from "react";
+import { useConfirm } from "../components/confirm";
 import { canEditGame, useGame, useSetGameData } from "../services/game";
 import { useIsAdmin } from "../services/me";
 
 export function Editor() {
   const isAdmin = useIsAdmin();
   const game = useGame();
+  const confirm = useConfirm();
   const canRead = isAdmin;
   const content = useMemo(() => {
     return JSON.stringify(JSON.parse(game.gameData!), null, 2);
@@ -33,13 +35,13 @@ export function Editor() {
     setIsOpen(!isOpen);
   }, [isOpen, setIsOpen]);
 
-  const submit = useCallback(() => {
-    const confirmed = confirm(
+  const submit = useCallback(async () => {
+    const confirmed = await confirm(
       "Are you sure? This can seriously fuck up your game and there's no undo",
     );
     if (!confirmed) return;
     setGameData(JSON.stringify(JSON.parse(actualContent)));
-  }, [actualContent, setGameData]);
+  }, [confirm, actualContent, setGameData]);
 
   if (!canRead) return <></>;
 

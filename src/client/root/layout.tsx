@@ -22,6 +22,7 @@ import {
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import { useIsAwaitingPlayer } from "../components/awaiting_player";
 import { DropdownMenu, DropdownMenuItem } from "../components/dropdown_menu";
 import { Loading } from "../components/loading";
@@ -180,6 +181,12 @@ export function Layout() {
         </Suspense>
       </main>
       <Footer />
+      <ToastContainer
+        position="bottom-left"
+        hideProgressBar
+        autoClose={2000}
+        theme={mode}
+      />
     </>
   );
 }

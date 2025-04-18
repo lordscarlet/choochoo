@@ -1,4 +1,3 @@
-import { useNotifications } from "@toolpad/core";
 import { useCallback, useState } from "react";
 import { CreateErrorReportApi } from "../../../api/feedback";
 import { assert } from "../../../utils/validate";
@@ -7,7 +6,6 @@ import { tsr } from "../client";
 let throttleTimestamp: number | undefined;
 
 export function useReportError() {
-  const notifications = useNotifications();
   const { mutate, isPending } = tsr.feedback.reportError.useMutation();
   const [errorId, setErrorId] = useState<number | undefined>();
 
@@ -30,7 +28,7 @@ export function useReportError() {
         },
       );
     },
-    [notifications],
+    [],
   );
   return { reportError, isPending, errorId };
 }

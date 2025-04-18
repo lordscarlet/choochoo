@@ -8,8 +8,8 @@ import {
   FormControlLabel,
   IconButton,
 } from "@mui/material";
-import { useNotifications } from "@toolpad/core";
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { toast } from "react-toastify";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { UrbanizeAction } from "../../engine/build/urbanize";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
@@ -105,15 +105,10 @@ export function BuildingDialog({
 
   const isOpen = coordinates != null && hasBuildingOptions;
 
-  const notifications = useNotifications();
-
   useEffect(() => {
     if (coordinates != null && !hasBuildingOptions) {
       cancelBuild();
-      notifications.show("No eligible building options", {
-        autoHideDuration: 2000,
-        severity: "error",
-      });
+      toast.error("No eligible building options");
     }
   }, [coordinates, hasBuildingOptions, cancelBuild]);
 

@@ -1,4 +1,3 @@
-import { useNotifications } from "@toolpad/core";
 import {
   ReactNode,
   createContext,
@@ -7,6 +6,7 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   CreateUserApi,
   ForgotPasswordRequest,
@@ -114,7 +114,6 @@ export function useIsAdmin(ignoreAdminMode = false): boolean {
 }
 
 export function useLogin() {
-  const notifications = useNotifications();
   const navigate = useNavigate();
   const { mutate, error, isPending } = tsr.users.login.useMutation();
   const validationError = handleError(isPending, error);
@@ -128,10 +127,7 @@ export function useLogin() {
           onSuccess: (data) => {
             updateCache(data.body.user, undefined);
             if (body.activationCode) {
-              notifications.show("Welcome! CCMF!", {
-                autoHideDuration: 2000,
-                severity: "success",
-              });
+              toast.success("Welcome! CCMF!");
             }
             navigate("/");
           },
@@ -204,7 +200,6 @@ export function useForgotPassword() {
 
 export function useUpdatePassword() {
   const { mutate, error, isPending } = tsr.users.updatePassword.useMutation();
-  const notifications = useNotifications();
   const validationError = handleError(isPending, error);
 
   const updatePassword = useCallback(
@@ -213,10 +208,7 @@ export function useUpdatePassword() {
         { body },
         {
           onSuccess: (_) => {
-            notifications.show("Update succeeded!", {
-              autoHideDuration: 2000,
-              severity: "success",
-            });
+            toast.success("Update succeeded!");
             onSuccess?.();
           },
         },
@@ -230,7 +222,6 @@ export function useUpdatePassword() {
 export function useLogout() {
   const { mutate, error, isPending } = tsr.users.logout.useMutation();
   handleError(isPending, error);
-  const notifications = useNotifications();
   const updateCache = useUpdateMeCache();
 
   const logout = useCallback(() => {
@@ -240,10 +231,7 @@ export function useLogout() {
         onSuccess({ status, body }) {
           assert(status === 200 && body.success);
           updateCache(undefined, undefined);
-          notifications.show("Logout successful", {
-            autoHideDuration: 2000,
-            severity: "success",
-          });
+          toast.success("Logout successful");
         },
       },
     );
@@ -255,7 +243,6 @@ export function useResendActivationCode() {
   const { mutate, error, isPending } =
     tsr.users.resendActivationCode.useMutation();
   handleError(isPending, error);
-  const notifications = useNotifications();
 
   const resend = useCallback((body: ResendActivationCodeRequest = {}) => {
     mutate(
@@ -263,10 +250,7 @@ export function useResendActivationCode() {
       {
         onSuccess({ status, body }) {
           assert(status === 200 && body.success);
-          notifications.show("Activation code sent", {
-            autoHideDuration: 2000,
-            severity: "success",
-          });
+          toast.success("Activation code sent");
         },
       },
     );
@@ -279,7 +263,6 @@ export function useActivateAccount() {
   const { mutate, error, isError, isPending } =
     tsr.users.activateAccount.useMutation();
   handleError(isPending, error);
-  const notifications = useNotifications();
   const navigate = useNavigate();
   const updateCache = useUpdateMeCache();
 
@@ -290,10 +273,7 @@ export function useActivateAccount() {
         onSuccess({ status, body }) {
           assert(status === 200);
           updateCache(body.user, undefined);
-          notifications.show("Success! CCMF!", {
-            autoHideDuration: 2000,
-            severity: "success",
-          });
+          toast.success("Success! CCMF!");
           navigate("/");
         },
       },

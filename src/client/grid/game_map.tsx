@@ -1,4 +1,3 @@
-import { DialogHook, useDialogs } from "@toolpad/core";
 import { useCallback, useMemo } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { ClaimAction, ClaimData } from "../../engine/build/claim";
@@ -34,6 +33,7 @@ import { PlaceAction } from "../../maps/soultrain/earth_to_heaven";
 import { ViewRegistry } from "../../maps/view_registry";
 import { Coordinates } from "../../utils/coordinates";
 import { arrayEqualsIgnoreOrder, peek, removeKey } from "../../utils/functions";
+import { ConfirmCallback, useConfirm } from "../components/confirm";
 import { useAction, useGameVersionState } from "../services/game";
 import { useTypedCallback, useTypedMemo } from "../utils/hooks";
 import {
@@ -104,19 +104,19 @@ function onSelectGoodCb(
 }
 
 function useMaybeConfirmEmitHeavyLifting() {
-  const dialogs = useDialogs();
+  const confirm = useConfirm();
   const { getErrorMessage, emit, canEmit } = useAction(HeavyLiftingAction);
   return useCallback(
     async (data: HeavyLiftingData) => {
       if (!canEmit) return false;
       if (getErrorMessage(data) != null) return false;
-      if (!(await dialogs.confirm("Use heavy cardboard move?"))) {
+      if (!(await confirm("Use heavy cardboard move?"))) {
         return false;
       }
       emit(data);
       return true;
     },
-    [dialogs, emit, canEmit, getErrorMessage],
+    [confirm, emit, canEmit, getErrorMessage],
   );
 }
 
@@ -315,7 +315,7 @@ function onClickCb(
 
 function maybeConfirmDeliveryCb(
   moveHelper: Memoized<MoveHelper>,
-  dialogs: DialogHook,
+  confirm: ConfirmCallback,
   grid: Grid,
   emitMove: (moveData: MoveData) => void,
 ) {
@@ -327,20 +327,18 @@ function maybeConfirmDeliveryCb(
       endingStop instanceof City &&
       moveHelper.value.canDeliverTo(endingStop, moveActionProgress.good)
     ) {
-      dialogs
-        .confirm("Deliver to " + endingStop.name(), {
-          okText: "Confirm Delivery",
-          cancelText: "Cancel",
-        })
-        .then((confirmed) => {
-          if (!confirmed) return;
-          emitMove({
-            ...moveActionProgress,
-            path: moveActionProgress.path.map((step) =>
-              removeKey(step, "startingConnection"),
-            ),
-          });
+      confirm("Deliver to " + endingStop.name(), {
+        confirmButton: "Confirm Delivery",
+        cancelButton: "Cancel",
+      }).then((confirmed) => {
+        if (!confirmed) return;
+        emitMove({
+          ...moveActionProgress,
+          path: moveActionProgress.path.map((step) =>
+            removeKey(step, "startingConnection"),
+          ),
         });
+      });
     }
   };
 }
@@ -406,7 +404,7 @@ export function GameMap() {
     isConnectCityPending ||
     isDiscoProductionPending;
 
-  const dialogs = useDialogs();
+  const confirm = useConfirm();
 
   const [moveActionProgress, setMoveActionProgress] = useGameVersionState<
     EnhancedMoveData | undefined
@@ -419,7 +417,7 @@ export function GameMap() {
 
   const maybeConfirmDelivery = useTypedCallback(maybeConfirmDeliveryCb, [
     moveHelper,
-    dialogs,
+    confirm,
     grid,
     emitMove,
   ]);

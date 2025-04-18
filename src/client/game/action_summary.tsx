@@ -1,5 +1,4 @@
 import { Button } from "@mui/material";
-import { useDialogs } from "@toolpad/core";
 import { ReactNode, useCallback } from "react";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
@@ -25,6 +24,7 @@ import {
 } from "../../maps/st-lucia/bidding";
 import { iterate } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
+import { useConfirm } from "../components/confirm";
 import { DropdownMenu, DropdownMenuItem } from "../components/dropdown_menu";
 import { MaybeTooltip } from "../components/maybe_tooltip";
 import { Username } from "../components/username";
@@ -390,7 +390,7 @@ function Deurbanization() {
 
 function Build() {
   const { emit: emitPass, canEmit, canEmitUserId } = useEmptyAction(DoneAction);
-  const notify = useDialogs();
+  const confirm = useConfirm();
   const [buildsRemaining, canUrbanize] = useInject(() => {
     const helper = inject(BuilderHelper);
     if (!canEmit) return [undefined, undefined];
@@ -402,15 +402,13 @@ function Build() {
       emitPass();
       return;
     }
-    notify
-      .confirm(
-        "You still have an urbanize available, are you sure you are done building?",
-      )
-      .then((stillPass) => {
-        if (stillPass) {
-          emitPass();
-        }
-      });
+    confirm(
+      "You still have an urbanize available, are you sure you are done building?",
+    ).then((stillPass) => {
+      if (stillPass) {
+        emitPass();
+      }
+    });
   }, [emitPass, canUrbanize]);
 
   if (canEmitUserId == null) {

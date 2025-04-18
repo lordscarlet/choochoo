@@ -1,7 +1,7 @@
-import { useDialogs, useNotifications } from "@toolpad/core";
 import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { ValidationError } from "../../api/error";
 import {
   CreateGameApi,
@@ -24,6 +24,7 @@ import {
 import { Entry, WithFormNumber } from "../../utils/types";
 import { assert, assertNever } from "../../utils/validate";
 import { useUpdateAutoActionCache } from "../auto_action/hooks";
+import { useConfirm } from "../components/confirm";
 import { useMostRecentValue } from "../utils/hooks";
 import { useInjected, useInjectedMemo } from "../utils/injection_context";
 import { useSuccess } from "../utils/notify";
@@ -334,15 +335,12 @@ export function useCreateGame(): {
 export function useDeleteGame(game: GameLiteApi) {
   const me = useMe();
   const isAdmin = useIsAdmin();
-  const dialogs = useDialogs();
-  const notifications = useNotifications();
+  const confirm = useConfirm();
   const { mutate, error, isPending } = tsr.games.deleteGame.useMutation();
   handleError(isPending, error);
 
   const perform = useCallback(async () => {
-    const result = await dialogs.confirm(
-      "Are you sure you want to delete this game?",
-    );
+    const result = await confirm("Are you sure you want to delete this game?");
 
     if (!result) return;
 
@@ -350,14 +348,11 @@ export function useDeleteGame(game: GameLiteApi) {
       { params: { gameId: game.id } },
       {
         onSuccess: () => {
-          notifications.show("Success", {
-            autoHideDuration: 2000,
-            severity: "success",
-          });
+          toast.success("Success");
         },
       },
     );
-  }, [game.id]);
+  }, [confirm, game.id]);
 
   const canBeDeleted =
     game.status === GameStatus.enum.LOBBY || game.playerIds.length === 1;
@@ -509,13 +504,12 @@ export function canEditGame(game: GameApi): boolean {
 export function useAction<T extends object>(
   action: ActionConstructor<T>,
 ): ActionHandler<T> {
-  const dialogs = useDialogs();
+  const confirm = useConfirm();
   const me = useMe();
   const game = useGame();
   const onSuccess = useSetGameSuccess();
   const updateAutoActionCache = useUpdateAutoActionCache(game.id);
   const phaseDelegator = useInjected(PhaseDelegator);
-  const notifications = useNotifications();
   const { mutate, isPending } = tsr.games.performAction.useMutation();
   const actionInstance = useInjectedMemo(action);
   const errorNotifier = useErrorNotifier();
@@ -525,10 +519,7 @@ export function useAction<T extends object>(
   const emit = useCallback(
     (actionData: T, confirmed = false) => {
       if ("view" in actionData && actionData["view"] instanceof Window) {
-        notifications.show("Error performing action", {
-          autoHideDuration: 2000,
-          severity: "success",
-        });
+        toast.error("Error performing action");
         throw new Error(
           "Cannot use event as actionData. You likely want to use useEmptyAction",
         );
@@ -547,23 +538,20 @@ export function useAction<T extends object>(
             ) {
               errorNotifier(error);
             } else {
-              dialogs
-                .confirm("This action is not reversible. Continue?")
-                .then((confirmed) => {
+              confirm("This action is not reversible. Continue?").then(
+                (confirmed) => {
                   if (confirmed) {
                     emit(actionData, true);
                   }
-                });
+                },
+              );
             }
           },
           onSuccess: (r) => {
             onSuccess(r);
             updateAutoActionCache(r.body.auto);
 
-            notifications.show("Success", {
-              autoHideDuration: 2000,
-              severity: "success",
-            });
+            toast.success("Success");
           },
         },
       );
@@ -606,8 +594,7 @@ export function useUndoAction(): UndoAction {
   const game = useGame();
   const onSuccess = useSetGameSuccess();
   const me = useMe();
-  const dialogs = useDialogs();
-  const notifications = useNotifications();
+  const confirm = useConfirm();
   const { mutate, error, isPending } = tsr.games.undoAction.useMutation();
   handleError(isPending, error);
 
@@ -620,7 +607,7 @@ export function useUndoAction(): UndoAction {
   const undo = useCallback(async () => {
     const adminOverride = !canUndoBecausePlayer;
     if (!canUndoBecausePlayer) {
-      const shouldContinue = await dialogs.confirm(
+      const shouldContinue = await confirm(
         "This is an admin action, usually you cannot undo this action. Continue?",
       );
       if (!shouldContinue) return;
@@ -634,10 +621,7 @@ export function useUndoAction(): UndoAction {
         onSuccess(r) {
           onSuccess(r);
 
-          notifications.show("Success", {
-            autoHideDuration: 2000,
-            severity: "success",
-          });
+          toast.success("Success");
         },
       },
     );
@@ -655,24 +639,17 @@ interface RetryAction {
 export function useRetryAction(): RetryAction {
   const game = useGame();
   const onSuccess = useSetGameSuccess();
-  const notifications = useNotifications();
   const { mutate, isPending, error } = tsr.games.retryLast.useMutation();
   handleError(isPending, error);
 
   const retry = useCallback(() => {
     const steps = Number(prompt("How many steps?"));
     if (isNaN(steps)) {
-      notifications.show("Enter a valid number", {
-        autoHideDuration: 2000,
-        severity: "error",
-      });
+      toast.error("Enter a valid number");
       return;
     }
     if (steps >= game.version) {
-      notifications.show(
-        "Warning, the active player may break when starting over",
-        { autoHideDuration: 2000, severity: "error" },
-      );
+      toast.error("Warning, the active player may break when starting over");
     }
 
     mutate(
@@ -683,10 +660,7 @@ export function useRetryAction(): RetryAction {
       {
         onSuccess(r) {
           onSuccess(r);
-          notifications.show("Success", {
-            autoHideDuration: 2000,
-            severity: "success",
-          });
+          toast.success("Success");
         },
       },
     );
@@ -722,24 +696,22 @@ export function useConcede() {
 export function useAbandon() {
   const game = useGame();
   const onSuccess = useSuccess();
-  const dialogs = useDialogs();
+  const confirm = useConfirm();
   const { mutate, isPending, error } = tsr.games.abandon.useMutation();
   handleError(isPending, error);
 
   const abandon = useCallback(() => {
-    dialogs
-      .confirm(
-        "Are you sure you want to abandon the game? This will hurt your reputation.",
-      )
-      .then((result) => {
-        if (!result) return;
-        mutate(
-          {
-            params: { gameId: game.id },
-          },
-          { onSuccess },
-        );
-      });
+    confirm(
+      "Are you sure you want to abandon the game? This will hurt your reputation.",
+    ).then((result) => {
+      if (!result) return;
+      mutate(
+        {
+          params: { gameId: game.id },
+        },
+        { onSuccess },
+      );
+    });
   }, [game.id]);
 
   return { abandon, isPending };
@@ -748,24 +720,22 @@ export function useAbandon() {
 export function useKick() {
   const game = useGame();
   const onSuccess = useSuccess();
-  const dialogs = useDialogs();
+  const confirm = useConfirm();
   const { mutate, isPending, error } = tsr.games.kick.useMutation();
   handleError(isPending, error);
 
   const kick = useCallback(() => {
-    dialogs
-      .confirm(
-        "Are you sure you want to kick the current player? This will hurt their reputation.",
-      )
-      .then((result) => {
-        if (!result) return;
-        mutate(
-          {
-            params: { gameId: game.id },
-          },
-          { onSuccess },
-        );
-      });
+    confirm(
+      "Are you sure you want to kick the current player? This will hurt their reputation.",
+    ).then((result) => {
+      if (!result) return;
+      mutate(
+        {
+          params: { gameId: game.id },
+        },
+        { onSuccess },
+      );
+    });
   }, [game.id]);
 
   const timeRemaining =

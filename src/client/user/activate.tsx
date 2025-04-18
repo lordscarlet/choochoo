@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
-import { useNotifications } from "@toolpad/core";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { UserRole } from "../../api/user";
 import {
   useActivateAccount,
@@ -11,7 +11,6 @@ import {
 
 export function ActivatePage() {
   const navigate = useNavigate();
-  const notifications = useNotifications();
   const me = useMe();
   const [searchParams] = useSearchParams();
   const activationCode = searchParams.get("activationCode");
@@ -25,10 +24,7 @@ export function ActivatePage() {
     if (hasNavigated.current) return;
     if (me == null) {
       hasNavigated.current = true;
-      notifications.show("Login to activate your account", {
-        autoHideDuration: 2000,
-        severity: "error",
-      });
+      toast.error("Login to activate your account");
       navigate("/app/users/login?activationCode=" + activationCode);
       return;
     }
