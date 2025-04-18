@@ -33,6 +33,10 @@ export class PittsburghFunkyBuilding extends BuildCostCalculator {
     return super.costOf(coordinates, newTileType, orientation);
   }
 
+  protected getRedirectCost(): number {
+    return 4;
+  }
+
   protected getTerrainCost(_: Land): number {
     return 0;
   }
