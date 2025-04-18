@@ -193,7 +193,7 @@ export class StateStore {
   }
 }
 
-export interface ValueChange {
+interface ValueChange {
   key: string;
 }
 
@@ -211,5 +211,3 @@ interface InjectedOps<Data> {
 }
 
 export type InjectedState<Data> = (() => Immutable<Data>) & InjectedOps<Data>;
-
-export type Mappable<Data> = () => Immutable<Data>;

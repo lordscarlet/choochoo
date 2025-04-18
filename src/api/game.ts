@@ -19,8 +19,6 @@ export type MapConfig = z.infer<typeof MapConfig>;
 
 export type GameStatus = z.infer<typeof GameStatus>;
 
-export const allGameStatuses = GameStatus.options;
-
 export function gameStatusToString(game: GameLiteApi): string {
   if (game.summary != null) return game.summary;
   switch (game.status) {
@@ -39,7 +37,7 @@ export function gameStatusToString(game: GameLiteApi): string {
   }
 }
 
-export const ActionApi = z.object({
+const ActionApi = z.object({
   actionName: z.string(),
   actionData: z.unknown(),
   confirmed: z.boolean(),

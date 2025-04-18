@@ -276,7 +276,7 @@ export function useGame(): GameApi {
   return data.body.game;
 }
 
-export type CreateGameInputApi = WithFormNumber<
+type CreateGameInputApi = WithFormNumber<
   CreateGameApi,
   "minPlayers" | "maxPlayers"
 >;
@@ -595,7 +595,7 @@ export function useAction<T extends object>(
   return { emit, canEmit, canEmitUserId, getErrorMessage, isPending };
 }
 
-export interface UndoAction {
+interface UndoAction {
   undo(): void;
   canUndo: boolean;
   isPending: boolean;
@@ -646,7 +646,7 @@ export function useUndoAction(): UndoAction {
   return { undo, canUndo, isPending };
 }
 
-export interface RetryAction {
+interface RetryAction {
   retry(): void;
   canRetry: boolean;
   isPending: boolean;

@@ -71,7 +71,3 @@ export function composeState<
     };
   };
 }
-
-export type Rest<T extends Tuple> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends [any, ...infer B] ? [...B] : never;

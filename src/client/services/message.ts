@@ -9,7 +9,7 @@ import { useJoinRoom, useSocket } from "./socket";
 
 export const emptyMessages: MessageApi[] = [];
 
-export interface UseMessages {
+interface UseMessages {
   messages: MessageApi[];
   isLoading: boolean;
   fetchNextPage: () => void;

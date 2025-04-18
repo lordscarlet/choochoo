@@ -10,7 +10,7 @@ import { ClientToServerEvents, ServerToClientEvents } from "../../api/socket";
 import { assert } from "../../utils/validate";
 import { environment } from "./environment";
 
-export type ChooChooSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+type ChooChooSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 const SocketContext = createContext<ChooChooSocket | undefined>(undefined);
 

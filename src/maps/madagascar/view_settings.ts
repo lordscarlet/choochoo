@@ -1,13 +1,16 @@
 import { Action } from "../../engine/state/action";
+import { MapViewSettings } from "../view_settings";
+import { getActionCaption } from "./action_caption";
 import { MadagascarRules } from "./rules";
 import { MadagascarMapSettings } from "./settings";
-import { MapViewSettings } from "../view_settings";
 
 export class MadagascarViewSettings
   extends MadagascarMapSettings
   implements MapViewSettings
 {
   getMapRules = MadagascarRules;
+
+  getActionCaption = getActionCaption;
 
   getActionDescription(action: Action): string | undefined {
     if (action === Action.LOCOMOTIVE) {

@@ -14,7 +14,8 @@
     "format": "prettier src --write",
     "migrate": "node bin/scripts/migrations up",
     "test": "ts-node node_modules/jasmine/bin/jasmine",
-    "test-watch": "nodemon -V --ext ts,tsx --watch src/ --exec 'ts-node node_modules/jasmine/bin/jasmine'"
+    "test-watch": "nodemon -V --ext ts,tsx --watch src/ --exec 'ts-node node_modules/jasmine/bin/jasmine'",
+    "knip": "knip"
   },
   "files": [
     "./dist",
@@ -87,10 +88,12 @@
     "eslint-plugin-react": "^7.37.5",
     "globals": "^15.14.0",
     "jasmine": "^5.5.0",
+    "knip": "^5.50.5",
     "nodemon": "^3.1.9",
     "prettier": "3.4.2",
     "sqlite3": "^5.1.7",
     "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.30.1"
   },
   "author": "YourDeveloperFriend",
