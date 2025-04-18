@@ -19,7 +19,7 @@ export function MoonRules() {
         </li>
         <li>
           <b>Spherical map</b>: builds off one edge of the map can be routed off
-          the other end (as marked).
+          the other end (double check the numbers to see where it loops around).
         </li>
         <li>
           <b>Cities</b>: switch to black cities on every other turn.
