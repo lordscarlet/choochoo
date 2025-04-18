@@ -12,12 +12,17 @@ export class IncomeReductionPhase extends PhaseModule {
   private readonly players = injectAllPlayersUnsafe();
 
   onStart(): void {
+    let hasLoggedIncomeReduction = false;
     this.players.update((players) => {
       for (const player of players) {
         if (player.outOfGame) continue;
         const lostIncome = this.calculateIncomeReduction(player.income);
         player.income -= lostIncome;
         if (lostIncome > 0) {
+          if (!hasLoggedIncomeReduction) {
+            hasLoggedIncomeReduction = true;
+            this.log.log("Begin income reduction");
+          }
           this.log.player(player, `loses ${lostIncome} income`);
         }
       }
