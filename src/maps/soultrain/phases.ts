@@ -72,6 +72,7 @@ export class SoulTrainRoundEngine extends RoundEngine {
       .map((space) => space.getGoods().length)
       .reduce((a, b) => a + b, 0);
     if (count <= 10) {
+      this.log.log("Earth to Heaven phase begins...");
       this.cleanUpHell();
       this.addHeaven();
       return super.start(1);
@@ -158,7 +159,11 @@ export class SoulTrainRoundEngine extends RoundEngine {
 
     for (const [playerColor, count] of playerTrack) {
       this.playerHelper.update(playerColor, (data) => {
-        data.income += Math.floor(count / 3);
+        const incomeIncrease = Math.floor(count / 3);
+        data.income += incomeIncrease;
+        if (incomeIncrease > 0) {
+          this.log.player(data, `earns ${incomeIncrease} from track in hell.`);
+        }
       });
     }
   }
