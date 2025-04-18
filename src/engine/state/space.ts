@@ -5,7 +5,7 @@ import { SpaceType, SpaceTypeZod } from "./location_type";
 import { OnRollData } from "./roll";
 import { DirectionZod, MutableTileData } from "./tile";
 
-export const MutableCityData = z.object({
+const MutableCityData = z.object({
   type: z.literal(SpaceType.CITY),
   name: z.string(),
   color: z.union([z.array(z.nativeEnum(Good)), z.nativeEnum(Good)]),
@@ -18,7 +18,7 @@ export const MutableCityData = z.object({
   startingNumCubesPerPlayer: z.number().optional(),
 });
 
-export type MutableCityData = z.infer<typeof MutableCityData>;
+type MutableCityData = z.infer<typeof MutableCityData>;
 export type CityData = Immutable<MutableCityData>;
 
 export const LandType = SpaceTypeZod.refine(isLandType);

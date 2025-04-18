@@ -6,6 +6,7 @@
     "src/scripts/*"
   ],
   "project": ["**/*.{js,ts,tsx}"],
+  "ignoreBinaries": ["tar"],
   "ignore": [
     "src/scripts/*",
     "src/migrations/*",
