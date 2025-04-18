@@ -51,7 +51,7 @@ describe('BuildValidator', () => {
       orientation: Direction.TOP_LEFT,
     };
     expect(validator().getInvalidBuildReason(state().plainCoordinates, build))
-      .toBe('cannot have an exit to unpassable terrain');
+      .toBe('cannot build towards an unpassable edge');
   });
 
   it("cannot build a tile into explicitly unpassable terrain", () => {
@@ -69,7 +69,7 @@ describe('BuildValidator', () => {
       orientation: Direction.TOP,
     };
     expect(validator().getInvalidBuildReason(plainCoordinates, build))
-      .toBe('cannot have an exit to unpassable terrain');
+      .toBe('cannot build towards an unpassable edge');
   });
 
   it("cannot build a tile into water terrain", () => {
@@ -87,7 +87,7 @@ describe('BuildValidator', () => {
       orientation: Direction.TOP,
     };
     expect(validator().getInvalidBuildReason(plainCoordinates, build))
-        .toBe('cannot have an exit to unpassable terrain');
+        .toBe('cannot build towards an unpassable edge');
   });
 
   it("cannot build a tile on unpassable terrain", () => {
