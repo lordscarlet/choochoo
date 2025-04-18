@@ -89,7 +89,7 @@
   },
   "author": "YourDeveloperFriend",
   "license": "ISC",
-  "description": "",
+  "description": "This is a description.",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/YourDeveloperFriend"
   },
