@@ -44,7 +44,7 @@ export const MyUserApi = UserApi.extend({
 });
 export type MyUserApi = z.infer<typeof MyUserApi>;
 
-export const UserPageCursor = z.array(z.coerce.number());
+export const UserPageCursor = z.string();
 export type UserPageCursor = z.infer<typeof UserPageCursor>;
 
 export const ListUsersApi = z.object({

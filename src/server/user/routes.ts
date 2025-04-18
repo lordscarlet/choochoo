@@ -2,6 +2,7 @@ import { Op, ValidationError, WhereOptions } from "@sequelize/core";
 import { createExpressEndpoints, initServer } from "@ts-rest/express";
 import express from "express";
 import { userContract, UserRole } from "../../api/user";
+import { pageCursorToString, parsePageCursor } from "../../utils/page_cursor";
 import { assert, fail } from "../../utils/validate";
 import "../session";
 import { emailService } from "../util/email";
@@ -81,8 +82,9 @@ const router = initServer().router(userContract, {
   async list({ req, query }) {
     await assertRole(req, UserRole.enum.ADMIN);
     const where: WhereOptions<UserDao> = {};
-    if (query.pageCursor != null) {
-      where.id = { [Op.notIn]: query.pageCursor };
+    const pageCursor = parsePageCursor(query.pageCursor);
+    if (pageCursor != null) {
+      where.id = { [Op.notIn]: pageCursor };
     }
     const pageSize = query.pageSize ?? 20;
     const allUsers = await UserDao.findAll({
@@ -94,11 +96,14 @@ const router = initServer().router(userContract, {
       allUsers.length > pageSize ? allUsers.slice(0, pageSize) : allUsers;
     const nextPageCursor =
       allUsers.length > pageSize
-        ? (query.pageCursor ?? []).concat(users.map((user) => user.id))
+        ? (pageCursor ?? []).concat(users.map((user) => user.id))
         : undefined;
     return {
       status: 200,
-      body: { users: users.map((user) => user.toMyApi()), nextPageCursor },
+      body: {
+        users: users.map((user) => user.toMyApi()),
+        nextPageCursor: pageCursorToString(nextPageCursor),
+      },
     };
   },
 

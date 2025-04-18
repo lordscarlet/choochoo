@@ -172,7 +172,7 @@ export const OrderByOptions = z.union([
   z.literal("updatedAt"),
 ]);
 
-export const GamePageCursor = z.array(z.coerce.number());
+export const GamePageCursor = z.string();
 export type GamePageCursor = z.infer<typeof GamePageCursor>;
 
 export const ListGamesApi = z.object({

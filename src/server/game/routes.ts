@@ -8,6 +8,7 @@ import { Op, WhereOptions } from "@sequelize/core";
 import { UserRole } from "../../api/user";
 import { EngineDelegator } from "../../engine/framework/engine";
 import { peek, remove } from "../../utils/functions";
+import { pageCursorToString, parsePageCursor } from "../../utils/page_cursor";
 import { LogDao } from "../messages/log_dao";
 import { sequelize } from "../sequelize";
 import "../session";
@@ -28,9 +29,11 @@ const router = initServer().router(gameContract, {
       order,
       userId,
       status,
-      pageCursor,
+      pageCursor: pageCursorString,
       ...rest
     } = { ...defaultQuery, ...query };
+
+    const pageCursor = parsePageCursor(pageCursorString);
     let where: WhereOptions<GameDao> = rest;
 
     if (status != null) {
@@ -95,7 +98,13 @@ const router = initServer().router(gameContract, {
       const nextPageCursor = (pageCursor ?? []).concat(
         gamesApi.map(({ id }) => id),
       );
-      return { status: 200, body: { nextPageCursor, games: gamesApi } };
+      return {
+        status: 200,
+        body: {
+          nextPageCursor: pageCursorToString(nextPageCursor),
+          games: gamesApi,
+        },
+      };
     } else {
       return { status: 200, body: { games: games.map((g) => g.toLiteApi()) } };
     }
