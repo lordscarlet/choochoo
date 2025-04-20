@@ -26,6 +26,8 @@ export const environment = {
   mailjetKey: process.env.MAILJET_KEY,
   mailjetSecret: process.env.MAILJET_SECRET,
   cryptoSecret: process.env.CRYPTO_SECRET ?? devCryptoSecret,
+  aosDiscordWebhookUrl: process.env.AOS_DISCORD_WEBHOOK_URL,
+  eotDiscordWebhookUrl: process.env.EOT_DISCORD_WEBHOOK_URL,
 } as const;
 
 if (environment.stage !== Stage.enum.development) {

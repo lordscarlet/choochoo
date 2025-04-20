@@ -79,6 +79,9 @@ abstract class BaseWebHookNotifier
     setting: AnyWebHookSetting,
   ): Promise<void> {
     const webHookUrl = toUrl(setting);
+    if (webHookUrl == null) {
+      return;
+    }
     const webHookUserId = toUserId(preferences, setting);
     const encodedMessage = `<${getNotifyPrefix(webHookUrl)}${webHookUserId}> ${message}`;
 
@@ -120,7 +123,7 @@ function toUserId(
   }
 }
 
-function toUrl(setting: AnyWebHookSetting): string {
+function toUrl(setting: AnyWebHookSetting): string | undefined {
   if (
     setting.method === NotificationMethod.WEBHOOK ||
     setting.method === NotificationMethod.CUSTOM_DISCORD
@@ -129,9 +132,9 @@ function toUrl(setting: AnyWebHookSetting): string {
   }
   switch (setting.option) {
     case WebHookOption.AOS:
-      return "https://discord.com/api/webhooks/1333509087849087047/ljD50Bvi7ZiKuYdi1WNGdhvtcePzbQ88mh0CTX8J9eBz8ji6aJ7Xo3Fcjvtkq3WAQNEv";
+      return environment.aosDiscordWebhookUrl;
     case WebHookOption.EOT:
-      return "https://discord.com/api/webhooks/1333499625759572129/wAl78ONZ57T9J7c72n8-cjUT-mpjls3t7X8ql1GDTe6lpD49D9vfU1HM2GglxGruQZPV";
+      return environment.eotDiscordWebhookUrl;
     default:
       assertNever(setting.option);
   }
