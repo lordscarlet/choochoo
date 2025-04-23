@@ -84,6 +84,7 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
   canEmit(): boolean {
     return (
       this.currentPlayer().color === this.heavyPlayer()?.color &&
+      this.heavyLifting.isInitialized() &&
       !this.heavyLifting().usedHeavyLifting
     );
   }
