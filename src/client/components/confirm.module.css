@@ -1,3 +1,5 @@
-.confirm {
+:global(.dark-mode) .modal:global(.ui.header),
+.modal:global(.ui.header),
+.modal {
   color: black;
 }

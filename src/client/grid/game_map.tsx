@@ -47,6 +47,7 @@ import {
 import { BuildingDialog, PlaceDialog } from "./building_dialog";
 import { ClickTarget } from "./click_target";
 import { HexGrid } from "./hex_grid";
+import { StealIncomeModal, useStealIncomeState } from "./steal_income";
 
 interface EnhancedPath extends Path {
   startingConnection: Track | OwnedInterCityConnection;
@@ -318,6 +319,7 @@ function maybeConfirmDeliveryCb(
   confirm: ConfirmCallback,
   grid: Grid,
   emitMove: (moveData: MoveData) => void,
+  maybeStealFrom: (moveData: MoveData, cityName: string) => boolean,
 ) {
   return (moveActionProgress: EnhancedMoveData | undefined) => {
     if (moveActionProgress == null) return;
@@ -327,6 +329,7 @@ function maybeConfirmDeliveryCb(
       endingStop instanceof City &&
       moveHelper.value.canDeliverTo(endingStop, moveActionProgress.good)
     ) {
+      if (maybeStealFrom(moveActionProgress, endingStop.name())) return;
       confirm("Deliver to " + endingStop.name(), {
         confirmButton: "Confirm Delivery",
         cancelButton: "Cancel",
@@ -351,6 +354,7 @@ export function GameMap() {
     emit: emitMove,
     isPending: isMovePending,
   } = useAction(MoveAction);
+  const { maybeStealFrom, ...stealIncomeState } = useStealIncomeState();
   const {
     canEmit: canEmitClaim,
     emit: emitClaim,
@@ -420,6 +424,7 @@ export function GameMap() {
     confirm,
     grid,
     emitMove,
+    maybeStealFrom,
   ]);
 
   const maybeConfirmEmitHeavyLifting = useMaybeConfirmEmitHeavyLifting();
@@ -524,6 +529,7 @@ export function GameMap() {
         settings={mapSettings}
         cancelPlace={() => setPlaceSpace(undefined)}
       />
+      <StealIncomeModal {...stealIncomeState} />
     </>
   );
 }

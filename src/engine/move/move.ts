@@ -37,7 +37,9 @@ export const MoveData = z.object({
 
 export type MoveData = z.infer<typeof MoveData>;
 
-export class MoveAction implements ActionProcessor<MoveData> {
+export class MoveAction<T extends MoveData = MoveData>
+  implements ActionProcessor<T>
+{
   static readonly action = "move";
   protected readonly currentPlayer = injectCurrentPlayer();
   protected readonly gridHelper = inject(GridHelper);
@@ -47,8 +49,15 @@ export class MoveAction implements ActionProcessor<MoveData> {
   protected readonly players = injectAllPlayersUnsafe();
   protected readonly moveHelper = inject(MoveHelper);
 
-  readonly assertInput = MoveData.parse;
-  validate(action: MoveData): void {
+  assertInput(data: unknown): T {
+    return MoveData.parse(data) as T;
+  }
+
+  canEmit(): boolean {
+    return true;
+  }
+
+  validate(action: T): void {
     const grid = this.grid();
     const curr = this.currentPlayer();
     if (!this.moveHelper.isWithinLocomotive(curr, action)) {
@@ -138,9 +147,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
     }
   }
 
-  protected calculateIncome(
-    action: MoveData,
-  ): Map<PlayerColor | undefined, number> {
+  protected calculateIncome(action: T): Map<PlayerColor | undefined, number> {
     return new Map(
       [...partition(action.path, (step) => step.owner).entries()].map(
         ([owner, steps]) => [owner, steps.length],
@@ -148,7 +155,7 @@ export class MoveAction implements ActionProcessor<MoveData> {
     );
   }
 
-  process(action: MoveData): boolean {
+  process(action: T): boolean {
     this.gridHelper.update(action.startingCity, (location) => {
       assert(location.goods != null);
       location.goods.splice(location.goods.indexOf(action.good), 1);

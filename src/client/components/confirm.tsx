@@ -59,7 +59,7 @@ export function DialogsProvider({ children }: { children: ReactNode }) {
         confirmButton={options?.confirmButton}
         cancelButton={options?.cancelButton}
         size="large"
-        className={styles.confirm}
+        className={styles.modal}
       />
     </ConfirmOpenContext.Provider>
   );
