@@ -70,7 +70,6 @@ export function StealIncomeModal({
     const players = new Set(
       path.map((p) => p.owner).filter((p) => p != currentPlayer?.color),
     );
-    console.log("players", players);
     return [
       { key: NO_ONE, text: "Don't use LG", value: NO_ONE },
       ...[...players].map((p) => ({

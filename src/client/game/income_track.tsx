@@ -32,8 +32,6 @@ export function IncomeTrack() {
       );
     }, [playerData]);
 
-    console.log("track", track);
-
     return (
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
