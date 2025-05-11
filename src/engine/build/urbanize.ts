@@ -68,7 +68,7 @@ export class UrbanizeAction implements ActionProcessor<UrbanizeData> {
       const connection = this.grid().connection(data.coordinates, direction);
       if (!(connection instanceof Track) || connection.getOwner() != null) continue;
 
-      this.gridHelper.setRouteOwner(connection);
+      this.gridHelper.setRouteOwner(connection, this.currentPlayer().color);
     }
 
     this.log.currentPlayer(`places city ${toLetter(city.onRoll[0])} in ${location.name() ?? this.grid().displayName(data.coordinates)}`);
