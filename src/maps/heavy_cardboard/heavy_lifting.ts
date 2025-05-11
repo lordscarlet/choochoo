@@ -112,10 +112,14 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
       invalidInput: "must deliver to matching city",
     });
 
+    const checked = new Map<Coordinates, number>();
     const canTrace = this.canTracePath(
       startingCity.coordinates,
       endingCity.coordinates,
+      6,
+      checked,
     );
+    console.log("checked", checked);
     assert(canTrace, {
       invalidInput: "must be within 6 spaces",
     });
@@ -125,7 +129,7 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
     current: Coordinates,
     destination: Coordinates,
     distance = 6,
-    checked = new Set<Coordinates>(),
+    checked = new Map<Coordinates, number>(),
   ): boolean {
     return allDirections.some((direction) =>
       this.withinDistance(
@@ -141,10 +145,10 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
     current: Coordinates,
     destination: Coordinates,
     distance: number,
-    checked: Set<Coordinates>,
+    checked: Map<Coordinates, number>,
   ): boolean {
-    if (checked.has(current)) return false;
-    checked.add(current);
+    if (checked.has(current) && checked.get(current)! >= distance) return false;
+    checked.set(current, distance);
     if (current === destination) return true;
     const space = this.gridHelper.lookup(current);
     if (!(space instanceof Land)) return false;
