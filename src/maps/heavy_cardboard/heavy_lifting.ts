@@ -112,14 +112,10 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
       invalidInput: "must deliver to matching city",
     });
 
-    const checked = new Map<Coordinates, number>();
     const canTrace = this.canTracePath(
       startingCity.coordinates,
       endingCity.coordinates,
-      6,
-      checked,
     );
-    console.log("checked", checked);
     assert(canTrace, {
       invalidInput: "must be within 6 spaces",
     });
