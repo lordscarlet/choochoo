@@ -11,6 +11,7 @@ import {
   injectPlayerAction,
 } from "../../engine/game/state";
 import { City } from "../../engine/map/city";
+import { getOpposite } from "../../engine/map/direction";
 import { GridHelper } from "../../engine/map/grid_helper";
 import { Land } from "../../engine/map/location";
 import { MoveHelper } from "../../engine/move/helper";
@@ -112,13 +113,32 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
       invalidInput: "must deliver to matching city",
     });
 
-    const canTrace = this.canTracePath(
-      startingCity.coordinates,
-      endingCity.coordinates,
+    const canTrace = this.canTracePathCheckingHeavyCardboardCity(
+      startingCity,
+      endingCity,
     );
     assert(canTrace, {
       invalidInput: "must be within 6 spaces",
     });
+  }
+
+  private canTracePathCheckingHeavyCardboardCity(
+    startingCity: City,
+    endingCity: City,
+  ): boolean {
+    if (startingCity.data.mapSpecific?.center === true) {
+      return allDirections.some((direction) =>
+        this.canTracePath(
+          startingCity.coordinates.neighbor(direction),
+          endingCity.coordinates,
+        ),
+      );
+    } else {
+      return this.canTracePath(
+        startingCity.coordinates,
+        endingCity.coordinates,
+      );
+    }
   }
 
   private canTracePath(
@@ -127,14 +147,29 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
     distance = 6,
     checked = new Map<Coordinates, number>(),
   ): boolean {
-    return allDirections.some((direction) =>
-      this.withinDistance(
-        current.neighbor(direction),
-        destination,
-        distance,
-        checked,
-      ),
-    );
+    return allDirections
+      .filter((direction) => {
+        const toCheck = [
+          [current, direction],
+          [current.neighbor(direction), getOpposite(direction)],
+        ] as const;
+        return toCheck.every(([coordinates, direction]) => {
+          const location = this.gridHelper.lookup(coordinates);
+          return (
+            location instanceof City ||
+            (location instanceof Land && location.canExit(direction))
+          );
+        });
+      })
+      .some((direction) => {
+        console.log("checking", current.toString(), direction);
+        return this.withinDistance(
+          current.neighbor(direction),
+          destination,
+          distance,
+          checked,
+        );
+      });
   }
 
   private withinDistance(
@@ -144,14 +179,17 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
     checked: Map<Coordinates, number>,
   ): boolean {
     if (checked.has(current) && checked.get(current)! >= distance) return false;
-    checked.set(current, distance);
-    if (current === destination) return true;
     const space = this.gridHelper.lookup(current);
+    if (space == null) return false;
+    const newDistance =
+      distance -
+      (space instanceof Land && space.getLandType() === SpaceType.MOUNTAIN
+        ? 2
+        : 1);
+    if (newDistance < 0) return false;
+    if (current === destination) return true;
     if (!(space instanceof Land)) return false;
     if (space.getTrack().length > 0) return false;
-    const newDistance =
-      distance - (space.getLandType() === SpaceType.MOUNTAIN ? 2 : 1);
-    if (newDistance < 0) return false;
     return this.canTracePath(current, destination, newDistance, checked);
   }
 
