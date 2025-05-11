@@ -8,6 +8,7 @@ import { Land } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Action } from "../state/action";
 import { ComplexTileType, SimpleTileType, TileType, TownTileType } from "../state/tile";
+import { BuildDiscountManager } from "./discount";
 import { BUILD_STATE } from "./state";
 
 
@@ -16,6 +17,7 @@ export class BuilderHelper {
   protected readonly buildState = injectState(BUILD_STATE);
   protected readonly grid = injectGrid();
   protected readonly gridHelper = inject(GridHelper);
+  protected readonly discountManager = inject(BuildDiscountManager);
 
   isAtEndOfTurn(): boolean {
     return this.buildsRemaining() === 0 && !this.canUrbanize();
@@ -58,8 +60,7 @@ export class BuilderHelper {
   }
 
   protected minimumBuildCost(): number {
-    // The base game, you need at least $2 for any build.
-    return 2;
+    return this.discountManager.getMinimumBuild();
   }
 
   protected startingManifest(): ImmutableMap<TileType, number> {

@@ -9,6 +9,7 @@ import { injectCurrentPlayer, injectGrid } from "../game/state";
 import { City, isCity } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { InterCityConnection } from "../state/inter_city_connection";
+import { BuildDiscountManager } from "./discount";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
 
@@ -27,10 +28,12 @@ export class ConnectCitiesAction implements ActionProcessor<ConnectCitiesData> {
   protected readonly currentPlayer = injectCurrentPlayer();
   protected readonly moneyHelper = inject(MoneyManager);
   protected readonly helper = inject(BuilderHelper);
+  protected readonly discountManager = inject(BuildDiscountManager);
   protected readonly log = inject(Log);
 
-  protected getConnectionCost(connection: InterCityConnection) {
-    return connection.cost;
+  protected totalCost(data: ConnectCitiesData, connection: InterCityConnection) {
+    const cost = connection.cost;
+    return cost - this.discountManager.getDiscount(data, cost);
   }
 
   validate(data: ConnectCitiesData): void {
@@ -42,7 +45,7 @@ export class ConnectCitiesAction implements ActionProcessor<ConnectCitiesData> {
     const connection = this.grid().findConnection(data.connect);
     assert(connection != null, { invalidInput: 'Connection not found' });
     assert(connection.owner == null, { invalidInput: 'City already connected' });
-    assert(this.currentPlayer().money >= this.getConnectionCost(connection), { invalidInput: 'Cannot afford purchase' });
+    assert(this.currentPlayer().money >= this.totalCost(data, connection), { invalidInput: 'Cannot afford purchase' });
 
     const cities = data.connect.map((coordinates) => this.grid().get(coordinates));
     assert(cities.every(isCity), {invalidInput: 'Cannot connect cities until both have been urbanized'});
@@ -51,7 +54,8 @@ export class ConnectCitiesAction implements ActionProcessor<ConnectCitiesData> {
   process(data: ConnectCitiesData): boolean {
     const cities = data.connect.map(coordinates => this.grid().get(coordinates) as City);
     const connection = this.grid().findConnection(data.connect)!;
-    this.moneyHelper.addMoneyForCurrentPlayer(-this.getConnectionCost(connection));
+    this.moneyHelper.addMoneyForCurrentPlayer(-this.totalCost(data, connection));
+    this.discountManager.applyDiscount(data, connection.cost);
     this.gridHelper.setInterCityOwner(this.currentPlayer().color, connection);
 
     this.buildState.update((buildState) => {

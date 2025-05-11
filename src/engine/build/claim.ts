@@ -12,6 +12,7 @@ import { GridHelper } from "../map/grid_helper";
 import { Land } from "../map/location";
 import { Track } from "../map/track";
 import { SpaceType } from "../state/location_type";
+import { BuildDiscountManager } from "./discount";
 import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
 
@@ -34,9 +35,12 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
   protected readonly currentPlayer = injectCurrentPlayer();
   protected readonly playerHelper = inject(PlayerHelper);
   protected readonly moneyManager = inject(MoneyManager);
+  protected readonly discountManager = inject(BuildDiscountManager);
 
-  protected claimCost(track: Track): number {
-    return track.claimCost();
+  protected totalCost(data: ClaimData, track: Track): number {
+    const cost = track.claimCost();
+    const discount = this.discountManager.getDiscount(data, cost);
+    return cost - discount;
   }
 
   validate(data: ClaimData): void {
@@ -48,7 +52,7 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
     assert(space != null, { invalidInput: 'cannot call claim on an invalid space' });
     const track = space.getTrack().find((track) => track.isClaimable());
     assert(track != null, { invalidInput: 'No claimable track on given space' });
-    assert(this.currentPlayer().money >= this.claimCost(track), { invalidInput: 'cannot afford claim' });
+    assert(this.currentPlayer().money >= this.totalCost(data, track), { invalidInput: 'cannot afford claim' });
   }
 
   process(data: ClaimData): boolean {
@@ -75,7 +79,8 @@ export class ClaimAction implements ActionProcessor<ClaimData> {
       buildState.buildCount = (buildState.buildCount ?? buildState.previousBuilds.length) + 1;
     });
 
-    this.moneyManager.addMoneyForCurrentPlayer(-this.claimCost(track));
+    this.moneyManager.addMoneyForCurrentPlayer(-this.totalCost(data, track));
+    this.discountManager.applyDiscount(data, track.claimCost());
     return this.helper.isAtEndOfTurn();
   }
 }

@@ -42,9 +42,14 @@ export class BuildAction implements ActionProcessor<BuildData> {
   protected readonly moneyManager = inject(MoneyManager);
   protected readonly log = inject(Log);
 
+  originalCostOf(build: BuildData): number {
+    return this.costCalculator.costOf(build.coordinates, build.tileType, build.orientation);
+  }
+
   totalCostOf(build: BuildData): number {
-    return this.costCalculator.costOf(build.coordinates, build.tileType, build.orientation) -
-      this.discountManager.getDiscount(build);
+    const cost = this.originalCostOf(build);
+    const discount = this.discountManager.getDiscount(build, cost);
+    return cost - discount;
   }
 
   validate(data: BuildData): void {
@@ -63,7 +68,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
   process(data: BuildData): boolean {
     const coordinates = data.coordinates;
     this.moneyManager.addMoneyForCurrentPlayer(-this.totalCostOf(data));
-    this.discountManager.applyDiscount(data);
+    this.discountManager.applyDiscount(data, this.originalCostOf(data));
     const newTile = this.newTile(data);
     this.log.currentPlayer(`builds a ${getTileTypeString(data.tileType)} at ${this.grid().displayName(data.coordinates)}`);
     this.gridHelper.update(coordinates, (hex) => {
