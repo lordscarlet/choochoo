@@ -1,5 +1,6 @@
-import { inject } from "../../engine/framework/execution_context";
-import { RoundEngine } from "../../engine/game/round";
+import { UrbanizeAction, UrbanizeData } from "../../engine/build/urbanize";
+import { inject, injectState } from "../../engine/framework/execution_context";
+import { ROUND, RoundEngine } from "../../engine/game/round";
 import { GoodsHelper } from "../../engine/goods_growth/helper";
 import { GoodsGrowthPhase } from "../../engine/goods_growth/phase";
 import { City } from "../../engine/map/city";
@@ -8,9 +9,25 @@ import { MoveHelper } from "../../engine/move/helper";
 import { CityGroup } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
 import { SpaceType } from "../../engine/state/location_type";
+import { MutableCityData } from "../../engine/state/space";
 import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 import { Side } from "./state";
+
+function getNightSide(round: number): Side {
+  return round % 2 === 1 ? Side.LEFT : Side.RIGHT;
+}
+
+function addNightColor(city: MutableCityData, lookFor: Side): void {
+  const originalColor = Array.isArray(city.color)
+    ? city.color.find((c) => c !== Good.BLACK)!
+    : city.color;
+  if (city.mapSpecific!.side === lookFor) {
+    city.color = [originalColor, Good.BLACK];
+  } else {
+    city.color = [originalColor];
+  }
+}
 
 export class MoonRoundEngine extends RoundEngine {
   private readonly gridHelper = inject(GridHelper);
@@ -21,19 +38,12 @@ export class MoonRoundEngine extends RoundEngine {
   }
 
   moveDayToNight(round: number): void {
-    const lookFor = round % 2 === 1 ? Side.LEFT : Side.RIGHT;
+    const lookFor = getNightSide(round);
     for (const city of this.gridHelper.findAllCities()) {
       if (city.goodColors().length === 0) continue;
       this.gridHelper.update(city.coordinates, (city) => {
         assert(city.type === SpaceType.CITY);
-        const originalColor = Array.isArray(city.color)
-          ? city.color.find((c) => c !== Good.BLACK)!
-          : city.color;
-        if (city.mapSpecific!.side === lookFor) {
-          city.color = [originalColor, Good.BLACK];
-        } else {
-          city.color = [originalColor];
-        }
+        addNightColor(city, lookFor);
       });
     }
   }
@@ -64,5 +74,17 @@ export class MoonGoodsHelper extends GoodsHelper {
     assert(city instanceof City);
     if (city.goodColors().includes(Good.BLACK)) return;
     return super.moveGoodsToCity(coordinates, onRollIndex, count);
+  }
+}
+
+export class MoonUrbanizeAction extends UrbanizeAction {
+  private readonly round = injectState(ROUND);
+
+  process(data: UrbanizeData): boolean {
+    const result = super.process(data);
+    this.gridHelper.update(data.coordinates, (location) => {
+      addNightColor(location as MutableCityData, getNightSide(this.round()));
+    });
+    return result;
   }
 }
