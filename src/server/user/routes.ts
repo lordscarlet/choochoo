@@ -2,6 +2,7 @@ import { Op, ValidationError, WhereOptions } from "@sequelize/core";
 import { createExpressEndpoints, initServer } from "@ts-rest/express";
 import express from "express";
 import { userContract, UserRole } from "../../api/user";
+import { logError } from "../../utils/functions";
 import { pageCursorToString, parsePageCursor } from "../../utils/page_cursor";
 import { assert, fail } from "../../utils/validate";
 import "../session";
@@ -122,7 +123,7 @@ const router = initServer().router(userContract, {
       emailService.sendActivationCode(user.email);
       return { status: 200, body: { user: user.toMyApi() } };
     } catch (e) {
-      console.log("error", e);
+      logError("failed to send activation code", e);
       if (e instanceof ValidationError) {
         assert(!e.errors[0].message.includes("must be unique"), {
           invalidInput: e.errors[0].message,

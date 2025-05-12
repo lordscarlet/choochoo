@@ -161,15 +161,14 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
           );
         });
       })
-      .some((direction) => {
-        console.log("checking", current.toString(), direction);
-        return this.withinDistance(
+      .some((direction) =>
+        this.withinDistance(
           current.neighbor(direction),
           destination,
           distance,
           checked,
-        );
-      });
+        ),
+      );
   }
 
   private withinDistance(

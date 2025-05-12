@@ -2,6 +2,7 @@ import RedisStore from "connect-redis";
 import express from "express";
 import session from "express-session";
 import { Redis } from "ioredis";
+import { logError } from "../utils/functions";
 import { environment } from "./util/environment";
 
 export const redisClient = new Redis({
@@ -13,8 +14,7 @@ export const redisClient = new Redis({
 export const subClient = redisClient.duplicate();
 
 redisClient.on("error", (e) => {
-  console.error("redis connection error");
-  console.error(e);
+  logError("redis connection error", e);
   process.exit();
 });
 

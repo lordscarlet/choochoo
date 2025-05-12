@@ -7,6 +7,7 @@ import { createServer } from "http";
 import { createServer as createSecureServer } from "https";
 import { resolve } from "path";
 import { UserError } from "../utils/error";
+import { log, logError } from "../utils/functions";
 import { assert } from "../utils/validate";
 import { devApp } from "./dev/routes";
 import { feedbackApp } from "./feedback/routes";
@@ -63,16 +64,17 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
     res.json({ success: false, error: err.message, code: err.errorCode });
   } else {
     if (err instanceof DatabaseError) {
-      console.error("database error", err.parameters, err.cause);
+      logError("database error", err, err.parameters, err.cause);
+    } else {
+      logError(
+        "error handling request",
+        err,
+        req.path,
+        req.params,
+        req.query,
+        req.body && JSON.stringify(req.body),
+      );
     }
-    console.error(
-      "Failed on request",
-      req.path,
-      req.params,
-      req.query,
-      req.body && JSON.stringify(req.body),
-    );
-    console.error(err);
     res.status(500);
     res.json({ success: false });
   }
@@ -91,12 +93,11 @@ if (environment.cert != null) {
 
       /// Start
       server.listen(environment.port, () => {
-        console.log(`AoS listening on port ${environment.port}, running...`);
+        log(`AoS listening on port ${environment.port}, running...`);
       });
     })
     .catch((e) => {
-      console.error("unknown system error");
-      console.error(e);
+      logError("unknown system error", e);
       process.exit();
     });
 } else {
@@ -106,7 +107,7 @@ if (environment.cert != null) {
 
   /// Start
   server.listen(environment.port, () => {
-    console.log(`AoS listening on port ${environment.port}`);
+    log(`AoS listening on port ${environment.port}`);
   });
 }
 

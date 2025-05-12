@@ -1,6 +1,7 @@
 import Mailjet from "node-mailjet";
 import z from "zod";
 import { EmailSetting } from "../../api/notifications";
+import { log, logError } from "../../utils/functions";
 import { decrypt, encrypt } from "./encrypt";
 import { environment } from "./environment";
 import {
@@ -314,8 +315,7 @@ class MailjetEmailService extends EmailService {
         ],
       });
     } catch (e) {
-      console.error("failed to send an email");
-      console.error(e);
+      logError("failed to send email", e);
     }
   }
 }
@@ -329,15 +329,15 @@ interface SendEmailProps {
 
 class NoopEmailService extends EmailService {
   async setIsExcludedFromCampaigns(email: string): Promise<void> {
-    console.log("unsubscribing", email);
+    log("unsubscribing", email);
   }
 
   async subscribe(email: string): Promise<void> {
-    console.log("subscribing", email);
+    log("subscribing", email);
   }
 
   protected async sendEmail(email: SendEmailProps): Promise<void> {
-    console.log("sending email", email);
+    log("sending email", email);
   }
 }
 

@@ -26,6 +26,7 @@ import {
 } from "../../engine/game/map_settings";
 import { Grid } from "../../engine/map/grid";
 import { ViewRegistry } from "../../maps/view_registry";
+import { log } from "../../utils/functions";
 import { Point } from "../../utils/point";
 import * as mapStyles from "../grid/hex.module.css";
 import { HexGrid } from "../grid/hex_grid";
@@ -186,7 +187,7 @@ export function CreateGamePage() {
   const Editor = selectedMap.getVariantConfigEditor;
 
   if (validationError != null) {
-    console.log("validation", validationError);
+    log("validation", validationError);
   }
 
   return (
@@ -373,7 +374,6 @@ function RiverDots({ path, setRiverPath }: RiverEditorProps) {
     (e: React.MouseEvent<SVGCircleElement>) => {
       const target = e.target as SVGCircleElement;
       const index = Number(target.dataset["i"]);
-      console.log("onClick", index);
       if (typeof index != "number" || isNaN(index)) return;
       setDragging({
         index,

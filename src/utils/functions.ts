@@ -135,3 +135,21 @@ export function formatMillisecondDuration(millis: number): string {
   };
   return format.format(duration);
 }
+
+export function log(...args: unknown[]): void {
+  // eslint-disable-next-line no-console
+  console.log(...args);
+}
+
+export function logError(
+  tag: string,
+  error: unknown,
+  ...args: unknown[]
+): void {
+  // eslint-disable-next-line no-console
+  console.error(tag);
+  // eslint-disable-next-line no-console
+  console.error(error);
+  // eslint-disable-next-line no-console
+  console.error(...args);
+}

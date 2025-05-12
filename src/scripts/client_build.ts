@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import type { BuildResult, Plugin } from "esbuild";
 import { writeFile } from "fs/promises";
 import { resolve } from "path";
+import { log, logError } from "../utils/functions";
 
 export async function buildApp({
   watch,
@@ -42,7 +43,7 @@ export async function buildApp({
     await ctx.watch();
   } else {
     await ctx.rebuild().catch((e) => {
-      console.error("error building", e);
+      logError("error building", e);
       throw e;
     });
     await ctx.dispose();
@@ -56,19 +57,19 @@ function rebuildPlugins(): Plugin[] {
       async setup(build) {
         build.onEnd(logErrors);
         const { stdout } = await exec("tsc");
-        stdout?.on("data", (d) => console.log(d));
+        stdout?.on("data", (d) => log(d));
       },
     },
   ];
 }
 
 async function logErrors(result: BuildResult) {
-  console.log(`build ended with ${result.errors.length} errors`);
+  log(`build ended with ${result.errors.length} errors`);
   for (const error of result.errors) {
-    console.log("===================");
-    console.log("Text: ", error.text);
-    console.log("Detail: ", error.detail);
-    console.log("location: ", error.location);
+    log("===================");
+    log("Text: ", error.text);
+    log("Detail: ", error.detail);
+    log("location: ", error.location);
   }
   await writeFile(
     `buildmeta.${process.env.NODE_ENV}.json`,
@@ -76,7 +77,7 @@ async function logErrors(result: BuildResult) {
   );
 }
 
-console.log();
+log();
 if (resolve(process.argv[1]) === resolve(__filename)) {
   buildApp();
 }

@@ -3,6 +3,7 @@ import { useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 import { ZodError } from "zod";
 import { ValidationError, ZodErrorResponse } from "../../api/error";
+import { logError } from "../../utils/functions";
 
 interface NetworkError {
   status: number;
@@ -69,7 +70,7 @@ export function handleError(
 
 function toMessage(error: Error | NetworkError): string {
   if (isFetchError(error) || error.status >= 500) {
-    console.error(error);
+    logError("Server error", error);
     return "An unknown error occurred";
   }
   const prefix = toPrefix(error.status);
@@ -79,7 +80,7 @@ function toMessage(error: Error | NetworkError): string {
     }
     return prefix;
   }
-  console.error(error);
+  logError("Unknown error", error);
   return "An unknown error occurred";
 }
 

@@ -7,6 +7,7 @@ import {
   NoAutoActionError,
 } from "../../engine/state/auto_action";
 import { ErrorCode } from "../../utils/error_code";
+import { log, logError } from "../../utils/functions";
 import { afterTransaction } from "../../utils/transaction";
 import { assert } from "../../utils/validate";
 import { LogDao } from "../messages/log_dao";
@@ -71,8 +72,7 @@ export async function startGame(
   );
 
   notifyTurn(newGame).catch((e) => {
-    console.error("Failed during processAsync");
-    console.error(e);
+    logError("Failed during processAsync", e);
   });
 
   return newGame.toApi();
@@ -153,16 +153,14 @@ export async function performAction(
         LogDao.createForGame(game.id, game.version - 1, logs),
       ]);
 
-      console.log(
+      log(
         `Game action id=${newGameHistory.id} reversible=${reversible} actionName=${actionName}`,
       );
 
       transaction.afterCommit(() => {
         if (!playerChanged) return;
-        console.log("notifying turn");
         notifyTurnUnlessAutoAction(newGame).catch((e) => {
-          console.error("Failed during processAsync");
-          console.error(e);
+          logError("Failed during processAsync", e);
         });
 
         if (game.status === GameStatus.enum.ACTIVE) {
@@ -245,8 +243,7 @@ async function checkForAutoAction(
   } catch (e) {
     if (e instanceof NoAutoActionError) return false;
 
-    console.error("failed to process auto action", gameId, autoAction);
-    console.error(e);
+    logError("failed to process auto action", e, gameId, autoAction);
     return false;
   }
 }
@@ -266,8 +263,7 @@ Lifecycle.singleton.onStart(() => {
             game.playerIds.length === game.config.maxPlayers
           ) {
             startGame(game.id).catch((e) => {
-              console.error("error starting game");
-              console.error(e);
+              logError("error starting game", e);
             });
           }
         }, 2000);

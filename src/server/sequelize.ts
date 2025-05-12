@@ -7,22 +7,20 @@ import { GameHistoryDao } from "./game/history_dao";
 import { LogDao } from "./messages/log_dao";
 import { UserDao } from "./user/dao";
 import { environment } from "./util/environment";
+import { log, logError } from "../utils/functions";
 
 export const sequelize = new Sequelize({ 
   dialect: PostgresDialect,
   url: environment.postgresUrl.toString(),
-  logging: console.log,
+  logging: log,
   models: [GameDao, UserDao, LogDao, GameHistoryDao, FeedbackDao],
 });
 
 const connection = sequelize.authenticate();
 
 connection
-  .then(() => {
-    console.log("connection");
-  })
   .catch((err: unknown) => {
-    console.log("failed to connect to sql database", err);
+    logError("failed to connect to sql database", err);
     process.exit();
   });
 

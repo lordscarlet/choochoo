@@ -1,5 +1,6 @@
 import { readdir, stat, unlink } from "fs/promises";
 import { resolve } from "path";
+import { logError } from "../utils/functions";
 
 async function* readdirRecursive(dir: string): AsyncIterable<string> {
   const files = await readdir(dir);
@@ -72,6 +73,5 @@ function toTsFiles({ binDir, srcDir, jsFile }: ToTsFileProps): string[] {
 }
 
 removeDeleted().catch((e) => {
-  console.error("error removing deleted");
-  console.error(e);
+  logError("error removing deleted", e);
 });

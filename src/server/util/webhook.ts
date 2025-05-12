@@ -8,6 +8,7 @@ import {
   WebHookSetting,
 } from "../../api/notifications";
 import { MapRegistry } from "../../maps/registry";
+import { log } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
 import { environment } from "./environment";
 import {
@@ -93,7 +94,7 @@ abstract class BaseWebHookNotifier
 
 class NoopWebHookNotifier extends BaseWebHookNotifier {
   protected async post(url: string, payload: object): Promise<void> {
-    console.log(`submitting webhook (${url}), ${JSON.stringify(payload)}`);
+    log(`submitting webhook (${url}), ${JSON.stringify(payload)}`);
   }
 }
 

@@ -1,15 +1,16 @@
 import { SequelizeStorage, Umzug } from "umzug";
 import { sequelize } from "../server/sequelize";
+import { log } from "../utils/functions";
 
 const umzug = new Umzug({
   migrations: { glob: "bin/migrations/*.js" },
   context: sequelize.queryInterface,
   storage: new SequelizeStorage({ sequelize }),
   logger: {
-    error: console.log,
-    info: console.log,
-    warn: console.log,
-    debug: console.log,
+    error: log,
+    info: log,
+    warn: log,
+    debug: log,
   },
 });
 
