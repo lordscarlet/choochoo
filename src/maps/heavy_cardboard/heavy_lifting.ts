@@ -178,6 +178,7 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
     checked: Map<Coordinates, number>,
   ): boolean {
     if (checked.has(current) && checked.get(current)! >= distance) return false;
+    checked.set(current, distance);
     const space = this.gridHelper.lookup(current);
     if (space == null) return false;
     const newDistance =
