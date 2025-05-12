@@ -6,11 +6,12 @@ import {
   MoonGoodsHelper,
   MoonMoveHelper,
   MoonRoundEngine,
+  MoonUrbanizeAction,
 } from "./day_night";
 import { map } from "./grid";
 import { MoonAllowedActions, MoonMoveAction } from "./low_gravitation";
-import { getNeighbor } from "./wrap_around";
 import { MoonStarter } from "./starter";
+import { getNeighbor } from "./wrap_around";
 
 export class MoonMapSettings implements MapSettings {
   readonly key = GameKey.MOON;
@@ -31,6 +32,7 @@ export class MoonMapSettings implements MapSettings {
       MoonGoodsGrowthPhase,
       MoonMoveAction,
       MoonAllowedActions,
+      MoonUrbanizeAction,
     ];
   }
 

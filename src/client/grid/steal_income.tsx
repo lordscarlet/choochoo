@@ -15,8 +15,6 @@ import * as styles from "../components/confirm.module.css";
 import { useAction } from "../services/game";
 import { useCurrentPlayer, useInjected } from "../utils/injection_context";
 
-export enum StealIncomeResponse {}
-
 interface StealIncomeModalProps {
   cityName?: string;
   moveData?: MoveData;
