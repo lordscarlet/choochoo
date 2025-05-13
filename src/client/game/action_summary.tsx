@@ -3,7 +3,7 @@ import { ReactNode, useCallback } from "react";
 import { BuildAction } from "../../engine/build/build";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
-import { inject } from "../../engine/framework/execution_context";
+import { inject, injectState } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
 import { LocoAction } from "../../engine/move/loco";
 import { MovePassAction } from "../../engine/move/pass";
@@ -11,6 +11,7 @@ import { SelectAction as ActionSelectionSelectAction } from "../../engine/select
 import { SkipAction } from "../../engine/select_action/skip";
 import { ShareHelper } from "../../engine/shares/share_helper";
 import { TakeSharesAction } from "../../engine/shares/take_shares";
+import { Good } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
@@ -18,6 +19,8 @@ import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { ProductionPassAction } from "../../maps/disco/production";
 import { PassAction as DeurbanizationPassAction } from "../../maps/ireland/deurbanization";
+import { RepopulateAction } from "../../maps/montreal_metro/select_action/repopulate";
+import { REPOPULATION } from "../../maps/montreal_metro/select_action/state";
 import { PlaceAction } from "../../maps/soultrain/earth_to_heaven";
 import {
   StLuciaBidAction,
@@ -29,14 +32,17 @@ import { useConfirm } from "../components/confirm";
 import { DropdownMenu, DropdownMenuItem } from "../components/dropdown_menu";
 import { MaybeTooltip } from "../components/maybe_tooltip";
 import { Username } from "../components/username";
-import { useAction, useEmptyAction } from "../services/game";
+import { useAction, useEmptyAction } from "../services/action";
 import {
   useActiveGameState,
   useInject,
   useInjected,
   useViewSettings,
 } from "../utils/injection_context";
-import { ManualGoodsGrowth } from "./india-steam-brothers/goods_growth";
+import {
+  GoodSelector,
+  ManualGoodsGrowth,
+} from "./india-steam-brothers/goods_growth";
 
 const PASS_ACTION = "Pass" as const;
 type PassActionString = typeof PASS_ACTION;
@@ -52,7 +58,12 @@ export function ActionSummary() {
     case Phase.TURN_ORDER:
       return <Bid />;
     case Phase.ACTION_SELECTION:
-      return <SpecialActionSelector />;
+      return (
+        <>
+          <Repopulate />
+          <SpecialActionSelector />
+        </>
+      );
     case Phase.BUILDING:
       return <Build />;
     case Phase.MOVING:
@@ -80,6 +91,39 @@ export function ActionSummary() {
     default:
       assertNever(currentPhase);
   }
+}
+
+function Repopulate() {
+  const { canEmit, canEmitUserId, data, setData } = useAction(RepopulateAction);
+  const repopulateData = useInject(() => {
+    const state = injectState(REPOPULATION);
+    return state.isInitialized() ? [...new Set(state())] : undefined;
+  }, []);
+
+  const selectGood = useCallback((good: Good) => setData({ good }), [setData]);
+
+  if (canEmitUserId == null) {
+    return <></>;
+  }
+
+  if (!canEmit || repopulateData == null) {
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must repopulate a city.
+      </GenericMessage>
+    );
+  }
+
+  return (
+    <div>
+      You must repopulate a city.
+      <GoodSelector
+        selected={data?.good}
+        goods={repopulateData!}
+        onSelect={selectGood}
+      />
+    </div>
+  );
 }
 
 function StLuciaTurnOrder() {
@@ -166,6 +210,7 @@ function DiscoProduction() {
 
 function SpecialActionSelector() {
   const { canEmit, canEmitUserId } = useAction(ActionSelectionSelectAction);
+  console.log("special action selector", canEmit);
   const {
     canEmit: canEmitSkip,
     isPending,

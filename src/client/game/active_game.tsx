@@ -10,12 +10,8 @@ import { useAwaitingPlayer } from "../components/awaiting_player";
 import { Username } from "../components/username";
 import { GameMap } from "../grid/game_map";
 import { DeleteButton } from "../home/game_card";
-import {
-  useAction,
-  useGame,
-  useRetryAction,
-  useUndoAction,
-} from "../services/game";
+import { useAction } from "../services/action";
+import { useGame, useRetryAction, useUndoAction } from "../services/game";
 import {
   GameContextProvider,
   useCurrentPlayer,

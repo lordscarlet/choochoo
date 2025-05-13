@@ -22,6 +22,7 @@ export class SelectAction implements ActionProcessor<SelectData> {
   private readonly actions = inject(AllowedActions);
 
   readonly assertInput = SelectData.parse;
+
   validate({ action }: SelectData): void {
     assert(this.actions.getAvailableActions().has(action), {
       invalidInput: "action already selected",

@@ -136,7 +136,7 @@ export function usePhaseState<T>(
   return useOptionalInjectedState(key, phase === currentPhase);
 }
 
-function useOptionalInjectedState<T>(
+export function useOptionalInjectedState<T>(
   key: Key<T>,
   optionalCheck: boolean,
 ): Immutable<T> | undefined {
@@ -151,8 +151,8 @@ function useOptionalInjectedState<T>(
 
   useEffect(() => {
     if (!optionalCheck) return;
-    return injectedState.listen((newValue) => {
-      setValue(newValue);
+    return injectedState.listen(() => {
+      setValue(injectedState.isInitialized() ? injectedState() : undefined);
     });
   }, [ctx, optionalCheck]);
 

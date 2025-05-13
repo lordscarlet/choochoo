@@ -8,7 +8,7 @@ import {
 } from "../../../maps/india-steam-brothers/production";
 import { DropdownMenu, DropdownMenuItem } from "../../components/dropdown_menu";
 import { Username } from "../../components/username";
-import { useAction } from "../../services/game";
+import { useAction } from "../../services/action";
 import { useInjectedState } from "../../utils/injection_context";
 import { GenericMessage } from "../action_summary";
 
@@ -16,7 +16,7 @@ export function ManualGoodsGrowth() {
   const state = useInjectedState(PRODUCTION_STATE);
 
   return state.production != null ? (
-    <SelectGood production={state.production} />
+    <SelectGoodForGoodsGrowth production={state.production} />
   ) : (
     <SelectCity />
   );
@@ -45,8 +45,15 @@ function SelectCity() {
   );
 }
 
-function SelectGood({ production }: { production: InProgressProduction }) {
-  const { canEmit, isPending, canEmitUserId } = useAction(SelectGoodAction);
+function SelectGoodForGoodsGrowth({
+  production,
+}: {
+  production: InProgressProduction;
+}) {
+  const { emit, canEmit, isPending, canEmitUserId } =
+    useAction(SelectGoodAction);
+
+  const select = useCallback((good: Good) => emit({ good }), [emit]);
 
   if (canEmitUserId == null) {
     return <></>;
@@ -64,23 +71,64 @@ function SelectGood({ production }: { production: InProgressProduction }) {
   return (
     <div>
       <GenericMessage>You must select a good.</GenericMessage>
-      <DropdownMenu id="select-good" title="Select good" disabled={isPending}>
-        {production.goods.map((good) => (
-          <GoodDropdownMenuItem key={good} good={good} />
-        ))}
-      </DropdownMenu>
+      <GoodSelector
+        goods={production.goods}
+        disabled={isPending}
+        onSelect={select}
+      />
     </div>
   );
 }
 
-function GoodDropdownMenuItem({ good }: { good: Good }) {
-  const { emit, isPending } = useAction(SelectGoodAction);
+interface GoodSelectorProps {
+  goods: Good[];
+  disabled?: boolean;
+  selected?: Good;
+  onSelect(good: Good): void;
+}
+
+export function GoodSelector({
+  goods,
+  disabled,
+  selected,
+  onSelect,
+}: GoodSelectorProps) {
+  return (
+    <DropdownMenu
+      id="select-good"
+      title={selected == null ? "Select good" : goodToString(selected)}
+      disabled={disabled}
+    >
+      {goods.map((good) => (
+        <GoodDropdownMenuItem
+          key={good}
+          good={good}
+          disabled={disabled}
+          onSelect={onSelect}
+        />
+      ))}
+    </DropdownMenu>
+  );
+}
+
+interface GoodDropdownMenuItemProps {
+  good: Good;
+  selected?: boolean;
+  disabled?: boolean;
+  onSelect(good: Good): void;
+}
+
+function GoodDropdownMenuItem({
+  good,
+  disabled,
+  onSelect,
+}: GoodDropdownMenuItemProps) {
+  const onClick = useCallback(() => {
+    onSelect(good);
+  }, [onSelect, good]);
 
   return (
-    <DropdownMenuItem
-      onClick={useCallback(() => emit({ good }), [good])}
-      disabled={isPending}
-    >
+    <DropdownMenuItem onClick={onClick} disabled={disabled}>
       {goodToString(good)}
     </DropdownMenuItem>
   );

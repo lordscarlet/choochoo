@@ -16,12 +16,8 @@ import { ImmutableMap } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
 import { Username } from "../components/username";
 import { goodStyle } from "../grid/good";
-import {
-  useAction,
-  useEmptyAction,
-  useGame,
-  useGameVersionState,
-} from "../services/game";
+import { useAction, useEmptyAction } from "../services/action";
+import { useGame, useGameVersionState } from "../services/game";
 import {
   useGrid,
   useInjected,

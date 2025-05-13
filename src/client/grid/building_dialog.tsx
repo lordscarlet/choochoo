@@ -36,7 +36,7 @@ import {
 import { PlaceAction, TO_URBANIZE } from "../../maps/soultrain/earth_to_heaven";
 import { MapViewSettings } from "../../maps/view_settings";
 import { Coordinates } from "../../utils/coordinates";
-import { useAction } from "../services/game";
+import { useAction } from "../services/action";
 import { useTypedMemo } from "../utils/hooks";
 import {
   useInjected,

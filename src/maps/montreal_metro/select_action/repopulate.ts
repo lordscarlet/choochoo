@@ -65,7 +65,7 @@ export class RepopulateAction implements ActionProcessor<RepopulateData> {
     this.bag.update((bag) => {
       const repopulation = this.repopulation();
       const index = repopulation.indexOf(good);
-      assert(index > 0);
+      assert(index >= 0);
 
       bag.push(
         ...repopulation.slice(0, index).concat(repopulation.slice(index + 1)),

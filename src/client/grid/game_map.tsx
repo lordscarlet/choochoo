@@ -29,12 +29,17 @@ import {
   DeurbanizeAction,
   DeurbanizeData,
 } from "../../maps/ireland/deurbanization";
+import {
+  RepopulateAction,
+  RepopulateData,
+} from "../../maps/montreal_metro/select_action/repopulate";
 import { PlaceAction } from "../../maps/soultrain/earth_to_heaven";
 import { ViewRegistry } from "../../maps/view_registry";
 import { Coordinates } from "../../utils/coordinates";
 import { arrayEqualsIgnoreOrder, peek, removeKey } from "../../utils/functions";
 import { ConfirmCallback, useConfirm } from "../components/confirm";
-import { useAction, useGameVersionState } from "../services/game";
+import { useAction } from "../services/action";
+import { useGameVersionState } from "../services/game";
 import { useTypedCallback, useTypedMemo } from "../utils/hooks";
 import {
   Memoized,
@@ -267,9 +272,19 @@ function onClickCb(
   emitDiscoProduction: (data: ProductionData) => void,
   canEmitPlaceAction: boolean,
   setPlaceSpace: (space: Land) => void,
+  canEmitRepopulate: boolean,
+  emitRepopulate: (data: RepopulateData) => void,
+  repopulateGood?: Good,
 ) {
   return (space: Space, good?: Good) => {
     if (isPending) return;
+    if (canEmitRepopulate && repopulateGood != null) {
+      emitRepopulate({
+        good: repopulateGood,
+        coordinates: space.coordinates,
+      });
+      return;
+    }
     if (canEmitSelectCity) {
       emitSelectCity({ coordinates: space.coordinates });
       return;
@@ -366,6 +381,12 @@ export function GameMap() {
     isPending: isDeurbanizePending,
   } = useAction(DeurbanizeAction);
   const {
+    data: repopulateData,
+    canEmit: canEmitRepopulate,
+    emit: emitRepopulate,
+    isPending: isRepopulatePending,
+  } = useAction(RepopulateAction);
+  const {
     canEmit: canEmitSelectCity,
     emit: emitSelectCity,
     isPending: isSelectCityPending,
@@ -406,7 +427,8 @@ export function GameMap() {
     isClaimPending ||
     isSelectCityPending ||
     isConnectCityPending ||
-    isDiscoProductionPending;
+    isDiscoProductionPending ||
+    isRepopulatePending;
 
   const confirm = useConfirm();
 
@@ -467,6 +489,9 @@ export function GameMap() {
     emitDiscoProduction,
     canEmitPlaceAction,
     setPlaceSpace,
+    canEmitRepopulate,
+    emitRepopulate,
+    repopulateData?.good,
   ]);
 
   const clickTargets: Set<ClickTarget> = useMemo(() => {
@@ -489,6 +514,9 @@ export function GameMap() {
     if (canEmitPlaceAction) {
       return new Set([ClickTarget.TOWN]);
     }
+    if (canEmitRepopulate && repopulateData?.good != null) {
+      return new Set([ClickTarget.CITY]);
+    }
     return new Set();
   }, [
     canEmitMove,
@@ -498,6 +526,8 @@ export function GameMap() {
     canEmitSelectCity,
     canEmitDiscoProduction,
     canEmitPlaceAction,
+    canEmitRepopulate,
+    repopulateData?.good,
   ]);
 
   const onClickInterCity = useCallback((connect: Coordinates[]) => {

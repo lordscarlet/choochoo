@@ -60,7 +60,9 @@ export class MontrealSelectAction extends SelectAction {
         this.log.log(`Bag empty, skipping repopulation`);
         return true;
       }
-      this.log.currentPlayer(`drew ${pull.map(goodToString)} for repopulation`);
+      this.log.currentPlayer(
+        `drew ${pull.map(goodToString).join(" ")} for repopulation`,
+      );
       this.repopulation.initState(pull);
       return false;
     }

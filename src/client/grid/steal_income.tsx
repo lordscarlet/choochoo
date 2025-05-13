@@ -12,7 +12,7 @@ import { MoveData } from "../../engine/move/move";
 import { PlayerColor, playerColorToString } from "../../engine/state/player";
 import { MoonMoveAction } from "../../maps/moon/low_gravitation";
 import * as styles from "../components/confirm.module.css";
-import { useAction } from "../services/game";
+import { useAction } from "../services/action";
 import { useCurrentPlayer, useInjected } from "../utils/injection_context";
 
 interface StealIncomeModalProps {

@@ -10,7 +10,7 @@ import { Key } from "./key";
 
 interface StateContainer<T> {
   state?: { value: Immutable<T> };
-  listeners: Set<(t: Immutable<T>) => void>;
+  listeners: Set<() => void>;
 }
 
 const SerializedGameDataV3 = z.object({
@@ -69,7 +69,7 @@ export class StateStore {
   private notifyListeners<T>(key: Key<T>) {
     const container = this.getContainer(key);
     for (const listener of container.listeners) {
-      listener(container.state!.value);
+      listener();
     }
   }
 
@@ -95,7 +95,7 @@ export class StateStore {
   listenAll(keys: Set<Key<unknown>>, listenerFn: () => void): () => void {
     const cbs: Array<() => void> = [];
     for (const key of keys) {
-      cbs.push(this.listen(key, (_) => listenerFn()));
+      cbs.push(this.listen(key, () => listenerFn()));
     }
     return () => {
       for (const cb of cbs) {
@@ -104,7 +104,7 @@ export class StateStore {
     };
   }
 
-  listen<T>(key: Key<T>, listenerFn: (v: Immutable<T>) => void): () => void {
+  listen<T>(key: Key<T>, listenerFn: () => void): () => void {
     this.initContainerIfNotExists(key);
     const container = this.getContainer(key);
     container.listeners.add(listenerFn);
@@ -142,7 +142,7 @@ export class StateStore {
       initState: (state: T) => this.init(key, state),
       set: (state: T) => this.set(key, state),
       isInitialized: () => this.isInitialized(key),
-      listen: (listenFn: (t: Immutable<T>) => void): (() => void) =>
+      listen: (listenFn: () => void): (() => void) =>
         this.listen(key, listenFn),
       update: (updateFn: (t: T) => void) => this.update(key, updateFn),
       delete: () => this.delete(key),
@@ -167,10 +167,25 @@ export class StateStore {
 
   merge(gameDataStr: string): void {
     const { gameData } = SerializedGameData.parse(JSON.parse(gameDataStr));
-    const changes: ValueChange[] = Object.entries(gameData)
+    const updates: ValueChange[] = Object.entries(gameData)
       .filter(([key]) => !Key.isDeprecated(key))
       .filter(([key, value]) => this.mergeValue(Key.fromString(key), value))
       .map(([key]) => ({ key }));
+
+    const keepKeys = new Set(Object.keys(gameData));
+    const allKeys = [...this.state.entries()].map(([key]) => key);
+
+    const deletes: ValueChange[] = [];
+    for (const key of allKeys) {
+      this.initContainerIfNotExists(key);
+      if (keepKeys.has(key.name) || !this.isInitialized(key)) {
+        continue;
+      }
+      this.delete(key);
+      deletes.push({ key: key.name });
+    }
+
+    const changes = updates.concat(deletes);
 
     for (const change of changes) {
       this.notifyListeners(Key.fromString(change.key));
@@ -206,7 +221,7 @@ interface InjectedOps<Data> {
   isInitialized(): boolean;
   set(state: Data): void;
   update(updateFn: (state: Data) => void): void;
-  listen(listenFn: (value: Immutable<Data>) => void): () => void;
+  listen(listenFn: () => void): () => void;
   delete(): void;
 }
 

@@ -1,6 +1,7 @@
 import { GameStatus } from "../../api/game";
 import { assertNever } from "../../utils/validate";
 import { GameCard } from "../home/game_card";
+import { PartialActionProvider } from "../services/action";
 import { useGame } from "../services/game";
 import { ActiveGame } from "./active_game";
 
@@ -13,7 +14,11 @@ export function GamePage() {
     case GameStatus.enum.ACTIVE:
     case GameStatus.enum.ENDED:
     case GameStatus.enum.ABANDONED:
-      return <ActiveGame />;
+      return (
+        <PartialActionProvider>
+          <ActiveGame />
+        </PartialActionProvider>
+      );
     default:
       assertNever(game.status);
   }

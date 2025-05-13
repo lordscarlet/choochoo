@@ -1,4 +1,3 @@
-import { isFetchError } from "@ts-rest/react-query/v5";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -12,10 +11,6 @@ import {
   ListGamesApi,
 } from "../../api/game";
 import { GameHistoryApi } from "../../api/history";
-import { PhaseDelegator } from "../../engine/game/phase_delegator";
-import { ActionConstructor } from "../../engine/game/phase_module";
-import { InvalidInputError } from "../../utils/error";
-import { ErrorCode } from "../../utils/error_code";
 import {
   entries,
   formatMillisecondDuration,
@@ -23,19 +18,12 @@ import {
 } from "../../utils/functions";
 import { Entry, WithFormNumber } from "../../utils/types";
 import { assert, assertNever } from "../../utils/validate";
-import { useUpdateAutoActionCache } from "../auto_action/hooks";
 import { useConfirm } from "../components/confirm";
 import { useMostRecentValue } from "../utils/hooks";
-import { useInjected, useInjectedMemo } from "../utils/injection_context";
 import { useSuccess } from "../utils/notify";
 import { tsr } from "./client";
 import { useIsAdmin, useMe } from "./me";
-import {
-  handleError,
-  isErrorBody,
-  toValidationError,
-  useErrorNotifier,
-} from "./network";
+import { handleError, toValidationError } from "./network";
 import { useJoinRoom, useSocket } from "./socket";
 
 function getQueryKey(gameId: number | string, historyId?: number): string[] {
@@ -225,7 +213,7 @@ function useSetGame() {
   };
 }
 
-function useSetGameSuccess() {
+export function useSetGameSuccess() {
   const setGame = useSetGame();
   return useCallback(
     ({ body }: { status: 200; body: { game: GameApi } }) => {
@@ -446,37 +434,6 @@ export function useStartGame(game: GameLiteApi): GameAction {
   return { canPerform, perform, isPending };
 }
 
-interface ActionHandler<T> {
-  emit(data: T): void;
-  canEmit: boolean;
-  isPending: boolean;
-  canEmitUserId?: number;
-  getErrorMessage(t: T): string | undefined;
-}
-
-type EmptyActionHandler = Omit<
-  ActionHandler<unknown>,
-  "emit" | "getErrorMessage"
-> & {
-  emit(): void;
-  getErrorMessage(): string | undefined;
-};
-
-export function useEmptyAction(
-  action: ActionConstructor<Record<string, never>>,
-): EmptyActionHandler {
-  const {
-    emit: oldEmit,
-    getErrorMessage: oldGetErrorMessage,
-    ...rest
-  } = useAction(action);
-  const emit = useCallback(() => {
-    oldEmit({});
-  }, [oldEmit]);
-  const getErrorMessage = useCallback(() => oldGetErrorMessage({}), []);
-  return { emit, getErrorMessage, ...rest };
-}
-
 /** Like `useState` but it resets when the game version changes. */
 export function useGameVersionState<T>(initialValue: T): [T, (t: T) => void] {
   const game = useGame();
@@ -499,88 +456,6 @@ export function isGameHistory(game: GameApi): game is GameHistoryApi {
 
 export function canEditGame(game: GameApi): boolean {
   return !isGameHistory(game);
-}
-
-export function useAction<T extends object>(
-  action: ActionConstructor<T>,
-): ActionHandler<T> {
-  const confirm = useConfirm();
-  const me = useMe();
-  const game = useGame();
-  const onSuccess = useSetGameSuccess();
-  const updateAutoActionCache = useUpdateAutoActionCache(game.id);
-  const phaseDelegator = useInjected(PhaseDelegator);
-  const { mutate, isPending } = tsr.games.performAction.useMutation();
-  const actionInstance = useInjectedMemo(action);
-  const errorNotifier = useErrorNotifier();
-
-  const actionName = action.action;
-
-  const emit = useCallback(
-    (actionData: T, confirmed = false) => {
-      if ("view" in actionData && actionData["view"] instanceof Window) {
-        toast.error("Error performing action");
-        throw new Error(
-          "Cannot use event as actionData. You likely want to use useEmptyAction",
-        );
-      }
-      mutate(
-        {
-          params: { gameId: game.id },
-          body: { actionName, actionData, confirmed },
-        },
-        {
-          onError: (error) => {
-            if (
-              isFetchError(error) ||
-              !isErrorBody(error.body) ||
-              error.body.code !== ErrorCode.MUST_CONFIRM_ACTION
-            ) {
-              errorNotifier(error);
-            } else {
-              confirm("This action is not reversible. Continue?").then(
-                (confirmed) => {
-                  if (confirmed) {
-                    emit(actionData, true);
-                  }
-                },
-              );
-            }
-          },
-          onSuccess: (r) => {
-            onSuccess(r);
-            updateAutoActionCache(r.body.auto);
-
-            toast.success("Success");
-          },
-        },
-      );
-    },
-    [game.id, actionName],
-  );
-
-  const actionCanBeEmitted =
-    game.status == GameStatus.enum.ACTIVE &&
-    phaseDelegator.get().canEmit(action);
-
-  const canEmitUserId = actionCanBeEmitted ? game.activePlayerId : undefined;
-  const canEmit =
-    me?.id === game.activePlayerId && actionCanBeEmitted && canEditGame(game);
-  const getErrorMessage = useCallback(
-    (data: T) => {
-      try {
-        actionInstance.value.validate(actionInstance.value.assertInput(data));
-      } catch (e) {
-        if (e instanceof InvalidInputError) {
-          return e.message;
-        }
-        throw e;
-      }
-    },
-    [actionInstance],
-  );
-
-  return { emit, canEmit, canEmitUserId, getErrorMessage, isPending };
 }
 
 interface UndoAction {
