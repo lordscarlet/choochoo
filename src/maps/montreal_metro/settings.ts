@@ -13,10 +13,15 @@ import {
   MontrealMetroPhaseEngine,
   MontrealMetroStarter,
 } from "./disable_goods_growth";
-import { MontrealMetroMoveHelper } from "./government_engine_level";
+import { MontrealMetroProfitHelper } from "./expenses";
+import {
+  MontrealMetroLocoAction,
+  MontrealMetroMoveHelper,
+} from "./government_engine_level";
 import { map } from "./grid";
 import { MontrealMetroTakeSharesAction } from "./max_shares";
 import { MontrealAllowedActions } from "./select_action/allowed_actions";
+import { MontrealSelectAction } from "./select_action/montreal_select_action";
 
 export class MontrealMetroMapSettings implements MapSettings {
   readonly key = GameKey.MONTREAL_METRO;
@@ -31,10 +36,13 @@ export class MontrealMetroMapSettings implements MapSettings {
       MontrealSelectActionPhase,
       MontrealAllowedActions,
       MontrealMetroPhaseEngine,
+      MontrealMetroProfitHelper,
       MontrealMetroStarter,
       MontrealBidAction,
       MontrealTurnOrderPhase,
+      MontrealSelectAction,
       MontrealMetroTakeSharesAction,
+      MontrealMetroLocoAction,
       MontrealMetroMoveHelper,
       MontrealMetroBuilderHelper,
       MontrealMetroUrbanizeAction,
