@@ -49,7 +49,7 @@ export const map = grid([
     PLAIN,
   ],
   [
-    { ...LAKE, terrainCost: 6 },
+    LAKE,
     ...duplicate(3, STREET),
     PLAIN,
     PLAIN,
@@ -173,12 +173,7 @@ export const map = grid([
     LAKE,
     PLAIN,
   ],
-  [
-    ...duplicate(5, UNPASSABLE),
-    ...duplicate(3, STREET),
-    { ...LAKE, terrainCost: 6 },
-    STREET,
-  ],
+  [...duplicate(5, UNPASSABLE), ...duplicate(3, STREET), LAKE, STREET],
   [
     ...duplicate(6, UNPASSABLE),
     PLAIN,

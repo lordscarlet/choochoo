@@ -30,6 +30,10 @@ export class MontrealMetroStarter extends GameStarter {
     );
   }
 
+  protected numCubesForAvailableCity(): number {
+    return 1;
+  }
+
   allPlayerColors(): PlayerColor[] {
     return remove(allPlayerColors, GOVERNMENT_COLOR);
   }

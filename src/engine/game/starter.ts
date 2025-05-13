@@ -150,6 +150,10 @@ export class GameStarter {
     ];
   }
 
+  protected numCubesForAvailableCity(): number {
+    return 0;
+  }
+
   initializeAvailableCities() {
     const bag = [...this.bag()];
     const availableCities: AvailableCity[] = this.getAvailableCities().map(
@@ -162,7 +166,7 @@ export class GameStarter {
             onRoll,
           },
         ],
-        goods: [],
+        goods: draw(this.numCubesForAvailableCity(), bag),
       }),
     );
     this.availableCities.initState(availableCities);
