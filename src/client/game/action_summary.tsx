@@ -210,7 +210,6 @@ function DiscoProduction() {
 
 function SpecialActionSelector() {
   const { canEmit, canEmitUserId } = useAction(ActionSelectionSelectAction);
-  console.log("special action selector", canEmit);
   const {
     canEmit: canEmitSkip,
     isPending,

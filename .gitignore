@@ -1,5 +1,6 @@
 dist
 node_modules
+deploy
 bin
 builds
 .DS_STORE

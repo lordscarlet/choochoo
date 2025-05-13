@@ -15,7 +15,7 @@ export function LocoTrack() {
         <Typography component="h2">Locomotive Track</Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <div className={styles.container}>
+        <div>
           {...times(5, (i) => (
             <div key={i} className={styles.row}>
               {times(6, (j) => (
