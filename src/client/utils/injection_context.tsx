@@ -30,9 +30,9 @@ import { Immutable } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
 import { useGame } from "../services/game";
 
-const InjectionContextContext = createContext<
-  InjectionContext | undefined
->(undefined);
+const InjectionContextContext = createContext<InjectionContext | undefined>(
+  undefined,
+);
 const MapKeyContext = createContext<GameKey | undefined>(undefined);
 
 function useInjectionContext(): InjectionContext {
@@ -124,6 +124,9 @@ export function useViewSettings(): MapViewSettings {
   const gameKey = useGameKey();
   return useMemo(() => ViewRegistry.singleton.get(gameKey), [gameKey]);
 }
+
+/** Alias of useViewSettings. */
+export const useMapSettings = useViewSettings;
 
 export function usePhaseState<T>(
   phase: Phase,

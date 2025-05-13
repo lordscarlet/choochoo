@@ -20,6 +20,7 @@ import {
   GameContextProvider,
   useCurrentPlayer,
   useInject,
+  useViewSettings,
 } from "../utils/injection_context";
 import { ActionSummary } from "./action_summary";
 import * as styles from "./active_game.module.css";
@@ -49,6 +50,7 @@ export function ActiveGame() {
 function InternalActiveGame() {
   const { canEmitUserId: canEmitProduction } = useAction(ProductionAction);
   const { canEmitUserId: canEmitSelectAction } = useAction(SelectAction);
+  const settings = useViewSettings();
   const game = useGame();
   const [searchParams] = useSearchParams();
   const undoOnly = searchParams.get("undoOnly") != null;
@@ -74,6 +76,9 @@ function InternalActiveGame() {
       <RetryButton />
       {!undoOnly && <PlayerStats />}
       <IncomeTrack />
+      {settings.additionalSliders?.map((Slider, index) => (
+        <Slider key={index} />
+      ))}
       {!undoOnly && <GameMap />}
       {!undoOnly &&
         !canEmitProduction &&

@@ -19,6 +19,7 @@ export interface MapViewSettings extends MapSettings {
   getInitialVariantConfig?(): VariantConfig;
   getVariantConfigEditor?(props: VariantConfigProps): ReactNode;
 
+  additionalSliders?: Array<() => ReactElement>;
   getVariantString?(variant: VariantConfig): string[] | undefined;
   getMapRules(props: RulesProps): ReactElement;
   getActionDescription?(action: Action): string | undefined;
