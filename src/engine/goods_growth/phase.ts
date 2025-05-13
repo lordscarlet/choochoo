@@ -7,6 +7,7 @@ import {
   injectInitialPlayerCount,
   injectPlayerAction,
 } from "../game/state";
+import { City } from "../map/city";
 import { GridHelper } from "../map/grid_helper";
 import { Action } from "../state/action";
 import { CityGroup, cityGroupToString } from "../state/city_group";
@@ -70,6 +71,10 @@ export class GoodsGrowthPhase extends PhaseModule {
     return this.playerCount();
   }
 
+  ignoreCity(_: City): boolean {
+    return false;
+  }
+
   onEnd(): void {
     for (const cityGroup of [CityGroup.WHITE, CityGroup.BLACK]) {
       const rolls = this.random.rollDice(this.getRollCount(cityGroup)).sort();
@@ -81,6 +86,7 @@ export class GoodsGrowthPhase extends PhaseModule {
       for (const city of cities) {
         for (const [index, { group, onRoll }] of city.onRoll().entries()) {
           if (group !== cityGroup) continue;
+          if (this.ignoreCity(city)) continue;
           const numRolled = rolls.filter((r) => r === onRoll).length;
           this.helper.moveGoodsToCity(city.coordinates, index, numRolled);
         }

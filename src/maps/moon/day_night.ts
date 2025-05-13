@@ -1,6 +1,7 @@
 import { UrbanizeAction, UrbanizeData } from "../../engine/build/urbanize";
 import { inject, injectState } from "../../engine/framework/execution_context";
 import { ROUND, RoundEngine } from "../../engine/game/round";
+import { injectGrid } from "../../engine/game/state";
 import { GoodsHelper } from "../../engine/goods_growth/helper";
 import { GoodsGrowthPhase } from "../../engine/goods_growth/phase";
 import { City } from "../../engine/map/city";
@@ -10,9 +11,10 @@ import { CityGroup } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
 import { SpaceType } from "../../engine/state/location_type";
 import { MutableCityData } from "../../engine/state/space";
+import { allDirections } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
-import { Side } from "./state";
+import { MoonMapData, Side } from "./state";
 
 function getNightSide(round: number): Side {
   return round % 2 === 1 ? Side.LEFT : Side.RIGHT;
@@ -59,8 +61,27 @@ export class MoonMoveHelper extends MoveHelper {
 }
 
 export class MoonGoodsGrowthPhase extends GoodsGrowthPhase {
+  private readonly round = injectState(ROUND);
+  private readonly actualGrid = injectGrid();
+
   getRollCount(_: CityGroup): number {
     return this.playerCount() * 2;
+  }
+
+  ignoreCity(city: City): boolean {
+    if (
+      city.getMapSpecific(MoonMapData.parse)!.side ===
+      getNightSide(this.round())
+    ) {
+      return true;
+    }
+    const connected = allDirections.some(
+      (direction) =>
+        this.actualGrid().connection(city.coordinates, direction) != null,
+    );
+    if (!connected) return true;
+
+    return super.ignoreCity(city);
   }
 }
 
