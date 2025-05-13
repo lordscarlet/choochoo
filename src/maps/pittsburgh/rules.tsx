@@ -15,7 +15,8 @@ export function PittsburghRules() {
         <li>
           <b>Any straight track:</b> costs $10 (incl. simple track, complex that
           adds a straight, redirecting to straight). The X track is not
-          available.
+          available. Special reminder: there are only 7 tight track available
+          (including the tight town).
         </li>
         <li>
           <b>Commonwealth action:</b> Reduces the cost of one $10 build to $7.
