@@ -17,6 +17,10 @@ export class MontrealSelectAction extends SelectAction {
   private readonly bag = injectState(BAG);
   private readonly repopulation = injectState(REPOPULATION);
 
+  canEmit(): boolean {
+    return !this.repopulation.isInitialized();
+  }
+
   protected applyLocomotive(): void {
     const currentGvtLoco = this.engineLevel().get(this.currentPlayer().color)!;
     if (currentGvtLoco >= this.getMaxGvtLoco()) return;

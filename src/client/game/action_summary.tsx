@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 import { ReactNode, useCallback } from "react";
+import { BuildAction } from "../../engine/build/build";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
 import { inject } from "../../engine/framework/execution_context";
@@ -68,6 +69,8 @@ export function ActionSummary() {
       return <EarthToHeaven />;
     case Phase.ST_LUCIA_TURN_ORDER:
       return <StLuciaTurnOrder />;
+    case Phase.GOVERNMENT_BUILD:
+      return <GovernmentBuild />;
     case Phase.GOODS_GROWTH:
     case Phase.INCOME:
     case Phase.EXPENSES:
@@ -386,6 +389,29 @@ function Deurbanization() {
       </Button>
     </div>
   );
+}
+
+function GovernmentBuild() {
+  const { canEmit, canEmitUserId } = useAction(BuildAction);
+  const buildsRemaining = useInject(() => {
+    const helper = inject(BuilderHelper);
+    if (!canEmit) return undefined;
+    return helper.buildsRemaining();
+  }, [canEmit]);
+
+  if (canEmitUserId == null) {
+    return <></>;
+  }
+
+  if (!canEmit) {
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must build the government track.
+      </GenericMessage>
+    );
+  }
+
+  return <div>You can build {buildsRemaining} more government track.</div>;
 }
 
 function Build() {

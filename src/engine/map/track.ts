@@ -48,11 +48,12 @@ export class Track {
     return this.track.claimableCost!;
   }
 
-  equals(other: Track): boolean {
-    return (
-      this.coordinates.equals(other.coordinates) &&
-      this.getExits().every((e) => other.getExits().includes(e))
-    );
+  equals(other: Track | TrackInfo): boolean {
+    if (other instanceof Track && !this.coordinates.equals(other.coordinates)) {
+      return false;
+    }
+    const otherExits = other instanceof Track ? other.getExits() : other.exits;
+    return this.getExits().every((e) => otherExits.includes(e));
   }
 }
 

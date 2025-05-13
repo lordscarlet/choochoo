@@ -11,6 +11,7 @@ import { GridHelper } from "../map/grid_helper";
 import { calculateTrackInfo, Land } from "../map/location";
 import { TOWN } from "../map/track";
 import { SpaceType } from "../state/location_type";
+import { PlayerColor } from "../state/player";
 import { Direction, getTileTypeString, TileData, TileType } from "../state/tile";
 import { BuildCostCalculator } from "./cost";
 import { BuildDiscountManager } from "./discount";
@@ -42,7 +43,11 @@ export class BuildAction implements ActionProcessor<BuildData> {
   protected readonly moneyManager = inject(MoneyManager);
   protected readonly log = inject(Log);
 
-  originalCostOf(build: BuildData): number {
+  protected owningPlayer(): PlayerColor {
+    return this.currentPlayer().color;
+  }
+
+  protected originalCostOf(build: BuildData): number {
     return this.costCalculator.costOf(build.coordinates, build.tileType, build.orientation);
   }
 
@@ -61,7 +66,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
     assert(this.currentPlayer().money >= this.totalCostOf(data), { invalidInput: 'Cannot afford to place track' });
 
     assert(!this.hasBuiltHere(coordinates), { invalidInput: 'cannot build in the same location twice in one turn' });
-    const invalidBuildReason = this.validator.getInvalidBuildReason(coordinates, { ...data, playerColor: this.currentPlayer().color });
+    const invalidBuildReason = this.validator.getInvalidBuildReason(coordinates, { ...data, playerColor: this.owningPlayer() });
     assert(invalidBuildReason == null, { invalidInput: 'invalid build: ' + invalidBuildReason });
   }
 
@@ -79,8 +84,8 @@ export class BuildAction implements ActionProcessor<BuildData> {
     assert(location instanceof Land);
 
     for (const track of location.getTrack()) {
-      if (track.getOwner() === this.currentPlayer().color) {
-        this.gridHelper.setRouteOwner(track, this.currentPlayer().color);
+      if (track.getOwner() === this.owningPlayer()) {
+        this.gridHelper.setRouteOwner(track, this.owningPlayer());
       }
     }
 
@@ -111,7 +116,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
         }
       }
 
-      return this.currentPlayer().color;
+      return this.owningPlayer();
     });
 
     return {

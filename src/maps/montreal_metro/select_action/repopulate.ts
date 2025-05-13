@@ -37,7 +37,10 @@ export class RepopulateAction implements ActionProcessor<RepopulateData> {
   readonly assertInput = RepopulateData.parse;
 
   canEmit(): boolean {
-    return this.currentPlayer().selectedAction === Action.REPOPULATION;
+    return (
+      this.currentPlayer().selectedAction === Action.REPOPULATION &&
+      this.repopulation.isInitialized()
+    );
   }
 
   validate({ coordinates, good }: RepopulateData): void {

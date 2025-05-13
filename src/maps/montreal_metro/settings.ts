@@ -18,8 +18,13 @@ import {
   MontrealMetroLocoAction,
   MontrealMetroMoveHelper,
 } from "./government_engine_level";
+import {
+  MontrealMetroBuildAction,
+  MontrealMetroPhaseDelegator,
+} from "./government_track";
 import { map } from "./grid";
 import { MontrealMetroTakeSharesAction } from "./max_shares";
+import { MontrealMetroRoundEngine } from "./rounds";
 import { MontrealAllowedActions } from "./select_action/allowed_actions";
 import { MontrealSelectAction } from "./select_action/montreal_select_action";
 
@@ -39,9 +44,12 @@ export class MontrealMetroMapSettings implements MapSettings {
       MontrealMetroProfitHelper,
       MontrealMetroStarter,
       MontrealBidAction,
+      MontrealMetroPhaseDelegator,
       MontrealTurnOrderPhase,
       MontrealSelectAction,
       MontrealMetroTakeSharesAction,
+      MontrealMetroBuildAction,
+      MontrealMetroRoundEngine,
       MontrealMetroLocoAction,
       MontrealMetroMoveHelper,
       MontrealMetroBuilderHelper,

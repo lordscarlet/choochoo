@@ -19,9 +19,7 @@ import { BuilderHelper } from "./helper";
 import { BUILD_STATE } from "./state";
 import { UrbanizeAction } from "./urbanize";
 
-export class BuildPhase extends PhaseModule {
-  static readonly phase = Phase.BUILDING;
-
+export class BaseBuildPhase extends PhaseModule {
   protected readonly helper = inject(BuilderHelper);
   protected readonly turnState = injectState(BUILD_STATE);
   protected readonly gridHelper = inject(GridHelper);
@@ -56,7 +54,7 @@ export class BuildPhase extends PhaseModule {
     }));
   }
 
-  onEndTurn(): void {
+  protected abandonDangling() {
     const { danglers } = this.turnState();
     const grid = this.grid();
     const newDanglers = this.getDanglersAsInfo(this.currentPlayer().color);
@@ -77,6 +75,10 @@ export class BuildPhase extends PhaseModule {
     if (toRemoveTrack.length > 0) {
       this.log.currentPlayer('abandons dangling track');
     }
+  }
+
+  onEndTurn(): void {
+    this.abandonDangling();
     super.onEndTurn();
     this.turnState.delete();
   }
@@ -96,4 +98,8 @@ export class BuildPhase extends PhaseModule {
     }
     return undefined;
   }
+}
+
+export class BuildPhase extends BaseBuildPhase {
+  static readonly phase = Phase.BUILDING;
 }

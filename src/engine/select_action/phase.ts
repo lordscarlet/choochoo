@@ -10,7 +10,7 @@ import { SelectAction } from "./select";
 export class SelectActionPhase extends PhaseModule {
   static readonly phase = Phase.ACTION_SELECTION;
 
-  private readonly players = injectAllPlayersUnsafe();
+  protected readonly players = injectAllPlayersUnsafe();
   protected readonly autoActionManager = inject(AutoActionManager);
   protected readonly allowedActions = inject(AllowedActions);
 

@@ -5,6 +5,7 @@ import { Key } from "../framework/key";
 import { Log } from "./log";
 import { injectInitialPlayerCount } from "./state";
 
+/** The current round, starting with round 1 (i.e. not zero-indexed). */
 export const ROUND = new Key("roundNumber", { parse: z.number().parse });
 
 export class RoundEngine {

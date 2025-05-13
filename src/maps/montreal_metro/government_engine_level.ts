@@ -39,7 +39,7 @@ export class MontrealMetroMoveHelper extends MoveHelper {
       moveData.path,
       (path) => path.owner === GOVERNMENT_COLOR,
     );
-    const usingGovtLoco = Math.max(
+    const usingGovtLoco = Math.min(
       govtLoco,
       partitioned.get(true)?.length ?? 0,
     );

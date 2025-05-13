@@ -1,8 +1,13 @@
-import { injectState } from "../../engine/framework/execution_context";
+import { inject, injectState } from "../../engine/framework/execution_context";
 import { SetKey } from "../../engine/framework/key";
-import { CURRENT_PLAYER } from "../../engine/game/state";
+import { Log } from "../../engine/game/log";
+import { CURRENT_PLAYER, injectCurrentPlayer } from "../../engine/game/state";
 import { SelectActionPhase } from "../../engine/select_action/phase";
-import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
+import {
+  PlayerColor,
+  PlayerColorZod,
+  PlayerData,
+} from "../../engine/state/player";
 import { BidAction, BidData } from "../../engine/turn_order/bid";
 import { TurnOrderPhase } from "../../engine/turn_order/phase";
 import { RepopulateAction } from "./select_action/repopulate";
@@ -33,10 +38,34 @@ export class MontrealBidAction extends BidAction {
 
 export class MontrealSelectActionPhase extends SelectActionPhase {
   private readonly hasBid = injectState(HAS_BID);
+  protected readonly currentPlayer = injectCurrentPlayer();
+  private readonly log = inject(Log);
 
   configureActions(): void {
     super.configureActions();
     this.installAction(RepopulateAction);
+  }
+
+  private getSkippedPlayers(): PlayerData[] {
+    const hasBid = this.hasBid();
+    const nonBidders = this.players().filter(
+      (player) => !hasBid.has(player.color),
+    );
+    if (nonBidders.length > 1) {
+      return nonBidders;
+    }
+    return [];
+  }
+
+  onStart(): void {
+    super.onStart();
+
+    for (const nonBidder of this.getSkippedPlayers()) {
+      this.log.player(
+        nonBidder,
+        "will not get an action because they did not bid",
+      );
+    }
   }
 
   onEnd() {
@@ -46,7 +75,7 @@ export class MontrealSelectActionPhase extends SelectActionPhase {
 
   getPlayerOrder(): PlayerColor[] {
     const hasBid = this.hasBid();
-    if (this.turnOrder().length - hasBid.size >= 2) {
+    if (this.getSkippedPlayers().length > 0) {
       return this.turnOrder().filter((playerColor) => hasBid.has(playerColor));
     }
     return this.turnOrder();
