@@ -5,6 +5,7 @@ import { SelectActionPhase } from "../../engine/select_action/phase";
 import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
 import { BidAction, BidData } from "../../engine/turn_order/bid";
 import { TurnOrderPhase } from "../../engine/turn_order/phase";
+import { RepopulateAction } from "./select_action/repopulate";
 
 const HAS_BID = new SetKey<PlayerColor>("HAS_BID", {
   parse: PlayerColorZod.parse,
@@ -32,6 +33,12 @@ export class MontrealBidAction extends BidAction {
 
 export class MontrealSelectActionPhase extends SelectActionPhase {
   private readonly hasBid = injectState(HAS_BID);
+
+  configureActions(): void {
+    super.configureActions();
+    this.installAction(RepopulateAction);
+  }
+
   onEnd() {
     this.hasBid.delete();
     super.onEnd();
@@ -39,6 +46,9 @@ export class MontrealSelectActionPhase extends SelectActionPhase {
 
   getPlayerOrder(): PlayerColor[] {
     const hasBid = this.hasBid();
-    return this.turnOrder().filter((playerColor) => hasBid.has(playerColor));
+    if (this.turnOrder().length - hasBid.size >= 2) {
+      return this.turnOrder().filter((playerColor) => hasBid.has(playerColor));
+    }
+    return this.turnOrder();
   }
 }

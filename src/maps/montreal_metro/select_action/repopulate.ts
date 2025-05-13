@@ -5,9 +5,14 @@ import {
 } from "../../../engine/framework/execution_context";
 import { ActionProcessor } from "../../../engine/game/action";
 import { Log } from "../../../engine/game/log";
-import { BAG, injectGrid } from "../../../engine/game/state";
+import {
+  BAG,
+  injectCurrentPlayer,
+  injectGrid,
+} from "../../../engine/game/state";
 import { City } from "../../../engine/map/city";
 import { GridHelper } from "../../../engine/map/grid_helper";
+import { Action } from "../../../engine/state/action";
 import { goodToString, GoodZod } from "../../../engine/state/good";
 import { SpaceType } from "../../../engine/state/location_type";
 import { CoordinatesZod } from "../../../utils/coordinates";
@@ -26,9 +31,15 @@ export class RepopulateAction implements ActionProcessor<RepopulateData> {
   private readonly grid = injectGrid();
   private readonly gridHelper = inject(GridHelper);
   private readonly repopulation = injectState(REPOPULATION);
+  private readonly currentPlayer = injectCurrentPlayer();
   private readonly bag = injectState(BAG);
 
   readonly assertInput = RepopulateData.parse;
+
+  canEmit(): boolean {
+    return this.currentPlayer().selectedAction === Action.REPOPULATION;
+  }
+
   validate({ coordinates, good }: RepopulateData): void {
     assert(this.repopulation().includes(good), {
       invalidInput: "must select a good you drew",

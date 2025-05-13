@@ -18,14 +18,30 @@ export class MontrealSelectAction extends SelectAction {
   private readonly repopulation = injectState(REPOPULATION);
 
   protected applyLocomotive(): void {
-    if (this.currentPlayer().locomotive >= 6) return;
+    const currentGvtLoco = this.engineLevel().get(this.currentPlayer().color)!;
+    if (currentGvtLoco >= this.getMaxGvtLoco()) return;
 
     this.engineLevel.update((engineLevel) => {
-      engineLevel.set(
-        this.currentPlayer().color,
-        engineLevel.get(this.currentPlayer().color)! + 1,
-      );
+      engineLevel.set(this.currentPlayer().color, currentGvtLoco + 1);
     });
+  }
+
+  private getMaxGvtLoco(): number {
+    const currentLoco = this.currentPlayer().locomotive;
+    switch (currentLoco) {
+      case 1:
+        return 1;
+      case 2:
+      case 3:
+        return 2;
+      case 4:
+        return 3;
+      case 5:
+      case 6:
+        return 4;
+      default:
+        throw new Error(`Invalid locomotive value: ${currentLoco}`);
+    }
   }
 
   process(data: SelectData): boolean {

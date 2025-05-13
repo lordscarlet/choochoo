@@ -11,6 +11,7 @@ import { IrelandMapSettings } from "./ireland/settings";
 import { JamaicaMapSettings } from "./jamaica/settings";
 import { KoreaWallaceMapSettings } from "./korea-wallace/settings";
 import { MadagascarMapSettings } from "./madagascar/settings";
+import { MontrealMetroMapSettings } from "./montreal_metro/settings";
 import { MoonMapSettings } from "./moon/settings";
 import { PittsburghMapSettings } from "./pittsburgh/settings";
 import { ReversteamMapSettings } from "./reversteam/settings";
@@ -34,6 +35,7 @@ export class MapRegistry {
     this.add(new IndiaSteamBrothersMapSettings());
     this.add(new KoreaWallaceMapSettings());
     this.add(new GermanyMapSettings());
+    this.add(new MontrealMetroMapSettings());
     this.add(new SoulTrainMapSettings());
     this.add(new DetroitBankruptcyMapSettings());
     this.add(new StLuciaMapSettings());

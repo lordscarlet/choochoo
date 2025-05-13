@@ -10,6 +10,7 @@ import { IrelandViewSettings } from "./ireland/view_settings";
 import { JamaicaViewSettings } from "./jamaica/view_settings";
 import { KoreaWallaceViewSettings } from "./korea-wallace/view_settings";
 import { MadagascarViewSettings } from "./madagascar/view_settings";
+import { MontrealMetroViewSettings } from "./montreal_metro/view_settings";
 import { MoonViewSettings } from "./moon/view_settings";
 import { PittsburghViewSettings } from "./pittsburgh/view_settings";
 import { ReversteamViewSettings } from "./reversteam/view_settings";
@@ -41,6 +42,7 @@ export class ViewRegistry {
     this.add(new JamaicaViewSettings());
     this.add(new MoonViewSettings());
     this.add(new HeavyCardboardViewSettings());
+    this.add(new MontrealMetroViewSettings());
   }
 
   values(): Iterable<MapViewSettings> {

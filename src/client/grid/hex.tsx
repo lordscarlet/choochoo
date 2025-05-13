@@ -44,17 +44,16 @@ function landColorStyle(space: Land): string {
   switch (type) {
     case SpaceType.PLAIN:
       return styles.plain;
+    case SpaceType.STREET:
     case SpaceType.RIVER:
       return styles.river;
     case SpaceType.WATER:
+    case SpaceType.LAKE:
       return styles.water;
     case SpaceType.FIRE:
       return styles.fire;
     case SpaceType.MOUNTAIN:
       return styles.mountain;
-    // TODO: render street and street
-    case SpaceType.LAKE:
-    case SpaceType.STREET:
     case SpaceType.SWAMP:
       return styles.swamp;
     case SpaceType.UNPASSABLE:
