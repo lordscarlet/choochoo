@@ -1,5 +1,6 @@
 import { Action } from "../../engine/state/action";
 import { MapViewSettings } from "../view_settings";
+import { GovtBuildOrder } from "./govt_build_order";
 import { LocoTrack } from "./loco_track";
 import { MontrealMetroRules } from "./rules";
 import { MontrealMetroMapSettings } from "./settings";
@@ -17,5 +18,5 @@ export class MontrealMetroViewSettings
     return undefined;
   }
 
-  additionalSliders = [LocoTrack];
+  additionalSliders = [LocoTrack, GovtBuildOrder];
 }
