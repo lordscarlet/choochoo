@@ -61,7 +61,8 @@ jobs:
       - run: mkdir deploy
       - run: mkdir deploy/dist
 
-      - run: sed -e "s/vvversion/$(sha1sum src/client/index.html | awk '{print $1}')/g" src/client/index.html > deploy/index.html
+      - run: sed -e "s/jsversion/$(sha1sum dist/index.min.js | awk '{print $1}')/g" src/client/index.html > deploy/index.html
+      - run: sed -e "s/cssversion/$(sha1sum dist/index.min.css | awk '{print $1}')/g" src/client/index.html > deploy/index.html
       - run: cp -r dist deploy/
 
       - uses: reggionick/s3-deploy@v4
