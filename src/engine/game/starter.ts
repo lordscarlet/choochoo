@@ -56,16 +56,18 @@ export class GameStarter {
 
   protected onStartGame(): void {}
 
+  protected startingBag(): Good[] {
+    return [
+      ...duplicate(20, Good.RED),
+      ...duplicate(20, Good.PURPLE),
+      ...duplicate(20, Good.YELLOW),
+      ...duplicate(20, Good.BLUE),
+      ...duplicate(16, Good.BLACK),
+    ];
+  }
+
   initializeStartingCubes() {
-    this.bag.initState(
-      this.random.shuffle([
-        ...duplicate(20, Good.RED),
-        ...duplicate(20, Good.PURPLE),
-        ...duplicate(20, Good.YELLOW),
-        ...duplicate(20, Good.BLUE),
-        ...duplicate(16, Good.BLACK),
-      ]),
-    );
+    this.bag.initState(this.random.shuffle(this.startingBag()));
   }
 
   drawCubesForCities(startingMap: GridData, playerCount: number) {

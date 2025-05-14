@@ -4,6 +4,13 @@ import {
   ReleaseStage,
   Rotation,
 } from "../../engine/game/map_settings";
+import {
+  SicilyAllowedActions,
+  SicilyMoveAction,
+  SicilyStarter,
+  SicilyUrbanizeAction,
+} from "./black_cubes";
+import { SicilyRoundEngine } from "./game_end";
 import { map } from "./grid";
 
 export class SicilyMapSettings implements MapSettings {
@@ -16,6 +23,12 @@ export class SicilyMapSettings implements MapSettings {
   readonly rotation = Rotation.CLOCKWISE;
 
   getOverrides() {
-    return [];
+    return [
+      SicilyStarter,
+      SicilyMoveAction,
+      SicilyAllowedActions,
+      SicilyUrbanizeAction,
+      SicilyRoundEngine,
+    ];
   }
 }
