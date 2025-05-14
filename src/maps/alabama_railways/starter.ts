@@ -1,7 +1,8 @@
-import { draw, GameStarter } from "../../engine/game/starter";
+import { GameStarter } from "../../engine/game/starter";
 import { CityGroup } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
 import { OnRoll } from "../../engine/state/roll";
+import { infiniteLoopCheck } from "../../utils/functions";
 
 export class AlabamaRailwaysStarter extends GameStarter {
   protected startingBag(): Good[] {
@@ -22,17 +23,19 @@ export class AlabamaRailwaysStarter extends GameStarter {
     urbanized: boolean,
   ): Good[] {
     const normalized = Array.isArray(cityColor) ? cityColor : [cityColor];
-    let previousDraw: Good[] | undefined;
-    do {
-      if (previousDraw != null) {
-        bag.push(...previousDraw);
-      }
-      previousDraw = draw(urbanized ? 2 : 3, bag);
-    } while (
-      previousDraw.every(
-        (good) => good === Good.BLACK || !normalized.includes(good),
-      )
-    );
-    return previousDraw;
+    const array: Good[] = [];
+    for (let i = 0; i < (urbanized ? 2 : 3); i++) {
+      let index: number;
+      let good: Good;
+      const loop = infiniteLoopCheck(15);
+      do {
+        loop();
+        index = Math.floor(Math.random() * bag.length);
+        good = bag[index];
+      } while (good !== Good.BLACK && normalized.includes(good));
+      array.push(good);
+      bag.splice(index, 1);
+    }
+    return array;
   }
 }

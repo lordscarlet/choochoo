@@ -8,72 +8,108 @@ import {
   ModalContent,
   Select,
 } from "semantic-ui-react";
+import { GameKey } from "../../api/game_key";
 import { MoveData } from "../../engine/move/move";
 import { PlayerColor, playerColorToString } from "../../engine/state/player";
+import { AlabamaMoveAction } from "../../maps/alabama_railways/move_good";
 import { MoonMoveAction } from "../../maps/moon/low_gravitation";
 import * as styles from "../components/confirm.module.css";
 import { useAction } from "../services/action";
-import { useCurrentPlayer, useInjected } from "../utils/injection_context";
+import { useCurrentPlayer, useGameKey } from "../utils/injection_context";
 
-interface StealIncomeModalProps {
+interface InterceptMoveModalProps {
   cityName?: string;
   moveData?: MoveData;
   clearMoveData(): void;
 }
 
-export function useStealIncomeState() {
-  const action = useInjected(MoonMoveAction);
-  const { canEmit } = useAction(MoonMoveAction);
+export function useMoveInterceptionState() {
+  const gameKey = useGameKey();
+  const { canEmit: canEmitMoonMove } = useAction(MoonMoveAction);
+  const { emit: emitAlabama } = useAction(AlabamaMoveAction);
   const currentPlayer = useCurrentPlayer()?.color;
-  const [cityName, setCityName] = useState<string | undefined>();
-  const [moveData, setMoveData] = useState<MoveData | undefined>();
+  const [[cityName, moveData], setInternalState] = useState<
+    [string, MoveData] | [undefined, undefined]
+  >([undefined, undefined]);
   const clearMoveData = useCallback(() => {
-    setCityName(undefined);
-    setMoveData(undefined);
+    setInternalState([undefined, undefined]);
   }, []);
-  const maybeStealFrom = useCallback(
+  const maybeInterceptMove = useCallback(
     (moveData: MoveData, cityName: string) => {
-      const canSteal =
+      const hasAChoice =
         currentPlayer != null &&
         moveData.path.some(({ owner }) => owner !== currentPlayer);
-      if (action.hasLowGravitation() && canSteal) {
-        setCityName(cityName);
-        setMoveData(moveData);
+      if (gameKey === GameKey.ALABAMA_RAILWAYS) {
+        if (!hasAChoice) {
+          emitAlabama({
+            ...moveData,
+            forgo: moveData.path.map(({ owner }) => owner)[0],
+          });
+          return true;
+        }
+        setInternalState([cityName, moveData]);
+        return true;
+      }
+      const canSteal =
+        gameKey === GameKey.MOON && canEmitMoonMove && hasAChoice;
+      if (canSteal) {
+        setInternalState([cityName, moveData]);
         return true;
       }
       return false;
     },
-    [canEmit, setMoveData],
+    [canEmitMoonMove, gameKey, setInternalState, currentPlayer],
   );
-  return { moveData, cityName, clearMoveData, maybeStealFrom, currentPlayer };
+  return {
+    moveData,
+    cityName,
+    clearMoveData,
+    maybeInterceptMove,
+  };
 }
 
 const NO_ONE = "NO_ONE" as const;
 
-type StealFrom = PlayerColor | typeof NO_ONE;
+type SelectedPlayer = PlayerColor | typeof NO_ONE;
 
-export function StealIncomeModal({
+export function InterceptMoveModal({
   cityName,
   moveData,
   clearMoveData: clearMoveDataExternal,
-}: StealIncomeModalProps) {
-  const { emit, isPending } = useAction(MoonMoveAction);
-  const [stealFrom, setStealFrom] = useState<StealFrom | undefined>(NO_ONE);
+}: InterceptMoveModalProps) {
+  const gameKey = useGameKey();
+  const { emit: emitMoonMoveAction, isPending: isMoonPending } =
+    useAction(MoonMoveAction);
+  const { emit: emitAlabamaMoveAction, isPending: isAlabamaPending } =
+    useAction(AlabamaMoveAction);
+  const isPending = isMoonPending || isAlabamaPending;
+
+  const [selectedPlayer, setSelectedPlayer] = useState<
+    SelectedPlayer | undefined
+  >(NO_ONE);
   const currentPlayer = useCurrentPlayer();
 
   const clearMoveData = useCallback(() => {
     clearMoveDataExternal();
-    setStealFrom(NO_ONE);
-  }, [clearMoveDataExternal, setStealFrom]);
+    setSelectedPlayer(NO_ONE);
+  }, [clearMoveDataExternal, setSelectedPlayer]);
 
   const options = useMemo(() => {
     if (moveData == null) return [];
     const { path } = moveData;
     const players = new Set(
-      path.map((p) => p.owner).filter((p) => p != currentPlayer?.color),
+      path
+        .map((p) => p.owner)
+        .filter((p) =>
+          gameKey === GameKey.MOON ? p != currentPlayer?.color : true,
+        ),
     );
     return [
-      { key: NO_ONE, text: "Don't use LG", value: NO_ONE },
+      {
+        key: NO_ONE,
+        text: gameKey === GameKey.MOON ? "Don't use LG" : "",
+        value: NO_ONE,
+      },
       ...[...players].map((p) => ({
         key: p == null ? "--Unowned--" : p,
         text: p == null ? "Unowned link" : playerColorToString(p),
@@ -83,19 +119,35 @@ export function StealIncomeModal({
   }, [moveData, currentPlayer?.color]);
 
   const completeMove = useCallback(() => {
-    emit({
-      ...moveData!,
-      stealFrom: stealFrom === NO_ONE ? undefined : { color: stealFrom },
-    });
+    if (gameKey === GameKey.MOON) {
+      emitMoonMoveAction({
+        ...moveData!,
+        stealFrom:
+          selectedPlayer === NO_ONE ? undefined : { color: selectedPlayer },
+      });
+    } else {
+      if (selectedPlayer === NO_ONE) return;
+      emitAlabamaMoveAction({
+        forgo: selectedPlayer,
+        ...moveData!,
+      });
+    }
     clearMoveData();
-    setStealFrom(NO_ONE);
-  }, [emit, clearMoveData, moveData, stealFrom]);
+    setSelectedPlayer(NO_ONE);
+  }, [
+    gameKey,
+    emitMoonMoveAction,
+    emitAlabamaMoveAction,
+    clearMoveData,
+    moveData,
+    selectedPlayer,
+  ]);
 
   const onChange = useCallback(
     (_: unknown, { value }: DropdownProps) => {
-      setStealFrom(value as StealFrom | undefined);
+      setSelectedPlayer(value as SelectedPlayer | undefined);
     },
-    [setStealFrom],
+    [setSelectedPlayer],
   );
 
   return (
@@ -107,10 +159,14 @@ export function StealIncomeModal({
     >
       <Header className={styles.modal} content={`Deliver to ${cityName}?`} />
       <ModalContent>
-        <p>
-          Optionally, you can use low gravitation to use a player&apos;s link{" "}
-          {stealFrom == NO_ONE ? "no one" : playerColorToString(stealFrom)}.
-        </p>
+        {gameKey === GameKey.MOON && (
+          <p>
+            Optionally, you can use low gravitation to use a player&apos;s link.
+          </p>
+        )}
+        {gameKey === GameKey.ALABAMA_RAILWAYS && (
+          <p>Select a player to miss out on income.</p>
+        )}
         <Select
           placeholder="Player link"
           options={options}
@@ -122,9 +178,11 @@ export function StealIncomeModal({
           Cancel
         </Button>
         <Button onClick={completeMove} disabled={isPending}>
-          {stealFrom === NO_ONE
-            ? "Continue without using low gravitation"
-            : "Use low gravitation"}
+          {gameKey === GameKey.ALABAMA_RAILWAYS
+            ? "Select Player"
+            : selectedPlayer === NO_ONE
+              ? "Continue without using low gravitation"
+              : "Use low gravitation"}
         </Button>
       </ModalActions>
     </Modal>

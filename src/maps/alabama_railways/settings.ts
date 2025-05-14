@@ -13,7 +13,7 @@ export class AlabamaRailwaysMapSettings implements MapSettings {
   readonly minPlayers = 2;
   readonly maxPlayers = 2;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly stage = ReleaseStage.ALPHA;
 
   getOverrides() {
     return [AlabamaRailwaysStarter, AlabamaMoveAction];

@@ -4,7 +4,7 @@ import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
 import { assert } from "../../utils/validate";
 
 export const AlabamaMoveData = MoveData.extend({
-  forgo: PlayerColorZod,
+  forgo: PlayerColorZod.optional(),
 });
 export type AlabamaMoveData = z.infer<typeof AlabamaMoveData>;
 

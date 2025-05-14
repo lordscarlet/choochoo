@@ -6,10 +6,6 @@ export abstract class Module {
   private readonly mixins: Array<[SimpleConstructor<unknown>, Mixin<unknown>]> =
     [];
 
-  constructor() {
-    this.installMixins();
-  }
-
   abstract installMixins(): void;
 
   installMixin<T>(ctor: SimpleConstructor<T>, mixin: Mixin<T>) {
@@ -19,6 +15,7 @@ export abstract class Module {
   registerOverrides(
     overrides: Map<SimpleConstructor<unknown>, SimpleConstructor<unknown>>,
   ) {
+    this.installMixins();
     for (const [base, mixin] of this.mixins) {
       const override = mixin(overrides.get(base) ?? base);
       let current = Object.getPrototypeOf(override);
