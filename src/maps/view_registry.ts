@@ -1,3 +1,4 @@
+import { AlabamaRailwaysViewSettings } from "./alabama_railways/view_settings";
 import { SicilyViewSettings } from "./sicily/view_settings";
 import { GameKey } from "../api/game_key";
 import { assert } from "../utils/validate";
@@ -26,6 +27,7 @@ export class ViewRegistry {
   private readonly maps = new Map<GameKey, MapViewSettings>();
 
   private constructor() {
+    this.add(new AlabamaRailwaysViewSettings());
     this.add(new SicilyViewSettings());
     this.add(new RustBeltViewSettings());
     this.add(new ReversteamViewSettings());
