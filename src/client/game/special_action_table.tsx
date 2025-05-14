@@ -137,6 +137,8 @@ function getSelectedActionDescription(
       return "Allows you to use other's links as if they are your own for both moves.";
     case Action.HEAVY_LIFTING:
       return "Allows you to move goods across open land. See rules for more information.";
+    case Action.PROTECTION:
+      return "Allows you to move black cubes from towns during the Move Goods step.";
     default:
       assertNever(action);
   }

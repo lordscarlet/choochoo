@@ -16,7 +16,7 @@ export class SicilyStarter extends GameStarter {
     // 9 black cubes are needed for the towns.
     return super
       .startingBag()
-      .filter((good) => good === Good.BLACK)
+      .filter<Good>((good) => good !== Good.BLACK)
       .concat(duplicate(7, Good.BLACK));
   }
 

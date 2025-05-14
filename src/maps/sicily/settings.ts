@@ -19,7 +19,7 @@ export class SicilyMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly stage = ReleaseStage.ALPHA;
   readonly rotation = Rotation.CLOCKWISE;
 
   getOverrides() {
