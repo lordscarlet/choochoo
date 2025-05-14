@@ -58,7 +58,7 @@ async function createMap({ name, maxPlayers, minPlayers }: ParsedArgs) {
       .replace(NAME, name)
       .replace(GAME_KEY_NAME, `GameKey.${constantCase}`)
       .replace(MIN_PLAYERS, `readonly minPlayers = ${minPlayers};`)
-      .replace(MAX_PLAYERS, `readonly minPlayers = ${maxPlayers};`);
+      .replace(MAX_PLAYERS, `readonly maxPlayers = ${maxPlayers};`);
     await writeFile(resolve(dirName, filename), newContents, "utf8");
   }
 
