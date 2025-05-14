@@ -17,7 +17,7 @@ export class SicilyMapSettings implements MapSettings {
   readonly key = GameKey.SICILY;
   readonly name = "Sicily";
   readonly minPlayers = 3;
-  readonly maxPlayers = 6;
+  readonly maxPlayers = 3;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.DEVELOPMENT;
   readonly rotation = Rotation.CLOCKWISE;
