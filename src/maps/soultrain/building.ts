@@ -2,7 +2,6 @@ import z from "zod";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { BuildCostCalculator } from "../../engine/build/cost";
 import { BuilderHelper } from "../../engine/build/helper";
-import { BuildPhase } from "../../engine/build/phase";
 import { inject, injectState } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
 import { injectCurrentPlayer } from "../../engine/game/state";
@@ -11,7 +10,6 @@ import { SpaceType } from "../../engine/state/location_type";
 import { LandType } from "../../engine/state/space";
 import { Direction, TileType } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
-import { assert } from "../../utils/validate";
 
 const RUNNING_COST = new Key("runningCost", { parse: z.number().parse });
 
@@ -83,15 +81,5 @@ export class SoulTrainBuilderHelper extends BuilderHelper {
 
   getMaxBuilds(): number {
     return 6;
-  }
-}
-
-export class SoulTrainBuildPhase extends BuildPhase {
-  onEndTurn(): void {
-    const newDanglers = this.getDanglersAsInfo(this.currentPlayer().color);
-    assert(newDanglers.length === 0, {
-      invalidInput: "Cannot end your turn with danglers",
-    });
-    return super.onEndTurn();
   }
 }

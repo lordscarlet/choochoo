@@ -1,9 +1,9 @@
 import { GameKey } from "../../api/game_key";
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import { CompleteLinkBuldModule } from "../../modules/complete_link_build";
 import {
   SoulTrainBuildAction,
   SoulTrainBuilderHelper,
-  SoulTrainBuildPhase,
   SoulTrainCalculator,
 } from "./building";
 import { SoulTrainMoveAction, SoulTrainMoveHelper } from "./delivery";
@@ -29,7 +29,6 @@ export class SoulTrainMapSettings implements MapSettings {
       SoulTrainStarter,
       SoulTrainCalculator,
       SoulTrainBuildAction,
-      SoulTrainBuildPhase,
       SoulTrainPhaseEngine,
       SoulTrainPhaseDelegator,
       SoulTrainRoundEngine,
@@ -38,5 +37,9 @@ export class SoulTrainMapSettings implements MapSettings {
       SoulTrainBuilderHelper,
       SoulTrainAllowedActions,
     ];
+  }
+
+  getModules() {
+    return [new CompleteLinkBuldModule()];
   }
 }

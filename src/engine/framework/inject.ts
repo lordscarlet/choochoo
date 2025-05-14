@@ -9,7 +9,10 @@ import {
 import { Key } from "./key";
 
 export class InjectionContext {
-  private readonly overrides = new Map<SimpleConstructor<unknown>, unknown>();
+  private readonly overrides = new Map<
+    SimpleConstructor<unknown>,
+    SimpleConstructor<unknown>
+  >();
   private readonly inConstruction = new Map<
     SimpleConstructor<unknown>,
     ProxyObject<unknown>
@@ -22,12 +25,17 @@ export class InjectionContext {
   private readonly dependencyStack = new DependencyStack();
 
   constructor(mapKey: GameKey) {
-    for (const override of MapRegistry.singleton.get(mapKey).getOverrides()) {
+    const settings = MapRegistry.singleton.get(mapKey);
+    for (const override of settings.getOverrides()) {
       let current = Object.getPrototypeOf(override);
       do {
         this.overrides.set(current, override);
         current = Object.getPrototypeOf(current);
       } while (current !== Object.getPrototypeOf(Object));
+    }
+
+    for (const module of settings.getModules?.() ?? []) {
+      module.registerOverrides(this.overrides);
     }
 
     // Carve out a special path for DependencyStack

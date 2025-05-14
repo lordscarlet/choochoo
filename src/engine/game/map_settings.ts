@@ -3,6 +3,7 @@ import { Coordinates } from "../../utils/coordinates";
 import { assertNever } from "../../utils/validate";
 import { SimpleConstructor } from "../framework/dependency_stack";
 import { Grid, Space } from "../map/grid";
+import { Module } from "../module/module";
 import { GridData } from "../state/grid";
 import { InterCityConnection } from "../state/inter_city_connection";
 import { Direction } from "../state/tile";
@@ -50,6 +51,11 @@ export interface MapSettings {
   readonly rotation?: Rotation;
 
   getOverrides(): Array<SimpleConstructor<unknown>>;
+  getModules?(): Array<Module>;
 
-  getNeighbor?: (grid: Grid, coordinates: Coordinates, dir: Direction) => Space | undefined;
+  getNeighbor?: (
+    grid: Grid,
+    coordinates: Coordinates,
+    dir: Direction,
+  ) => Space | undefined;
 }
