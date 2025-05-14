@@ -15,8 +15,8 @@ const { values: argsUnparsed } = parseArgs({
 const CAMEL_CASE = /TTTCAMEL_CASE/g;
 const NAME = /TTTNAME/g;
 const GAME_KEY_NAME = /GameKey.REVERSTEAM/g;
-const MIN_PLAYERS = /readonly minPlayers = 3;/g;
-const MAX_PLAYERS = /readonly maxPlayers = 3;/g;
+const MIN_PLAYERS = /readonly minPlayers = \d;/g;
+const MAX_PLAYERS = /readonly maxPlayers = \d;/g;
 
 createMap(validateArgs(argsUnparsed));
 
