@@ -24,6 +24,7 @@ interface StealIncomeModalProps {
 export function useStealIncomeState() {
   const action = useInjected(MoonMoveAction);
   const { canEmit } = useAction(MoonMoveAction);
+  const currentPlayer = useCurrentPlayer()?.color;
   const [cityName, setCityName] = useState<string | undefined>();
   const [moveData, setMoveData] = useState<MoveData | undefined>();
   const clearMoveData = useCallback(() => {
@@ -32,7 +33,10 @@ export function useStealIncomeState() {
   }, []);
   const maybeStealFrom = useCallback(
     (moveData: MoveData, cityName: string) => {
-      if (action.hasLowGravitation()) {
+      const canSteal =
+        currentPlayer != null &&
+        moveData.path.some(({ owner }) => owner !== currentPlayer);
+      if (action.hasLowGravitation() && canSteal) {
         setCityName(cityName);
         setMoveData(moveData);
         return true;
@@ -41,7 +45,7 @@ export function useStealIncomeState() {
     },
     [canEmit, setMoveData],
   );
-  return { moveData, cityName, clearMoveData, maybeStealFrom };
+  return { moveData, cityName, clearMoveData, maybeStealFrom, currentPlayer };
 }
 
 const NO_ONE = "NO_ONE" as const;
