@@ -30,7 +30,7 @@ import { MontrealSelectAction } from "./select_action/montreal_select_action";
 
 export class MontrealMetroMapSettings implements MapSettings {
   readonly key = GameKey.MONTREAL_METRO;
-  readonly name = "Montreal Metro";
+  readonly name = "Montréal Métro";
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
   readonly startingGrid = map;
