@@ -1,3 +1,4 @@
+import { SicilyViewSettings } from "./sicily/view_settings";
 import { GameKey } from "../api/game_key";
 import { assert } from "../utils/validate";
 import { CyprusViewSettings } from "./cyprus/view_settings";
@@ -25,6 +26,7 @@ export class ViewRegistry {
   private readonly maps = new Map<GameKey, MapViewSettings>();
 
   private constructor() {
+    this.add(new SicilyViewSettings());
     this.add(new RustBeltViewSettings());
     this.add(new ReversteamViewSettings());
     this.add(new IrelandViewSettings());

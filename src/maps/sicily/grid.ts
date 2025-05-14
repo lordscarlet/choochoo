@@ -1,0 +1,80 @@
+import { BLUE, PURPLE, RED, YELLOW } from "../../engine/state/good";
+import { SpaceData } from "../../engine/state/space";
+import { allDirections } from "../../engine/state/tile";
+import { duplicate } from "../../utils/functions";
+import {
+  black,
+  city,
+  grid,
+  MOUNTAIN,
+  PLAIN,
+  town,
+  UNPASSABLE,
+  white,
+} from "../factory";
+
+export const map = grid<SpaceData>([
+  [
+    city("Messina", BLUE, [black(5), black(6)]),
+    PLAIN,
+    PLAIN,
+    ...duplicate(4, UNPASSABLE),
+    city("Palermo", RED, [white(5), white(6)]),
+    PLAIN,
+    UNPASSABLE,
+    PLAIN,
+  ],
+  [
+    PLAIN,
+    MOUNTAIN,
+    PLAIN,
+    town("Mistretta"),
+    PLAIN,
+    town("Termini"),
+    PLAIN,
+    PLAIN,
+    town("Alcamo"),
+    MOUNTAIN,
+    city("Trapani", BLUE, [white(4)]),
+  ],
+  [UNPASSABLE, ...duplicate(9, MOUNTAIN), PLAIN],
+  [
+    MOUNTAIN,
+    { ...MOUNTAIN, unpassableEdges: allDirections },
+    MOUNTAIN,
+    city("Enna", BLUE, black(1)),
+    MOUNTAIN,
+    MOUNTAIN,
+    town("Corleone"),
+    MOUNTAIN,
+    town("Menfi"),
+    MOUNTAIN,
+    city("Marsala", RED, white(3)),
+  ],
+  [
+    UNPASSABLE,
+    city("Catania", RED, black(4)),
+    ...duplicate(3, MOUNTAIN),
+    city("Caltanissetta", RED, white(1)),
+    ...duplicate(4, MOUNTAIN),
+    PLAIN,
+  ],
+  [
+    PLAIN,
+    MOUNTAIN,
+    city("Caltagirone", PURPLE, black(2)),
+    ...duplicate(4, MOUNTAIN),
+    town("Sciacca"),
+    PLAIN,
+    city("Castelvetrano", YELLOW, white(2)),
+  ],
+  [
+    city("Siracusa", BLUE, [black(3)]),
+    ...duplicate(3, MOUNTAIN),
+    town("Gela"),
+    PLAIN,
+    town("Agrigento"),
+    PLAIN,
+  ],
+  [PLAIN, PLAIN, town("Ragusa"), PLAIN],
+]);

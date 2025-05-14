@@ -3,6 +3,7 @@ import { GameKey } from "./game_key";
 
 const EmptyVariantConfig = z.object({
   gameKey: z.enum([
+    GameKey.SICILY,
     GameKey.DETROIT,
     GameKey.GERMANY,
     GameKey.MOON,

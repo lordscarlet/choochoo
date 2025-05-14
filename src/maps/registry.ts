@@ -1,3 +1,4 @@
+import { SicilyMapSettings } from "./sicily/settings";
 import { GameKey } from "../api/game_key";
 import { MapSettings } from "../engine/game/map_settings";
 import { assert } from "../utils/validate";
@@ -25,6 +26,7 @@ export class MapRegistry {
   private readonly maps = new Map<GameKey, MapSettings>();
 
   private constructor() {
+    this.add(new SicilyMapSettings());
     this.add(new RustBeltMapSettings());
     this.add(new ReversteamMapSettings());
     this.add(new IrelandMapSettings());
