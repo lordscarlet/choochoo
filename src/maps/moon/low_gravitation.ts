@@ -29,14 +29,13 @@ export class MoonMoveAction extends MoveAction<MoonMoveData> {
     return this.currentPlayer().color === this.lowGravitation()?.color;
   }
 
-  canEmit(): boolean {
-    return this.hasLowGravitation();
-  }
-
   validate(action: MoonMoveData): void {
     super.validate(action);
     const { stealFrom } = action;
     if (stealFrom == null) return;
+    assert(this.hasLowGravitation(), {
+      invalidInput: "Can only steal with low gravitation",
+    });
     assert(
       action.path.some((p) => p.owner === stealFrom.color),
       {

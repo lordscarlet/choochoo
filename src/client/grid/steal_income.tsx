@@ -15,7 +15,11 @@ import { AlabamaMoveAction } from "../../maps/alabama_railways/move_good";
 import { MoonMoveAction } from "../../maps/moon/low_gravitation";
 import * as styles from "../components/confirm.module.css";
 import { useAction } from "../services/action";
-import { useCurrentPlayer, useGameKey } from "../utils/injection_context";
+import {
+  useCurrentPlayer,
+  useGameKey,
+  useInjectedMemo,
+} from "../utils/injection_context";
 
 interface InterceptMoveModalProps {
   cityName?: string;
@@ -25,6 +29,7 @@ interface InterceptMoveModalProps {
 
 export function useMoveInterceptionState() {
   const gameKey = useGameKey();
+  const moonMoveAction = useInjectedMemo(MoonMoveAction);
   const { canEmit: canEmitMoonMove } = useAction(MoonMoveAction);
   const { emit: emitAlabama } = useAction(AlabamaMoveAction);
   const currentPlayer = useCurrentPlayer()?.color;
@@ -50,15 +55,17 @@ export function useMoveInterceptionState() {
         setInternalState([cityName, moveData]);
         return true;
       }
-      const canSteal =
-        gameKey === GameKey.MOON && canEmitMoonMove && hasAChoice;
-      if (canSteal) {
+      if (
+        gameKey === GameKey.MOON &&
+        hasAChoice &&
+        moonMoveAction.value.hasLowGravitation()
+      ) {
         setInternalState([cityName, moveData]);
         return true;
       }
       return false;
     },
-    [canEmitMoonMove, gameKey, setInternalState, currentPlayer],
+    [canEmitMoonMove, moonMoveAction, gameKey, setInternalState, currentPlayer],
   );
   return {
     moveData,
