@@ -13,7 +13,7 @@ export class JamaicaMapSettings implements MapSettings {
   readonly minPlayers = 2;
   readonly maxPlayers = 2;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.ALPHA;
+  readonly stage = ReleaseStage.BETA;
 
   getOverrides() {
     return [

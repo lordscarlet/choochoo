@@ -18,7 +18,7 @@ export class KoreaWallaceMapSettings implements MapSettings {
     ["Inchon", "Suwon"],
     ["Suwon", "Seoul"],
   ]);
-  readonly stage = ReleaseStage.ALPHA;
+  readonly stage = ReleaseStage.BETA;
 
   getOverrides() {
     return [
