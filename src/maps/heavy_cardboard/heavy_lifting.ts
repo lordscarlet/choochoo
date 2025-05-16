@@ -8,12 +8,14 @@ import { ROUND } from "../../engine/game/round";
 import {
   BAG,
   injectCurrentPlayer,
+  injectGrid,
   injectPlayerAction,
 } from "../../engine/game/state";
 import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
 import { GridHelper } from "../../engine/map/grid_helper";
 import { Land } from "../../engine/map/location";
+import { TOWN, Track } from "../../engine/map/track";
 import { MoveHelper } from "../../engine/move/helper";
 import { MovePhase } from "../../engine/move/phase";
 import { AllowedActions } from "../../engine/select_action/allowed_actions";
@@ -74,6 +76,7 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
   private readonly heavyLifting = injectState(HEAVY_LIFTING);
   private readonly moveHelper = inject(MoveHelper);
   private readonly gridHelper = inject(GridHelper);
+  private readonly grid = injectGrid();
   private readonly playerHelper = inject(PlayerHelper);
   private readonly currentPlayer = injectCurrentPlayer();
   private readonly heavyPlayer = injectPlayerAction(Action.HEAVY_LIFTING);
@@ -113,6 +116,10 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
       invalidInput: "must deliver to matching city",
     });
 
+    assert(this.hasConnectionTo(startingCity), {
+      invalidInput: "must be connected to the starting city",
+    });
+
     const canTrace = this.canTracePathCheckingHeavyCardboardCity(
       startingCity,
       endingCity,
@@ -120,6 +127,33 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
     assert(canTrace, {
       invalidInput: "must be within 6 spaces",
     });
+  }
+
+  private hasConnectionTo(startingCity: City): boolean {
+    if (startingCity.data.mapSpecific?.center === true) {
+      return allDirections.some((direction) =>
+        this.hasConnectionTo(
+          this.grid().get(startingCity.coordinates.neighbor(direction)) as City,
+        ),
+      );
+    } else {
+      return allDirections.some((direction) => {
+        const track = this.grid().connection(
+          startingCity.coordinates,
+          direction,
+        );
+        if (!(track instanceof Track)) return false;
+        if (track.getOwner() !== this.currentPlayer().color) return false;
+        const [endTrack, exit] = this.grid().getEnd(
+          track,
+          getOpposite(direction),
+        );
+        return (
+          exit === TOWN ||
+          this.grid().get(endTrack.neighbor(exit)) instanceof City
+        );
+      });
+    }
   }
 
   private canTracePathCheckingHeavyCardboardCity(
