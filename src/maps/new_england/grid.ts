@@ -4,15 +4,15 @@ import { duplicate } from "../../utils/functions";
 import {
   black,
   city,
-  grid,
   MOUNTAIN,
   PLAIN,
+  startsLowerGrid,
   town,
   UNPASSABLE,
   white,
 } from "../factory";
 
-export const map = grid<SpaceData>([
+export const map = startsLowerGrid<SpaceData>([
   [
     PLAIN,
     PLAIN,
