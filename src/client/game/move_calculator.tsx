@@ -43,7 +43,7 @@ export function MoveCalculator() {
 
   const handleClick = useCallback(() => {
     const allRoutes: Option[] = searcher.value
-      .findAllRoutes({ locomotive: Infinity } as PlayerData)
+      .findAllRoutes(mePlayer ?? ({ locomotive: Infinity } as PlayerData))
       .map((route) => ({
         route,
         income: moveAction.value.calculateIncome(route),
