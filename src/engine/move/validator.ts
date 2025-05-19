@@ -53,6 +53,10 @@ export class MoveValidator {
   validateNew(player: PlayerData, action: MoveData): void {
     this.validatePartial(player, action);
 
+    if (action.path.length === 0) {
+      throw new InvalidInputError("must move over at least one route");
+    }
+
     const endingLocation = this.grid().get(peek(action.path).endingStop);
 
     if (!(endingLocation instanceof City)) {
@@ -71,9 +75,6 @@ export class MoveValidator {
       throw new InvalidInputError(
         `Can only move ${this.moveHelper.getLocomotiveDisplay(player)} steps`,
       );
-    }
-    if (action.path.length === 0) {
-      throw new InvalidInputError("must move over at least one route");
     }
 
     const startingCity = grid.get(action.startingCity);
@@ -110,10 +111,9 @@ export class MoveValidator {
       .map(Coordinates.from);
     for (const [index, coordinate] of allCoordinates.entries()) {
       for (const otherCoordinate of allCoordinates.slice(index + 1)) {
-        assert(
-          !coordinate.equals(otherCoordinate),
-          "cannot stop at the same city twice",
-        );
+        assert(!coordinate.equals(otherCoordinate), {
+          invalidInput: "cannot stop at the same city twice",
+        });
       }
     }
 
@@ -437,10 +437,9 @@ export class MoveValidator {
       .map(Coordinates.from);
     for (const [index, coordinate] of allCoordinates.entries()) {
       for (const otherCoordinate of allCoordinates.slice(index + 1)) {
-        assert(
-          !coordinate.equals(otherCoordinate),
-          "cannot stop at the same city twice",
-        );
+        assert(!coordinate.equals(otherCoordinate), {
+          invalidInput: "cannot stop at the same city twice",
+        });
       }
     }
 

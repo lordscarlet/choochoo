@@ -41,7 +41,7 @@ export function MoveCalculator() {
     undefined,
   );
 
-  const handleClick = useCallback(() => {
+  const calculateRoutes = useCallback(() => {
     const allRoutes: Option[] = searcher.value
       .findAllRoutes(mePlayer ?? ({ locomotive: Infinity } as PlayerData))
       .map((route) => ({
@@ -51,13 +51,13 @@ export function MoveCalculator() {
     allRoutes.sort((a, b) => {
       if (mePlayer == null) {
         return (
-          [...a.income.values()].reduce((a, b) => a + b, 0) -
-          [...b.income.values()].reduce((a, b) => a + b, 0)
+          [...b.income.values()].reduce((a, b) => a + b, 0) -
+          [...a.income.values()].reduce((a, b) => a + b, 0)
         );
       }
       return (
-        (a.income.get(mePlayer.color) ?? 0) -
-        (b.income.get(mePlayer.color) ?? 0)
+        (b.income.get(mePlayer.color) ?? 0) -
+        (a.income.get(mePlayer.color) ?? 0)
       );
     });
     setOptions(allRoutes);
@@ -74,7 +74,7 @@ export function MoveCalculator() {
       </AccordionSummary>
       <AccordionDetails>
         <div>
-          <Button onClick={handleClick}>Calculate Moves</Button>
+          <Button onClick={calculateRoutes}>Calculate Moves</Button>
           {options != null && options.length > 0 && (
             <table>
               <thead>
