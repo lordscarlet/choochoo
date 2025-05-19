@@ -10,6 +10,7 @@ import { Land } from "../../engine/map/location";
 import { Track } from "../../engine/map/track";
 import { MoveHelper } from "../../engine/move/helper";
 import { MoveAction, MoveData, Path } from "../../engine/move/move";
+import { MoveSearcher } from "../../engine/move/searcher";
 import { Good } from "../../engine/state/good";
 import { OwnedInterCityConnection } from "../../engine/state/inter_city_connection";
 import {
@@ -67,11 +68,11 @@ interface EnhancedMoveData extends MoveData {
 }
 
 function buildPaths(
-  grid: Grid,
+  moveSearcher: MoveSearcher,
   startingStop: Coordinates,
   endingStop: Coordinates,
 ): EnhancedPath[] {
-  return [...grid.findRoutesToLocation(startingStop, endingStop)].map(
+  return [...moveSearcher.findRoutesToLocation(startingStop, endingStop)].map(
     (connection) => {
       if (connection instanceof Track) {
         return {
@@ -131,6 +132,7 @@ function useMaybeConfirmEmitHeavyLifting() {
 }
 
 function onMoveToSpaceCb(
+  moveSearcher: Memoized<MoveSearcher>,
   moveHelper: Memoized<MoveHelper>,
   moveActionProgress: EnhancedMoveData | undefined,
   setMoveActionProgress: (data: EnhancedMoveData | undefined) => void,
@@ -174,7 +176,11 @@ function onMoveToSpaceCb(
       if (entirePathIndex === 0) return;
       // Otherwise, just update the owner
       const fromSpace = grid.get(entirePath[entirePath.length - 2])!;
-      const paths = buildPaths(grid, fromSpace.coordinates, space.coordinates);
+      const paths = buildPaths(
+        moveSearcher.value,
+        fromSpace.coordinates,
+        space.coordinates,
+      );
       if (paths.length === 1) {
         maybeConfirmDelivery(moveActionProgress);
         return;
@@ -210,7 +216,11 @@ function onMoveToSpaceCb(
       !moveHelper.value.canMoveThrough(fromSpace, moveActionProgress.good)
     )
       return;
-    const paths = buildPaths(grid, fromSpace.coordinates, space.coordinates);
+    const paths = buildPaths(
+      moveSearcher.value,
+      fromSpace.coordinates,
+      space.coordinates,
+    );
     if (paths.length === 0) return;
 
     // Prefer the path belonging to the current player.
@@ -430,6 +440,7 @@ export function GameMap() {
     undefined,
   );
   const moveHelper = useInjectedMemo(MoveHelper);
+  const moveSearcher = useInjectedMemo(MoveSearcher);
   const gameKey = useGameKey();
 
   const mapSettings = useMemo(
@@ -471,6 +482,7 @@ export function GameMap() {
   const maybeConfirmEmitHeavyLifting = useMaybeConfirmEmitHeavyLifting();
 
   const onMoveToSpace = useTypedCallback(onMoveToSpaceCb, [
+    moveSearcher,
     moveHelper,
     moveActionProgress,
     setMoveActionProgress,

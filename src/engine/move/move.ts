@@ -19,6 +19,7 @@ import { Track } from "../map/track";
 import { Good, goodToString } from "../state/good";
 import { PlayerColor, playerColorToString } from "../state/player";
 import { MoveHelper } from "./helper";
+import { MoveSearcher } from "./searcher";
 
 export const Path = z.object({
   owner: z.nativeEnum(PlayerColor).optional(),
@@ -48,6 +49,7 @@ export class MoveAction<T extends MoveData = MoveData>
   protected readonly bag = injectState(BAG);
   protected readonly players = injectAllPlayersUnsafe();
   protected readonly moveHelper = inject(MoveHelper);
+  protected readonly moveSearcher = inject(MoveSearcher);
 
   assertInput(data: unknown): T {
     return MoveData.parse(data) as T;
@@ -125,7 +127,10 @@ export class MoveAction<T extends MoveData = MoveData>
     let fromCity: City | Land = startingCity;
     for (const step of action.path) {
       const routes = [
-        ...grid.findRoutesToLocation(fromCity.coordinates, step.endingStop),
+        ...this.moveSearcher.findRoutesToLocation(
+          fromCity.coordinates,
+          step.endingStop,
+        ),
       ];
 
       assert(routes.length > 0, {
