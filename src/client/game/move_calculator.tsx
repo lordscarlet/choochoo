@@ -10,7 +10,11 @@ import { Button } from "semantic-ui-react";
 import { MoveAction, MoveData } from "../../engine/move/move";
 import { MoveSearcher } from "../../engine/move/searcher";
 import { goodToString } from "../../engine/state/good";
-import { PlayerColor, playerColorToString } from "../../engine/state/player";
+import {
+  PlayerColor,
+  playerColorToString,
+  PlayerData,
+} from "../../engine/state/player";
 import { peek } from "../../utils/functions";
 import { useAction } from "../services/action";
 import { useGameVersionState } from "../services/game";
@@ -38,10 +42,12 @@ export function MoveCalculator() {
   );
 
   const handleClick = useCallback(() => {
-    const allRoutes: Option[] = searcher.value.findAllRoutes().map((route) => ({
-      route,
-      income: moveAction.value.calculateIncome(route),
-    }));
+    const allRoutes: Option[] = searcher.value
+      .findAllRoutes({ locomotive: Infinity } as PlayerData)
+      .map((route) => ({
+        route,
+        income: moveAction.value.calculateIncome(route),
+      }));
     allRoutes.sort((a, b) => {
       if (mePlayer == null) {
         return (

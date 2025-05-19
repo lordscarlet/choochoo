@@ -56,7 +56,7 @@ export class MoveAction<T extends MoveData = MoveData>
   }
 
   validate(action: T): void {
-    this.validator.validate(action);
+    this.validator.validate(this.currentPlayer(), action);
   }
 
   calculateIncome(action: T): Map<PlayerColor | undefined, number> {

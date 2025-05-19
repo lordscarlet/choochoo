@@ -3,13 +3,13 @@ import { InvalidInputError } from "../../utils/error";
 import { isNotNull, logError, peek } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 import { inject } from "../framework/execution_context";
-import { injectCurrentPlayer, injectGrid } from "../game/state";
+import { injectGrid } from "../game/state";
 import { City } from "../map/city";
 import { Land } from "../map/location";
 import { TOWN, Track } from "../map/track";
 import { goodToString } from "../state/good";
 import { OwnedInterCityConnection } from "../state/inter_city_connection";
-import { PlayerColor, playerColorToString } from "../state/player";
+import { PlayerColor, playerColorToString, PlayerData } from "../state/player";
 import { allDirections, Direction } from "../state/tile";
 import { MoveHelper } from "./helper";
 import { MoveData } from "./move";
@@ -17,12 +17,11 @@ import { MoveData } from "./move";
 export class MoveValidator {
   private readonly grid = injectGrid();
   private readonly moveHelper = inject(MoveHelper);
-  private readonly currentPlayer = injectCurrentPlayer();
 
-  validate(action: MoveData): void {
+  validate(player: PlayerData, action: MoveData): void {
     let legacyErrorMessage: string | undefined;
     try {
-      this.validateLegacy(action);
+      this.validateLegacy(player, action);
     } catch (e) {
       if (e instanceof InvalidInputError) {
         legacyErrorMessage = e.message;
@@ -31,7 +30,7 @@ export class MoveValidator {
     }
     let newErrorMessage: string | undefined;
     try {
-      this.validateNew(action);
+      this.validateNew(player, action);
     } catch (e) {
       if (e instanceof InvalidInputError) {
         newErrorMessage = e.message;
@@ -51,8 +50,8 @@ export class MoveValidator {
     }
   }
 
-  validateNew(action: MoveData): void {
-    this.validatePartial(action);
+  validateNew(player: PlayerData, action: MoveData): void {
+    this.validatePartial(player, action);
 
     const endingLocation = this.grid().get(peek(action.path).endingStop);
 
@@ -66,12 +65,11 @@ export class MoveValidator {
     });
   }
 
-  validatePartial(action: MoveData): void {
+  validatePartial(player: PlayerData, action: MoveData): void {
     const grid = this.grid();
-    const curr = this.currentPlayer();
-    if (!this.moveHelper.isWithinLocomotive(curr, action)) {
+    if (!this.moveHelper.isWithinLocomotive(player, action)) {
       throw new InvalidInputError(
-        `Can only move ${this.moveHelper.getLocomotiveDisplay(curr)} steps`,
+        `Can only move ${this.moveHelper.getLocomotiveDisplay(player)} steps`,
       );
     }
     if (action.path.length === 0) {
@@ -145,33 +143,34 @@ export class MoveValidator {
     fromCoordinates: Coordinates,
     toCoordinates: Coordinates,
   ): RouteInfo[] {
-    return this.findRoutesToLocationLegacy(fromCoordinates, toCoordinates).map((connection) => {
-      if (connection instanceof Track) {
-        return {
-          type: "track",
-          destination: {
-            type: "city",
-            coordinates: connection.coordinates,
-          } as Destination,
-          startingTrack: connection,
-          fullRoute: this.grid().getRoute(connection),
-          owner: connection.getOwner(),
-        };
-      } else {
-        return {
-          type: "connection",
-          destination: {
-            type: "city",
-            coordinates: toCoordinates,
-            city: this.grid().get(toCoordinates) as City,
-          },
-          connection,
-          owner: connection.owner.color,
-        };
-      }
-    });
+    return this.findRoutesToLocationLegacy(fromCoordinates, toCoordinates).map(
+      (connection) => {
+        if (connection instanceof Track) {
+          return {
+            type: "track",
+            destination: {
+              type: "city",
+              coordinates: connection.coordinates,
+            } as Destination,
+            startingTrack: connection,
+            fullRoute: this.grid().getRoute(connection),
+            owner: connection.getOwner(),
+          };
+        } else {
+          return {
+            type: "connection",
+            destination: {
+              type: "city",
+              coordinates: toCoordinates,
+              city: this.grid().get(toCoordinates) as City,
+            },
+            connection,
+            owner: connection.owner.color,
+          };
+        }
+      },
+    );
   }
-
 
   findRoutesToLocationNew(
     fromCoordinates: Coordinates,
@@ -382,12 +381,11 @@ export class MoveValidator {
     }
   }
 
-  validateLegacy(action: MoveData): void {
+  validateLegacy(player: PlayerData, action: MoveData): void {
     const grid = this.grid();
-    const curr = this.currentPlayer();
-    if (!this.moveHelper.isWithinLocomotive(curr, action)) {
+    if (!this.moveHelper.isWithinLocomotive(player, action)) {
       throw new InvalidInputError(
-        `Can only move ${this.moveHelper.getLocomotiveDisplay(curr)} steps`,
+        `Can only move ${this.moveHelper.getLocomotiveDisplay(player)} steps`,
       );
     }
     if (action.path.length === 0) {
