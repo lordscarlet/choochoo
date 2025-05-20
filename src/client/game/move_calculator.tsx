@@ -42,12 +42,15 @@ export function MoveCalculator() {
   );
 
   const calculateRoutes = useCallback(() => {
+    const startTimeStart = performance.now();
+
     const allRoutes: Option[] = searcher.value
       .findAllRoutes(mePlayer ?? ({ locomotive: 6 } as PlayerData))
       .map((route) => ({
         route,
         income: moveAction.value.calculateIncome(route),
       }));
+    console.log("counter", Math.floor(performance.now() - startTimeStart));
     allRoutes.sort((a, b) => {
       if (mePlayer == null) {
         return (

@@ -143,43 +143,12 @@ export class MoveValidator {
     fromCoordinates: Coordinates,
     toCoordinates: Coordinates,
   ): RouteInfo[] {
-    return this.findRoutesToLocationLegacy(fromCoordinates, toCoordinates).map(
-      (connection) => {
-        if (connection instanceof Track) {
-          return {
-            type: "track",
-            destination: {
-              type: "city",
-              coordinates: connection.coordinates,
-            } as Destination,
-            startingTrack: connection,
-            fullRoute: this.grid().getRoute(connection),
-            owner: connection.getOwner(),
-          };
-        } else {
-          return {
-            type: "connection",
-            destination: {
-              type: "city",
-              coordinates: toCoordinates,
-              city: this.grid().get(toCoordinates) as City,
-            },
-            connection,
-            owner: connection.owner.color,
-          };
-        }
-      },
-    );
-  }
-
-  findRoutesToLocationNew(
-    fromCoordinates: Coordinates,
-    toCoordinates: Coordinates,
-  ): RouteInfo[] {
     const space = this.grid().get(fromCoordinates);
     assert(space != null, "cannot call findRoutes from null location");
-    return this.findRoutesFromLocation(fromCoordinates).filter((route) =>
-      route.destination.coordinates.equals(toCoordinates),
+    return this.findRoutesFromLocation(fromCoordinates).filter(
+      (route) =>
+        route.destination.type !== "dangles" &&
+        route.destination.coordinates.equals(toCoordinates),
     );
   }
 
@@ -207,18 +176,15 @@ export class MoveValidator {
         (connection): connection is Track | OwnedInterCityConnection =>
           !(connection instanceof City),
       )
-      .filter((connection) => {
-        if (connection instanceof Track) {
-          return this.canMoveGoodsAcrossTrack(connection);
-        }
-        return true;
-      })
+      .filter(
+        (connection) =>
+          !(connection instanceof Track) ||
+          this.canMoveGoodsAcrossTrack(connection),
+      )
       .flatMap((connection) => {
         if (connection instanceof Track) {
           return this.findRoutesFromTrack(connection).filter(
-            (route) =>
-              route.destination.type !== "city" ||
-              route.destination.city !== originCity,
+            (route) => route.destination.coordinates !== originCity.coordinates,
           );
         }
         const otherCity = this.grid().get(
@@ -245,9 +211,7 @@ export class MoveValidator {
       .filter((track) => this.canMoveGoodsAcrossTrack(track))
       .flatMap((track) => this.findRoutesFromTrack(track))
       .filter(
-        (route) =>
-          route.destination.type !== "town" ||
-          route.destination.land === location,
+        (route) => route.destination.coordinates !== location.coordinates,
       );
   }
 
@@ -508,4 +472,4 @@ interface ConnectedCityRouteInfo {
   owner: PlayerColor | undefined;
 }
 
-type RouteInfo = TrackRouteInfo | ConnectedCityRouteInfo;
+export type RouteInfo = TrackRouteInfo | ConnectedCityRouteInfo;
