@@ -72,24 +72,16 @@ function buildPaths(
   startingStop: Coordinates,
   endingStop: Coordinates,
 ): EnhancedPath[] {
-  return [
-    ...moveValidator.findRoutesToLocationLegacy(startingStop, endingStop),
-  ].map((connection) => {
-    if (connection instanceof Track) {
-      return {
-        owner: connection.getOwner(),
-        endingStop,
-        startingConnection: connection,
-      };
-    } else {
-      // InterCityConnection
-      return {
-        owner: connection.owner!.color,
-        startingConnection: connection,
-        endingStop,
-      };
-    }
-  });
+  return [...moveValidator.findRoutesToLocation(startingStop, endingStop)].map(
+    (connection) => ({
+      owner: connection.owner,
+      endingStop: connection.destination.coordinates,
+      startingConnection:
+        connection.type === "track"
+          ? connection.startingTrack
+          : connection.connection,
+    }),
+  );
 }
 
 function onSelectGoodCb(
