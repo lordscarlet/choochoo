@@ -10,7 +10,7 @@ import { TOWN, Track } from "../map/track";
 import { goodToString } from "../state/good";
 import { OwnedInterCityConnection } from "../state/inter_city_connection";
 import { PlayerColor, playerColorToString, PlayerData } from "../state/player";
-import { allDirections, Direction } from "../state/tile";
+import { allDirections } from "../state/tile";
 import { MoveHelper } from "./helper";
 import { MoveData } from "./move";
 
@@ -20,7 +20,10 @@ export class MoveValidator {
 
   validate(player: PlayerData, action: MoveData): void {
     this.validatePartial(player, action);
+    this.validateEnd(action);
+  }
 
+  validateEnd(action: MoveData): void {
     if (action.path.length === 0) {
       throw new InvalidInputError("must move over at least one route");
     }
@@ -52,6 +55,14 @@ export class MoveValidator {
       `${goodToString(action.good)} good not found at the indicated location`,
     );
 
+    // Cannot visit the same stop twice
+    const allCoordinates = [action.startingCity].concat(
+      [...action.path.values()].map((v) => v.endingStop),
+    );
+    assert(allCoordinates.length === new Set(allCoordinates).size, {
+      invalidInput: "cannot stop at the same city twice",
+    });
+
     // Validate that the route passes through cities and towns
     for (const step of action.path.slice(0, action.path.length - 1)) {
       const location = grid.get(step.endingStop);
@@ -70,18 +81,6 @@ export class MoveValidator {
         throw new InvalidInputError(
           `Cannot pass through a ${location.goodColors().map(goodToString).join("/")} city with a ${goodToString(action.good)} good`,
         );
-      }
-    }
-
-    // Cannot visit the same stop twice
-    const allCoordinates = [action.startingCity]
-      .concat([...action.path.values()].map((v) => v.endingStop))
-      .map(Coordinates.from);
-    for (const [index, coordinate] of allCoordinates.entries()) {
-      for (const otherCoordinate of allCoordinates.slice(index + 1)) {
-        assert(!coordinate.equals(otherCoordinate), {
-          invalidInput: "cannot stop at the same city twice",
-        });
       }
     }
 
@@ -113,10 +112,8 @@ export class MoveValidator {
   ): RouteInfo[] {
     const space = this.grid().get(fromCoordinates);
     assert(space != null, "cannot call findRoutes from null location");
-    return this.findRoutesFromLocation(fromCoordinates).filter(
-      (route) =>
-        route.destination.type !== "dangles" &&
-        route.destination.coordinates.equals(toCoordinates),
+    return this.findRoutesFromLocation(fromCoordinates).filter((route) =>
+      route.destination.equals(toCoordinates),
     );
   }
 
@@ -130,47 +127,41 @@ export class MoveValidator {
   }
 
   private findRoutesFromCity(originCity: City): RouteInfo[] {
-    const allCities = this.grid()
-      .cities()
-      .filter((otherCity) => originCity.isSameCity(otherCity));
-    return allCities
-      .flatMap((city) =>
-        allDirections.map((direction) =>
-          this.grid().connection(city.coordinates, direction),
-        ),
-      )
-      .filter(isNotNull)
-      .filter(
-        (connection): connection is Track | OwnedInterCityConnection =>
-          !(connection instanceof City),
-      )
-      .filter(
-        (connection) =>
-          !(connection instanceof Track) ||
-          this.canMoveGoodsAcrossTrack(connection),
-      )
-      .flatMap((connection) => {
-        if (connection instanceof Track) {
-          return this.findRoutesFromTrack(connection).filter(
-            (route) => route.destination.coordinates !== originCity.coordinates,
-          );
-        }
-        const otherCity = this.grid().get(
-          connection.connects.find((c) => originCity.coordinates !== c)!,
-        ) as City;
-        return [
-          {
-            type: "connection",
-            destination: {
-              type: "city",
-              coordinates: otherCity.coordinates,
-              city: otherCity,
+    const allCities = this.grid().getSameCities(originCity);
+    return allCities.flatMap((originCity) =>
+      allDirections
+        .map((direction) =>
+          this.grid().connection(originCity.coordinates, direction),
+        )
+        .filter(isNotNull)
+        .filter(
+          (connection): connection is Track | OwnedInterCityConnection =>
+            !(connection instanceof City),
+        )
+        .filter(
+          (connection) =>
+            !(connection instanceof Track) ||
+            this.canMoveGoodsAcrossTrack(connection),
+        )
+        .flatMap((connection) => {
+          if (connection instanceof Track) {
+            return this.findRoutesFromTrack(connection).filter(
+              (route) => route.destination !== originCity.coordinates,
+            );
+          }
+          const otherCity = this.grid().get(
+            connection.connects.find((c) => originCity.coordinates !== c)!,
+          ) as City;
+          return [
+            {
+              type: "connection",
+              destination: otherCity.coordinates,
+              connection,
+              owner: connection.owner.color,
             },
-            connection,
-            owner: connection.owner.color,
-          },
-        ];
-      });
+          ];
+        }),
+    );
   }
 
   private findRoutesFromLand(location: Land): RouteInfo[] {
@@ -178,54 +169,34 @@ export class MoveValidator {
       .getTrack()
       .filter((track) => this.canMoveGoodsAcrossTrack(track))
       .flatMap((track) => this.findRoutesFromTrack(track))
-      .filter(
-        (route) => route.destination.coordinates !== location.coordinates,
-      );
+      .filter((route) => route.destination !== location.coordinates);
   }
 
   private findRoutesFromTrack(startingTrack: Track): RouteInfo[] {
-    return startingTrack.getExits().map((exit): RouteInfo => {
-      const [end, endExit] = this.grid().getEnd(startingTrack, exit);
-      const fullRoute = this.grid().getRoute(startingTrack);
-      if (endExit === TOWN) {
-        return {
-          type: "track",
-          destination: {
-            type: "town",
-            land: this.grid().get(end) as Land,
-            coordinates: end,
-          },
-          startingTrack,
-          fullRoute,
-          owner: startingTrack.getOwner(),
-        };
-      }
-      const next = this.grid().get(end.neighbor(endExit));
-      if (next instanceof City) {
-        return {
-          type: "track",
-          destination: {
-            type: "city",
-            city: next,
-            coordinates: next.coordinates,
-          },
-          startingTrack,
-          fullRoute,
-          owner: startingTrack.getOwner(),
-        };
-      }
-      return {
-        type: "track",
-        destination: {
-          type: "dangles",
-          coordinates: end,
-          exit: endExit,
-        },
-        startingTrack,
-        fullRoute,
-        owner: startingTrack.getOwner(),
-      };
-    });
+    return startingTrack
+      .getExits()
+      .map((exit): RouteInfo | undefined => {
+        const [end, endExit] = this.grid().getEnd(startingTrack, exit);
+        if (endExit === TOWN) {
+          return {
+            type: "track",
+            destination: end,
+            startingTrack,
+            owner: startingTrack.getOwner(),
+          };
+        }
+        const next = this.grid().get(end.neighbor(endExit));
+        if (next instanceof City) {
+          return {
+            type: "track",
+            destination: next.coordinates,
+            startingTrack,
+            owner: startingTrack.getOwner(),
+          };
+        }
+        return undefined;
+      })
+      .filter(isNotNull);
   }
 
   private canMoveGoodsAcrossTrack(track: Track): boolean {
@@ -235,37 +206,16 @@ export class MoveValidator {
   }
 }
 
-interface TownDestination {
-  type: "town";
-  coordinates: Coordinates;
-  land: Land;
-}
-
-interface CityDestination {
-  type: "city";
-  coordinates: Coordinates;
-  city: City;
-}
-
-interface DanglingDestination {
-  type: "dangles";
-  coordinates: Coordinates;
-  exit: Direction;
-}
-
-type Destination = TownDestination | CityDestination | DanglingDestination;
-
 interface TrackRouteInfo {
   type: "track";
-  destination: Destination;
+  destination: Coordinates;
   startingTrack: Track;
-  fullRoute: Track[];
   owner: PlayerColor | undefined;
 }
 
 interface ConnectedCityRouteInfo {
   type: "connection";
-  destination: Destination;
+  destination: Coordinates;
   connection: OwnedInterCityConnection;
   owner: PlayerColor | undefined;
 }

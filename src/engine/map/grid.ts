@@ -22,6 +22,8 @@ import { Exit, TOWN, Track, tupleMap } from "./track";
 export type Space = City | Land;
 
 export class Grid {
+  private citiesCache: City[] | undefined;
+  private sameCitiesCache: Map<number, City[]> | undefined;
   readonly topLeft: DoubleHeight;
   readonly bottomRight: DoubleHeight;
 
@@ -118,8 +120,27 @@ export class Grid {
     return this.grid.values();
   }
 
+  getSameCities(city: City): City[] {
+    if (city.data.sameCity == null) return [city];
+    if (this.sameCitiesCache == null) {
+      this.sameCitiesCache = new Map<number, City[]>();
+      for (const city of this.cities()) {
+        const key = city.data.sameCity;
+        if (key == null) continue;
+        if (!this.sameCitiesCache.has(key)) {
+          this.sameCitiesCache.set(key, []);
+        }
+        this.sameCitiesCache.get(key)!.push(city);
+      }
+    }
+    return this.sameCitiesCache.get(city.data.sameCity)!;
+  }
+
   cities(): City[] {
-    return [...this.values()].filter(isCity);
+    if (this.citiesCache == null) {
+      this.citiesCache = [...this.values()].filter(isCity);
+    }
+    return this.citiesCache;
   }
 
   entries(): Iterable<[Coordinates, Space]> {

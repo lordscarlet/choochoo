@@ -75,7 +75,7 @@ function buildPaths(
   return [...moveValidator.findRoutesToLocation(startingStop, endingStop)].map(
     (connection) => ({
       owner: connection.owner,
-      endingStop: connection.destination.coordinates,
+      endingStop: connection.destination,
       startingConnection:
         connection.type === "track"
           ? connection.startingTrack

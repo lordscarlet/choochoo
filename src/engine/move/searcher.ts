@@ -34,16 +34,18 @@ export class MoveSearcher {
     player: PlayerData,
     partialPath: MoveData,
   ): MoveData[] {
-    const completeErrorMessage = this.getErrorMessage(() =>
-      this.validator.validate(player, partialPath),
+    const endErrorMessage = this.getErrorMessage(() =>
+      this.validator.validateEnd(partialPath),
     );
-    if (completeErrorMessage == null) {
-      return [partialPath];
-    }
 
     const partialErrorMessage = this.getErrorMessage(() =>
       this.validator.validatePartial(player, partialPath),
     );
+
+    if (endErrorMessage == null && partialErrorMessage == null) {
+      return [partialPath];
+    }
+
     if (partialErrorMessage != null) {
       return [];
     }
@@ -57,14 +59,11 @@ export class MoveSearcher {
       this.validator.findRoutesFromLocation(fromCoordinates);
     cache.set(fromCoordinates, routes);
     return routes.flatMap((route) => {
-      if (route.destination.type === "dangles") {
-        return [];
-      }
       const newPath: MoveData = {
         ...partialPath,
         path: partialPath.path.concat([
           {
-            endingStop: route.destination.coordinates,
+            endingStop: route.destination,
             owner: route.owner,
           },
         ]),
