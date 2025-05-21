@@ -160,7 +160,7 @@ function LogMessages({
                     :
                   </>
                 )}{" "}
-                <span className={styles.message}>
+                <span>
                   <LogMessage message={log.message} />
                 </span>
               </p>
@@ -171,12 +171,7 @@ function LogMessages({
       {canScrollToBottom && (
         <div className={styles.scrollToBottomContainer}>
           <Tooltip title="Scroll to bottom">
-            <Fab
-              color="primary"
-              size="small"
-              className={styles.scrollToBottom}
-              onClick={scrollBottom}
-            >
+            <Fab color="primary" size="small" onClick={scrollBottom}>
               <ArrowDownwardIcon />
             </Fab>
           </Tooltip>
