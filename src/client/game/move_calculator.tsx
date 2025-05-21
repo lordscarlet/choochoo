@@ -24,6 +24,7 @@ import {
   useInjectedMemo,
   useMePlayer,
 } from "../utils/injection_context";
+import * as styles from "./move_calculator.module.css";
 
 interface Option {
   route: MoveData;
@@ -52,23 +53,22 @@ export function MoveCalculator() {
       }));
     console.log("counter", Math.floor(performance.now() - startTimeStart));
     allRoutes.sort((a, b) => {
+      const totalSum =
+        [...b.income.values()].reduce((a, b) => a + b, 0) -
+        [...a.income.values()].reduce((a, b) => a + b, 0);
       if (mePlayer == null) {
-        return (
-          [...b.income.values()].reduce((a, b) => a + b, 0) -
-          [...a.income.values()].reduce((a, b) => a + b, 0)
-        );
+        return totalSum;
       }
-      return (
+      const result1 =
         (b.income.get(mePlayer.color) ?? 0) -
-        (a.income.get(mePlayer.color) ?? 0)
-      );
+        (a.income.get(mePlayer.color) ?? 0);
+      if (result1 !== 0) {
+        return result1;
+      }
+      return -totalSum;
     });
     setOptions(allRoutes);
   }, [searcher, moveAction, setOptions, mePlayer]);
-
-  if (!isAdmin) {
-    return <></>;
-  }
 
   return (
     <Accordion>
@@ -79,21 +79,21 @@ export function MoveCalculator() {
         <div>
           <Button onClick={calculateRoutes}>Calculate Moves</Button>
           {options != null && options.length > 0 && (
-            <table>
+            <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Good</th>
                   <th>Starting City</th>
+                  <th>Good</th>
                   <th>Destination City</th>
                   <th>Income</th>
-                  <th></th>
+                  {canEmit && <th></th>}
                 </tr>
               </thead>
               <tbody>
                 {options.map((option, index) => (
                   <tr key={index}>
-                    <td>{goodToString(option.route.good)}</td>
                     <td>{grid.displayName(option.route.startingCity)}</td>
+                    <td>{goodToString(option.route.good)}</td>
                     <td>
                       {grid.displayName(peek(option.route.path).endingStop)}
                     </td>
@@ -104,13 +104,13 @@ export function MoveCalculator() {
                         </p>
                       ))}
                     </td>
-                    <td>
-                      {canEmit && (
+                    {canEmit && (
+                      <td>
                         <Button onClick={() => emit(option.route)}>
                           Move good
                         </Button>
-                      )}
-                    </td>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -118,7 +118,10 @@ export function MoveCalculator() {
           )}
           {options != null && options.length === 0 && <p>No moves available</p>}
           {options == null && (
-            <p>Click &quot;calculate&quot; to see available moves</p>
+            <p>
+              Click &quot;calculate&quot; to see available moves (this might
+              take ~30 seconds).
+            </p>
           )}
         </div>
       </AccordionDetails>
