@@ -77,7 +77,9 @@ export function MoveCalculator() {
       </AccordionSummary>
       <AccordionDetails>
         <div>
-          <Button onClick={calculateRoutes}>Calculate Moves</Button>
+          {options == null && (
+            <Button onClick={calculateRoutes}>Calculate Moves</Button>
+          )}
           {options != null && options.length > 0 && (
             <table className={styles.table}>
               <thead>
