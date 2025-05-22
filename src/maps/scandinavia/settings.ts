@@ -4,6 +4,10 @@ import {
   ReleaseStage,
   Rotation,
 } from "../../engine/game/map_settings";
+import { Module } from "../../engine/module/module";
+import { Action } from "../../engine/state/action";
+import { AvailableActionsModule } from "../../modules/available_actions";
+import { ClaimRequiresUrbanizeModule } from "../../modules/claim_requires_urbanize";
 import { map } from "./grid";
 
 export class ScandinaviaMapSettings implements MapSettings {
@@ -17,5 +21,12 @@ export class ScandinaviaMapSettings implements MapSettings {
 
   getOverrides() {
     return [];
+  }
+
+  getModules(): Array<Module> {
+    return [
+      new AvailableActionsModule({ add: [Action.FERRY] }),
+      new ClaimRequiresUrbanizeModule(),
+    ];
   }
 }
