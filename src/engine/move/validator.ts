@@ -59,6 +59,17 @@ export class MoveValidator {
     const allCoordinates = [action.startingCity].concat(
       [...action.path.values()].map((v) => v.endingStop),
     );
+    for (const [index, oneCoordinate] of allCoordinates.entries()) {
+      const oneCity = this.grid().get(oneCoordinate);
+      for (let i = index + 1; i < allCoordinates.length; i++) {
+        const twoCity = this.grid().get(allCoordinates[i]);
+        if (oneCity instanceof City && twoCity instanceof City) {
+          assert(!oneCity.isSameCity(twoCity), {
+            invalidInput: "Cannot visit the same city twice",
+          });
+        }
+      }
+    }
     assert(allCoordinates.length === new Set(allCoordinates).size, {
       invalidInput: "cannot stop at the same city twice",
     });
