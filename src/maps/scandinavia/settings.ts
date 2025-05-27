@@ -8,6 +8,7 @@ import { Module } from "../../engine/module/module";
 import { Action } from "../../engine/state/action";
 import { AvailableActionsModule } from "../../modules/available_actions";
 import { ClaimRequiresUrbanizeModule } from "../../modules/claim_requires_urbanize";
+import { ScandinaviaMoveHelper, ScandinaviaMoveValidator } from "./ferry";
 import { map } from "./grid";
 
 export class ScandinaviaMapSettings implements MapSettings {
@@ -20,7 +21,7 @@ export class ScandinaviaMapSettings implements MapSettings {
   readonly rotation = Rotation.CLOCKWISE;
 
   getOverrides() {
-    return [];
+    return [ScandinaviaMoveValidator, ScandinaviaMoveHelper];
   }
 
   getModules(): Array<Module> {
