@@ -29,10 +29,8 @@
 
 .scrollToBottomContainer {
   position: absolute;
-  width: 100%;
   bottom: 8px;
   left: 8px;
-  display: flex;
 }
 
 .loadMoreButton {
