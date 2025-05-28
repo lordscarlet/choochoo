@@ -167,6 +167,7 @@ export function BuildingDialog({
                   space={space!}
                   settings={settings}
                   tile={build.tile}
+                  
                   onClick={() => build.reason == null && onSelect(build.action)}
                 />
                 {build.reason}

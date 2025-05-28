@@ -295,11 +295,14 @@ export function TrackHex({
     [coordinates, size],
   );
 
+  const tileData = useMemo(() => {
+    return space instanceof Land ? space.getTileData() : undefined;
+  }, [space]);
+
   const trackInfo = useMemo(() => {
-    const tileData = space instanceof Land ? space.getTileData() : undefined;
     if (tileData == null) return [];
     return calculateTrackInfo(tileData);
-  }, [space]);
+  }, [tileData]);
 
   const highlightedTrackSet = useMemo(() => {
     if (highlightedTrack == null) return new Set<TrackInfo>();
@@ -313,8 +316,13 @@ export function TrackHex({
     );
   }, [highlightedTrack, coordinates, trackInfo]);
 
+  if (tileData == null) return <></>;
+
   return (
-    <>
+    <g
+      data-tile-type={tileData?.tileType}
+      data-orientation={tileData?.orientation}
+    >
       {trackInfo.map((t, index) => (
         <TrackSvg
           key={index}
@@ -325,7 +333,7 @@ export function TrackHex({
           rotation={rotation}
         />
       ))}
-    </>
+    </g>
   );
 }
 

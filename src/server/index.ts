@@ -3,7 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { readFile } from "fs/promises";
-import { createServer } from "http";
+import { createServer, Server } from "http";
 import { createServer as createSecureServer } from "https";
 import { resolve } from "path";
 import { UserError } from "../utils/error";
@@ -18,6 +18,7 @@ import { messageApp } from "./messages/routes";
 import { redisSession } from "./redis";
 import { waitForSequelize } from "./sequelize";
 import { io } from "./socket";
+import { testApp } from "./test/routes";
 import { notificationApp } from "./user/notification_routes";
 import { userApp } from "./user/routes";
 import { enforceRoleMiddleware } from "./util/enforce_role";
@@ -40,6 +41,7 @@ if (environment.clientOrigin) {
 app.use(xsrfApp);
 app.use(express.json());
 app.use(waitForSequelize());
+app.use(testApp);
 
 if (environment.stage !== Stage.enum.production) {
   app.use(devApp());
@@ -80,35 +82,43 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-if (environment.cert != null) {
-  assert(environment.certKey != null, "cannot provide cert without certkey");
-  Promise.all([
-    readFile(resolve(environment.certKey), { encoding: "utf-8" }),
-    readFile(resolve(environment.cert), { encoding: "utf-8" }),
-  ])
-    .then(([key, cert]) => {
-      const server = createSecureServer({ key, cert }, app);
-
-      io.attach(server);
-
-      /// Start
-      server.listen(environment.port, () => {
-        log(`AoS listening on port ${environment.port}, running...`);
-      });
-    })
-    .catch((e) => {
-      logError("unknown system error", e);
-      process.exit();
-    });
-} else {
-  const server = createServer(app);
+export async function runApp(): Promise<() => Promise<void>> {
+  let server: Server;
+  if (environment.cert != null) {
+    assert(environment.certKey != null, "cannot provide cert without certkey");
+    const [key, cert] = await Promise.all([
+      readFile(resolve(environment.certKey), { encoding: "utf-8" }),
+      readFile(resolve(environment.cert), { encoding: "utf-8" }),
+    ]);
+    server = createSecureServer({ key, cert }, app);
+  } else {
+    server = createServer(app);
+  }
 
   io.attach(server);
 
   /// Start
   server.listen(environment.port, () => {
-    log(`AoS listening on port ${environment.port}`);
+    log(`AoS listening on port ${environment.port}, running...`);
   });
+
+  Lifecycle.singleton.start();
+
+  return () =>
+    new Promise((resolve, reject) =>
+      server.close((err) => {
+        if (err != null) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      }),
+    );
 }
 
-Lifecycle.singleton.start();
+if (resolve(process.argv[1]) === resolve(__filename)) {
+  runApp().catch((e) => {
+    logError("unknown system error", e);
+    process.exit();
+  });
+}

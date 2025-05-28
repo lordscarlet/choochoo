@@ -2,7 +2,7 @@ import { URL } from "url";
 import { z } from "zod";
 import { assert } from "../../utils/validate";
 
-export const Stage = z.enum(["production", "development"]);
+export const Stage = z.enum(["production", "development", "test"]);
 export type Stage = z.infer<typeof Stage>;
 
 assert(process.env.POSTGRES_URL != null, "must provide POSTGRES_URL");
@@ -30,7 +30,7 @@ export const environment = {
   eotDiscordWebhookUrl: process.env.EOT_DISCORD_WEBHOOK_URL,
 } as const;
 
-if (environment.stage !== Stage.enum.development) {
+if (environment.stage === Stage.enum.production) {
   assert(
     environment.cert != null,
     "must provide CERT and CERT_KEY in prod mode",

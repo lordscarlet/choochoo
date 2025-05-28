@@ -24,7 +24,7 @@ const EmptyVariantConfig = z.object({
     GameKey.ST_LUCIA,
   ]),
 });
-type EmptyVariantConfig = z.infer<typeof EmptyVariantConfig>;
+export type EmptyVariantConfig = z.infer<typeof EmptyVariantConfig>;
 
 export const IrelandVariantConfig = z.object({
   gameKey: z.literal(GameKey.IRELAND),
