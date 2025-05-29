@@ -33,7 +33,7 @@ export class Driver {
 
   async setUp(): Promise<void> {
     const chromeOptions = new Options();
-    // chromeOptions.addArguments("--headless=new");
+    chromeOptions.addArguments("--headless=new");
     this.driver = await new Builder()
       .setChromeOptions(chromeOptions)
       .forBrowser(Browser.CHROME)
