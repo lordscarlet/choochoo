@@ -3,6 +3,6 @@ import { toast } from "react-toastify";
 
 export function useSuccess() {
   return useCallback(() => {
-    toast.success("Success");
+    toast.success("Success", { className: "success-toast" });
   }, []);
 }

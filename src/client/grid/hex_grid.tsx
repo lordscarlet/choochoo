@@ -40,6 +40,7 @@ import {
 import { InterCityConnectionRender } from "./inter_city_connection";
 
 interface HexGridProps {
+  id?: string;
   grid: Grid;
   rotation?: Rotation;
   onClick?: (space: Space, good?: Good) => void;
@@ -89,6 +90,7 @@ function useZoom(allowZoom?: boolean) {
 }
 
 export function HexGrid({
+  id,
   onClick,
   onClickInterCity,
   rotation,
@@ -308,6 +310,7 @@ export function HexGrid({
       )}
       <div className={hexGridContainer}>
         <svg
+          data-hex-grid={id}
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
           className={`bi bi-google ${hexGrid}`}

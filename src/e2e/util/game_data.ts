@@ -1,4 +1,4 @@
-import { readFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
 import { GameStatus } from "../../api/game";
 import { UserRole } from "../../api/user";
@@ -53,6 +53,26 @@ export function setUpGameEnvironment(
   return gameEnvironment;
 }
 
+export async function compareGameData(game: GameDao, gameDataFile: string) {
+  await game.reload();
+  const actualGameData = JSON.stringify(
+    JSON.parse(game.gameData!),
+    undefined,
+    2,
+  );
+
+  if (process.env.WRITE === "true") {
+    await writeFile(
+      resolve(__dirname, `../goldens/${gameDataFile}.json`),
+      actualGameData,
+      "utf-8",
+    );
+  } else {
+    const expectedGameData = await parseGameData(gameDataFile);
+    expect(actualGameData).toBe(JSON.stringify(expectedGameData, undefined, 2));
+  }
+}
+
 async function initializeGame(
   variantConfig: VariantConfig,
   gameData: SerializedGameData,
@@ -105,7 +125,7 @@ export function fakeUsers(existingUsers: Set<string>): Promise<UserDao[]> {
   );
 }
 
-async function parseGameData(
+export async function parseGameData(
   gameDataFile: string,
 ): Promise<SerializedGameData> {
   const contents = await readFile(

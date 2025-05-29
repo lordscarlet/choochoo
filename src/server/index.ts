@@ -106,7 +106,7 @@ export async function runApp(): Promise<() => Promise<void>> {
 
   return () =>
     new Promise((resolve, reject) =>
-      server.close((err) => {
+      io.close((err) => {
         if (err != null) {
           reject(err);
         } else {

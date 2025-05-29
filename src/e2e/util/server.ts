@@ -7,7 +7,5 @@ export function setUpServer(): void {
     cb = await runApp();
   });
 
-  afterEach(async () => {
-    await cb();
-  });
+  afterEach(() => cb());
 }
