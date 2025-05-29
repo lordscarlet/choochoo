@@ -1,4 +1,4 @@
-import { runApp } from "../../server";
+import { runApp } from "../../server/server";
 
 export function setUpServer(): void {
   let cb: () => Promise<void>;
