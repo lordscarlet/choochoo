@@ -480,6 +480,7 @@ function CyprusBorder({
           center={center}
           size={size}
           direction={direction}
+          color="grey"
         />
       ))}
     </>
@@ -510,9 +511,10 @@ interface EdgeBoundaryProps {
   center: Point;
   size: number;
   direction: Direction;
+  color?: string;
 }
 
-function EdgeBoundary({ center, size, direction }: EdgeBoundaryProps) {
+function EdgeBoundary({ center, size, direction, color }: EdgeBoundaryProps) {
   const [corner1, corner2] = useMemo(
     () => edgeCorners(center, size, direction),
     [center.x, center.y, size, direction],
@@ -523,7 +525,7 @@ function EdgeBoundary({ center, size, direction }: EdgeBoundaryProps) {
       y1={corner1.y}
       x2={corner2.x}
       y2={corner2.y}
-      stroke="red"
+      stroke={color ?? "red"}
       strokeLinecap="round"
       strokeWidth={size / 18}
     />
