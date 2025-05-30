@@ -7,6 +7,7 @@ import { SerializedGameData } from "../../engine/framework/state";
 import { MutablePlayerData, PlayerColor } from "../../engine/state/player";
 import { GameDao } from "../../server/game/dao";
 import { UserDao } from "../../server/user/dao";
+import { removeKeys } from "../../utils/functions";
 
 interface GameEnvironment {
   game: GameDao;
@@ -55,26 +56,27 @@ export function setUpGameEnvironment(
 
 export async function compareGameData(game: GameDao, gameDataFile: string) {
   await game.reload();
-  const actualGameData = JSON.stringify(
+  const actualGameDataValue = removeKeys(
     {
       ...game.toApi(),
-      id: undefined,
-      turnStartTime: undefined,
       gameData: JSON.parse(game.gameData!),
     },
-    undefined,
-    2,
+    "id",
+    "turnStartTime",
   );
+
+  // Remove undefined values
+  const actualGameData = JSON.parse(JSON.stringify(actualGameDataValue));
 
   if (process.env.WRITE === "true") {
     await writeFile(
       resolve(__dirname, `../goldens/${gameDataFile}.json`),
-      actualGameData,
+      JSON.stringify(actualGameData, null, 2),
       "utf-8",
     );
   } else {
-    const expectedGameData = await parseGameData(gameDataFile);
-    expect(actualGameData).toBe(JSON.stringify(expectedGameData, undefined, 2));
+    const expectedGameData = await parseFile(gameDataFile);
+    expect(actualGameData).toEqual(expectedGameData);
   }
 }
 
@@ -134,9 +136,13 @@ export function fakeUsers(existingUsers: Set<string>): Promise<UserDao[]> {
 export async function parseGameData(
   gameDataFile: string,
 ): Promise<SerializedGameData> {
+  return SerializedGameData.parse(await parseFile(gameDataFile));
+}
+
+export async function parseFile(gameDataFile: string): Promise<object> {
   const contents = await readFile(
     resolve(__dirname, `../goldens/${gameDataFile}.json`),
     "utf-8",
   );
-  return SerializedGameData.parse(JSON.parse(contents));
+  return JSON.parse(contents);
 }
