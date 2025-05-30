@@ -47,7 +47,7 @@ export function setUpGameEnvironment(
   });
 
   afterEach(async () => {
-    await gameEnvironment.game.destroy();
+    await gameEnvironment?.game.destroy();
   });
 
   return gameEnvironment;
@@ -56,7 +56,7 @@ export function setUpGameEnvironment(
 export async function compareGameData(game: GameDao, gameDataFile: string) {
   await game.reload();
   const actualGameData = JSON.stringify(
-    JSON.parse(game.gameData!),
+    { ...game.toApi(), id: undefined, gameData: JSON.parse(game.gameData!) },
     undefined,
     2,
   );
@@ -95,10 +95,11 @@ async function initializeGame(
       maxPlayers: players.length,
     },
     unlisted: false,
+    autoStart: false,
   });
 }
 
-async function initializeUsers(): Promise<UserDao[]> {
+export async function initializeUsers(): Promise<UserDao[]> {
   const currentUsers = await UserDao.findAll({ limit: 6 });
   if (currentUsers.length < 6) {
     const newUsers = await fakeUsers(

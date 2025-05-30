@@ -2,17 +2,13 @@ import { GameKey } from "../api/game_key";
 import { Direction, SimpleTileType, TownTileType } from "../engine/state/tile";
 import { Coordinates } from "../utils/coordinates";
 import { compareGameData, setUpGameEnvironment } from "./util/game_data";
-import { setUpServer } from "./util/server";
-import { setUpWebDriver } from "./util/webdriver";
+import { Driver } from "./util/webdriver";
 
-describe("Building track", () => {
-  const driver = setUpWebDriver();
+export function buildingTrack(driver: Driver) {
   const env = setUpGameEnvironment(
     { gameKey: GameKey.REVERSTEAM, baseRules: true },
     "build_track_before",
   );
-
-  setUpServer();
 
   it("builds track", async () => {
     await driver.goToGame(env.activePlayer.id, env.game.id);
@@ -31,4 +27,4 @@ describe("Building track", () => {
 
     await compareGameData(env.game, "build_track_after");
   });
-});
+}

@@ -14,13 +14,13 @@ export function setUpWebDriver(): Driver {
   const driver = new Driver();
   let originalTimeout: number;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
     await driver.setUp();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     await driver.close();
   });
@@ -29,7 +29,7 @@ export function setUpWebDriver(): Driver {
 }
 
 export class Driver {
-  private driver!: WebDriver;
+  public driver!: WebDriver;
 
   async setUp(): Promise<void> {
     const chromeOptions = new Options();
@@ -41,7 +41,7 @@ export class Driver {
   }
 
   async close(): Promise<void> {
-    await this.driver.close();
+    await this.driver?.close();
   }
 
   async goToGame(userId: number, gameId: number): Promise<void> {
@@ -52,6 +52,26 @@ export class Driver {
     await this.driver.get(
       `http://localhost:3001/login-as/${userId}?redirect=${encodeURIComponent(path)}`,
     );
+
+    await waitFor(async () => {
+      const currentPath = await this.getPath();
+      if (currentPath !== path) {
+        throw new Error(
+          "never successfully navigated to " +
+            path +
+            " current path=" +
+            currentPath,
+        );
+      }
+      return true;
+    });
+  }
+
+  async getPath(): Promise<string> {
+    const urlStr = await this.driver.getCurrentUrl();
+    const url = new URL(urlStr);
+
+    return url.pathname;
   }
 
   async buildTrack(
@@ -78,14 +98,26 @@ export class Driver {
       .findElement(By.css("polygon"))
       .click();
 
-    // Wait for success.
+    await this.waitForSuccess();
+  }
+
+  async waitForSuccess(): Promise<void> {
     await this.waitForElement(By.className("toast-success"));
   }
 
-  private waitForElement(by: By, options?: RunAsyncOptions): WebElementPromise {
+  async getGameId(): Promise<number> {
+    const path = await this.getPath();
+    const matches = path.match(/\/app\/games\/(\d*)$/);
+    if (matches == null) {
+      throw new Error(`URL path "${path}" is not a game page`);
+    }
+    return Number(matches[1]);
+  }
+
+  waitForElement(by: By, options?: RunAsyncOptions): WebElementPromise {
     return new WebElementPromise(
       this.driver,
-      runAsync(async () => (await this.driver.findElements(by))[0], options),
+      waitFor(async () => (await this.driver.findElements(by))[0], options),
     );
   }
 
@@ -153,7 +185,7 @@ const DEFAULT_OPTIONS = {
   interval: 100,
 };
 
-async function runAsync<T>(
+async function waitFor<T>(
   fn: () => Promise<T>,
   optionsInput?: RunAsyncOptions,
 ): Promise<T> {

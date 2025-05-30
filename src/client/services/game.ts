@@ -417,14 +417,15 @@ export function useSetGameData() {
   return { setGameData, isPending };
 }
 
-export function useStartGame(game: GameLiteApi): GameAction {
+export function useStartGame(game: GameLiteApi) {
   const onSuccess = useSetGameSuccess();
   const me = useMe();
   const { mutate, error, isPending } = tsr.games.start.useMutation();
   handleError(isPending, error);
 
   const perform = useCallback(
-    () => mutate({ params: { gameId: game.id } }, { onSuccess }),
+    (seed?: string) =>
+      mutate({ params: { gameId: game.id }, body: { seed } }, { onSuccess }),
     [game.id],
   );
 
