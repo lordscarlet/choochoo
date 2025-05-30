@@ -56,7 +56,12 @@ export function setUpGameEnvironment(
 export async function compareGameData(game: GameDao, gameDataFile: string) {
   await game.reload();
   const actualGameData = JSON.stringify(
-    { ...game.toApi(), id: undefined, gameData: JSON.parse(game.gameData!) },
+    {
+      ...game.toApi(),
+      id: undefined,
+      turnStartTime: undefined,
+      gameData: JSON.parse(game.gameData!),
+    },
     undefined,
     2,
   );
