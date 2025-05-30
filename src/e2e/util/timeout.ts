@@ -1,12 +1,12 @@
-export function setTimeout(timeout: number): void {
+export function setTestTimeout(timeout: number): void {
   let originalTimeout: number;
 
-  beforeEach(async () => {
+  beforeAll(() => {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = timeout;
   });
 
-  afterEach(async () => {
+  afterAll(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 }

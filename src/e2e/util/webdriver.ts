@@ -8,21 +8,24 @@ import {
 } from "selenium-webdriver";
 import { Options } from "selenium-webdriver/chrome";
 import { Direction, TileType } from "../../engine/state/tile";
+import { environment } from "../../server/util/environment";
 import { Coordinates } from "../../utils/coordinates";
+import { log } from "../../utils/functions";
+import { assert } from "../../utils/validate";
 
-export function setUpWebDriver(): Driver {
-  const driver = new Driver();
-  let originalTimeout: number;
+export function setUpWebDriver(origin = "http://localhost:3001"): Driver {
+  const driver = new Driver(origin);
 
-  beforeAll(async () => {
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+  beforeAll(async function setUpWebDriver() {
+    log("start web driver set up");
     await driver.setUp();
+    log("end web driver set up");
   });
 
-  afterAll(async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+  afterAll(async function turnDownWebDriver() {
+    log("start web driver turn down");
     await driver.close();
+    log("end web driver turn down");
   });
 
   return driver;
@@ -31,9 +34,13 @@ export function setUpWebDriver(): Driver {
 export class Driver {
   public driver!: WebDriver;
 
+  constructor(private readonly origin: string) {}
+
   async setUp(): Promise<void> {
     const chromeOptions = new Options();
-    chromeOptions.addArguments("--headless=new");
+    if (process.env.HEADLESS !== "false") {
+      chromeOptions.addArguments("--headless=new");
+    }
     this.driver = await new Builder()
       .setChromeOptions(chromeOptions)
       .forBrowser(Browser.CHROME)
@@ -44,14 +51,22 @@ export class Driver {
     await this.driver?.close();
   }
 
-  async goToGame(userId: number, gameId: number): Promise<void> {
-    return this.goTo(userId, `/app/games/${gameId}`);
+  async goHome(userId?: number) {
+    return this.goTo("/", userId);
   }
 
-  async goTo(userId: number, path: string): Promise<void> {
-    await this.driver.get(
-      `http://localhost:3001/login-as/${userId}?redirect=${encodeURIComponent(path)}`,
-    );
+  async goToGame(gameId: number, userId?: number): Promise<void> {
+    return this.goTo(`/app/games/${gameId}`, userId);
+  }
+
+  async goTo(path: string, userId?: number): Promise<void> {
+    if (userId == null) {
+      await this.driver.get(`${this.origin}${path}`);
+    } else {
+      await this.driver.get(
+        `${this.origin}/login-as/${userId}?loginKey=${encodeURIComponent(environment.loginKey ?? "")}&redirect=${encodeURIComponent(path)}`,
+      );
+    }
 
     await waitFor(async () => {
       const currentPath = await this.getPath();
@@ -102,7 +117,7 @@ export class Driver {
   }
 
   async waitForSuccess(): Promise<void> {
-    await this.waitForElement(By.className("toast-success"));
+    await this.waitForElement(By.className("success-toast"));
   }
 
   async getGameId(): Promise<number> {
@@ -117,7 +132,7 @@ export class Driver {
   waitForElement(by: By, options?: RunAsyncOptions): WebElementPromise {
     return new WebElementPromise(
       this.driver,
-      waitFor(async () => (await this.driver.findElements(by))[0], options),
+      waitFor(() => this.driver.findElement(by), options),
     );
   }
 
@@ -185,8 +200,9 @@ const DEFAULT_OPTIONS = {
   interval: 100,
 };
 
-async function waitFor<T>(
-  fn: () => Promise<T>,
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+async function waitFor<T extends {}>(
+  fn: () => Promise<T | undefined | null>,
   optionsInput?: RunAsyncOptions,
 ): Promise<T> {
   const { timeout, interval } = { ...optionsInput, ...DEFAULT_OPTIONS };
@@ -203,5 +219,7 @@ async function waitFor<T>(
     }
     await new Promise((r) => setTimeout(r, interval));
   } while (Date.now() < start + timeout);
-  return fn();
+  const result = await fn();
+  assert(result != null);
+  return result;
 }

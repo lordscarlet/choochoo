@@ -22,7 +22,7 @@
   },
   "summary": "Turn 2/6 - Build track",
   "unlisted": false,
-  "version": 3,
+  "version": 2,
   "concedingPlayers": [],
   "gameData": {
     "version": 3,
@@ -81,12 +81,11 @@
             "type": 2,
             "townName": "Indianapolis",
             "tile": {
-              "tileType": 111,
+              "tileType": 107,
               "orientation": 4,
               "owners": [
                 7,
                 7,
-                1,
                 7
               ]
             }
@@ -2294,7 +2293,7 @@
           "color": 1,
           "income": 2,
           "shares": 7,
-          "money": 8,
+          "money": 11,
           "locomotive": 2,
           "selectedAction": 4
         },
@@ -2420,13 +2419,9 @@
           {
             "q": 9,
             "r": 13
-          },
-          {
-            "q": 10,
-            "r": 12
           }
         ],
-        "buildCount": 2,
+        "buildCount": 1,
         "hasUrbanized": false,
         "danglers": []
       }

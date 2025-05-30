@@ -11,7 +11,7 @@ export function buildingTrack(driver: Driver) {
   );
 
   it("builds track", async () => {
-    await driver.goToGame(env.activePlayer.id, env.game.id);
+    await driver.goToGame(env.game.id, env.activePlayer.id);
 
     await driver.buildTrack(
       Coordinates.from({ q: 9, r: 13 }),

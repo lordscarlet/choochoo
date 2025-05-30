@@ -28,6 +28,8 @@ export const environment = {
   cryptoSecret: process.env.CRYPTO_SECRET ?? devCryptoSecret,
   aosDiscordWebhookUrl: process.env.AOS_DISCORD_WEBHOOK_URL,
   eotDiscordWebhookUrl: process.env.EOT_DISCORD_WEBHOOK_URL,
+  loginIds: process.env.LOGIN_IDS?.split(",").map((id) => Number(id)) ?? [],
+  loginKey: process.env.LOGIN_KEY,
 } as const;
 
 if (environment.stage === Stage.enum.production) {

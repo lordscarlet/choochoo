@@ -7,7 +7,7 @@ import { SerializedGameData } from "../../engine/framework/state";
 import { MutablePlayerData, PlayerColor } from "../../engine/state/player";
 import { GameDao } from "../../server/game/dao";
 import { UserDao } from "../../server/user/dao";
-import { removeKeys } from "../../utils/functions";
+import { log, removeKeys } from "../../utils/functions";
 
 interface GameEnvironment {
   game: GameDao;
@@ -21,7 +21,8 @@ export function setUpGameEnvironment(
 ): GameEnvironment {
   const gameEnvironment = {} as GameEnvironment;
 
-  beforeEach(async () => {
+  beforeEach(async function setUpGameData() {
+    log("start game data set up");
     const gameData = await parseGameData(gameDataFile);
     const users = await initializeUsers();
 
@@ -45,10 +46,18 @@ export function setUpGameEnvironment(
       gameEnvironment.activePlayer,
       [...players.values()],
     );
+    log("end game data set up");
   });
 
-  afterEach(async () => {
-    await gameEnvironment?.game.destroy();
+  afterEach(async function cleanUpGameData() {
+    log("start game data cleanup");
+    if (gameEnvironment.game != null) {
+      await GameDao.destroy({
+        where: { id: gameEnvironment.game.id },
+        force: true,
+      });
+    }
+    log("end game data cleanup");
   });
 
   return gameEnvironment;
