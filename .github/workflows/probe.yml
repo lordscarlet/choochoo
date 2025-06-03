@@ -24,3 +24,6 @@ jobs:
 
       - name: Running prober
         run: npm run prober
+        env:
+          LOGIN_KEY: ${{ secrets.LOGIN_KEY }}
+          LOGIN_IDS: ${{ secrets.LOGIN_IDS }}
