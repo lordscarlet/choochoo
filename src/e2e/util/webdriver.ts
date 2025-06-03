@@ -13,8 +13,11 @@ import { Coordinates } from "../../utils/coordinates";
 import { log } from "../../utils/functions";
 import { assert } from "../../utils/validate";
 
-export function setUpWebDriver(origin = "http://localhost:3001"): Driver {
-  const driver = new Driver(origin);
+export function setUpWebDriver(
+  uiOrigin = "http://localhost:3001",
+  apiOrigin = uiOrigin,
+): Driver {
+  const driver = new Driver(uiOrigin, apiOrigin);
 
   beforeAll(async function setUpWebDriver() {
     log("start web driver set up");
@@ -34,7 +37,10 @@ export function setUpWebDriver(origin = "http://localhost:3001"): Driver {
 export class Driver {
   public driver!: WebDriver;
 
-  constructor(private readonly origin: string) {}
+  constructor(
+    private readonly uiOrigin: string,
+    private readonly apiOrigin: string,
+  ) {}
 
   async setUp(): Promise<void> {
     const chromeOptions = new Options();
@@ -61,10 +67,11 @@ export class Driver {
 
   async goTo(path: string, userId?: number): Promise<void> {
     if (userId == null) {
-      await this.driver.get(`${this.origin}${path}`);
+      await this.driver.get(`${this.uiOrigin}${path}`);
     } else {
+      const redirect = this.uiOrigin + path;
       await this.driver.get(
-        `${this.origin}/login-as/${userId}?loginKey=${encodeURIComponent(environment.loginKey ?? "")}&redirect=${encodeURIComponent(path)}`,
+        `${this.apiOrigin}/login-as/${userId}?loginKey=${encodeURIComponent(environment.loginKey ?? "")}&redirect=${encodeURIComponent(redirect)}`,
       );
     }
 
