@@ -25,6 +25,8 @@ export function buildingTrack(driver: Driver) {
       Direction.BOTTOM_RIGHT,
     );
 
+    await new Promise((r) => setTimeout(r, 1000));
+
     await compareGameData(env.game, "build_track_after");
   });
 }

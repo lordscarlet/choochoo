@@ -284,6 +284,7 @@ export function CreateGamePage() {
 
           <FormCheckbox
             toggle
+            data-auto-start
             label="Auto start"
             checked={autoStart}
             disabled={isPending}

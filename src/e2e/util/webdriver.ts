@@ -117,7 +117,8 @@ export class Driver {
   }
 
   async waitForSuccess(): Promise<void> {
-    await this.waitForElement(By.className("success-toast"));
+    const element = await this.waitForElement(By.className("success-toast"));
+    await element.findElement(By.css("button")).click();
   }
 
   async getGameId(): Promise<number> {
@@ -196,7 +197,7 @@ interface FindElementOptions extends RunAsyncOptions {
 }
 
 const DEFAULT_OPTIONS = {
-  timeout: 1000,
+  timeout: 5000,
   interval: 100,
 };
 

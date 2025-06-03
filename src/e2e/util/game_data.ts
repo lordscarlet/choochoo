@@ -63,6 +63,15 @@ export function setUpGameEnvironment(
   return gameEnvironment;
 }
 
+interface CoordinatesData {
+  q: number;
+  r: number;
+}
+
+function serialize({ q, r }: CoordinatesData): string {
+  return `${q}|${r}`;
+}
+
 export async function compareGameData(game: GameDao, gameDataFile: string) {
   await game.reload();
   const actualGameDataValue = removeKeys(
@@ -72,6 +81,11 @@ export async function compareGameData(game: GameDao, gameDataFile: string) {
     },
     "id",
     "turnStartTime",
+  );
+
+  actualGameDataValue.gameData?.["gameData"].grid.sort(
+    (a: CoordinatesData[], b: CoordinatesData[]) =>
+      serialize(a[0]) < serialize(b[0]) ? -1 : 1,
   );
 
   // Remove undefined values

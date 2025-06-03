@@ -26,3 +26,10 @@
 :global(body.dark-mode) :global(.ui.menu).appBar.appBarActive {
   background-color: orangered;
 }
+
+@keyframes noop {}
+
+.noop{
+  animation: noop 0s;
+}
+

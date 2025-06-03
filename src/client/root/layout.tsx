@@ -1,9 +1,11 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, Outlet } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { cssTransition, ToastContainer } from "react-toastify";
+import { Button, Dropdown, Icon, Menu, MenuMenu } from "semantic-ui-react";
 import { useIsAwaitingPlayer } from "../components/awaiting_player";
 import { Loading } from "../components/loading";
+import { environment } from "../services/environment";
 import { FeedbackForm } from "../services/feedback/form";
 import { useReportError } from "../services/feedback/report_error";
 import {
@@ -16,7 +18,6 @@ import { isNetworkError } from "../services/network";
 import { Banner } from "./banner";
 import * as styles from "./layout.module.css";
 import { useTheme } from "./theme";
-import { Button, Dropdown, Icon, Menu, MenuMenu } from "semantic-ui-react";
 
 function Offset() {
   return <div style={{ marginTop: "3em" }} />;
@@ -122,12 +123,26 @@ export function Layout() {
         </Suspense>
       </main>
       <Footer />
-      <ToastContainer
-        position="bottom-left"
-        hideProgressBar
-        autoClose={2000}
-        theme={isDarkMode ? "dark" : "light"}
-      />
+      {environment.stage === "test" ? (
+        <ToastContainer
+          position="bottom-left"
+          hideProgressBar
+          autoClose={false}
+          theme={isDarkMode ? "dark" : "light"}
+          transition={cssTransition({
+            enter: styles.noop,
+            exit: styles.noop,
+            collapse: false,
+          })}
+        />
+      ) : (
+        <ToastContainer
+          position="bottom-left"
+          hideProgressBar
+          autoClose={2000}
+          theme={isDarkMode ? "dark" : "light"}
+        />
+      )}
     </>
   );
 }
