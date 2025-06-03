@@ -117,12 +117,6 @@ interface GameButtonProps {
 }
 
 function ViewButton({ game }: GameButtonProps) {
-  if (
-    game.status !== GameStatus.enum.ACTIVE &&
-    game.status !== GameStatus.enum.ENDED
-  )
-    return <></>;
-
   return (
     <Button color="green" as={Link} to={`/app/games/${game.id}`}>
       View
