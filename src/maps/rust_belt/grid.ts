@@ -80,7 +80,7 @@ export const map = grid([
     town("Toledo"),
     PLAIN,
     PLAIN,
-    city("Cincinati", Good.BLUE, black(2)),
+    city("Cincinnati", Good.BLUE, black(2)),
     RIVER,
     PLAIN,
   ],
