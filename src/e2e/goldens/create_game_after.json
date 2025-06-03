@@ -7,11 +7,7 @@
   "name": "My Game",
   "status": "ACTIVE",
   "turnDuration": 86400000,
-  "playerIds": [
-    1,
-    2,
-    3
-  ],
+  "playerIds": [1, 2, 3],
   "activePlayerId": 3,
   "config": {
     "maxPlayers": 6,
@@ -24,26 +20,7 @@
   "gameData": {
     "version": 3,
     "gameData": {
-      "bag": [
-        0,
-        1,
-        0,
-        2,
-        3,
-        1,
-        0,
-        0,
-        3,
-        3,
-        2,
-        3,
-        2,
-        3,
-        0,
-        4,
-        1,
-        3
-      ],
+      "bag": [0, 1, 0, 2, 3, 1, 0, 0, 3, 3, 2, 3, 2, 3, 0, 4, 1, 3],
       "grid": [
         [
           {
@@ -188,26 +165,17 @@
             "r": 14
           },
           {
-            "name": "Cincinati",
-            "color": [
-              0
-            ],
+            "name": "Cincinnati",
+            "color": [0],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 2,
                 "onRoll": 2,
-                "goods": [
-                  0,
-                  1,
-                  0
-                ]
+                "goods": [0, 1, 0]
               }
             ],
-            "goods": [
-              1,
-              0
-            ],
+            "goods": [1, 0],
             "type": 1
           }
         ],
@@ -246,25 +214,16 @@
           },
           {
             "name": "Duluth",
-            "color": [
-              3
-            ],
+            "color": [3],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 1,
                 "onRoll": 6,
-                "goods": [
-                  1,
-                  2,
-                  0
-                ]
+                "goods": [1, 2, 0]
               }
             ],
-            "goods": [
-              2,
-              0
-            ],
+            "goods": [2, 0],
             "type": 1
           }
         ],
@@ -311,25 +270,16 @@
           },
           {
             "name": "Minneapolis",
-            "color": [
-              0
-            ],
+            "color": [0],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 1,
                 "onRoll": 5,
-                "goods": [
-                  1,
-                  2,
-                  1
-                ]
+                "goods": [1, 2, 1]
               }
             ],
-            "goods": [
-              2,
-              3
-            ],
+            "goods": [2, 3],
             "type": 1
           }
         ],
@@ -432,25 +382,16 @@
           },
           {
             "name": "Kansas City",
-            "color": [
-              3
-            ],
+            "color": [3],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 1,
                 "onRoll": 3,
-                "goods": [
-                  4,
-                  2,
-                  2
-                ]
+                "goods": [4, 2, 2]
               }
             ],
-            "goods": [
-              1,
-              4
-            ],
+            "goods": [1, 4],
             "type": 1
           }
         ],
@@ -524,25 +465,16 @@
           },
           {
             "name": "St. Louis",
-            "color": [
-              2
-            ],
+            "color": [2],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 1,
                 "onRoll": 2,
-                "goods": [
-                  4,
-                  2,
-                  3
-                ]
+                "goods": [4, 2, 3]
               }
             ],
-            "goods": [
-              0,
-              4
-            ],
+            "goods": [0, 4],
             "type": 1
           }
         ],
@@ -734,26 +666,16 @@
           },
           {
             "name": "Pittsburgh",
-            "color": [
-              2
-            ],
+            "color": [2],
             "startingNumCubes": 3,
             "onRoll": [
               {
                 "group": 2,
                 "onRoll": 5,
-                "goods": [
-                  3,
-                  1,
-                  1
-                ]
+                "goods": [3, 1, 1]
               }
             ],
-            "goods": [
-              4,
-              3,
-              4
-            ],
+            "goods": [4, 3, 4],
             "type": 1
           }
         ],
@@ -973,26 +895,16 @@
           },
           {
             "name": "Wheeling",
-            "color": [
-              4
-            ],
+            "color": [4],
             "startingNumCubes": 3,
             "onRoll": [
               {
                 "group": 2,
                 "onRoll": 4,
-                "goods": [
-                  3,
-                  3,
-                  2
-                ]
+                "goods": [3, 3, 2]
               }
             ],
-            "goods": [
-              2,
-              3,
-              0
-            ],
+            "goods": [2, 3, 0],
             "type": 1
           }
         ],
@@ -1021,25 +933,16 @@
           },
           {
             "name": "Toronto",
-            "color": [
-              4
-            ],
+            "color": [4],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 2,
                 "onRoll": 6,
-                "goods": [
-                  4,
-                  0,
-                  4
-                ]
+                "goods": [4, 0, 4]
               }
             ],
-            "goods": [
-              1,
-              4
-            ],
+            "goods": [1, 4],
             "type": 1
           }
         ],
@@ -1169,25 +1072,16 @@
           },
           {
             "name": "Detroit",
-            "color": [
-              2
-            ],
+            "color": [2],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 2,
                 "onRoll": 3,
-                "goods": [
-                  4,
-                  4,
-                  4
-                ]
+                "goods": [4, 4, 4]
               }
             ],
-            "goods": [
-              4,
-              2
-            ],
+            "goods": [4, 2],
             "type": 1
           }
         ],
@@ -1307,25 +1201,16 @@
           },
           {
             "name": "Evansville",
-            "color": [
-              0
-            ],
+            "color": [0],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 2,
                 "onRoll": 1,
-                "goods": [
-                  4,
-                  3,
-                  0
-                ]
+                "goods": [4, 3, 0]
               }
             ],
-            "goods": [
-              0,
-              2
-            ],
+            "goods": [0, 2],
             "type": 1
           }
         ],
@@ -1572,25 +1457,16 @@
           },
           {
             "name": "Desmoines",
-            "color": [
-              0
-            ],
+            "color": [0],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 1,
                 "onRoll": 4,
-                "goods": [
-                  0,
-                  0,
-                  2
-                ]
+                "goods": [0, 0, 2]
               }
             ],
-            "goods": [
-              0,
-              4
-            ],
+            "goods": [0, 4],
             "type": 1
           }
         ],
@@ -1745,25 +1621,16 @@
           },
           {
             "name": "Chicago",
-            "color": [
-              2
-            ],
+            "color": [2],
             "startingNumCubes": 2,
             "onRoll": [
               {
                 "group": 1,
                 "onRoll": 1,
-                "goods": [
-                  0,
-                  2,
-                  4
-                ]
+                "goods": [0, 2, 4]
               }
             ],
-            "goods": [
-              1,
-              1
-            ],
+            "goods": [1, 1],
             "type": 1
           }
         ],
@@ -1921,20 +1788,13 @@
           "locomotive": 1
         }
       ],
-      "turnOrder": [
-        1,
-        7,
-        2
-      ],
+      "turnOrder": [1, 7, 2],
       "availableCities": [
         {
           "color": 2,
           "onRoll": [
             {
-              "goods": [
-                1,
-                3
-              ],
+              "goods": [1, 3],
               "group": 1,
               "onRoll": 3
             }
@@ -1945,10 +1805,7 @@
           "color": 0,
           "onRoll": [
             {
-              "goods": [
-                3,
-                3
-              ],
+              "goods": [3, 3],
               "group": 1,
               "onRoll": 4
             }
@@ -1959,10 +1816,7 @@
           "color": 1,
           "onRoll": [
             {
-              "goods": [
-                2,
-                3
-              ],
+              "goods": [2, 3],
               "group": 1,
               "onRoll": 5
             }
@@ -1973,10 +1827,7 @@
           "color": 1,
           "onRoll": [
             {
-              "goods": [
-                2,
-                3
-              ],
+              "goods": [2, 3],
               "group": 1,
               "onRoll": 6
             }
@@ -1987,10 +1838,7 @@
           "color": 4,
           "onRoll": [
             {
-              "goods": [
-                3,
-                0
-              ],
+              "goods": [3, 0],
               "group": 2,
               "onRoll": 1
             }
@@ -2001,10 +1849,7 @@
           "color": 3,
           "onRoll": [
             {
-              "goods": [
-                4,
-                2
-              ],
+              "goods": [4, 2],
               "group": 2,
               "onRoll": 2
             }
@@ -2015,10 +1860,7 @@
           "color": 1,
           "onRoll": [
             {
-              "goods": [
-                1,
-                4
-              ],
+              "goods": [1, 4],
               "group": 2,
               "onRoll": 3
             }
@@ -2029,10 +1871,7 @@
           "color": 1,
           "onRoll": [
             {
-              "goods": [
-                2,
-                4
-              ],
+              "goods": [2, 4],
               "group": 2,
               "onRoll": 4
             }
