@@ -3,13 +3,13 @@ import express from "express";
 import session from "express-session";
 import { Redis } from "ioredis";
 import { logError } from "../utils/functions";
-import { environment } from "./util/environment";
+import { redisUrl, sessionSecret } from "./util/environment";
 
 export const redisClient = new Redis({
-  host: environment.redisUrl.hostname,
-  port: Number(environment.redisUrl.port),
-  username: environment.redisUrl.username,
-  password: environment.redisUrl.password,
+  host: redisUrl().hostname,
+  port: Number(redisUrl().port),
+  username: redisUrl().username,
+  password: redisUrl().password,
 });
 export const subClient = redisClient.duplicate();
 
@@ -18,7 +18,7 @@ redisClient.on("error", (e) => {
   process.exit();
 });
 
-const redisPrefix = environment.redisUrl.pathname.slice(1);
+const redisPrefix = redisUrl().pathname.slice(1);
 
 const redisStore = new RedisStore({
   client: redisClient,
@@ -32,7 +32,7 @@ const sessionParser = session({
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
-  secret: environment.sessionSecret,
+  secret: sessionSecret(),
 });
 
 redisSession.use(sessionParser);

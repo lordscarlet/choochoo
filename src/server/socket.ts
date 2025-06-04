@@ -12,16 +12,17 @@ import { afterTransaction } from "../utils/transaction";
 import { GameDao, toApi } from "./game/dao";
 import { LogDao } from "./messages/log_dao";
 import { redisClient, subClient } from "./redis";
-import { environment } from "./util/environment";
+import { clientOrigin } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
 
 const args: Partial<ServerOptions> = {
   adapter: createAdapter(redisClient, subClient),
 };
 
-if (environment.clientOrigin != null) {
+const origin = clientOrigin();
+if (origin != null) {
   args.cors = {
-    origin: environment.clientOrigin,
+    origin,
     methods: ["GET", "POST"],
     credentials: true,
   };

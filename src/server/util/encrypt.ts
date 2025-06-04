@@ -1,8 +1,8 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
-import { environment } from "./environment";
+import { cryptoSecret } from "./environment";
 
 const algorithm = "aes-256-gcm";
-const key = Buffer.from(environment.cryptoSecret);
+const key = Buffer.from(cryptoSecret());
 
 const ivLength = 12;
 const authTagLength = 16;

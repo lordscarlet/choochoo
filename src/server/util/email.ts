@@ -4,7 +4,7 @@ import { EmailSetting } from "../../api/notifications";
 import { MyUserApi } from "../../api/user";
 import { log, logError } from "../../utils/functions";
 import { decrypt, encrypt } from "./encrypt";
-import { environment } from "./environment";
+import { mailjet } from "./environment";
 import {
   GamelessTurnNotifySetting,
   MaybeGameTurnNotifySetting,
@@ -370,10 +370,8 @@ class NoopEmailService extends EmailService {
   }
 }
 
+const config = mailjet();
 export const emailService =
-  environment.mailjetKey == null || environment.mailjetSecret == null
+  config == null
     ? new NoopEmailService()
-    : new MailjetEmailService(
-        environment.mailjetKey,
-        environment.mailjetSecret,
-      );
+    : new MailjetEmailService(config.key, config.secret);

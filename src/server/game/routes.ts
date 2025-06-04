@@ -14,7 +14,7 @@ import { sequelize } from "../sequelize";
 import "../session";
 import { UserDao } from "../user/dao";
 import { assertRole } from "../util/enforce_role";
-import { environment, Stage } from "../util/environment";
+import { stage, Stage } from "../util/environment";
 import { GameHistoryDao } from "./history_dao";
 import { abandonGame, inTheLead, performAction, startGame } from "./logic";
 
@@ -122,7 +122,7 @@ const router = initServer().router(gameContract, {
     assert(userId != null, { permissionDenied: true });
     const playerIds = [userId];
     if (body.artificialStart) {
-      assert(environment.stage === Stage.enum.development);
+      assert(stage() === Stage.enum.development);
       const users = await UserDao.findAll({
         where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER },
         limit: body.minPlayers - 1,
@@ -216,8 +216,7 @@ const router = initServer().router(gameContract, {
     const userId = req.session.userId;
     assert(userId != null, { permissionDenied: true });
 
-    const seed =
-      environment.stage !== Stage.enum.production ? req.body.seed : undefined;
+    const seed = stage() !== Stage.enum.production ? req.body.seed : undefined;
 
     const game = await startGame(params.gameId, userId, seed);
     return { status: 200, body: { game } };

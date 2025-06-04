@@ -8,7 +8,7 @@ import {
 } from "selenium-webdriver";
 import { Options } from "selenium-webdriver/chrome";
 import { Direction, TileType } from "../../engine/state/tile";
-import { environment } from "../../server/util/environment";
+import { loginBypass } from "../../server/util/environment";
 import { Coordinates } from "../../utils/coordinates";
 import { log } from "../../utils/functions";
 import { assert } from "../../utils/validate";
@@ -71,7 +71,7 @@ export class Driver {
     } else {
       const redirect = this.uiOrigin + path;
       await this.driver.get(
-        `${this.apiOrigin}/login-as/${userId}?loginKey=${encodeURIComponent(environment.loginKey ?? "")}&redirect=${encodeURIComponent(redirect)}`,
+        `${this.apiOrigin}/login-as/${userId}?loginKey=${encodeURIComponent(loginBypass().loginKey ?? "")}&redirect=${encodeURIComponent(redirect)}`,
       );
     }
 

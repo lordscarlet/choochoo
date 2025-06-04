@@ -22,7 +22,7 @@ import { testApp } from "./test/routes";
 import { notificationApp } from "./user/notification_routes";
 import { userApp } from "./user/routes";
 import { enforceRoleMiddleware } from "./util/enforce_role";
-import { environment, Stage } from "./util/environment";
+import { cert, clientOrigin, port, stage, Stage } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
 import { xsrfApp } from "./xsrf";
 
@@ -30,11 +30,12 @@ const app = express();
 
 app.use(cookieParser());
 app.use(redisSession);
-if (environment.clientOrigin) {
+const origin = clientOrigin();
+if (origin) {
   app.use(
     cors({
       credentials: true,
-      origin: environment.clientOrigin,
+      origin,
     }),
   );
 }
@@ -43,7 +44,7 @@ app.use(express.json());
 app.use(waitForSequelize());
 app.use(testApp);
 
-if (environment.stage !== Stage.enum.production) {
+if (stage() !== Stage.enum.production) {
   app.use(devApp());
 }
 
@@ -84,11 +85,12 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
 
 export async function runApp(): Promise<() => Promise<void>> {
   let server: Server;
-  if (environment.cert != null) {
-    assert(environment.certKey != null, "cannot provide cert without certkey");
+  const serverCert = cert();
+  if (serverCert != null) {
+    assert(serverCert.certKey != null, "cannot provide cert without certkey");
     const [key, cert] = await Promise.all([
-      readFile(resolve(environment.certKey), { encoding: "utf-8" }),
-      readFile(resolve(environment.cert), { encoding: "utf-8" }),
+      readFile(resolve(serverCert.certKey), { encoding: "utf-8" }),
+      readFile(resolve(serverCert.cert), { encoding: "utf-8" }),
     ]);
     server = createSecureServer({ key, cert }, app);
   } else {
@@ -98,8 +100,8 @@ export async function runApp(): Promise<() => Promise<void>> {
   io.attach(server);
 
   /// Start
-  server.listen(environment.port, () => {
-    log(`AoS listening on port ${environment.port}, running...`);
+  server.listen(port(), () => {
+    log(`AoS listening on port ${port()}, running...`);
   });
 
   Lifecycle.singleton.start();

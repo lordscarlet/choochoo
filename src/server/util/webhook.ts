@@ -10,7 +10,7 @@ import {
 import { MapRegistry } from "../../maps/registry";
 import { log } from "../../utils/functions";
 import { assertNever } from "../../utils/validate";
-import { environment } from "./environment";
+import { stage, webhookUrls } from "./environment";
 import {
   GamelessTurnNotifySetting,
   MaybeGameTurnNotifySetting,
@@ -114,7 +114,7 @@ class AxiosWebHookNotifier extends BaseWebHookNotifier {
 }
 
 export const webHookNotifier =
-  environment.stage !== "production"
+  stage() !== "production"
     ? new NoopWebHookNotifier()
     : new AxiosWebHookNotifier();
 
@@ -142,9 +142,9 @@ function toUrl(setting: AnyWebHookSetting): string | undefined {
   }
   switch (setting.option) {
     case WebHookOption.AOS:
-      return environment.aosDiscordWebhookUrl;
+      return webhookUrls().aos;
     case WebHookOption.EOT:
-      return environment.eotDiscordWebhookUrl;
+      return webhookUrls().eot;
     default:
       assertNever(setting.option);
   }

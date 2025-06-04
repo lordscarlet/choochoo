@@ -5,45 +5,85 @@ import { assert } from "../../utils/validate";
 export const Stage = z.enum(["production", "development", "test"]);
 export type Stage = z.infer<typeof Stage>;
 
-assert(process.env.POSTGRES_URL != null, "must provide POSTGRES_URL");
-assert(process.env.REDIS_URL != null, "must provide REDIS_URL");
-assert(process.env.SESSION_SECRET != null, "must provide SESSION_SECRET");
+export function stage(): Stage {
+  return Stage.parse(process.env.NODE_ENV);
+}
 
-const postgresUrl = new URL(process.env.POSTGRES_URL);
-assert(postgresUrl != null, "must provide POSTGRES_URL in url format");
+export function postgresUrl(): URL {
+  assert(process.env.POSTGRES_URL != null, "must provide POSTGRES_URL");
 
-const devCryptoSecret = "bb90c03bfc07af7e93eef09933764a86";
+  const postgresUrl = new URL(process.env.POSTGRES_URL);
+  assert(postgresUrl != null, "must provide POSTGRES_URL in url format");
+  return postgresUrl;
+}
 
-export const environment = {
-  stage: Stage.parse(process.env.NODE_ENV),
-  clientOrigin: process.env.CLIENT_ORIGIN,
-  postgresUrl,
-  redisUrl: new URL(process.env.REDIS_URL),
-  port: Number(process.env.PORT ?? 3000),
-  cert: process.env.CERT,
-  certKey: process.env.CERT_KEY,
-  sessionSecret: process.env.SESSION_SECRET,
-  mailjetKey: process.env.MAILJET_KEY,
-  mailjetSecret: process.env.MAILJET_SECRET,
-  cryptoSecret: process.env.CRYPTO_SECRET ?? devCryptoSecret,
-  aosDiscordWebhookUrl: process.env.AOS_DISCORD_WEBHOOK_URL,
-  eotDiscordWebhookUrl: process.env.EOT_DISCORD_WEBHOOK_URL,
-  loginIds: process.env.LOGIN_IDS?.split(",").map((id) => Number(id)) ?? [],
-  loginKey: process.env.LOGIN_KEY,
-} as const;
+export function redisUrl(): URL {
+  assert(process.env.REDIS_URL != null, "must provide REDIS_URL");
+  return new URL(process.env.REDIS_URL);
+}
 
-if (environment.stage === Stage.enum.production) {
-  assert(
-    environment.cert != null,
-    "must provide CERT and CERT_KEY in prod mode",
-  );
-  assert(environment.port === 443, "PORT must be 443 in prod mode");
-  assert(
-    environment.clientOrigin != null,
-    "must provide CLIENT_ORIGIN in prd mode",
-  );
-  assert(
-    environment.cryptoSecret !== devCryptoSecret,
-    "must provide a crypto secret",
-  );
+export function sessionSecret(): string {
+  assert(process.env.SESSION_SECRET != null, "must provide SESSION_SECRET");
+  return process.env.SESSION_SECRET;
+}
+
+export function cert() {
+  if (stage() !== Stage.enum.production) {
+    return undefined;
+  }
+  assert(process.env.CERT != null, "must provide CERT in prod");
+  assert(process.env.CERT_KEY != null, "must provide CERT_KEY in prod");
+  const cert = {
+    cert: process.env.CERT,
+    certKey: process.env.CERT_KEY,
+  };
+  return cert;
+}
+
+export function mailjet() {
+  const key = process.env.MAILJET_KEY;
+  const secret = process.env.MAILJET_SECRET;
+  if (key == null || secret == null) return undefined;
+  return {
+    key,
+    secret,
+  };
+}
+
+export function clientOrigin() {
+  const origin = process.env.CLIENT_ORIGIN;
+  if (stage() === Stage.enum.production) {
+    assert(origin != null, "must provide CLIENT_ORIGIN in prd mode");
+  }
+  return origin;
+}
+
+export function port() {
+  const port = Number(process.env.PORT ?? 3000);
+  if (stage() === Stage.enum.production) {
+    assert(port === 443, "PORT must be 443 in prod mode");
+  }
+  return port;
+}
+
+export function webhookUrls() {
+  return {
+    aos: process.env.AOS_DISCORD_WEBHOOK_URL,
+    eot: process.env.EOT_DISCORD_WEBHOOK_URL,
+  };
+}
+
+export function cryptoSecret() {
+  const cryptoSecret = process.env.CRYPTO_SECRET;
+  if (stage() === Stage.enum.production) {
+    assert(cryptoSecret != null, "must provide a crypto secret");
+  }
+  return cryptoSecret ?? "bb90c03bfc07af7e93eef09933764a86";
+}
+
+export function loginBypass() {
+  return {
+    loginIds: process.env.LOGIN_IDS?.split(",").map((id) => Number(id)) ?? [],
+    loginKey: process.env.LOGIN_KEY,
+  };
 }
