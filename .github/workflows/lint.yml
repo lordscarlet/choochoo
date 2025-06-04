@@ -12,22 +12,10 @@ jobs:
   run-linters:
     name: Run linters
     runs-on: ubuntu-latest
-    container: node:20-bookworm-slim
 
     permissions:
       contents: read
       checks: write
-
-    services:
-      postgrestestdb:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: postgrespass
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Check out Git repository
@@ -42,9 +30,6 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
-      - name: Running tests
-        run: npm test
-
       - name: Run linters
         # Revert back to original lint-action branch once it's fixed.
         uses: YourDeveloperFriend/lint-action@master
@@ -53,16 +38,3 @@ jobs:
           prettier_dir: src/
           eslint: true
           prettier: true
-
-      - run: npm run build
-      - run: npm run migrate-testdb
-        env:
-          POSTGRES_URL: "postgres://postgres:postgrespass@postgrestestdb:5432/postgres"
-
-      - name: Run e2e tests
-        run: ./src/scripts/deflake.sh \"npm run e2e-test\"
-        env:
-          # User, port, and db seem to be hardcoded
-          POSTGRES_URL: "postgres://postgres:postgrespass@postgrestestdb:5432/postgres"
-          NODE_ENV: "test"
-          PORT: 3001

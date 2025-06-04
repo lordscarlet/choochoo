@@ -1,0 +1,59 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    container: node:20-bookworm-slim
+
+    permissions:
+      contents: read
+      checks: write
+
+    services:
+      postgrestestdb:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgrespass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 22
+
+      # ESLint and Prettier must be in `package.json`
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Running tests
+        run: npm test
+
+      - run: npm run build
+      - run: npm run migrate-testdb
+        env:
+          POSTGRES_URL: "postgres://postgres:postgrespass@postgrestestdb:5432/postgres"
+
+      - name: Run e2e tests
+        run: ./src/scripts/deflake.sh \"npm run e2e-test\"
+        env:
+          # User, port, and db seem to be hardcoded
+          POSTGRES_URL: "postgres://postgres:postgrespass@postgrestestdb:5432/postgres"
+          NODE_ENV: "test"
+          PORT: 3001
