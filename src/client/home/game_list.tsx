@@ -12,6 +12,7 @@ interface GameListProps {
   title: string;
   hideStatus?: boolean;
   fixOrder?: boolean;
+  useLog?: boolean;
 }
 
 export function GameList({
@@ -19,10 +20,11 @@ export function GameList({
   title,
   hideStatus,
   fixOrder,
+  useLog,
 }: GameListProps) {
   const me = useMe();
   const { games, nextPage, prevPage, hasPrevPage, hasNextPage } =
-    useGameList(query);
+    useGameList(query, useLog);
 
   const gamesInOrder: GameLiteApi[] = useMemo(() => {
     if (games == null) return [];

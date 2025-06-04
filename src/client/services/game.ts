@@ -14,6 +14,7 @@ import { GameHistoryApi } from "../../api/history";
 import {
   entries,
   formatMillisecondDuration,
+  log,
   peek,
 } from "../../utils/functions";
 import { pageCursorToString } from "../../utils/page_cursor";
@@ -60,8 +61,9 @@ function checkMatches(baseQuery: ListGamesApi, game: GameLiteApi): boolean {
   return entries(baseQuery).every((entry) => checkMatch(game, entry));
 }
 
-export function useGameList(baseQuery: ListGamesApi) {
+export function useGameList(baseQuery: ListGamesApi, useLog?: boolean) {
   const socket = useSocket();
+  const internalLog = useLog ? log : () => {};
   const tsrQueryClient = tsr.useQueryClient();
   const queryWithLimit: ListGamesApi = { pageSize: 20, ...baseQuery };
   const queryKeyFromFilter = Object.entries(queryWithLimit)
@@ -109,11 +111,13 @@ export function useGameList(baseQuery: ListGamesApi) {
       updater: (pages: GameLiteApi[][]) => GameLiteApi[][],
     ) {
       tsrQueryClient.games.list.setQueryData(queryKey, (r) => {
+        internalLog("updating game list", games, data);
         if (games == null) return r;
 
         assert(data != null);
 
         const newPages = updater(data.pages.map((page) => page.body.games));
+        internalLog("updating games list with", newPages);
 
         const pageParams = newPages
           .map((_, index) => {
@@ -136,6 +140,7 @@ export function useGameList(baseQuery: ListGamesApi) {
       });
     }
     function setGame(game: GameLiteApi) {
+      internalLog("setting", game);
       updateGameList((pages) => {
         const present = pages.some((games) =>
           games.some((other) => other.id === game.id),
@@ -143,6 +148,7 @@ export function useGameList(baseQuery: ListGamesApi) {
 
         const matchesQuery = checkMatches(baseQuery, game);
 
+        internalLog("matches query", matchesQuery, present);
         if (matchesQuery) {
           if (present) {
             return pages.map((games) =>
@@ -167,6 +173,7 @@ export function useGameList(baseQuery: ListGamesApi) {
       pages: GameLiteApi[][],
       gameId: number,
     ): GameLiteApi[][] {
+      internalLog("removing game", pages, gameId);
       const pageIndex = pages.findIndex((games) =>
         games.some((other) => other.id === gameId),
       );
@@ -195,6 +202,8 @@ export function useGameList(baseQuery: ListGamesApi) {
       socket.off("gameDestroy", deleteGame);
     };
   }, [queryKey, baseQuery, data]);
+
+  internalLog("games list", games);
 
   return {
     games,
