@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Running prober
-        run: npm run prober
+        run: ./src/scripts/deflake.sh \"npm run prober\"
         env:
           LOGIN_KEY: ${{ secrets.LOGIN_KEY }}
           LOGIN_IDS: ${{ secrets.LOGIN_IDS }}

@@ -24,7 +24,11 @@ export function redisUrl(): URL {
 
 export function sessionSecret(): string {
   assert(process.env.SESSION_SECRET != null, "must provide SESSION_SECRET");
-  return process.env.SESSION_SECRET;
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (stage() === Stage.enum.production) {
+    assert(sessionSecret != null, "must provide a crypto secret");
+  }
+  return sessionSecret ?? "foobar";
 }
 
 export function cert() {

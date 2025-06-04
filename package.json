@@ -16,10 +16,9 @@
     "migrate-testdb": "export $(cat .testenv.sh | xargs) && node bin/scripts/migrations up",
     "test": "ts-node node_modules/jasmine/bin/jasmine --config=spec/support/jasmine.mjs",
     "test-watch": "nodemon -V --ext ts,tsx --watch src/ --exec 'npm run test'",
-    "e2e": "RUNS=3 npm run e2e-check-flakes",
-    "e2e-flaky": "export $(cat .testenv.sh | xargs) && ts-node node_modules/jasmine/bin/jasmine --config=spec/support/e2e.mjs",
-    "e2e-check-flakes": "failures=0; RUNS=${RUNS:=10}; echo \"running $RUNS times\"; for i in $(seq 1 $RUNS); do if ! npm run e2e-flaky; then failures=$((failures + 1)); fi; echo \"\n=========\nFailed $failures/$i\n=========\"; done; if (( \"$failures\" >= \"$RUNS\" )); then exit 1; else exit 0; fi;",
-    "e2e-write": "export $(cat .testenv.sh | xargs) && WRITE=true ts-node node_modules/jasmine/bin/jasmine --config=spec/support/e2e.mjs",
+    "e2e": "export $(cat .testenv.sh | xargs) && npm run e2e-test",
+    "e2e-test": "ts-node node_modules/jasmine/bin/jasmine --config=spec/support/e2e.mjs",
+    "e2e-write": "WRITE=true npm run e2e",
     "e2e-watch": "nodemon -V --ext ts,tsx --watch src/ --exec 'npm run e2e'",
     "prober": "ts-node node_modules/jasmine/bin/jasmine --config=spec/support/prober.mjs",
     "knip": "knip"
