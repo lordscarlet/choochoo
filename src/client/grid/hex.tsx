@@ -7,6 +7,7 @@ import { isTownTile } from "../../engine/map/tile";
 import { Track, TrackInfo } from "../../engine/map/track";
 import { CityGroup } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
+import { SpaceStyle } from "../../engine/state/location_style";
 import { SpaceType } from "../../engine/state/location_type";
 import { Direction } from "../../engine/state/tile";
 import { CyprusMapData } from "../../maps/cyprus/map_data";
@@ -30,7 +31,6 @@ import * as gridStyles from "./hex_grid.module.css";
 import { HexName } from "./hex_name";
 import { OnRoll } from "./on_roll";
 import { Track as TrackSvg } from "./track";
-import { SpaceStyle } from "../../engine/state/location_style";
 
 function cityColorStyles(space: City): string[] {
   const colors = space.goodColors();
@@ -114,8 +114,8 @@ export function getTerrainHexes(props: TerrainHexProps): TerrainHexes {
       <BorderBoundaries key={key + "BorderBoundaries"} {...props} />,
     ],
     afterTextures: [
-      <UpperTerrainHex key={key + "UpperTerrainHex"} {...props} />,
       <TrackHex key={key + "TrackHex"} {...props} />,
+      <UpperTerrainHex key={key + "UpperTerrainHex"} {...props} />,
       <GoodsOnHex key={key + "GoodsOnHex"} {...props} />,
     ],
   };
