@@ -63,7 +63,7 @@ function checkMatches(baseQuery: ListGamesApi, game: GameLiteApi): boolean {
 export function useGameList(baseQuery: ListGamesApi) {
   const socket = useSocket();
   const tsrQueryClient = tsr.useQueryClient();
-  const queryWithLimit: ListGamesApi = { pageSize: 3, ...baseQuery };
+  const queryWithLimit: ListGamesApi = { pageSize: 20, ...baseQuery };
   const queryKeyFromFilter = Object.entries(queryWithLimit)
     .sort((a, b) => (a[0] > b[0] ? 1 : -1))
     .map(([key, value]) => `${key}:${value}`)
