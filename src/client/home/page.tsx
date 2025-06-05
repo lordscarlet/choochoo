@@ -53,7 +53,7 @@ export function HomePage() {
           Create Game
         </Button>
       </div>
-      {user && <GameList title="Your Games" query={userQuery} useLog fixOrder />}
+      {user && <GameList title="Your Games" query={userQuery} fixOrder />}
       <GameList title="New Games" query={lobbyQuery} />
       <GameList title="Active Games" query={activeQuery} />
       <GameList title="Ended Games" query={endedQuery} hideStatus />

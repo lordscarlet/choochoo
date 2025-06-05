@@ -1,18 +1,17 @@
 import { useMemo } from "react";
+import { Button, CardGroup } from "semantic-ui-react";
 import { GameLiteApi, GameStatus, ListGamesApi } from "../../api/game";
 import { partition } from "../../utils/functions";
 import { useGameList } from "../services/game";
 import { useMe } from "../services/me";
 import { GameCard } from "./game_card";
 import * as styles from "./game_list.module.css";
-import { Button, CardGroup } from "semantic-ui-react";
 
 interface GameListProps {
   query: ListGamesApi;
   title: string;
   hideStatus?: boolean;
   fixOrder?: boolean;
-  useLog?: boolean;
 }
 
 export function GameList({
@@ -20,11 +19,10 @@ export function GameList({
   title,
   hideStatus,
   fixOrder,
-  useLog,
 }: GameListProps) {
   const me = useMe();
   const { games, nextPage, prevPage, hasPrevPage, hasNextPage } =
-    useGameList(query, useLog);
+    useGameList(query);
 
   const gamesInOrder: GameLiteApi[] = useMemo(() => {
     if (games == null) return [];

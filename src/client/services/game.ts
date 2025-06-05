@@ -14,7 +14,6 @@ import { GameHistoryApi } from "../../api/history";
 import {
   entries,
   formatMillisecondDuration,
-  log,
   peek,
 } from "../../utils/functions";
 import { pageCursorToString } from "../../utils/page_cursor";
@@ -61,11 +60,10 @@ function checkMatches(baseQuery: ListGamesApi, game: GameLiteApi): boolean {
   return entries(baseQuery).every((entry) => checkMatch(game, entry));
 }
 
-export function useGameList(baseQuery: ListGamesApi, useLog?: boolean) {
+export function useGameList(baseQuery: ListGamesApi) {
   const socket = useSocket();
-  const internalLog = useLog ? log : () => {};
   const tsrQueryClient = tsr.useQueryClient();
-  const queryWithLimit: ListGamesApi = { pageSize: 20, ...baseQuery };
+  const queryWithLimit: ListGamesApi = { pageSize: 3, ...baseQuery };
   const queryKeyFromFilter = Object.entries(queryWithLimit)
     .sort((a, b) => (a[0] > b[0] ? 1 : -1))
     .map(([key, value]) => `${key}:${value}`)
@@ -111,18 +109,16 @@ export function useGameList(baseQuery: ListGamesApi, useLog?: boolean) {
       updater: (pages: GameLiteApi[][]) => GameLiteApi[][],
     ) {
       tsrQueryClient.games.list.setQueryData(queryKey, (r) => {
-        internalLog("updating game list", games, data);
         if (games == null) return r;
 
         assert(data != null);
 
         const newPages = updater(data.pages.map((page) => page.body.games));
-        internalLog("updating games list with", newPages);
 
         const pageParams = newPages
           .map((_, index) => {
             return newPages
-              .slice(index)
+              .slice(0, index)
               .flatMap((games) => games.map(({ id }) => id));
           })
           .map(pageCursorToString);
@@ -130,17 +126,23 @@ export function useGameList(baseQuery: ListGamesApi, useLog?: boolean) {
         // TODO: fix the typing of this particular method.
         return {
           pageParams,
-          pages: newPages.map((games) => ({
+          pages: newPages.map((games, index) => ({
             status: 200,
             headers: new Headers(),
-            body: { games },
+            body: {
+              games,
+              nextPageCursor: pageCursorToString(
+                newPages
+                  .slice(0, index + 1)
+                  .flatMap((games) => games.map((g) => g.id)),
+              ),
+            },
           })),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
       });
     }
     function setGame(game: GameLiteApi) {
-      internalLog("setting", game);
       updateGameList((pages) => {
         const present = pages.some((games) =>
           games.some((other) => other.id === game.id),
@@ -148,7 +150,6 @@ export function useGameList(baseQuery: ListGamesApi, useLog?: boolean) {
 
         const matchesQuery = checkMatches(baseQuery, game);
 
-        internalLog("matches query", matchesQuery, present);
         if (matchesQuery) {
           if (present) {
             return pages.map((games) =>
@@ -173,7 +174,6 @@ export function useGameList(baseQuery: ListGamesApi, useLog?: boolean) {
       pages: GameLiteApi[][],
       gameId: number,
     ): GameLiteApi[][] {
-      internalLog("removing game", pages, gameId);
       const pageIndex = pages.findIndex((games) =>
         games.some((other) => other.id === gameId),
       );
@@ -202,8 +202,6 @@ export function useGameList(baseQuery: ListGamesApi, useLog?: boolean) {
       socket.off("gameDestroy", deleteGame);
     };
   }, [queryKey, baseQuery, data]);
-
-  internalLog("games list", games);
 
   return {
     games,
