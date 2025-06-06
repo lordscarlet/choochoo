@@ -36,6 +36,7 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
+      - run: apt-get update
       - run: apt-get install unzip
 
       - name: Set up Node.js
