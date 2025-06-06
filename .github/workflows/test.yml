@@ -64,7 +64,7 @@ jobs:
           chrome-version: latest
 
       - run: npm run build
-      - run: npm run migrate-testdb
+      - run: npm run migrate-testdb-direct
         env:
           POSTGRES_URL: "postgres://postgres:postgrespass@localhost:5432/postgres"
 
