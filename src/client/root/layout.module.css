@@ -27,9 +27,9 @@
   background-color: orangered;
 }
 
-@keyframes noop {}
-
-.noop{
-  animation: noop 0s;
+@keyframes noop {
 }
 
+.noop {
+  animation: noop 0s;
+}

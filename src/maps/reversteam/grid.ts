@@ -70,7 +70,8 @@ export const map = startsLowerGrid([
     PLAIN,
     city("Cincinnati", Good.BLUE, black(2)),
     RIVER,
-    PLAIN ],
+    PLAIN,
+  ],
   [WATER, ...duplicate(5, PLAIN), town("Fort Wayne"), PLAIN, PLAIN, RIVER],
   [
     WATER,

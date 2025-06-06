@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { MoveData } from "../../engine/move/move";
-import { useInjected, useViewSettings} from "../utils/injection_context";
+import { useInjected, useViewSettings } from "../utils/injection_context";
 import { MoveInterceptor } from "../../engine/move/interceptor";
 
 interface InterceptMoveModalProps {

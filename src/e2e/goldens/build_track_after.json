@@ -7,14 +7,7 @@
   "name": "Test game",
   "status": "ACTIVE",
   "turnDuration": 1000,
-  "playerIds": [
-    6,
-    5,
-    4,
-    3,
-    2,
-    1
-  ],
+  "playerIds": [6, 5, 4, 3, 2, 1],
   "activePlayerId": 3,
   "config": {
     "maxPlayers": 6,
@@ -28,30 +21,7 @@
     "version": 3,
     "gameData": {
       "bag": [
-        4,
-        3,
-        4,
-        0,
-        1,
-        0,
-        3,
-        3,
-        0,
-        3,
-        0,
-        0,
-        3,
-        0,
-        3,
-        3,
-        2,
-        1,
-        4,
-        2,
-        3,
-        2,
-        0,
-        2
+        4, 3, 4, 0, 1, 0, 3, 3, 0, 3, 0, 0, 3, 0, 3, 3, 2, 1, 4, 2, 3, 2, 0, 2
       ],
       "grid": [
         [
@@ -143,22 +113,13 @@
           {
             "type": 1,
             "name": "Kansas City",
-            "color": [
-              3
-            ],
-            "goods": [
-              3,
-              1,
-              0,
-              1
-            ],
+            "color": [3],
+            "goods": [3, 1, 0, 1],
             "onRoll": [
               {
                 "onRoll": 3,
                 "group": 1,
-                "goods": [
-                  3
-                ]
+                "goods": [3]
               }
             ],
             "startingNumCubes": 2
@@ -202,12 +163,7 @@
             "tile": {
               "tileType": 111,
               "orientation": 4,
-              "owners": [
-                7,
-                7,
-                1,
-                7
-              ]
+              "owners": [7, 7, 1, 7]
             }
           }
         ],
@@ -221,9 +177,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 2,
-              "owners": [
-                7
-              ]
+              "owners": [7]
             }
           }
         ],
@@ -320,9 +274,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 3,
-              "owners": [
-                7
-              ]
+              "owners": [7]
             }
           }
         ],
@@ -406,21 +358,13 @@
           {
             "type": 1,
             "name": "Cincinnati",
-            "color": [
-              0
-            ],
-            "goods": [
-              2
-            ],
+            "color": [0],
+            "goods": [2],
             "onRoll": [
               {
                 "onRoll": 2,
                 "group": 2,
-                "goods": [
-                  0,
-                  2,
-                  4
-                ]
+                "goods": [0, 2, 4]
               }
             ],
             "startingNumCubes": 2
@@ -571,22 +515,13 @@
           {
             "type": 1,
             "name": "Detroit",
-            "color": [
-              2
-            ],
-            "goods": [
-              1,
-              2
-            ],
+            "color": [2],
+            "goods": [1, 2],
             "onRoll": [
               {
                 "onRoll": 3,
                 "group": 2,
-                "goods": [
-                  0,
-                  2,
-                  4
-                ]
+                "goods": [0, 2, 4]
               }
             ],
             "startingNumCubes": 2
@@ -611,9 +546,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 3,
-              "owners": [
-                4
-              ]
+              "owners": [4]
             }
           }
         ],
@@ -708,9 +641,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 6,
-              "owners": [
-                4
-              ]
+              "owners": [4]
             }
           }
         ],
@@ -742,9 +673,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 3,
-              "owners": [
-                3
-              ]
+              "owners": [3]
             }
           }
         ],
@@ -808,10 +737,7 @@
               {
                 "onRoll": 1,
                 "group": 2,
-                "goods": [
-                  2,
-                  2
-                ]
+                "goods": [2, 2]
               }
             ]
           }
@@ -835,9 +761,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 5,
-              "owners": [
-                4
-              ]
+              "owners": [4]
             }
           }
         ],
@@ -851,9 +775,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 4,
-              "owners": [
-                4
-              ]
+              "owners": [4]
             }
           }
         ],
@@ -892,22 +814,13 @@
           {
             "type": 1,
             "name": "Toronto",
-            "color": [
-              4
-            ],
-            "goods": [
-              1,
-              3,
-              0
-            ],
+            "color": [4],
+            "goods": [1, 3, 0],
             "onRoll": [
               {
                 "onRoll": 6,
                 "group": 2,
-                "goods": [
-                  4,
-                  0
-                ]
+                "goods": [4, 0]
               }
             ],
             "startingNumCubes": 2
@@ -950,9 +863,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 4,
-              "owners": [
-                4
-              ]
+              "owners": [4]
             }
           }
         ],
@@ -966,9 +877,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 6,
-              "owners": [
-                4
-              ]
+              "owners": [4]
             }
           }
         ],
@@ -982,9 +891,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 5,
-              "owners": [
-                3
-              ]
+              "owners": [3]
             }
           }
         ],
@@ -996,22 +903,13 @@
           {
             "type": 1,
             "name": "Wheeling",
-            "color": [
-              4
-            ],
-            "goods": [
-              4,
-              4
-            ],
+            "color": [4],
+            "goods": [4, 4],
             "onRoll": [
               {
                 "onRoll": 4,
                 "group": 2,
-                "goods": [
-                  3,
-                  1,
-                  3
-                ]
+                "goods": [3, 1, 3]
               }
             ],
             "startingNumCubes": 3
@@ -1080,16 +978,8 @@
           {
             "type": 1,
             "name": "Pittsburgh",
-            "color": [
-              2
-            ],
-            "goods": [
-              3,
-              3,
-              4,
-              2,
-              0
-            ],
+            "color": [2],
+            "goods": [3, 3, 4, 2, 0],
             "onRoll": [
               {
                 "onRoll": 5,
@@ -1110,9 +1000,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 2,
-              "owners": [
-                3
-              ]
+              "owners": [3]
             }
           }
         ],
@@ -1151,22 +1039,13 @@
           {
             "type": 1,
             "name": "Minneapolis",
-            "color": [
-              0
-            ],
-            "goods": [
-              2,
-              1
-            ],
+            "color": [0],
+            "goods": [2, 1],
             "onRoll": [
               {
                 "onRoll": 5,
                 "group": 1,
-                "goods": [
-                  4,
-                  0,
-                  2
-                ]
+                "goods": [4, 0, 2]
               }
             ],
             "startingNumCubes": 2
@@ -1236,9 +1115,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 6,
-              "owners": [
-                5
-              ]
+              "owners": [5]
             }
           }
         ],
@@ -1304,22 +1181,13 @@
           {
             "type": 1,
             "name": "Desmoines",
-            "color": [
-              0
-            ],
-            "goods": [
-              2,
-              3
-            ],
+            "color": [0],
+            "goods": [2, 3],
             "onRoll": [
               {
                 "onRoll": 4,
                 "group": 1,
-                "goods": [
-                  0,
-                  4,
-                  2
-                ]
+                "goods": [0, 4, 2]
               }
             ],
             "startingNumCubes": 2
@@ -1335,9 +1203,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 4,
-              "owners": [
-                5
-              ]
+              "owners": [5]
             }
           }
         ],
@@ -1351,9 +1217,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 6,
-              "owners": [
-                5
-              ]
+              "owners": [5]
             }
           }
         ],
@@ -1374,22 +1238,13 @@
           {
             "type": 1,
             "name": "Duluth",
-            "color": [
-              3
-            ],
-            "goods": [
-              3,
-              1,
-              4,
-              3
-            ],
+            "color": [3],
+            "goods": [3, 1, 4, 3],
             "onRoll": [
               {
                 "onRoll": 6,
                 "group": 1,
-                "goods": [
-                  2
-                ]
+                "goods": [2]
               }
             ],
             "startingNumCubes": 2
@@ -1468,9 +1323,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 4,
-              "owners": [
-                5
-              ]
+              "owners": [5]
             }
           }
         ],
@@ -1484,9 +1337,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 3,
-              "owners": [
-                5
-              ]
+              "owners": [5]
             }
           }
         ],
@@ -1573,10 +1424,7 @@
             "tile": {
               "tileType": 13,
               "orientation": 1,
-              "owners": [
-                5,
-                5
-              ]
+              "owners": [5, 5]
             }
           }
         ],
@@ -1590,9 +1438,7 @@
             "tile": {
               "tileType": 3,
               "orientation": 3,
-              "owners": [
-                5
-              ]
+              "owners": [5]
             }
           }
         ],
@@ -1679,9 +1525,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 5,
-              "owners": [
-                1
-              ]
+              "owners": [1]
             }
           }
         ],
@@ -1693,20 +1537,13 @@
           {
             "type": 1,
             "name": "St. Louis",
-            "color": [
-              2
-            ],
-            "goods": [
-              4
-            ],
+            "color": [2],
+            "goods": [4],
             "onRoll": [
               {
                 "onRoll": 2,
                 "group": 1,
-                "goods": [
-                  1,
-                  3
-                ]
+                "goods": [1, 3]
               }
             ],
             "startingNumCubes": 2
@@ -1767,9 +1604,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 5,
-              "owners": [
-                6
-              ]
+              "owners": [6]
             }
           }
         ],
@@ -1783,9 +1618,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 5,
-              "owners": [
-                6
-              ]
+              "owners": [6]
             }
           }
         ],
@@ -1798,10 +1631,7 @@
             "type": 1,
             "name": "Springfield",
             "color": 1,
-            "goods": [
-              4,
-              4
-            ],
+            "goods": [4, 4],
             "urbanized": true,
             "onRoll": [
               {
@@ -1822,9 +1652,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 2,
-              "owners": [
-                6
-              ]
+              "owners": [6]
             }
           }
         ],
@@ -1838,9 +1666,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 3,
-              "owners": [
-                7
-              ]
+              "owners": [7]
             }
           }
         ],
@@ -1890,9 +1716,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 5,
-              "owners": [
-                6
-              ]
+              "owners": [6]
             }
           }
         ],
@@ -1904,21 +1728,13 @@
           {
             "type": 1,
             "name": "Chicago",
-            "color": [
-              2
-            ],
-            "goods": [
-              4,
-              1
-            ],
+            "color": [2],
+            "goods": [4, 1],
             "onRoll": [
               {
                 "onRoll": 1,
                 "group": 1,
-                "goods": [
-                  1,
-                  2
-                ]
+                "goods": [1, 2]
               }
             ],
             "startingNumCubes": 2
@@ -1934,9 +1750,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 5,
-              "owners": [
-                1
-              ]
+              "owners": [1]
             }
           }
         ],
@@ -1950,9 +1764,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 2,
-              "owners": [
-                1
-              ]
+              "owners": [1]
             }
           }
         ],
@@ -1966,9 +1778,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 4,
-              "owners": [
-                6
-              ]
+              "owners": [6]
             }
           }
         ],
@@ -2066,10 +1876,7 @@
             "tile": {
               "tileType": 102,
               "orientation": 4,
-              "owners": [
-                6,
-                6
-              ]
+              "owners": [6, 6]
             }
           }
         ],
@@ -2083,9 +1890,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 3,
-              "owners": [
-                7
-              ]
+              "owners": [7]
             }
           }
         ],
@@ -2163,9 +1968,7 @@
             "tile": {
               "tileType": 1,
               "orientation": 4,
-              "owners": [
-                7
-              ]
+              "owners": [7]
             }
           }
         ],
@@ -2179,9 +1982,7 @@
             "tile": {
               "tileType": 2,
               "orientation": 5,
-              "owners": [
-                1
-              ]
+              "owners": [1]
             }
           }
         ],
@@ -2193,22 +1994,13 @@
           {
             "type": 1,
             "name": "Evansville",
-            "color": [
-              0
-            ],
-            "goods": [
-              4,
-              4,
-              0,
-              3
-            ],
+            "color": [0],
+            "goods": [4, 4, 0, 3],
             "onRoll": [
               {
                 "onRoll": 1,
                 "group": 2,
-                "goods": [
-                  0
-                ]
+                "goods": [0]
               }
             ],
             "startingNumCubes": 2
@@ -2317,14 +2109,7 @@
           "selectedAction": 3
         }
       ],
-      "turnOrder": [
-        4,
-        6,
-        5,
-        7,
-        1,
-        3
-      ],
+      "turnOrder": [4, 6, 5, 7, 1, 3],
       "availableCities": [
         {
           "color": 2,
@@ -2332,10 +2117,7 @@
             {
               "onRoll": 3,
               "group": 1,
-              "goods": [
-                2,
-                1
-              ]
+              "goods": [2, 1]
             }
           ],
           "goods": []
@@ -2346,10 +2128,7 @@
             {
               "onRoll": 4,
               "group": 1,
-              "goods": [
-                2,
-                4
-              ]
+              "goods": [2, 4]
             }
           ],
           "goods": []
@@ -2360,10 +2139,7 @@
             {
               "onRoll": 5,
               "group": 1,
-              "goods": [
-                0,
-                2
-              ]
+              "goods": [0, 2]
             }
           ],
           "goods": []
@@ -2374,10 +2150,7 @@
             {
               "onRoll": 2,
               "group": 2,
-              "goods": [
-                1,
-                0
-              ]
+              "goods": [1, 0]
             }
           ],
           "goods": []
@@ -2388,10 +2161,7 @@
             {
               "onRoll": 3,
               "group": 2,
-              "goods": [
-                1,
-                0
-              ]
+              "goods": [1, 0]
             }
           ],
           "goods": []
@@ -2402,10 +2172,7 @@
             {
               "onRoll": 4,
               "group": 2,
-              "goods": [
-                4,
-                1
-              ]
+              "goods": [4, 1]
             }
           ],
           "goods": []
