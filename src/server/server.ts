@@ -17,7 +17,6 @@ import { gameApp } from "./game/routes";
 import { messageApp } from "./messages/routes";
 import { redisApp } from "./redis";
 import { waitForSequelize } from "./sequelize";
-import { io } from "./socket";
 import { testApp } from "./test/routes";
 import { notificationApp } from "./user/notification_routes";
 import { userApp } from "./user/routes";
@@ -25,6 +24,7 @@ import { enforceRoleMiddleware } from "./util/enforce_role";
 import { cert, clientOrigin, port, stage, Stage } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
 import { xsrfApp } from "./xsrf";
+import { startIo } from "./socket";
 
 export async function runApp(): Promise<() => Promise<void>> {
   const app = express();
@@ -96,6 +96,8 @@ export async function runApp(): Promise<() => Promise<void>> {
   } else {
     server = createServer(app);
   }
+
+  const io = startIo();
 
   io.attach(server);
 

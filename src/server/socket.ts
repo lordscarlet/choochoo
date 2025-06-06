@@ -15,20 +15,24 @@ import { redisClient, subClient } from "./redis";
 import { clientOrigin } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
 
-const args: Partial<ServerOptions> = {
-  adapter: createAdapter(redisClient, subClient),
-};
+let io: Server<ClientToServerEvents, ServerToClientEvents>;
 
-const origin = clientOrigin();
-if (origin != null) {
-  args.cors = {
-    origin,
-    methods: ["GET", "POST"],
-    credentials: true,
+export function startIo() {
+  const args: Partial<ServerOptions> = {
+    adapter: createAdapter(redisClient, subClient),
   };
-}
 
-export const io = new Server<ClientToServerEvents, ServerToClientEvents>(args);
+  const origin = clientOrigin();
+  if (origin != null) {
+    args.cors = {
+      origin,
+      methods: ["GET", "POST"],
+      credentials: true,
+    };
+  }
+
+  return (io = new Server<ClientToServerEvents, ServerToClientEvents>(args));
+}
 
 const HOME_ROOM = "HOME_ROOM";
 

@@ -17,9 +17,12 @@ export function postgresUrl(): URL {
   return postgresUrl;
 }
 
-export function redisUrl(): URL {
-  assert(process.env.REDIS_URL != null, "must provide REDIS_URL");
-  return new URL(process.env.REDIS_URL);
+export function redisUrl(): URL | undefined {
+  const redisUrl = process.env.REDIS_URL;
+  if (stage() === Stage.enum.production) {
+    assert(redisUrl != null, "must provide a redis url");
+  }
+  return redisUrl == null ? undefined : new URL(redisUrl);
 }
 
 export function sessionSecret(): string {

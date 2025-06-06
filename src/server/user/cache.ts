@@ -1,10 +1,9 @@
 import { MyUserApi } from "../../api/user";
 import { redisClient } from "../redis";
-import { stage, Stage } from "../util/environment";
 
 class UserCache {
   async get(id: number): Promise<MyUserApi | undefined> {
-    if (stage() != Stage.enum.production) return;
+    if (redisClient == null) return;
     const result = await redisClient.get(`users:${id}`);
     if (result == null) return undefined;
     return JSON.parse(result);
@@ -12,7 +11,7 @@ class UserCache {
 
   async set(user: MyUserApi | undefined): Promise<void> {
     if (user == null) return;
-    if (stage() != Stage.enum.production) return;
+    if (redisClient == null) return;
     await redisClient.set(
       `users:${user.id}`,
       JSON.stringify(user),
