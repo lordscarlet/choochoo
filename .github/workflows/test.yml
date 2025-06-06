@@ -67,6 +67,7 @@ jobs:
       - run: npm run migrate-testdb-direct
         env:
           POSTGRES_URL: "postgres://postgres:postgrespass@localhost:5432/postgres"
+          NODE_ENV: "test"
 
       - name: Run e2e tests
         run: ./src/scripts/deflake.sh "npm run e2e-test"
