@@ -1,4 +1,5 @@
 # This script takes in a command and a number of runs, and runs the command N times. It only reports a failure if all runs fail.
+set -e
 
 COMMAND="$1"
 RUNS="${2:-3}"
