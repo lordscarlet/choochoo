@@ -18,6 +18,8 @@ for i in $(seq 1 $RUNS); do
   echo ""
 done
 
-if (( "$failures" >= "$RUNS" )); then
+if [ "$failures" -lt "$RUNS" ]; then
+  exit 0;
+else
   exit 1;
 fi
