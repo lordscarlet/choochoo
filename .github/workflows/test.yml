@@ -68,13 +68,13 @@ jobs:
       - run: npm run build
       - run: npm run migrate-testdb-direct
         env:
-          POSTGRES_URL: "postgres://postgres:postgres@localhost:5432/postgres"
+          POSTGRES_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
           NODE_ENV: "test"
 
       - name: Run e2e tests
         run: ./src/scripts/deflake.sh "npm run e2e-test"
         env:
           # User, port, and db seem to be hardcoded
-          POSTGRES_URL: "postgres://postgres:postgres@localhost:5432/postgres"
+          POSTGRES_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
           NODE_ENV: "test"
           PORT: 3001
