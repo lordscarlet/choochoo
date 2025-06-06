@@ -19,11 +19,12 @@ jobs:
       checks: write
 
     services:
-      postgrestestdb:
-        image: postgres
+      postgres:
+        image: postgres:latest
         env:
-          POSTGRES_PASSWORD: postgrespass
-          POSTGRES_DB: postgrestestdb
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -67,13 +68,13 @@ jobs:
       - run: npm run build
       - run: npm run migrate-testdb-direct
         env:
-          POSTGRES_URL: "postgres://postgres:postgrespass@localhost:5432/postgrestestdb"
+          POSTGRES_URL: "postgres://postgres:postgres@localhost:5432/postgres"
           NODE_ENV: "test"
 
       - name: Run e2e tests
         run: ./src/scripts/deflake.sh "npm run e2e-test"
         env:
           # User, port, and db seem to be hardcoded
-          POSTGRES_URL: "postgres://postgres:postgrespass@localhost:5432/postgrestestdb"
+          POSTGRES_URL: "postgres://postgres:postgres@localhost:5432/postgres"
           NODE_ENV: "test"
           PORT: 3001
