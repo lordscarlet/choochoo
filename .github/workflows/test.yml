@@ -45,6 +45,7 @@ jobs:
       - name: Running tests
         run: npm test
 
+      - run: apt-get install default-jre
       - run: npm run build
       - run: npm run migrate-testdb
         env:
