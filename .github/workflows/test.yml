@@ -28,10 +28,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
 
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
+
+      - run: apt-get install unzip
 
       - name: Set up Node.js
         uses: actions/setup-node@v1
@@ -62,6 +67,6 @@ jobs:
         run: ./src/scripts/deflake.sh "npm run e2e-test"
         env:
           # User, port, and db seem to be hardcoded
-          POSTGRES_URL: "postgres://postgres:postgrespass@postgrestestdb:5432/postgres"
+          POSTGRES_URL: "postgres://postgres:postgrespass@localhost:5432/postgres"
           NODE_ENV: "test"
           PORT: 3001
