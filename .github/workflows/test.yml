@@ -51,7 +51,7 @@ jobs:
           POSTGRES_URL: "postgres://postgres:postgrespass@postgrestestdb:5432/postgres"
 
       - name: Run e2e tests
-        run: ./src/scripts/deflake.sh \"npm run e2e-test\"
+        run: ./src/scripts/deflake.sh "npm run e2e-test"
         env:
           # User, port, and db seem to be hardcoded
           POSTGRES_URL: "postgres://postgres:postgrespass@postgrestestdb:5432/postgres"
