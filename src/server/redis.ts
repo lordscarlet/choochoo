@@ -18,21 +18,25 @@ redisClient.on("error", (e) => {
   process.exit();
 });
 
-const redisPrefix = redisUrl().pathname.slice(1);
+export function redisApp() {
+  const redisPrefix = redisUrl().pathname.slice(1);
 
-const redisStore = new RedisStore({
-  client: redisClient,
-  prefix: `${redisPrefix == "" ? "choo" : redisPrefix}:`,
-});
+  const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: `${redisPrefix == "" ? "choo" : redisPrefix}:`,
+  });
 
-export const redisSession = express();
+  const redisApp = express();
 
-const sessionParser = session({
-  store: redisStore,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
-  secret: sessionSecret(),
-});
+  const sessionParser = session({
+    store: redisStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
+    secret: sessionSecret(),
+  });
 
-redisSession.use(sessionParser);
+  redisApp.use(sessionParser);
+
+  return redisApp;
+}
