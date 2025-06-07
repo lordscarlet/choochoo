@@ -1,6 +1,6 @@
 import { SequelizeStorage, Umzug } from "umzug";
-import { sequelize } from "../server/sequelize";
-import { log } from "../utils/functions";
+import { connectToSequelize, sequelize } from "../server/sequelize";
+import { log, logError } from "../utils/functions";
 
 const umzug = new Umzug({
   migrations: { glob: "bin/migrations/*.js" },
@@ -18,5 +18,13 @@ const umzug = new Umzug({
 export type Migration = typeof umzug._types.migration;
 
 if (require.main === module) {
-  umzug.runAsCLI().finally(process.exit);
+  connectToSequelize()
+    .then(() => umzug.runAsCLI())
+    .then(() => {
+      process.exit();
+    })
+    .catch((e) => {
+      logError("caught error attempting to run umzug", e);
+      process.exit(1);
+    });
 }

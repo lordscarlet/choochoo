@@ -16,14 +16,17 @@ export const sequelize = new Sequelize({
   models: [GameDao, UserDao, LogDao, GameHistoryDao, FeedbackDao],
 });
 
-const connection = sequelize.authenticate();
+let connection: Promise<void>;
 
-connection.catch((err: unknown) => {
-  logError("failed to connect to sql database", err);
-  process.exit();
-});
+export function connectToSequelize() {
+  return (connection = sequelize.authenticate());
+}
 
 export function waitForSequelize() {
+  connectToSequelize().catch((err: unknown) => {
+    logError("failed to connect to sql database", err);
+    process.exit(1);
+  });
   return (req: Request, res: Response, next: NextFunction): void => {
     connection.then(() => next(), next);
   };
