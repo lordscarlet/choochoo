@@ -1,4 +1,3 @@
-import { assert } from "console";
 import z from "zod";
 import { BuildAction, BuildData } from "../../engine/build/build";
 import { ClaimAction, ClaimData } from "../../engine/build/claim";
@@ -9,6 +8,7 @@ import { City } from "../../engine/map/city";
 import { calculateTrackInfo, Land } from "../../engine/map/location";
 import { Exit, TOWN } from "../../engine/map/track";
 import { Coordinates } from "../../utils/coordinates";
+import { assert } from "../../utils/validate";
 
 const CONNECTED_TO_LISBOA = new Key("connectedToLisboa", {
   parse: z.boolean().parse,
