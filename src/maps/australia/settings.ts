@@ -13,7 +13,7 @@ export class AustraliaMapSettings implements MapSettings {
   readonly minPlayers = 4;
   readonly maxPlayers = 6;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly stage = ReleaseStage.ALPHA;
 
   getOverrides() {
     return [AustraliaStarter, AustraliaMoveAction];
