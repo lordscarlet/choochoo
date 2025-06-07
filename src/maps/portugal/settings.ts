@@ -1,6 +1,11 @@
 import { GameKey } from "../../api/game_key";
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
 import { map } from "./grid";
+import {
+  LisboaBuildAction,
+  LisboaBuildPhase,
+  LisboaClaimAction,
+} from "./lisboa";
 
 export class PortugalMapSettings implements MapSettings {
   readonly key = GameKey.PORTUGAL;
@@ -11,6 +16,6 @@ export class PortugalMapSettings implements MapSettings {
   readonly stage = ReleaseStage.DEVELOPMENT;
 
   getOverrides() {
-    return [];
+    return [LisboaBuildAction, LisboaBuildPhase, LisboaClaimAction];
   }
 }
