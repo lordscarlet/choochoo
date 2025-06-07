@@ -123,7 +123,7 @@ export class PlayerHelper {
       for (const track of space.getTrack()) {
         if (track.getOwner() !== color) continue;
         if (track.wasClaimed()) {
-          // Other track should not be claimed, but will be, so offset those track.
+          // Other track should not be counted, but will be, so offset those track.
           numTrack += 2 - this.grid().getRoute(track).length;
         } else {
           numTrack++;

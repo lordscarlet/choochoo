@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Immutable } from "../../utils/immutable";
 import { assertNever } from "../../utils/validate";
-import { PlayerColor } from "./player";
+import { PlayerColorZod } from "./player";
 
 export enum SimpleTileType {
   // Simple
@@ -101,9 +101,7 @@ export const MutableTileData = z.object({
   orientation: z.nativeEnum(Direction),
   // An array that includes undefined values will be coerced into null by JSON.stringify.
   owners: z.array(
-    z
-      .nativeEnum(PlayerColor)
-      .optional()
+    PlayerColorZod.optional()
       .nullable()
       .transform((v) => v ?? undefined),
   ),
