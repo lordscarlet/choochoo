@@ -1,7 +1,5 @@
 
-- Add a bridge from Lisboa to Leiria
 - Only allow one connection to Lisboa per turn
-- Add an extra claimable spot between Lisboa and Acores (I might just want to squeeze in an extra piece of track)
 - Allow multiple users to claim the same track (and all the messed up implications of that)
 - Add river textures
 - Add rules
