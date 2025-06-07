@@ -38,9 +38,11 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
+      - run: apt-get update
+
+      - run: apt-get install -y postgresql-client
       - run: PGPASSWORD=postgres psql -d postgres -U postgres -p "${{ job.services.postgres.ports[5432] }}" -c 'SELECT 1;'
 
-      - run: apt-get update
       - run: apt-get install unzip
 
       - name: Set up Node.js
