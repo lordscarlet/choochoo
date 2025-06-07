@@ -77,6 +77,22 @@ export class StateStore {
     return this.state.has(key) && this.getContainer(key).state != null;
   }
 
+  getOr<T>(key: Key<T>, other: T): Immutable<T> {
+    if (this.isInitialized(key)) {
+      return this.get(key);
+    } else {
+      return freeze(other);
+    }
+  }
+
+  upsert<T>(key: Key<T>, data: T): void {
+    if (this.isInitialized(key)) {
+      this.set(key, data);
+    } else {
+      this.init(key, data);
+    }
+  }
+
   get<T>(key: Key<T>): Immutable<T> {
     assert(
       this.isInitialized(key),
@@ -142,6 +158,8 @@ export class StateStore {
       initState: (state: T) => this.init(key, state),
       set: (state: T) => this.set(key, state),
       isInitialized: () => this.isInitialized(key),
+      getOr: (other: T) => this.getOr(key, other),
+      upsert: (data: T) => this.upsert(key, data),
       listen: (listenFn: () => void): (() => void) =>
         this.listen(key, listenFn),
       update: (updateFn: (t: T) => void) => this.update(key, updateFn),
@@ -219,7 +237,9 @@ export type KeyArray<T extends Tuple> = {
 interface InjectedOps<Data> {
   initState(state: Data): void;
   isInitialized(): boolean;
+  getOr(other: Data): Immutable<Data>;
   set(state: Data): void;
+  upsert(state: Data): void;
   update(updateFn: (state: Data) => void): void;
   listen(listenFn: () => void): () => void;
   delete(): void;

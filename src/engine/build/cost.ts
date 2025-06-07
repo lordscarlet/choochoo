@@ -9,7 +9,7 @@ import { ComplexTileType, Direction, SimpleTileType, TileData, TileType, TownTil
 
 
 export class BuildCostCalculator {
-  private readonly grid = injectGrid();
+  protected readonly grid = injectGrid();
 
   costOf(coordinates: Coordinates, newTileType: TileType, orientation: Direction): number {
     const location = this.grid().get(coordinates);
