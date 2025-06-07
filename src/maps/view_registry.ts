@@ -1,3 +1,4 @@
+import { PortugalViewSettings } from "./portugal/view_settings";
 import { AustraliaViewSettings } from "./australia/view_settings";
 import { DCMetroViewSettings } from "./d_c_metro/view_settings";
 import { GameKey } from "../api/game_key";
@@ -33,6 +34,7 @@ export class ViewRegistry {
   private readonly maps = new Map<GameKey, MapViewSettings>();
 
   private constructor() {
+    this.add(new PortugalViewSettings());
     this.add(new AustraliaViewSettings());
     this.add(new ScotlandViewSettings());
     this.add(new DCMetroViewSettings());
