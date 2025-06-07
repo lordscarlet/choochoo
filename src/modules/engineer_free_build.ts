@@ -39,9 +39,10 @@ function freeBuildMixin(
       previousCost: number,
     ): number {
       if (this.currentPlayer().selectedAction === Action.ENGINEER) {
-        return (
+        return Math.max(
+          0,
           previousCost -
-          this.engineer.getOr({ previousBuildCost: 0 }).previousBuildCost
+            this.engineer.getOr({ previousBuildCost: 0 }).previousBuildCost,
         );
       }
       return 0;
