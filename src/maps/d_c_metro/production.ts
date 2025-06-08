@@ -46,9 +46,7 @@ export const PlaceWhiteCubeData = z.object({
 });
 export type PlaceWhiteCubeData = z.infer<typeof PlaceWhiteCubeData>;
 
-export class PlaceWhiteCubeAction
-  implements ActionProcessor<PlaceWhiteCubeData>
-{
+class PlaceWhiteCubeAction implements ActionProcessor<PlaceWhiteCubeData> {
   static readonly action = "place-white-cube";
   private readonly gridHelper = inject(GridHelper);
   private readonly whiteCubesRemaining = injectState(WHITE_CUBES_REMAINING);

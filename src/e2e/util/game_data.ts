@@ -140,7 +140,7 @@ export async function initializeUsers(): Promise<UserDao[]> {
   return currentUsers;
 }
 
-export function fakeUsers(existingUsers: Set<string>): Promise<UserDao[]> {
+function fakeUsers(existingUsers: Set<string>): Promise<UserDao[]> {
   return UserDao.bulkCreate(
     ["bob", "jenny", "hurley", "nathan", "gustav", "penelope"]
       .filter((username) => !existingUsers.has(username))
@@ -156,13 +156,13 @@ export function fakeUsers(existingUsers: Set<string>): Promise<UserDao[]> {
   );
 }
 
-export async function parseGameData(
+async function parseGameData(
   gameDataFile: string,
 ): Promise<SerializedGameData> {
   return SerializedGameData.parse(await parseFile(gameDataFile));
 }
 
-export async function parseFile(gameDataFile: string): Promise<object> {
+async function parseFile(gameDataFile: string): Promise<object> {
   const contents = await readFile(
     resolve(__dirname, `../goldens/${gameDataFile}.json`),
     "utf-8",

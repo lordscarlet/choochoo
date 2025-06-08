@@ -1,17 +1,17 @@
 import { GameKey } from "../../api/game_key";
 import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
 import { GoodsGrowthPhase } from "../../engine/goods_growth/phase";
+import { Module } from "../../engine/module/module";
 import { CityGroup } from "../../engine/state/city_group";
+import { ClaimRequiresUrbanizeModule } from "../../modules/claim_requires_urbanize";
+import { interCityConnections } from "../factory";
 import {
-  ScotlandConnectCitiesAction,
   ScotlandBuildAction,
+  ScotlandConnectCitiesAction,
   ScotlandMoveValidator,
 } from "./ferries_connections";
-import { ScotlandRoundEngine, ScotlandPhaseEngine } from "./turn_order";
-import { interCityConnections } from "../factory";
 import { map } from "./grid";
-import { Module } from "../../engine/module/module";
-import { ClaimRequiresUrbanizeModule } from "../../modules/claim_requires_urbanize";
+import { ScotlandPhaseEngine, ScotlandRoundEngine } from "./turn_order";
 
 export class ScotlandMapSettings implements MapSettings {
   readonly key = GameKey.SCOTLAND;
@@ -40,7 +40,7 @@ export class ScotlandMapSettings implements MapSettings {
   }
 }
 
-export class ScotlandGoodsGrowthPhase extends GoodsGrowthPhase {
+class ScotlandGoodsGrowthPhase extends GoodsGrowthPhase {
   getRollCount(_: CityGroup): number {
     return 4;
   }

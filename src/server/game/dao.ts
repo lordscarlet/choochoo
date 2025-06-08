@@ -22,7 +22,7 @@ import { VariantConfig } from "../../api/variant_config";
 import { EngineDelegator } from "../../engine/framework/engine";
 import { LimitedGame, toLimitedGame } from "../../engine/game/game_memory";
 import { AutoAction } from "../../engine/state/auto_action";
-import { assertNever } from "../../utils/validate";
+import { assert, assertNever } from "../../utils/validate";
 
 @Table({ modelName: "Game" })
 export class GameDao extends Model<
@@ -86,6 +86,9 @@ export class GameDao extends Model<
   @NotNull
   declare variant: VariantConfig;
 
+  @Attribute(DataTypes.ARRAY(DataTypes.TEXT))
+  declare notes: Array<string | null> | null;
+
   @Attribute({ type: DataTypes.INTEGER, allowNull: true })
   declare activePlayerId: number | null;
 
@@ -131,6 +134,22 @@ export class GameDao extends Model<
     this.autoAction = this.autoAction ?? { users: {} };
     this.autoAction.users[userId] = autoAction;
     this.changed("autoAction", true);
+  }
+
+  getNotesForUser(userId: number): string {
+    const index = this.playerIds.indexOf(userId);
+    if (index === -1) {
+      return "";
+    }
+    return this.notes?.[index] ?? "";
+  }
+
+  setNotesForUser(userId: number, notes: string) {
+    const index = this.playerIds.indexOf(userId);
+    assert(index >= 0, { unauthorized: "only players can set notes" });
+    this.notes ??= [];
+    this.notes[index] = notes;
+    this.changed("notes");
   }
 }
 

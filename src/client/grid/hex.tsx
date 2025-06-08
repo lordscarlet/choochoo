@@ -121,7 +121,7 @@ export function getTerrainHexes(props: TerrainHexProps): TerrainHexes {
   };
 }
 
-export function LowerTerrainHex({
+function LowerTerrainHex({
   space,
   size,
   clickTargets,
@@ -239,7 +239,7 @@ export function LowerTerrainHex({
   }
 }
 
-export function BorderBoundaries({ space, size }: TerrainHexProps) {
+function BorderBoundaries({ space, size }: TerrainHexProps) {
   const gameKey = useGameKey();
   const center = useMemo(
     () => coordinatesToCenter(space.coordinates, size),
@@ -267,7 +267,7 @@ export function BorderBoundaries({ space, size }: TerrainHexProps) {
   );
 }
 
-export function UpperTerrainHex({
+function UpperTerrainHex({
   space,
   size,
   rotation,
@@ -334,7 +334,7 @@ interface TrackHexProps {
   rotation?: Rotation;
 }
 
-export function TrackHex({
+function TrackHex({
   space,
   highlightedTrack,
   size,
@@ -396,7 +396,7 @@ interface GoodsOnHexProps {
   rotation?: Rotation;
 }
 
-export function GoodsOnHex({
+function GoodsOnHex({
   space,
   selectedGood,
   size,

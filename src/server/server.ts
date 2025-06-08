@@ -13,10 +13,12 @@ import { devApp } from "./dev/routes";
 import { feedbackApp } from "./feedback/routes";
 import { autoActionApp } from "./game/auto_action_routes";
 import { gameHistoryApp } from "./game/history_routes";
+import { notesApp } from "./game/notes_routes";
 import { gameApp } from "./game/routes";
 import { messageApp } from "./messages/routes";
 import { redisApp } from "./redis";
 import { waitForSequelize } from "./sequelize";
+import { startIo } from "./socket";
 import { testApp } from "./test/routes";
 import { notificationApp } from "./user/notification_routes";
 import { userApp } from "./user/routes";
@@ -24,7 +26,6 @@ import { enforceRoleMiddleware } from "./util/enforce_role";
 import { cert, clientOrigin, port, stage, Stage } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
 import { xsrfApp } from "./xsrf";
-import { startIo } from "./socket";
 
 export async function runApp(): Promise<() => Promise<void>> {
   const app = express();
@@ -56,6 +57,7 @@ export async function runApp(): Promise<() => Promise<void>> {
   app.use("/api", gameHistoryApp);
   app.use("/api", messageApp);
   app.use("/api", feedbackApp);
+  app.use("/api", notesApp);
   app.use("/api", autoActionApp);
 
   app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {

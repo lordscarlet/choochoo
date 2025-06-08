@@ -10,6 +10,7 @@ import { feedbackContract } from "../../api/feedback";
 import { gameContract } from "../../api/game";
 import { gameHistoryContract } from "../../api/history";
 import { messageContract } from "../../api/message";
+import { notesContract } from "../../api/notes";
 import { notificationsContract } from "../../api/notifications";
 import { userContract } from "../../api/user";
 import { ErrorCode } from "../../utils/error_code";
@@ -27,6 +28,7 @@ const contract = c.router(
     feedback: feedbackContract,
     notifications: notificationsContract,
     autoActions: autoActionContract,
+    notes: notesContract,
   },
   {
     validateResponse: true,

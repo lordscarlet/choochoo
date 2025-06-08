@@ -66,7 +66,7 @@ export const DcMoveIntermediateData = z.object({
 });
 export type DcMoveIntermediateData = z.infer<typeof DcMoveIntermediateData>;
 
-export class DcMoveIntermediateAction
+class DcMoveIntermediateAction
   implements ActionProcessor<DcMoveIntermediateData>
 {
   static readonly action = "dc-move-intermediate";
