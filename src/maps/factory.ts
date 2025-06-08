@@ -134,7 +134,7 @@ export function town(townName: string): LandData {
   };
 }
 
-export interface InterCityConnectionFactoryProps {
+interface InterCityConnectionFactoryProps {
   connects: [string, string];
   cost?: number;
 }

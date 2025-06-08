@@ -61,10 +61,10 @@ export class DcMovePhase extends MovePhase {
   }
 }
 
-export const DcMoveIntermediateData = z.object({
+const DcMoveIntermediateData = z.object({
   goods: GoodZod.array(),
 });
-export type DcMoveIntermediateData = z.infer<typeof DcMoveIntermediateData>;
+type DcMoveIntermediateData = z.infer<typeof DcMoveIntermediateData>;
 
 class DcMoveIntermediateAction
   implements ActionProcessor<DcMoveIntermediateData>

@@ -3,10 +3,10 @@ import z from "zod";
 
 const c = initContract();
 
-export const Notes = z.object({
+const Notes = z.object({
   notes: z.string(),
 });
-export type Notes = z.infer<typeof Notes>;
+type Notes = z.infer<typeof Notes>;
 
 export const notesContract = c.router({
   get: {

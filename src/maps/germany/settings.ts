@@ -40,7 +40,7 @@ export class GermanyMapSettings implements MapSettings {
   }
 }
 
-export class GermanyGoodsGrowth extends GoodsGrowthPhase {
+class GermanyGoodsGrowth extends GoodsGrowthPhase {
   protected readonly helper = inject(GoodsHelper);
 
   onStart(): void {
