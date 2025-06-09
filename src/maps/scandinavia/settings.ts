@@ -12,6 +12,7 @@ import { TurnLengthModule } from "../../modules/turn_length";
 import {
   ScandinaviaMoveAction,
   ScandinaviaMoveHelper,
+  ScandinaviaMovePhase,
   ScandinaviaMoveValidator,
 } from "./ferry";
 import { map } from "./grid";
@@ -30,6 +31,7 @@ export class ScandinaviaMapSettings implements MapSettings {
       ScandinaviaMoveValidator,
       ScandinaviaMoveHelper,
       ScandinaviaMoveAction,
+      ScandinaviaMovePhase,
     ];
   }
 
