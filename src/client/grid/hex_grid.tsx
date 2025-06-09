@@ -332,7 +332,7 @@ export function HexGrid({
               {children}
               {spaceToConfirm && (
                 <ConfirmHex
-                  viewBox={viewBox}
+                  viewBox={internalViewBox}
                   space={spaceToConfirm}
                   size={size}
                   onSpaceConfirm={onSpaceConfirm!}
