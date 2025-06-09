@@ -219,45 +219,55 @@ function onClickCb(
   };
 }
 
-function maybeConfirmDeliveryCb(
+function confirmDeliveryCb(
+  moveAction: EnhancedMoveData | undefined,
   player: PlayerColor | undefined,
-  moveHelper: Memoized<MoveHelper>,
   moveInstance: Memoized<MoveAction>,
   confirm: ConfirmCallback,
   grid: Grid,
   emitMove: (moveData: MoveData) => void,
   maybeInterceptMove: (moveData: MoveData, cityName: string) => boolean,
 ) {
-  return (moveAction: EnhancedMoveData | undefined) => {
+  return () => {
     if (moveAction == null) return;
-    if (moveAction.path.length === 0) return;
-    const endingStop = grid.get(peek(moveAction.path).endingStop);
-    if (
-      endingStop instanceof City &&
-      moveHelper.value.canDeliverTo(endingStop, moveAction.good)
-    ) {
-      if (maybeInterceptMove(moveAction, endingStop.name())) return;
-      const income = moveInstance.value.calculateIncome(moveAction);
-      const counts = [...income]
-        .filter(([a]) => a != null)
-        .map(
-          ([owner, income]) =>
-            `${owner === player ? "you" : playerColorToString(owner)} ${income} income`,
-        );
-      const countsStr = counts.length > 0 ? counts.join(", ") : "zero income";
-      const message = `Deliver to ${endingStop.name()}? This will give ${countsStr}.`;
-      confirm(message, {
-        confirmButton: "Confirm Delivery",
-        cancelButton: "Cancel",
-      }).then((confirmed) => {
-        if (!confirmed) return;
-        emitMove({
-          ...moveAction,
-          path: moveAction.path.map((step) => removeKeys(step, "routeInfo")),
-        });
+    const endingStop = grid.get(peek(moveAction.path).endingStop) as City;
+    if (maybeInterceptMove(moveAction, endingStop.name())) return;
+    const income = moveInstance.value.calculateIncome(moveAction);
+    const counts = [...income]
+      .filter(([a]) => a != null)
+      .map(
+        ([owner, income]) =>
+          `${owner === player ? "you" : playerColorToString(owner)} ${income} income`,
+      );
+    const countsStr = counts.length > 0 ? counts.join(", ") : "zero income";
+    const message = `Deliver to ${endingStop.name()}? This will give ${countsStr}.`;
+    confirm(message, {
+      confirmButton: "Confirm Delivery",
+      cancelButton: "Cancel",
+    }).then((confirmed) => {
+      if (!confirmed) return;
+      emitMove({
+        ...moveAction,
+        path: moveAction.path.map((step) => removeKeys(step, "routeInfo")),
       });
-    }
+    });
   };
+}
+
+function getConfirmDeliveryCity(
+  grid: Grid,
+  moveAction: MoveData | undefined,
+  moveHelper: Memoized<MoveHelper>,
+): City | undefined {
+  if (moveAction == null) return;
+  if (moveAction.path.length === 0) return;
+  const endingStop = grid.get(peek(moveAction.path).endingStop);
+  if (
+    endingStop instanceof City &&
+    moveHelper.value.canDeliverTo(endingStop, moveAction.good)
+  ) {
+    return endingStop;
+  }
 }
 
 export function GameMap() {
@@ -341,14 +351,20 @@ export function GameMap() {
     setMoveActionProgress,
   ]);
 
-  const maybeConfirmDelivery = useTypedCallback(maybeConfirmDeliveryCb, [
+  const confirmDelivery = useTypedCallback(confirmDeliveryCb, [
+    moveActionProgress,
     player?.color,
-    moveHelper,
     moveInstance,
     confirm,
     grid,
     emitMove,
     maybeInterceptMove,
+  ]);
+
+  const confirmDeliveryCity = useTypedMemo(getConfirmDeliveryCity, [
+    grid,
+    moveActionProgress,
+    moveHelper,
   ]);
 
   const maybeConfirmEmitHeavyLifting = useMaybeConfirmEmitHeavyLifting();
@@ -359,7 +375,6 @@ export function GameMap() {
     setMoveActionProgress,
     grid,
     player,
-    maybeConfirmDelivery,
     maybeConfirmEmitHeavyLifting,
   ]);
 
@@ -453,6 +468,8 @@ export function GameMap() {
         clickTargets={clickTargets}
         selectedGood={selectedGood}
         rotation={mapSettings.rotation}
+        spaceToConfirm={confirmDeliveryCity}
+        onSpaceConfirm={confirmDelivery}
         grid={grid}
         gameKey={gameKey}
       />

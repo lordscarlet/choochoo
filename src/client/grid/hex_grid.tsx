@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button, Popup } from "semantic-ui-react";
 import { GameKey } from "../../api/game_key";
 import { Rotation } from "../../engine/game/map_settings";
 import { Grid, Space } from "../../engine/map/grid";
@@ -17,30 +18,32 @@ import {
   interCityConnectionEquals,
   OwnedInterCityConnection,
 } from "../../engine/state/inter_city_connection";
+import { Direction } from "../../engine/state/tile";
 import { ViewRegistry } from "../../maps/view_registry";
 import { Coordinates } from "../../utils/coordinates";
 import { deepEquals } from "../../utils/deep_equals";
 import { DoubleHeight } from "../../utils/double_height";
 import { iterate } from "../../utils/functions";
-import { distanceToSide, Point } from "../../utils/point";
+import {
+  coordinatesToCenter,
+  distanceToSide,
+  movePointInDirection,
+  Point,
+} from "../../utils/point";
 import { Rotate } from "../components/rotation";
 import { SwedenProgressionGraphic } from "../game/sweden/progression_graphic";
 import { useTypedCallback } from "../utils/hooks";
 import { ClickTarget } from "./click_target";
 import { getTerrainHexes } from "./hex";
-import {
-  fabs,
-  floatingFabs,
-  hexGrid,
-  hexGridContainer,
-} from "./hex_grid.module.css";
+import * as styles from "./hex_grid.module.css";
 import { InterCityConnectionRender } from "./inter_city_connection";
-import { Button, Popup } from "semantic-ui-react";
 
 interface HexGridProps {
   id?: string;
   grid: Grid;
   rotation?: Rotation;
+  spaceToConfirm?: Space;
+  onSpaceConfirm?: () => void;
   onClick?: (space: Space, good?: Good) => void;
   onClickInterCity?: (connects: Coordinates[]) => void;
   highlightedSpaces?: Set<Coordinates>;
@@ -94,6 +97,8 @@ export function HexGrid({
   rotation,
   fullMapVersion,
   highlightedSpaces,
+  spaceToConfirm,
+  onSpaceConfirm,
   highlightedTrack,
   highlightedConnections,
   selectedGood,
@@ -235,7 +240,9 @@ export function HexGrid({
   return (
     <>
       {allowZoom && (
-        <div className={`${fabs} ${zoom > 0.4 ? floatingFabs : ""}`}>
+        <div
+          className={`${styles.fabs} ${zoom > 0.4 ? styles.floatingFabs : ""}`}
+        >
           <Popup
             content="Zoom out"
             trigger={
@@ -276,12 +283,12 @@ export function HexGrid({
           />
         </div>
       )}
-      <div className={hexGridContainer}>
+      <div className={styles.hexGridContainer}>
         <svg
           data-hex-grid={id}
           xmlns="http://www.w3.org/2000/svg"
           fill="currentColor"
-          className={`bi bi-google ${hexGrid}`}
+          className={`bi bi-google ${styles.hexGrid}`}
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
           width={viewBox.width * zoom}
           height={viewBox.height * zoom}
@@ -323,6 +330,14 @@ export function HexGrid({
               ))}
               {fullMapVersion && <SwedenProgressionGraphic />}
               {children}
+              {spaceToConfirm && (
+                <ConfirmHex
+                  viewBox={viewBox}
+                  space={spaceToConfirm}
+                  size={size}
+                  onSpaceConfirm={onSpaceConfirm!}
+                />
+              )}
             </Rotate>
           </g>
         </svg>
@@ -434,5 +449,65 @@ function DoubleHeightNumber({
     <text x={x} y={y} dominantBaseline="middle" textAnchor="middle">
       {content}
     </text>
+  );
+}
+
+interface ConfirmHexProps {
+  viewBox: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  space: Space;
+  size: number;
+  onSpaceConfirm(): void;
+}
+
+function ConfirmHex({ viewBox, space, size, onSpaceConfirm }: ConfirmHexProps) {
+  const coordinates = space.coordinates;
+  const radius = size * 0.4;
+  const directions = useMemo(
+    () => [
+      Direction.TOP,
+      Direction.BOTTOM,
+      Direction.TOP_LEFT,
+      Direction.BOTTOM_LEFT,
+      Direction.TOP_RIGHT,
+      Direction.BOTTOM_RIGHT,
+    ],
+    [],
+  );
+  const center = useMemo(() => {
+    const center = coordinatesToCenter(coordinates, size);
+    return directions
+      .map((direction) => movePointInDirection(center, size * 1.3, direction))
+      .find(
+        (newCenter) =>
+          newCenter.x - radius > viewBox.x &&
+          newCenter.x + radius < viewBox.x + viewBox.width &&
+          newCenter.y - radius > viewBox.y &&
+          newCenter.y + radius < viewBox.y + viewBox.height,
+      )!;
+  }, [viewBox, coordinates, size]);
+
+  return (
+    <>
+      <g transform={`translate(${center.x}, ${center.y})`}>
+        <circle fill="black" r={radius} onClick={onSpaceConfirm} />
+        <circle
+          fill="white"
+          r={radius}
+          className={styles.clickable}
+          onClick={onSpaceConfirm}
+        />
+        <g transform="translate(-15,-15) scale(1.6)">
+          <path
+            d="M19.903 2.828 20.075 0 6.641 13.435 3.102 9.09 0 11.616l6.338 7.779L22.903 2.828z"
+            fill="green"
+          />
+        </g>
+      </g>
+    </>
   );
 }

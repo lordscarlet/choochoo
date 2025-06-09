@@ -14,7 +14,6 @@ export function onMoveToSpaceCb(
   setMoveActionProgress: (data: EnhancedMoveData | undefined) => void,
   grid: Grid,
   player: PlayerData | undefined,
-  maybeConfirmDelivery: (data: EnhancedMoveData) => void,
   confirmHeavyLifting: (data: HeavyLiftingData) => Promise<boolean>,
 ) {
   return async (space?: Space) => {
@@ -60,7 +59,6 @@ export function onMoveToSpaceCb(
     }
     if (newData == null) return;
     setMoveActionProgress(newData);
-    maybeConfirmDelivery(newData);
   };
 }
 
