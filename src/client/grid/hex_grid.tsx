@@ -30,6 +30,7 @@ import {
   movePointInDirection,
   Point,
 } from "../../utils/point";
+import { assert } from "../../utils/validate";
 import { Rotate } from "../components/rotation";
 import { SwedenProgressionGraphic } from "../game/sweden/progression_graphic";
 import { useTypedCallback } from "../utils/hooks";
@@ -332,10 +333,11 @@ export function HexGrid({
               {children}
               {spaceToConfirm && (
                 <ConfirmHex
-                  viewBox={internalViewBox}
+                  grid={grid}
                   space={spaceToConfirm}
                   size={size}
                   onSpaceConfirm={onSpaceConfirm!}
+                  rotation={rotation}
                 />
               )}
             </Rotate>
@@ -453,18 +455,20 @@ function DoubleHeightNumber({
 }
 
 interface ConfirmHexProps {
-  viewBox: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
+  grid: Grid;
   space: Space;
   size: number;
+  rotation?: Rotation;
   onSpaceConfirm(): void;
 }
 
-function ConfirmHex({ viewBox, space, size, onSpaceConfirm }: ConfirmHexProps) {
+function ConfirmHex({
+  grid,
+  space,
+  size,
+  rotation,
+  onSpaceConfirm,
+}: ConfirmHexProps) {
   const coordinates = space.coordinates;
   const radius = size * 0.4;
   const directions = useMemo(
@@ -480,33 +484,43 @@ function ConfirmHex({ viewBox, space, size, onSpaceConfirm }: ConfirmHexProps) {
   );
   const center = useMemo(() => {
     const center = coordinatesToCenter(coordinates, size);
-    return directions
-      .map((direction) => movePointInDirection(center, size * 1.3, direction))
-      .find(
-        (newCenter) =>
-          newCenter.x - radius > viewBox.x &&
-          newCenter.x + radius < viewBox.x + viewBox.width &&
-          newCenter.y - radius > viewBox.y &&
-          newCenter.y + radius < viewBox.y + viewBox.height,
-      )!;
-  }, [viewBox, coordinates, size]);
+    const direction = directions.find(
+      (direction) =>
+        grid.get(space.coordinates.neighbor(direction)) != null ||
+        grid.get(space.coordinates.neighbor(direction).neighbor(direction)) !=
+          null ||
+        grid.get(
+          space.coordinates
+            .neighbor(direction)
+            .neighbor(direction)
+            .neighbor(direction),
+        ) != null,
+    );
+    assert(
+      direction != null,
+      "attempted to find direction to place confirm but one not found",
+    );
+    return movePointInDirection(center, size * 1.3, direction);
+  }, [grid, coordinates, size]);
 
   return (
     <>
       <g transform={`translate(${center.x}, ${center.y})`}>
-        <circle fill="black" r={radius} onClick={onSpaceConfirm} />
-        <circle
-          fill="white"
-          r={radius}
-          className={styles.clickable}
-          onClick={onSpaceConfirm}
-        />
-        <g transform="translate(-15,-15) scale(1.6)">
-          <path
-            d="M19.903 2.828 20.075 0 6.641 13.435 3.102 9.09 0 11.616l6.338 7.779L22.903 2.828z"
-            fill="green"
+        <Rotate rotation={rotation} reverse>
+          <circle fill="black" r={radius} onClick={onSpaceConfirm} />
+          <circle
+            fill="white"
+            r={radius}
+            className={styles.clickable}
+            onClick={onSpaceConfirm}
           />
-        </g>
+          <g transform="translate(-15,-15) scale(1.6)">
+            <path
+              d="M19.903 2.828 20.075 0 6.641 13.435 3.102 9.09 0 11.616l6.338 7.779L22.903 2.828z"
+              fill="green"
+            />
+          </g>
+        </Rotate>
       </g>
     </>
   );
