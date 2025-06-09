@@ -1,7 +1,11 @@
+import z from "zod";
+import { injectState } from "../../engine/framework/execution_context";
+import { Key } from "../../engine/framework/key";
 import { City } from "../../engine/map/city";
 import { Space } from "../../engine/map/grid";
 import { MoveHelper } from "../../engine/move/helper";
-import { MoveData, Path } from "../../engine/move/move";
+import { MoveAction, MoveData, Path } from "../../engine/move/move";
+import { MovePhase } from "../../engine/move/phase";
 import {
   MoveValidator,
   RouteInfo,
@@ -12,6 +16,8 @@ import { PlayerData } from "../../engine/state/player";
 import { Coordinates } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 import { ScandinaviaMapData } from "./map_data";
+
+const USED_FERRY = new Key("usedFerry", { parse: z.boolean().parse });
 
 export class ScandinaviaMoveHelper extends MoveHelper {
   isWithinLocomotive(player: PlayerData, moveData: MoveData): boolean {
@@ -30,7 +36,29 @@ function isTeleport(data: Path): boolean {
   return additionalData.teleport ?? false;
 }
 
+export class ScandinaviaMoveAction extends MoveAction {
+  private readonly usedFerry = injectState(USED_FERRY);
+  process(action: MoveData): boolean {
+    this.usedFerry.upsert(
+      this.usedFerry.getOr(false) || action.path.some(isTeleport),
+    );
+    return super.process(action);
+  }
+}
+
+export class ScandinaviaMovePhase extends MovePhase {
+  private readonly usedFerry = injectState(USED_FERRY);
+  onEnd(): void {
+    if (this.usedFerry.isInitialized()) {
+      this.usedFerry.delete();
+    }
+    super.onEnd();
+  }
+}
+
 export class ScandinaviaMoveValidator extends MoveValidator {
+  private readonly usedFerry = injectState(USED_FERRY);
+
   validatePartial(player: PlayerData, action: MoveData): void {
     super.validatePartial(player, action);
 
@@ -38,6 +66,9 @@ export class ScandinaviaMoveValidator extends MoveValidator {
     if (player.selectedAction === Action.FERRY) {
       assert(numTeleports <= 1, {
         invalidInput: "can only use the ferry once in a move",
+      });
+      assert(!this.usedFerry.getOr(false), {
+        invalidInput: "can only use the ferry once per round",
       });
     } else {
       assert(numTeleports <= 0, {
