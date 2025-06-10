@@ -53,7 +53,7 @@ export const map = grid([
     city("Chicago", Good.RED, white(1)),
     ...duplicate(4, PLAIN),
   ],
-  [...duplicate(7, WATER), PLAIN, PLAIN, town("Terre Haute"), PLAIN],
+  [...duplicate(6, WATER), PLAIN, PLAIN, town("Terre Haute"), PLAIN, PLAIN],
   [
     ...duplicate(5, WATER),
     town("Michigan City"),
