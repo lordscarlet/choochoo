@@ -104,6 +104,7 @@ export function useMessages(gameId?: number): UseMessages {
 
   useEffect(() => {
     const listener = (message: MessageApi) => {
+      if (message.gameId !== gameId) return;
       updateLogs((logs) => logs.concat([message]));
     };
     socket.on("newLog", listener);
