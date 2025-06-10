@@ -51,7 +51,7 @@ type RiverPath = {
 export function CreateGamePage() {
   const me = useMe();
   const initialMapValue =
-    (useSearchParams()[0].get("map") as GameKey) ?? GameKey.REVERSTEAM;
+    (useSearchParams()[0].get("map") as GameKey) ?? GameKey.RUST_BELT;
   const maps = useMemo(
     () =>
       [...ViewRegistry.singleton.values()]
