@@ -1,0 +1,3 @@
+The UI has not been built for the production action.
+The UI has not been built for the move goods action.
+I also think that move goods should use move goods interruption logic.
