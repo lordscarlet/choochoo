@@ -334,12 +334,7 @@ interface TrackHexProps {
   rotation?: Rotation;
 }
 
-function TrackHex({
-  space,
-  highlightedTrack,
-  size,
-  rotation,
-}: TrackHexProps) {
+function TrackHex({ space, highlightedTrack, size, rotation }: TrackHexProps) {
   const coordinates = space.coordinates;
   const center = useMemo(
     () => coordinatesToCenter(coordinates, size),
@@ -542,7 +537,7 @@ function EdgeBoundary({ center, size, direction, color }: EdgeBoundaryProps) {
       y2={corner2.y}
       stroke={color ?? "red"}
       strokeLinecap="round"
-      strokeWidth={size / 18}
+      strokeWidth={size / 8}
     />
   );
 }
