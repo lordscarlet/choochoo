@@ -111,9 +111,9 @@ export function getTerrainHexes(props: TerrainHexProps): TerrainHexes {
   return {
     beforeTextures: [
       <LowerTerrainHex key={key + "LowerTerrainHex"} {...props} />,
-      <BorderBoundaries key={key + "BorderBoundaries"} {...props} />,
     ],
     afterTextures: [
+      <BorderBoundaries key={key + "BorderBoundaries"} {...props} />,
       <TrackHex key={key + "TrackHex"} {...props} />,
       <UpperTerrainHex key={key + "UpperTerrainHex"} {...props} />,
       <GoodsOnHex key={key + "GoodsOnHex"} {...props} />,

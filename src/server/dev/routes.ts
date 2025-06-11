@@ -23,8 +23,9 @@ export function devApp() {
   });
 
   devApp.use("/dist", express.static(join(__dirname, "../../../dist")));
+  devApp.use("/static", express.static(join(__dirname, "../../../static")));
 
-  const otherApps = ["/dist", "/js", "/api", "/favicon"];
+  const otherApps = ["/dist", "/js", "/api", "/favicon", "/static"];
 
   devApp.get("/*", (req: Request, res: Response, next: NextFunction) => {
     const otherApp = otherApps.find((other) => req.path.startsWith(other));

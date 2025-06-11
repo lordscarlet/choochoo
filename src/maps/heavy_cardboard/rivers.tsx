@@ -1,6 +1,119 @@
+import { useMemo } from "react";
+import { ClickTarget } from "../../client/grid/click_target";
 import * as styles from "../../client/grid/hex.module.css";
+import * as gridStyles from "../../client/grid/hex_grid.module.css";
+import { useGrid } from "../../client/utils/injection_context";
+import { peek } from "../../utils/functions";
+import {
+  BOTTOM_LEFT,
+  BOTTOM_RIGHT,
+  coordinatesToCenter,
+  LEFT,
+  movePointInRadDirection,
+  Point,
+  polygon,
+  RIGHT,
+  TOP_LEFT,
+  TOP_RIGHT,
+} from "../../utils/point";
+import { TexturesProps } from "../view_settings";
 
-export function HeavyCardboardRivers() {
+export function HeavyCardboardTextures(props: TexturesProps) {
+  return (
+    <>
+      <HeavyCardboardCity {...props} />
+      <HeavyCardboardRivers />
+    </>
+  );
+}
+
+function movePointInRadDirections(
+  point: Point,
+  ...directions: [number, number][]
+) {
+  let reference = point;
+  for (const direction of directions) {
+    reference = movePointInRadDirection(reference, direction[0], direction[1]);
+  }
+  return reference;
+}
+
+function polygonFromDirections(
+  startingPoint: Point,
+  size: number,
+  ...directions: number[]
+): Point[] {
+  const points = [startingPoint];
+  for (const direction of directions) {
+    points.push(movePointInRadDirection(peek(points), size, direction));
+  }
+  return points;
+}
+
+function HeavyCardboardCity({ size, clickTargets }: TexturesProps) {
+  const grid = useGrid();
+  const city = useMemo(() => {
+    return grid.cities().find((city) => city.data.mapSpecific?.center)!;
+  }, [grid]);
+  const points = useMemo(() => {
+    const center = coordinatesToCenter(city.coordinates, size);
+    const leftSide = movePointInRadDirections(
+      center,
+      [size, LEFT],
+      [size, BOTTOM_LEFT],
+      [size, LEFT],
+    );
+    return polygon(
+      polygonFromDirections(
+        leftSide,
+        size,
+        TOP_RIGHT,
+        TOP_LEFT,
+        TOP_RIGHT,
+        RIGHT,
+        TOP_RIGHT,
+        RIGHT,
+        BOTTOM_RIGHT,
+        RIGHT,
+        BOTTOM_RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM_RIGHT,
+        BOTTOM_LEFT,
+        LEFT,
+        BOTTOM_LEFT,
+        LEFT,
+        TOP_LEFT,
+        LEFT,
+      ),
+    );
+  }, [city, size]);
+  return (
+    <>
+      <polygon
+        points={points}
+        fill="white"
+        stroke="black"
+        strokeWidth={size / 100}
+      />
+      <polygon
+        points={points}
+        data-coordinates={city.coordinates.serialize()}
+        className={`${styles.colorless} ${styles.city} ${clickTargets?.has(ClickTarget.CITY) ? gridStyles.clickable : ""}`}
+        stroke="black"
+        strokeWidth={size / 100}
+      />
+      <image
+        href="/static/heavy-cardboard.png"
+        style={{ mixBlendMode: "darken" }}
+        height={250}
+        y="1575"
+        x="720"
+      />
+    </>
+  );
+}
+
+function HeavyCardboardRivers() {
   return (
     <>
       <path

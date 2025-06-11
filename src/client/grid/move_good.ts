@@ -1,3 +1,4 @@
+import { City } from "../../engine/map/city";
 import { Grid, Space } from "../../engine/map/grid";
 import { MoveData, Path } from "../../engine/move/move";
 import { MoveValidator, RouteInfo } from "../../engine/move/validator";
@@ -27,9 +28,13 @@ export function onMoveToSpaceCb(
     );
     if (heavyLifting) return;
 
-    const pathIndex = moveActionProgress.path.findIndex((p) =>
-      p.endingStop.equals(space.coordinates),
-    );
+    const pathIndex = moveActionProgress.path.findIndex((p) => {
+      if (space instanceof City) {
+        return space.isSameCity(grid.get(p.endingStop));
+      } else {
+        return space.coordinates === p.endingStop;
+      }
+    });
     let newData: EnhancedMoveData | undefined;
     if (space.coordinates === moveActionProgress.startingCity) {
       newData = {

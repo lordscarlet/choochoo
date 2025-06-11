@@ -199,7 +199,7 @@ export function HexGrid({
   if (gameKey) {
     const mapSettings = ViewRegistry.singleton.get(gameKey);
     if (mapSettings.getTexturesLayer) {
-      texturesLayer = mapSettings.getTexturesLayer();
+      texturesLayer = mapSettings.getTexturesLayer({ size, clickTargets });
     }
   }
 

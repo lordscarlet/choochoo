@@ -3,7 +3,7 @@ import { Direction } from "../engine/state/tile";
 import { Coordinates } from "./coordinates";
 import { assertNever } from "./validate";
 
-function movePointInRadDirection(
+export function movePointInRadDirection(
   point: Point,
   size: number,
   rad: number,
@@ -35,12 +35,12 @@ export interface Point {
   y: number;
 }
 
-const RIGHT = 0;
-const BOTTOM_RIGHT = Math.PI / 3;
-const BOTTOM_LEFT = (Math.PI * 2) / 3;
-const LEFT = Math.PI;
-const TOP_LEFT = (Math.PI * 4) / 3;
-const TOP_RIGHT = (Math.PI * 5) / 3;
+export const RIGHT = 0;
+export const BOTTOM_RIGHT = Math.PI / 3;
+export const BOTTOM_LEFT = (Math.PI * 2) / 3;
+export const LEFT = Math.PI;
+export const TOP_LEFT = (Math.PI * 4) / 3;
+export const TOP_RIGHT = (Math.PI * 5) / 3;
 
 const allCornerLocations = [
   RIGHT,
