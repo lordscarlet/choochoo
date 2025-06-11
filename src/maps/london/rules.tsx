@@ -96,6 +96,9 @@ export function LondonRules() {
             no effect on gameplay.
           </p>
         </li>
+        <li>
+          <b>Locomotive: </b> is removed for 3 player games.
+        </li>
       </ul>
     </div>
   );
