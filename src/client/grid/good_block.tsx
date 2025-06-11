@@ -57,6 +57,14 @@ export function GoodBlock({
   return (
     <Rotate rotation={rotation} center={center} reverse={true}>
       <rect
+        fill="black"
+        width={goodSize}
+        height={goodSize}
+        x={x}
+        y={y}
+        strokeWidth={0}
+      />
+      <rect
         className={`${clickable ? hexGridStyles.clickable : ""} ${styles.good} ${goodStyle(good)}`}
         filter={`url(#cubeShadow)`}
         data-coordinates={coordinates.serialize()}
