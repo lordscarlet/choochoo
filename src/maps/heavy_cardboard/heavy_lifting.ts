@@ -6,12 +6,7 @@ import { ActionProcessor } from "../../engine/game/action";
 import { Log } from "../../engine/game/log";
 import { PlayerHelper } from "../../engine/game/player";
 import { ROUND } from "../../engine/game/round";
-import {
-  BAG,
-  injectCurrentPlayer,
-  injectGrid,
-  injectPlayerAction,
-} from "../../engine/game/state";
+import { BAG, injectCurrentPlayer, injectGrid } from "../../engine/game/state";
 import { City } from "../../engine/map/city";
 import { getOpposite } from "../../engine/map/direction";
 import { GridHelper } from "../../engine/map/grid_helper";
@@ -80,7 +75,6 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
   private readonly grid = injectGrid();
   private readonly playerHelper = inject(PlayerHelper);
   private readonly currentPlayer = injectCurrentPlayer();
-  private readonly heavyPlayer = injectPlayerAction(Action.HEAVY_LIFTING);
   private readonly round = injectState(ROUND);
   private readonly log = inject(Log);
   private readonly bag = injectState(BAG);
@@ -89,9 +83,8 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
 
   canEmit(): boolean {
     return (
-      this.currentPlayer().color === this.heavyPlayer()?.color &&
-      this.heavyLifting.isInitialized() &&
-      !this.heavyLifting().usedHeavyLifting
+      this.currentPlayer().selectedAction === Action.HEAVY_LIFTING &&
+      !this.heavyLifting.getOr({ usedHeavyLifting: false }).usedHeavyLifting
     );
   }
 
@@ -241,7 +234,7 @@ export class HeavyLiftingAction implements ActionProcessor<HeavyLiftingData> {
       city.goods!.splice(city.goods!.indexOf(data.good), 1);
     });
     this.bag.update((goods) => goods.push(data.good));
-    this.heavyLifting.update((state) => ({ ...state, usedHeavyLifting: true }));
+    this.heavyLifting.update((state) => (state.usedHeavyLifting = true));
     return true;
   }
 }
