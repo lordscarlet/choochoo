@@ -63,7 +63,7 @@ jobs:
         with:
           install-chromedriver: true
           install-dependencies: true
-          chrome-version: latest
+          chrome-version: 139
 
       - run: npm run build
       - run: npm run migrate-testdb-direct
