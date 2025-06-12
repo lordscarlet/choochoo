@@ -17,8 +17,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      # TODO: enable test once it's fixed
-      # - run: npm test
+      - run: npm test
 
   deploy_server:
     needs: validate

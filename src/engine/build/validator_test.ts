@@ -147,6 +147,17 @@ describe('BuildValidator', () => {
   });
 
   it("cannot place regular track on a town-tile", () => {
+    injector.state().set(GRID, new Map<Coordinates, SpaceData>([
+      ...injector.state().get(GRID),
+      [state().plainCoordinates, ({
+        type: SpaceType.PLAIN,
+        tile: {
+          tileType: SimpleTileType.STRAIGHT,
+          orientation: Direction.TOP,
+          owners: [PlayerColor.BLUE],
+        },
+      })],
+    ]));
     const build: BuildInfo = {
       playerColor: PlayerColor.BLUE,
       tileType: SimpleTileType.STRAIGHT,
