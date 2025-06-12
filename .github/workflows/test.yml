@@ -12,7 +12,7 @@ jobs:
   run-tests:
     name: Run tests
     runs-on: ubuntu-latest
-    container: node:20-bookworm-slim
+    # container: node:20-bookworm-slim
 
     permissions:
       contents: read
@@ -38,7 +38,7 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      - run: apt-get update
+      # - run: apt-get update
 
       - run: apt-get install -y postgresql-client
       - run: PGPASSWORD=postgres psql -d postgres -h 0.0.0.0 -U postgres -p "${{ job.services.postgres.ports[5432] }}" -c 'SELECT 1;'
