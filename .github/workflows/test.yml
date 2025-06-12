@@ -40,7 +40,7 @@ jobs:
 
       # - run: apt-get update
 
-      - run: apt-get install -y postgresql-client
+      - run: sudo apt-get install -y postgresql-client
       - run: PGPASSWORD=postgres psql -d postgres -h 0.0.0.0 -U postgres -p "${{ job.services.postgres.ports[5432] }}" -c 'SELECT 1;'
 
       - run: apt-get install unzip
