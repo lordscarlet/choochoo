@@ -73,6 +73,7 @@ function onSelectGoodCb(
         return false;
       }
     }
+    // TODO
     setMoveActionProgress({ path: [], startingCity: space.coordinates, good });
     return true;
   };

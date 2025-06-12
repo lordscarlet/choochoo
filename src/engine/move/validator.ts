@@ -44,7 +44,7 @@ export class MoveValidator {
     const grid = this.grid();
     if (!this.moveHelper.isWithinLocomotive(player, action)) {
       throw new InvalidInputError(
-        `Can only move ${this.moveHelper.getLocomotiveDisplay(player)} steps`,
+        `Your loco only allows ${this.moveHelper.getLocomotiveDisplay(player)} steps`,
       );
     }
 

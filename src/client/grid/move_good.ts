@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { City } from "../../engine/map/city";
 import { Grid, Space } from "../../engine/map/grid";
 import { MoveData, Path } from "../../engine/move/move";
@@ -28,43 +29,52 @@ export function onMoveToSpaceCb(
     );
     if (heavyLifting) return;
 
-    const pathIndex = moveActionProgress.path.findIndex((p) => {
-      if (space instanceof City) {
-        return space.isSameCity(grid.get(p.endingStop));
-      } else {
-        return space.coordinates === p.endingStop;
-      }
-    });
-    let newData: EnhancedMoveData | undefined;
-    if (space.coordinates === moveActionProgress.startingCity) {
-      newData = {
-        ...moveActionProgress,
-        path: [],
-      };
-    } else if (pathIndex === -1) {
-      newData = appendToPath(
-        moveActionProgress,
-        space,
-        moveValidator.value,
-        player,
-      );
-    } else if (pathIndex <= moveActionProgress.path.length - 2) {
-      newData = {
-        ...moveActionProgress,
-        path: moveActionProgress.path.slice(0, pathIndex + 1),
-      };
-    } else {
-      newData = redirectPath(
-        moveActionProgress,
-        space,
-        grid,
-        moveValidator.value,
-        player,
-      );
-    }
+    const newData = getNewMoveData(
+      grid,
+      space,
+      moveActionProgress,
+      moveValidator.value,
+      player,
+    );
     if (newData == null) return;
+    if (typeof newData === "string") {
+      toast.error(newData);
+      return;
+    }
     setMoveActionProgress(newData);
   };
+}
+
+function getNewMoveData(
+  grid: Grid,
+  space: Space,
+  moveActionProgress: EnhancedMoveData,
+  moveValidator: MoveValidator,
+  player: PlayerData,
+): EnhancedMoveData | string | undefined {
+  const pathIndex = moveActionProgress.path.findIndex((p) => {
+    if (space instanceof City) {
+      return space.isSameCity(grid.get(p.endingStop));
+    } else {
+      return space.coordinates === p.endingStop;
+    }
+  });
+
+  if (space.coordinates === moveActionProgress.startingCity) {
+    return {
+      ...moveActionProgress,
+      path: [],
+    };
+  } else if (pathIndex === -1) {
+    return appendToPath(moveActionProgress, space, moveValidator, player);
+  } else if (pathIndex <= moveActionProgress.path.length - 2) {
+    return {
+      ...moveActionProgress,
+      path: moveActionProgress.path.slice(0, pathIndex + 1),
+    };
+  } else {
+    return redirectPath(moveActionProgress, space, grid, moveValidator, player);
+  }
 }
 
 async function handleHeavyLifting(
@@ -82,29 +92,26 @@ async function handleHeavyLifting(
   });
 }
 
-function findValidRoutes(
+function findAllRoutes(
   moveValidator: MoveValidator,
   player: PlayerData,
   from: Coordinates,
   to: Coordinates,
   moveData: EnhancedMoveData,
 ): EnhancedMoveData[] {
-  return moveValidator
-    .findRoutesToLocation(player, from, to)
-    .map((path) => ({
-      ...moveData,
-      path: moveData.path.concat([
-        {
-          owner: path.owner,
-          endingStop: path.destination,
-          routeInfo: path,
-          additionalData: {
-            teleport: path.type === "teleport",
-          },
+  return moveValidator.findRoutesToLocation(player, from, to).map((path) => ({
+    ...moveData,
+    path: moveData.path.concat([
+      {
+        owner: path.owner,
+        endingStop: path.destination,
+        routeInfo: path,
+        additionalData: {
+          teleport: path.type === "teleport",
         },
-      ]),
-    }))
-    .filter((data) => isValidPath(moveValidator, player, data));
+      },
+    ]),
+  }));
 }
 
 /**
@@ -126,12 +133,14 @@ function redirectPath(
       ? moveAction.startingCity
       : moveAction.path[moveAction.path.length - 2].endingStop,
   )!;
-  const newDatas = findValidRoutes(
+  const newDatas = findAllRoutes(
     moveValidator,
     player,
     fromSpace.coordinates,
     space.coordinates,
     { ...moveAction, path: moveAction.path.slice(0, -1) },
+  ).filter(
+    (data) => getPartialErrorReason(moveValidator, player, data) == null,
   );
   const previousRoute = peek(moveAction.path).routeInfo;
   const previousRouteExitIndex = newDatas.findIndex((p) => {
@@ -155,52 +164,52 @@ function appendToPath(
   space: Space,
   moveValidator: MoveValidator,
   player: PlayerData,
-): EnhancedMoveData | undefined {
+): EnhancedMoveData | string {
   const fromCoordinates =
     moveAction.path.length === 0
       ? moveAction.startingCity
       : peek(moveAction.path).endingStop;
-  const paths = moveValidator.findRoutesToLocation(
+  const paths = findAllRoutes(
+    moveValidator,
     player,
     fromCoordinates,
     space.coordinates,
+    moveAction,
   );
-  if (paths.length === 0) return;
 
-  const newDataList = paths
-    .map((path) => ({
-      ...moveAction,
-      path: moveAction.path.concat([
-        {
-          owner: path.owner,
-          endingStop: path.destination,
-          routeInfo: path,
-          additionalData: {
-            teleport: path.type === "teleport",
-          },
-        },
-      ]),
-    }))
-    .filter((data) => isValidPath(moveValidator, player, data));
-  // Prefer the path belonging to the current player.
-  const newData =
-    newDataList.find((data) => peek(data.path).owner === player.color) ??
-    newDataList[0];
+  const combined = paths.map(
+    (data) => getPartialErrorReason(moveValidator, player, data) ?? data,
+  );
 
-  return newData;
+  const validPaths = combined.filter((e) => typeof e !== "string");
+  const errorReasons = combined.filter((e) => typeof e === "string");
+
+  if (validPaths.length > 0) {
+    // Prefer the path belonging to the current player.
+    return (
+      validPaths.find((data) => peek(data.path).owner === player.color) ??
+      paths[0]
+    );
+  }
+
+  if (errorReasons.length > 0) {
+    const errorReasonsDeduped = new Set(errorReasons);
+    if (errorReasonsDeduped.size === 1) return errorReasons[0];
+  }
+  return "No valid route found";
 }
 
-function isValidPath(
+function getPartialErrorReason(
   moveValidator: MoveValidator,
   player: PlayerData,
   moveAction: MoveData,
-): boolean {
+): string | undefined {
   try {
     moveValidator.validatePartial(player, moveAction);
-    return true;
+    return undefined;
   } catch (e) {
     if (e instanceof InvalidInputError) {
-      return false;
+      return e.message;
     }
     throw e;
   }
