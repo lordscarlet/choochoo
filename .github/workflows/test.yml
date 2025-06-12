@@ -12,7 +12,7 @@ jobs:
   run-tests:
     name: Run tests
     runs-on: ubuntu-latest
-    container: node:20-bookworm-slim
+    # container: node:20-bookworm-slim
 
     permissions:
       contents: read
