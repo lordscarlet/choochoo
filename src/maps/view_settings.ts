@@ -3,6 +3,7 @@ import { VariantConfig } from "../api/variant_config";
 import { RowFactory } from "../client/game/final_overview_row";
 import { ClickTarget } from "../client/grid/click_target";
 import { MapSettings } from "../engine/game/map_settings";
+import { Grid } from "../engine/map/grid";
 import { InterceptMoveModalProps } from "../engine/move/interceptor";
 import { Action } from "../engine/state/action";
 
@@ -18,6 +19,7 @@ export interface RulesProps {
 }
 
 export interface TexturesProps {
+  grid: Grid;
   size: number;
   clickTargets?: Set<ClickTarget>;
 }

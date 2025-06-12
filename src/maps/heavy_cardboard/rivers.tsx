@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { ClickTarget } from "../../client/grid/click_target";
 import * as styles from "../../client/grid/hex.module.css";
 import * as gridStyles from "../../client/grid/hex_grid.module.css";
-import { useGrid } from "../../client/utils/injection_context";
 import { peek } from "../../utils/functions";
 import {
   BOTTOM_LEFT,
@@ -50,8 +49,7 @@ function polygonFromDirections(
   return points;
 }
 
-function HeavyCardboardCity({ size, clickTargets }: TexturesProps) {
-  const grid = useGrid();
+function HeavyCardboardCity({ grid, size, clickTargets }: TexturesProps) {
   const city = useMemo(() => {
     return grid.cities().find((city) => city.data.mapSpecific?.center)!;
   }, [grid]);
