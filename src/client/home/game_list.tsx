@@ -53,7 +53,7 @@ export function GameList({
           <GameCard game={game} key={game.id} hideStatus={hideStatus} />
         ))}
       </CardGroup>
-      <div style={{marginTop: "1em"}}>
+      <div style={{ marginTop: "1em" }}>
         {hasPrevPage && (
           <Button secondary onClick={prevPage}>
             <Icon name="angle left" />

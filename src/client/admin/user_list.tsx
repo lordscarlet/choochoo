@@ -2,7 +2,16 @@ import { UserRole } from "../../api/user";
 import { LoginButton } from "../game/login_button";
 import { useResendActivationCode } from "../services/me";
 import { useUserList } from "../services/user";
-import {Button, Icon, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow} from "semantic-ui-react";
+import {
+  Button,
+  Icon,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableHeaderCell,
+  TableRow,
+} from "semantic-ui-react";
 
 export function UserList() {
   const { users, hasNextPage, nextPage, hasPrevPage, prevPage, isLoading } =
@@ -44,7 +53,7 @@ export function UserList() {
           ))}
         </TableBody>
       </Table>
-      <div style={{marginTop: "1em"}}>
+      <div style={{ marginTop: "1em" }}>
         {hasPrevPage && (
           <Button disabled={isLoading} onClick={prevPage}>
             <Icon name="angle left" />
@@ -52,10 +61,10 @@ export function UserList() {
           </Button>
         )}
         {hasNextPage && (
-            <Button disabled={isLoading} onClick={nextPage}>
-              Next
-              <Icon name="angle right" />
-            </Button>
+          <Button disabled={isLoading} onClick={nextPage}>
+            Next
+            <Icon name="angle right" />
+          </Button>
         )}
       </div>
     </div>
