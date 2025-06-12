@@ -26,6 +26,17 @@ export class Validator {
   private readonly helper = inject(BuilderHelper);
   private readonly grid = injectGrid();
 
+  tileMatchesTownType(coordinates: Coordinates, tileType: TileType) {
+    const space = this.grid().get(coordinates) as Land;
+    const thisIsTownTile = isTownTile(tileType);
+    if (space.hasTown() !== thisIsTownTile) {
+      if (thisIsTownTile) {
+        return 'cannot place town track on a non-town tile';
+      }
+      return 'cannot place regular track on a town tile';
+    }
+  }
+
   /** Returns the invalid build reason. The order matters here, because we can show a specific error if every single build option returns that error. */
   getInvalidBuildReason(coordinates: Coordinates, buildData: BuildInfo): InvalidBuildReason | undefined {
     const grid = this.grid();
@@ -51,14 +62,14 @@ export class Validator {
     if (!this.helper.tileAvailableInManifest(buildData.tileType)) {
       return 'tile unavailable';
     }
+    
+
+    const townTileError = this.tileMatchesTownType(space.coordinates, buildData.tileType);
+    if (townTileError != null) {
+      return townTileError;
+    }
 
     const thisIsTownTile = isTownTile(buildData.tileType);
-    if (space.hasTown() !== thisIsTownTile) {
-      if (thisIsTownTile) {
-        return 'cannot place town track on a non-town tile';
-      }
-      return 'cannot place regular track on a town tile';
-    }
 
     if (thisIsTownTile && rerouted.length > 0) {
       return 'cannot reroute track on a town tile';
