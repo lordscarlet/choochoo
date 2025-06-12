@@ -67,7 +67,7 @@ export class BuildAction implements ActionProcessor<BuildData> {
 
     assert(!this.hasBuiltHere(coordinates), { invalidInput: 'cannot build in the same location twice in one turn' });
     const invalidBuildReason = this.validator.getInvalidBuildReason(coordinates, { ...data, playerColor: this.owningPlayer() });
-    assert(invalidBuildReason == null, { invalidInput: 'invalid build: ' + invalidBuildReason });
+    assert(invalidBuildReason == null, { invalidInput: 'Invalid build: ' + invalidBuildReason });
   }
 
   process(data: BuildData): boolean {
