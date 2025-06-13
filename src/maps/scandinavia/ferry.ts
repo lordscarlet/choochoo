@@ -63,18 +63,14 @@ export class ScandinaviaMoveValidator extends MoveValidator {
     super.validatePartial(player, action);
 
     const numTeleports = action.path.filter(isTeleport).length;
-    if (player.selectedAction === Action.FERRY) {
-      assert(numTeleports <= 1, {
-        invalidInput: "can only use the ferry once in a move",
-      });
-      assert(!this.usedFerry.getOr(false), {
-        invalidInput: "can only use the ferry once per round",
-      });
-    } else {
-      assert(numTeleports <= 0, {
-        invalidInput: "cannot use a teleport without the ferry action",
-      });
-    }
+    if (numTeleports === 0) return;
+
+    assert(player.selectedAction === Action.FERRY, {
+      invalidInput: "cannot use a teleport without the ferry action",
+    });
+    assert(numTeleports <= 1, {
+      invalidInput: "can only use the ferry once in a move",
+    });
   }
 
   findRoutesToLocation(
