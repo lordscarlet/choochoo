@@ -17,6 +17,13 @@ export class MontrealMetroUrbanizeAction extends UrbanizeAction {
 export class MontrealMetroBuilderHelper extends BuilderHelper {
   private readonly phase = injectState(PHASE);
 
+  getMaxBuilds(): number {
+    if (this.phase() !== MontrealMetroGovernmentBuildPhase.phase) {
+      return super.getMaxBuilds();
+    }
+    return 3;
+  }
+
   isAtEndOfTurn(): boolean {
     if (this.phase() !== MontrealMetroGovernmentBuildPhase.phase) {
       // Urbanization uses a build.
