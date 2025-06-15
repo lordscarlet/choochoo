@@ -1,3 +1,4 @@
+import { TrislandMapSettings } from "./trisland/settings";
 import { PortugalMapSettings } from "./portugal/settings";
 import { AustraliaMapSettings } from "./australia/settings";
 import { GameKey } from "../api/game_key";
@@ -34,6 +35,7 @@ export class MapRegistry {
   private readonly maps = new Map<GameKey, MapSettings>();
 
   private constructor() {
+    this.add(new TrislandMapSettings());
     this.add(new PortugalMapSettings());
     this.add(new AustraliaMapSettings());
     this.add(new DCMetroMapSettings());
