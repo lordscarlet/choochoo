@@ -56,16 +56,8 @@ function SpecialAction({ action }: { action: Action }) {
   ].join(" ");
 
   const caption = mapSettings.getActionCaption?.(action);
-
-  const captionEl =
-    player != null ? (
-      <>
-        <Username userId={player.playerId} />
-        {caption && ` (${caption})`}
-      </>
-    ) : (
-      <>{caption}</>
-    );
+  const captions =
+    caption == null ? [] : Array.isArray(caption) ? caption : [caption];
 
   return (
     <MaybeTooltip tooltip={disabledReason}>
@@ -78,8 +70,17 @@ function SpecialAction({ action }: { action: Action }) {
           <PlayerCircle
             disabled={disabledReason != null}
             color={player?.color}
-            caption={captionEl}
+            caption={player != null && <Username userId={player.playerId} />}
           />
+        </div>
+        <div>
+          {captions.length > 0 && (
+            <ul className={styles.captionList}>
+              {captions.map((caption, index) => (
+                <li key={index}>({caption})</li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </MaybeTooltip>

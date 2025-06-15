@@ -8,7 +8,7 @@ export class DoneAction extends EmptyActionProcessor {
   static readonly action = 'done';
   protected readonly log = inject(Log);
 
-  private readonly helper = inject(BuilderHelper);
+  protected readonly helper = inject(BuilderHelper);
 
   validate(): void { }
 

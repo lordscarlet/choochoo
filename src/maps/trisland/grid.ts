@@ -13,7 +13,7 @@ import {
 } from "../factory";
 
 export const map = grid<SpaceData>([
-  [...duplicate(4, UNPASSABLE), PLAIN, city("A", BLUE, white(1))],
+  [...duplicate(4, UNPASSABLE), PLAIN, city("A", BLUE, white(1), 4)],
   [...duplicate(3, UNPASSABLE), PLAIN, MOUNTAIN, MOUNTAIN, PLAIN],
   [...duplicate(3, UNPASSABLE), town("B"), PLAIN, MOUNTAIN, PLAIN, town("C")],
   [...duplicate(3, UNPASSABLE), ...duplicate(4, RIVER)],
@@ -33,9 +33,9 @@ export const map = grid<SpaceData>([
     UNPASSABLE,
     PLAIN,
     MOUNTAIN,
-    city("G", YELLOW, white(2)),
+    city("G", YELLOW, white(2), 4),
     { ...MOUNTAIN, terrainCost: 6 },
-    city("H", YELLOW, white(3)),
+    city("H", YELLOW, white(3), 4),
     MOUNTAIN,
     PLAIN,
   ],
@@ -57,7 +57,7 @@ export const map = grid<SpaceData>([
     RIVER,
     town("K"),
     MOUNTAIN,
-    city("L", YELLOW, white(4)),
+    city("L", YELLOW, white(4), 4),
     MOUNTAIN,
     town("M"),
     RIVER,
@@ -78,7 +78,7 @@ export const map = grid<SpaceData>([
     PLAIN,
   ],
   [
-    city("N", BLACK, white(5)),
+    city("N", BLACK, white(5), 4),
     MOUNTAIN,
     PLAIN,
     RIVER,
@@ -88,7 +88,7 @@ export const map = grid<SpaceData>([
     RIVER,
     PLAIN,
     MOUNTAIN,
-    city("P", RED, white(6)),
+    city("P", RED, white(6), 4),
   ],
   [PLAIN, PLAIN, town("Q"), ...duplicate(4, UNPASSABLE), town("R"), PLAIN],
 ]);

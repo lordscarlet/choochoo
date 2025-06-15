@@ -1,0 +1,65 @@
+import z from "zod";
+import { DoneAction } from "../../engine/build/done";
+import { injectState } from "../../engine/framework/execution_context";
+import { Key } from "../../engine/framework/key";
+import { injectCurrentPlayer } from "../../engine/game/state";
+import { SelectAction, SelectData } from "../../engine/select_action/select";
+import { Action, ActionZod } from "../../engine/state/action";
+import { PlayerColorZod } from "../../engine/state/player";
+import { assert } from "../../utils/validate";
+
+export const ActionRemaining = z.object({
+  action: ActionZod,
+  remaining: z.number(),
+});
+
+export const ActionsRemainingForPlayer = z.object({
+  player: PlayerColorZod,
+  actions: ActionRemaining.array(),
+});
+export const ActionsRemaining = ActionsRemainingForPlayer.array();
+export type ActionsRemaining = z.infer<typeof ActionsRemaining>;
+
+export const ACTIONS_REMAINING = new Key("actionsRemaining", {
+  parse: ActionsRemaining.parse,
+});
+
+export class TrislandSelectAction extends SelectAction {
+  private readonly actionsRemaining = injectState(ACTIONS_REMAINING);
+
+  validate(data: SelectData): void {
+    super.validate(data);
+    const numRemaining = this.actionsRemaining()
+      .find(({ player }) => player === this.currentPlayer().color)!
+      .actions.find(({ action }) => action === data.action)!.remaining;
+    assert(numRemaining > 0, {
+      invalidInput: "no more tokens remaining to select this action",
+    });
+  }
+
+  process(data: SelectData): boolean {
+    this.actionsRemaining.update((actions) => {
+      const actionValue = actions
+        .find(({ player }) => player === this.currentPlayer().color)!
+        .actions.find(({ action }) => action === data.action)!;
+      actionValue.remaining--;
+    });
+    return super.process(data);
+  }
+}
+
+export class TrislandBuildDoneAction extends DoneAction {
+  private readonly player = injectCurrentPlayer();
+
+  validate(): void {
+    super.validate();
+    assert(this.player().selectedAction !== Action.ENGINEER, {
+      invalidInput:
+        "Engineer must build until there are no buildable options left",
+    });
+
+    assert(!this.helper.canUrbanize(), {
+      invalidInput: "You cannot pass without urbanizing",
+    });
+  }
+}

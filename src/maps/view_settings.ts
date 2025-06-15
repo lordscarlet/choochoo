@@ -34,7 +34,7 @@ export interface MapViewSettings extends MapSettings {
   getActionDescription?(action: Action): string | undefined;
   getTexturesLayer?(props: TexturesProps): ReactNode;
   getFinalOverviewRows?(): RowFactory[];
-  getActionCaption?(action: Action): string | undefined;
+  getActionCaption?(action: Action): string[] | string | undefined;
   moveGoodsMessage?(): string | undefined;
   moveInterceptModal?(props: InterceptMoveModalProps): ReactNode;
 }
