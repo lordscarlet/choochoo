@@ -3,10 +3,11 @@ import { DoneAction } from "../../engine/build/done";
 import { injectState } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
 import { injectCurrentPlayer } from "../../engine/game/state";
+import { PassAction } from "../../engine/goods_growth/pass";
 import { SelectAction, SelectData } from "../../engine/select_action/select";
 import { Action, ActionZod } from "../../engine/state/action";
 import { PlayerColorZod } from "../../engine/state/player";
-import { assert } from "../../utils/validate";
+import { assert, fail } from "../../utils/validate";
 
 export const ActionRemaining = z.object({
   action: ActionZod,
@@ -60,6 +61,15 @@ export class TrislandBuildDoneAction extends DoneAction {
 
     assert(!this.helper.canUrbanize(), {
       invalidInput: "You cannot pass without urbanizing",
+    });
+  }
+}
+
+export class TrislandProductionPassAction extends PassAction {
+  private readonly player = injectCurrentPlayer();
+  validate(): void {
+    fail({
+      invalidInput: "You must place drawn cubes",
     });
   }
 }
