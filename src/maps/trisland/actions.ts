@@ -4,6 +4,7 @@ import { injectState } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
 import { injectCurrentPlayer } from "../../engine/game/state";
 import { PassAction } from "../../engine/goods_growth/pass";
+import { AllowedActions } from "../../engine/select_action/allowed_actions";
 import { SelectAction, SelectData } from "../../engine/select_action/select";
 import { Action, ActionZod } from "../../engine/state/action";
 import { PlayerColorZod } from "../../engine/state/player";
@@ -25,18 +26,23 @@ export const ACTIONS_REMAINING = new Key("actionsRemaining", {
   parse: ActionsRemaining.parse,
 });
 
-export class TrislandSelectAction extends SelectAction {
+export class TrislandAvailableActions extends AllowedActions {
   private readonly actionsRemaining = injectState(ACTIONS_REMAINING);
+  private readonly currentPlayer = injectCurrentPlayer();
 
-  validate(data: SelectData): void {
-    super.validate(data);
+  getDisabledActionReason(action: Action): string | undefined {
     const numRemaining = this.actionsRemaining()
       .find(({ player }) => player === this.currentPlayer().color)!
-      .actions.find(({ action }) => action === data.action)!.remaining;
-    assert(numRemaining > 0, {
-      invalidInput: "no more tokens remaining to select this action",
-    });
+      .actions.find((d) => d.action === action)!.remaining;
+    if (numRemaining === 0) {
+      return "no more tokens remaining to select this action";
+    }
+    return undefined;
   }
+}
+
+export class TrislandSelectAction extends SelectAction {
+  private readonly actionsRemaining = injectState(ACTIONS_REMAINING);
 
   process(data: SelectData): boolean {
     this.actionsRemaining.update((actions) => {
