@@ -25,12 +25,12 @@ export function MoonRules() {
           <b>Cities</b>: switch to black cities on every other turn.
         </li>
         <li>
-          <b>Low gravitation</b>: lets you use another player&apos;s links as
-          your own. For now, you must use this ability, there is no partial
-          usage.
+          <b>Low gravitation</b>: lets you use one link as if it were your own.
+          You can use this ability for both moves.
         </li>
         <li>
-          <b>Goods Growth</b>: only replenishes non-black cities.
+          <b>Goods Growth</b>: only replenishes non-black cities that have a
+          connection with a player.
         </li>
       </ul>
     </div>
