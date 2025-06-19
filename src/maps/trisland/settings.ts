@@ -4,7 +4,12 @@ import { Module } from "../../engine/module/module";
 import { Action } from "../../engine/state/action";
 import { AvailableActionsModule } from "../../modules/available_actions";
 import { TurnLengthModule } from "../../modules/turn_length";
-import { TrislandBuildDoneAction, TrislandSelectAction } from "./actions";
+import {
+  TrislandAvailableActions,
+  TrislandBuildDoneAction,
+  TrislandProductionPassAction,
+  TrislandSelectAction,
+} from "./actions";
 import { map } from "./grid";
 import { TrislandStarter } from "./starter";
 
@@ -17,7 +22,13 @@ export class TrislandMapSettings implements MapSettings {
   readonly stage = ReleaseStage.DEVELOPMENT;
 
   getOverrides() {
-    return [TrislandStarter, TrislandSelectAction, TrislandBuildDoneAction];
+    return [
+      TrislandStarter,
+      TrislandSelectAction,
+      TrislandBuildDoneAction,
+      TrislandProductionPassAction,
+      TrislandAvailableActions,
+    ];
   }
 
   getModules(): Array<Module> {

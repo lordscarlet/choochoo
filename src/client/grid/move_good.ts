@@ -57,7 +57,7 @@ export function useMoveOnClick(
   return isPending;
 }
 
-export function onSelectGoodCb(
+function onSelectGoodCb(
   moveActionProgress: EnhancedMoveData | undefined,
   setMoveActionProgress: (data: EnhancedMoveData | undefined) => void,
 ) {
@@ -79,7 +79,7 @@ export function onSelectGoodCb(
   };
 }
 
-export function onMoveToSpaceCb(
+function onMoveToSpaceCb(
   moveValidator: Memoized<MoveValidator>,
   moveActionProgress: EnhancedMoveData | undefined,
   setMoveActionProgress: (data: EnhancedMoveData | undefined) => void,

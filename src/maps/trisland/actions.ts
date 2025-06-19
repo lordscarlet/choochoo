@@ -10,17 +10,17 @@ import { Action, ActionZod } from "../../engine/state/action";
 import { PlayerColorZod } from "../../engine/state/player";
 import { assert, fail } from "../../utils/validate";
 
-export const ActionRemaining = z.object({
+const ActionRemaining = z.object({
   action: ActionZod,
   remaining: z.number(),
 });
 
-export const ActionsRemainingForPlayer = z.object({
+const ActionsRemainingForPlayer = z.object({
   player: PlayerColorZod,
   actions: ActionRemaining.array(),
 });
-export const ActionsRemaining = ActionsRemainingForPlayer.array();
-export type ActionsRemaining = z.infer<typeof ActionsRemaining>;
+const ActionsRemaining = ActionsRemainingForPlayer.array();
+type ActionsRemaining = z.infer<typeof ActionsRemaining>;
 
 export const ACTIONS_REMAINING = new Key("actionsRemaining", {
   parse: ActionsRemaining.parse,
@@ -72,7 +72,6 @@ export class TrislandBuildDoneAction extends DoneAction {
 }
 
 export class TrislandProductionPassAction extends PassAction {
-  private readonly player = injectCurrentPlayer();
   validate(): void {
     fail({
       invalidInput: "You must place drawn cubes",
