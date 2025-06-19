@@ -1,4 +1,13 @@
 import { ReactNode, useCallback, useState } from "react";
+import {
+  Button,
+  DropdownProps,
+  Form,
+  FormField,
+  FormGroup,
+  FormSelect,
+  Icon,
+} from "semantic-ui-react";
 import { BuildAction } from "../../engine/build/build";
 import { DoneAction } from "../../engine/build/done";
 import { BuilderHelper } from "../../engine/build/helper";
@@ -16,6 +25,7 @@ import { BidAction } from "../../engine/turn_order/bid";
 import { TurnOrderHelper } from "../../engine/turn_order/helper";
 import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
+import { PlaceWhiteCubeAction } from "../../maps/d_c_metro/production";
 import { ProductionPassAction } from "../../maps/disco/production";
 import { PassAction as DeurbanizationPassAction } from "../../maps/ireland/deurbanization";
 import { RepopulateAction } from "../../maps/montreal_metro/select_action/repopulate";
@@ -38,15 +48,6 @@ import {
   useViewSettings,
 } from "../utils/injection_context";
 import { ManualGoodsGrowth } from "./india-steam-brothers/goods_growth";
-import {
-  Button,
-  Icon,
-  Form,
-  FormSelect,
-  DropdownProps,
-  FormGroup,
-  FormField,
-} from "semantic-ui-react";
 
 const PASS_ACTION = "Pass" as const;
 type PassActionString = typeof PASS_ACTION;
@@ -65,6 +66,7 @@ export function ActionSummary() {
       return (
         <>
           <Repopulate />
+          <PlaceWhiteCubes />
           <SpecialActionSelector />
         </>
       );
@@ -95,6 +97,24 @@ export function ActionSummary() {
     default:
       assertNever(currentPhase);
   }
+}
+
+function PlaceWhiteCubes() {
+  const { canEmit, canEmitUserId } = useAction(PlaceWhiteCubeAction);
+
+  if (canEmitUserId == null) {
+    return <></>;
+  }
+
+  if (!canEmit) {
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must place white cubes.
+      </GenericMessage>
+    );
+  }
+
+  return <div>You must choose cities to place white cubes in.</div>;
 }
 
 function Repopulate() {

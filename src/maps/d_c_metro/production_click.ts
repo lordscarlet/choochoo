@@ -1,17 +1,17 @@
-// export function useProductionClick() {
-//   const { canEmit, emit } = useAction(PlaceWhiteCubeAction);
+import { ClickTarget, OnClickRegister } from "../../client/grid/click_target";
+import { useAction } from "../../client/services/action";
+import { PlaceWhiteCubeAction } from "./production";
 
-//   useClickTargets(
-//     (on) => {
-//       if (canEmit) {
-//         on(ClickTarget.CITY, (city) => {
-//           emit({ coordinates: city.coordinates });
-//         });
-//         on(ClickTarget.TOWN, (town) => {
-//           emit({ coordinates: town.coordinates });
-//         });
-//       }
-//     },
-//     [canEmit, emit],
-//   );
-// }
+export function useProductionClick(on: OnClickRegister) {
+  const { canEmit, emit, isPending } = useAction(PlaceWhiteCubeAction);
+
+  if (canEmit) {
+    on(ClickTarget.CITY, ({ coordinates }) => {
+      emit({ coordinates });
+    });
+    on(ClickTarget.TOWN, ({ coordinates }) => {
+      emit({ coordinates });
+    });
+  }
+  return isPending;
+}
