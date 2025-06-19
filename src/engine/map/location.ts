@@ -3,8 +3,7 @@ import { deepEquals } from "../../utils/deep_equals";
 import { assertNever } from "../../utils/validate";
 import { Good } from "../state/good";
 import { SpaceStyle } from "../state/location_style";
-import { SpaceType } from "../state/location_type";
-import { LandData, LandType } from "../state/space";
+import { isUnpassable, LandData, LandType } from "../state/space";
 import {
   allDirections,
   ComplexTileType,
@@ -75,6 +74,10 @@ export class Land {
     return this.data.type;
   }
 
+  isUnpassable(): boolean {
+    return isUnpassable(this.getLandType());
+  }
+
   getSpaceStyle(): SpaceStyle | undefined {
     return this.data.style;
   }
@@ -97,10 +100,7 @@ export class Land {
       return false;
     }
     if (neighbor instanceof City) return true;
-    if (
-      neighbor.getLandType() !== SpaceType.UNPASSABLE &&
-      neighbor.getLandType() !== SpaceType.WATER
-    ) {
+    if (!neighbor.isUnpassable()) {
       return true;
     }
 

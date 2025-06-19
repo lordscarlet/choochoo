@@ -268,7 +268,7 @@ export function ModifiedSpace({
     [newSpace],
   );
   const clickTargets = useMemo(
-    () => new Set([ClickTarget.TOWN, ClickTarget.LOCATION, ClickTarget.CITY]),
+    () => new Set([ClickTarget.TOWN, ClickTarget.LAND, ClickTarget.CITY]),
     [],
   );
   return (

@@ -63,6 +63,7 @@ export function PartialActionProvider({ children }: { children: ReactNode }) {
 interface ActionHandler<T> {
   data?: Partial<T>;
   setData(data: Partial<T>): void;
+  clearData(): void;
   emit(data: T): void;
   canEmit: boolean;
   isPending: boolean;
@@ -117,6 +118,8 @@ export function useAction<T extends object>(
     },
     [dataHandler],
   );
+
+  const clearData = useCallback(() => dataHandler.clearData(), [dataHandler]);
 
   const emit = useCallback(
     (actionData: T, confirmed = false) => {
@@ -188,6 +191,7 @@ export function useAction<T extends object>(
     canEmit,
     data,
     setData,
+    clearData,
     canEmitUserId,
     getErrorMessage,
     isPending,

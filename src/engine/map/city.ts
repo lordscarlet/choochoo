@@ -19,6 +19,10 @@ export class City {
     this.goodColorArray = Array.isArray(data.color) ? data.color : [data.color];
   }
 
+  isUnpassable(): boolean {
+    return false;
+  }
+
   isUrbanized(): boolean {
     return this.data.urbanized ?? false;
   }

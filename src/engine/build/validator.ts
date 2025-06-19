@@ -8,7 +8,6 @@ import { Grid } from "../map/grid";
 import { calculateTrackInfo, Land, usesTownDisc } from "../map/location";
 import { isTownTile } from "../map/tile";
 import { Exit, TOWN, Track, TrackInfo } from "../map/track";
-import { SpaceType } from "../state/location_type";
 import { PlayerColor } from "../state/player";
 import { Direction, TileType } from "../state/tile";
 import { BuilderHelper } from "./helper";
@@ -44,7 +43,7 @@ export class Validator {
     if (space instanceof City) {
       return 'cannot build on a city';
     }
-    if (space == null || space.getLandType() === SpaceType.UNPASSABLE || space.getLandType() === SpaceType.WATER) {
+    if (space == null || space.isUnpassable()) {
       return 'cannot build on unpassable terrain';
     }
 

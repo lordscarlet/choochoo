@@ -145,12 +145,11 @@ function LowerTerrainHex({
     space instanceof Land &&
     space.hasTown();
   const isClickableBuild =
-    clickTargets.has(ClickTarget.LOCATION) &&
+    clickTargets.has(ClickTarget.LAND) &&
     space instanceof Land &&
-    space.getLandType() !== SpaceType.UNPASSABLE &&
-    space.getLandType() !== SpaceType.WATER;
+    !space.isUnpassable();
   const isClaimableTrack =
-    clickTargets.has(ClickTarget.LOCATION) &&
+    clickTargets.has(ClickTarget.LAND) &&
     space instanceof Land &&
     space.getTrack().some((track) => track.isClaimable());
 

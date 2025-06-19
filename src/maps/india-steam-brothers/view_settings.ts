@@ -1,8 +1,11 @@
+import { ClickTarget, OnClickRegister } from "../../client/grid/click_target";
+import { useAction } from "../../client/services/action";
 import { Action } from "../../engine/state/action";
+import { MapViewSettings } from "../view_settings";
+import { SelectCityAction } from "./production";
+import { IndiaSteamBrothersRivers } from "./rivers";
 import { IndiaSteamBrothersRules } from "./rules";
 import { IndiaSteamBrothersMapSettings } from "./settings";
-import { MapViewSettings } from "../view_settings";
-import { IndiaSteamBrothersRivers } from "./rivers";
 
 export class IndiaSteamBrothersViewSettings
   extends IndiaSteamBrothersMapSettings
@@ -17,4 +20,14 @@ export class IndiaSteamBrothersViewSettings
     }
     return undefined;
   }
+
+  useOnMapClick = useSelectCityOnClick;
+}
+
+function useSelectCityOnClick(on: OnClickRegister) {
+  const { canEmit, emit, isPending } = useAction(SelectCityAction);
+  if (canEmit) {
+    on(ClickTarget.CITY, ({ coordinates }) => emit({ coordinates }));
+  }
+  return isPending;
 }

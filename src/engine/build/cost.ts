@@ -4,7 +4,7 @@ import { injectGrid } from "../game/state";
 import { calculateTrackInfo, countExits, Land, trackEquals } from "../map/location";
 import { crosses, isComplexTile, isSimpleTile, isTownTile } from "../map/tile";
 import { SpaceType } from "../state/location_type";
-import { LandType } from "../state/space";
+import { isUnpassable, LandType } from "../state/space";
 import { ComplexTileType, Direction, SimpleTileType, TileData, TileType, TownTileType } from "../state/tile";
 
 
@@ -69,7 +69,7 @@ export class BuildCostCalculator {
       case SpaceType.FIRE:
         return 0;
       default:
-        assert(type !== SpaceType.UNPASSABLE && type !== SpaceType.WATER);
+        assert(!isUnpassable(type));
         assertNever(type);
     }
   }
@@ -90,7 +90,7 @@ export class BuildCostCalculator {
       case SpaceType.FIRE: return 3;
       case SpaceType.SKY: return 1;
       default:
-        assert(type !== SpaceType.UNPASSABLE && type !== SpaceType.WATER);
+        assert(!isUnpassable(type));
         assertNever(type);
     }
   }

@@ -11,7 +11,7 @@ import { Good } from "../../engine/state/good";
 import { CoordinatesZod } from "../../utils/coordinates";
 import { assert } from "../../utils/validate";
 
-const WHITE_CUBES_REMAINING = new Key("whiteCubesRemaining", {
+export const WHITE_CUBES_REMAINING = new Key("whiteCubesRemaining", {
   parse: z.number().parse,
 });
 
@@ -46,7 +46,9 @@ const PlaceWhiteCubeData = z.object({
 });
 type PlaceWhiteCubeData = z.infer<typeof PlaceWhiteCubeData>;
 
-class PlaceWhiteCubeAction implements ActionProcessor<PlaceWhiteCubeData> {
+export class PlaceWhiteCubeAction
+  implements ActionProcessor<PlaceWhiteCubeData>
+{
   static readonly action = "place-white-cube";
   private readonly gridHelper = inject(GridHelper);
   private readonly whiteCubesRemaining = injectState(WHITE_CUBES_REMAINING);

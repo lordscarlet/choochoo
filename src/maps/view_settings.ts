@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode } from "react";
 import { VariantConfig } from "../api/variant_config";
 import { RowFactory } from "../client/game/final_overview_row";
-import { ClickTarget } from "../client/grid/click_target";
+import { ClickTarget, OnClickFunction } from "../client/grid/click_target";
 import { MapSettings } from "../engine/game/map_settings";
 import { Grid } from "../engine/map/grid";
 import { InterceptMoveModalProps } from "../engine/move/interceptor";
@@ -37,4 +37,5 @@ export interface MapViewSettings extends MapSettings {
   getActionCaption?(action: Action): string[] | string | undefined;
   moveGoodsMessage?(): string | undefined;
   moveInterceptModal?(props: InterceptMoveModalProps): ReactNode;
+  useOnMapClick?: OnClickFunction;
 }

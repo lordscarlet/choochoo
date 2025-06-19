@@ -1,8 +1,11 @@
 import { GameKey } from "../../api/game_key";
 import { IrelandVariantConfig, VariantConfig } from "../../api/variant_config";
+import { ClickTarget, OnClickRegister } from "../../client/grid/click_target";
+import { useAction } from "../../client/services/action";
 import { useGame } from "../../client/services/game";
 import { Action } from "../../engine/state/action";
 import { MapViewSettings } from "../view_settings";
+import { DeurbanizeAction } from "./deurbanization";
 import { IrelandRivers } from "./rivers";
 import { IrelandRules } from "./rules";
 import { IrelandMapSettings } from "./settings";
@@ -37,4 +40,16 @@ export class IrelandViewSettings
     }
     return undefined;
   }
+
+  useOnMapClick = useDeurbanizeOnClick;
+}
+
+function useDeurbanizeOnClick(on: OnClickRegister) {
+  const { canEmit, emit, isPending } = useAction(DeurbanizeAction);
+  if (canEmit) {
+    on(ClickTarget.GOOD, ({ coordinates }, good) =>
+      emit({ coordinates, good }),
+    );
+  }
+  return isPending;
 }

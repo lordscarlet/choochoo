@@ -2,6 +2,8 @@ import z from "zod";
 
 export type Primitive = number | string | boolean;
 
+export type PromiseOr<T> = Promise<T> | T;
+
 export type SomePartial<T, OptionalProps extends keyof T> = Partial<
   Pick<T, OptionalProps>
 > &
