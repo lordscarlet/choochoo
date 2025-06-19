@@ -1,0 +1,20 @@
+.goodsContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.reorderList {
+  list-style: none;
+  padding: 4px;
+}
+
+.reorderItem {
+  display: flex;
+  flex-direction: row;
+}
+
+.goodsBlock {
+  height: 16px;
+  width: 16px;
+  margin-right: 8px;
+}

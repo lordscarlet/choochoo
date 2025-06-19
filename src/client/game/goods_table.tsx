@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { Button, Icon } from "semantic-ui-react";
 import { PHASE } from "../../engine/game/phase";
 import { GameStarter } from "../../engine/game/starter";
 import { AVAILABLE_CITIES } from "../../engine/game/state";
@@ -24,7 +25,6 @@ import {
   usePhaseState,
 } from "../utils/injection_context";
 import * as styles from "./goods_table.module.css";
-import { Button, Icon } from "semantic-ui-react";
 
 function getMaxGoods(
   goodsMap: ImmutableMap<CityGroup, (Good | undefined | null)[][]>,
@@ -232,18 +232,26 @@ function PlaceGood({
 }
 
 interface GoodBlockProps {
-  onClick(): void;
+  onClick?: () => void;
   good?: Good;
   canSelect?: boolean;
   emptySpace?: boolean;
+  className?: string;
 }
 
-function GoodBlock({ onClick, good, canSelect, emptySpace }: GoodBlockProps) {
+export function GoodBlock({
+  onClick,
+  good,
+  canSelect,
+  emptySpace,
+  className,
+}: GoodBlockProps) {
   const classNames = [
     styles.goodPlace,
     !emptySpace ? styles.good : "",
     good != null ? goodStyle(good) : styles.empty,
     canSelect && !emptySpace && good == null ? styles.clickableGood : "",
+    className ?? "",
   ];
   return (
     <div

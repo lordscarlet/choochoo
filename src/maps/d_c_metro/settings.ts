@@ -3,12 +3,8 @@ import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
 import { Module } from "../../engine/module/module";
 import { TurnLengthModule } from "../../modules/turn_length";
 import { map } from "./grid";
-import {
-  DCLocoAction,
-  DCMoveAction,
-  DcMovePhase,
-  DCMoveValidator,
-} from "./move";
+import { DCMoveAction, DCMoveValidator } from "./move";
+import { DcMoveInterceptor } from "./move_interceptor";
 import { DCSelectAction, DCSelectActionPhase } from "./production";
 
 export class DCMetroMapSettings implements MapSettings {
@@ -25,8 +21,7 @@ export class DCMetroMapSettings implements MapSettings {
       DCSelectAction,
       DCMoveValidator,
       DCMoveAction,
-      DcMovePhase,
-      DCLocoAction,
+      DcMoveInterceptor,
     ];
   }
 
