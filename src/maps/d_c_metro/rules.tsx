@@ -21,6 +21,10 @@ export function DCMetroRules() {
         <li>
           <b>Game Length:</b> 9 turns for 3 players, 8 turns for 2 players.
         </li>
+        <li>
+          <b>City names:</b> are AI-generated because I cannot find the names of
+          the cities.
+        </li>
       </ul>
     </div>
   );
