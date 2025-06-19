@@ -13,7 +13,7 @@ export class DCMetroMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly stage = ReleaseStage.ALPHA;
 
   getOverrides() {
     return [
