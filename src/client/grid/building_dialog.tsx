@@ -35,6 +35,7 @@ import { PlaceAction, TO_URBANIZE } from "../../maps/soultrain/earth_to_heaven";
 import { MapViewSettings } from "../../maps/view_settings";
 import { Coordinates } from "../../utils/coordinates";
 import { useAction } from "../services/action";
+import { useIsAdmin } from "../services/me";
 import { useTypedMemo } from "../utils/hooks";
 import {
   Memoized,
@@ -63,6 +64,7 @@ export function BuildingDialog({
   cancelBuild,
 }: BuildingProps) {
   const { emit: emitBuild } = useAction(BuildAction);
+  const isAdmin = useIsAdmin();
   const { emit: emitUrbanize, canEmit: canEmitUrbanize } =
     useAction(UrbanizeAction);
   const action = useInjectedMemo(BuildAction);
@@ -105,10 +107,10 @@ export function BuildingDialog({
     availableCities.length > 0;
   const hasBuildingOptions = canUrbanize || eligible.length > 0;
 
-  const isOpen = coordinates != null && hasBuildingOptions;
+  const isOpen = coordinates != null && (hasBuildingOptions || isAdmin);
 
   useEffect(() => {
-    if (coordinates != null && !hasBuildingOptions) {
+    if (coordinates != null && !isOpen) {
       cancelBuild();
       toast.error(errorReason ?? "No eligible building options");
     }
