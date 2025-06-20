@@ -106,17 +106,21 @@ export class MontrealMetroBuildAction extends BuildAction {
     if (this.buildState().buildCount! === 0) {
       return true;
     }
-    const trackInfo = calculateTrackInfo(data);
-    const oneExitHasConnection = (track: TrackInfo) =>
-      track.exits.some((exit) => {
-        if (exit === TOWN) return false;
-        const connection = this.grid().connection(data.coordinates, exit);
-        return connection instanceof Track;
-      });
-    if (isTownTile(data.tileType)) {
-      return trackInfo.some(oneExitHasConnection);
-    }
-    return trackInfo.every(oneExitHasConnection);
+    const existingTrackInfo = (this.grid().get(data.coordinates) as Land)
+      .getTrack()
+      .map((track) => track.getExits());
+    const trackInfo = calculateTrackInfo(data).filter((info) => {
+      return !existingTrackInfo.some((exits) =>
+        exits.every((exit) => info.exits.includes(exit)),
+      );
+    });
+
+    if (trackInfo.length !== 1) return false;
+    return trackInfo[0].exits.some((exit) => {
+      if (exit === TOWN) return false;
+      const connection = this.grid().connection(data.coordinates, exit);
+      return connection instanceof Track;
+    });
   }
 
   private buildsMultipleEdgesOfTown(data: BuildData): boolean {
