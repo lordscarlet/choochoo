@@ -47,6 +47,12 @@ export function InterCityConnectionRender({
   return (
     <>
       <circle
+        cx={connectionCenter.x}
+        cy={connectionCenter.y}
+        r={size / 3}
+        fill="black"
+      />
+      <circle
         onClick={internalOnClick}
         cx={connectionCenter.x}
         cy={connectionCenter.y}

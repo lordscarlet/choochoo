@@ -114,7 +114,8 @@ export function useOnClick(
   moveActionProgress: EnhancedMoveData | undefined,
   setMoveActionProgress: (d: EnhancedMoveData | undefined) => void,
 ): OnClickResponse {
-  const { emit: emitConnectCity } = useAction(ConnectCitiesAction);
+  const { emit: emitConnectCity, canEmit: canEmitConnectCity } =
+    useAction(ConnectCitiesAction);
   const viewSettings = useViewSettings();
 
   const clickFunctions: OnClickFunction[] = [useClaim, useBuildOnClick];
@@ -139,6 +140,9 @@ export function useOnClick(
   const isPending = isPendingArray.some((v) => v);
 
   const clickTargetsNew = new Set(onClicks.map(([target]) => target));
+  if (canEmitConnectCity) {
+    clickTargetsNew.add(ClickTarget.INTER_CITY_CONNECTION);
+  }
   const clickTargets = useMemo(
     () => clickTargetsNew,
     [[...clickTargetsNew].sort().join(":")],
