@@ -72,7 +72,7 @@ const router = initServer().router(messageContract, {
         /https:\/\/www\.choochoo\.games\/app\/games\/(\d+)/g,
         (_, gameId) => `<@game-${gameId}>`,
       )
-      .replace(/Game #?(\d+)/g, (_, gameId) => `<@game-${gameId}>`);
+      .replace(/Game #?(\d+)/gi, (_, gameId) => `<@game-${gameId}>`);
     const log = await LogDao.create({
       message: refactored,
       gameId,
