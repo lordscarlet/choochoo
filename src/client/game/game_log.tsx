@@ -14,11 +14,11 @@ import * as styles from "./game_log.module.css";
 
 // @ts-expect-error This doesn't inject properly.
 import useStayScrolled from "react-stay-scrolled";
+import { Button, Form, Icon, Input, Popup } from "semantic-ui-react";
 import { GameHistoryApi } from "../../api/history";
 import { MessageApi } from "../../api/message";
 import { Username } from "../components/username";
 import { isGameHistory, useGame } from "../services/game";
-import { Button, Form, Icon, Input, Popup } from "semantic-ui-react";
 
 export function GameLog() {
   const game = useGame();
@@ -82,15 +82,20 @@ export function ChatLog({ gameId }: ChatLogProps) {
   );
 }
 
-const MESSAGE_PARSER = /<@user-(\d+)>/g;
+const USER_MESSAGE_PARSER = /<@(user|game)-(\d+)>/g;
+
+interface Container {
+  type: string;
+  id: number;
+}
 
 function LogMessage({ message }: { message: string }) {
   const messageParsed = useMemo(() => {
-    const parts: Array<string | number> = [];
+    const parts: Array<string | Container> = [];
     let lastIndex = 0;
-    for (const match of message.matchAll(MESSAGE_PARSER)) {
+    for (const match of message.matchAll(USER_MESSAGE_PARSER)) {
       parts.push(message.substring(lastIndex, match.index));
-      parts.push(Number(match[1]));
+      parts.push({ type: match[1], id: Number(match[2]) });
       lastIndex = match.index + match[0].length;
     }
     parts.push(message.substring(lastIndex));
@@ -103,8 +108,10 @@ function LogMessage({ message }: { message: string }) {
         <span key={index}>
           {typeof part === "string" ? (
             part
+          ) : part.type === "game" ? (
+            <a href={`/app/games/${part.id}`}>Game #{part.id}</a>
           ) : (
-            <Username userId={part} useAt={true} useLink={true} />
+            <Username userId={part.id} useAt={true} useLink={true} />
           )}
         </span>
       ))}

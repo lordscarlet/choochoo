@@ -62,11 +62,17 @@ const router = initServer().router(messageContract, {
       )
     ).filter(isNotNull);
 
-    const refactored = toUsers.reduce(
-      (message, user) =>
-        replaceAll(message, `@${user.username}`, `<@user-${user.id}>`),
-      message,
-    );
+    const refactored = toUsers
+      .reduce(
+        (message, user) =>
+          replaceAll(message, `@${user.username}`, `<@user-${user.id}>`),
+        message,
+      )
+      .replace(
+        /https:\/\/www\.choochoo\.games\/app\/games\/(\d+)/g,
+        (_, gameId) => `<@game-${gameId}>`,
+      )
+      .replace(/Game #?(\d+)/g, (_, gameId) => `<@game-${gameId}>`);
     const log = await LogDao.create({
       message: refactored,
       gameId,
