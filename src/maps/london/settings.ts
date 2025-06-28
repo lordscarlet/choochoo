@@ -7,11 +7,11 @@ import { map } from "./grid";
 import { LondonStarter } from "./starter";
 import { LondonAllowedActions } from "./allowed_actions";
 import { LondonPhaseEngine } from "./production";
-import { LondonMoveAction, LondonMovePhase } from "./move_good";
 import { LondonShareHelper } from "./shares";
 import { LondonUrbanizeAction } from "./urbanize";
 import { LondonPlayerHelper } from "./score";
 import { TurnLengthModule } from "../../modules/turn_length";
+import { InstantProductionModule } from "../../modules/instant_production/module";
 import { LondonActionNamingProvider } from "./actions";
 
 export class LondonMapSettings implements MapSettings {
@@ -34,8 +34,6 @@ export class LondonMapSettings implements MapSettings {
       LondonStarter,
       LondonBuilderHelper,
       LondonPhaseEngine,
-      LondonMoveAction,
-      LondonMovePhase,
       LondonShareHelper,
       LondonUrbanizeAction,
       LondonPlayerHelper,
@@ -44,6 +42,6 @@ export class LondonMapSettings implements MapSettings {
   }
 
   getModules() {
-    return [new TurnLengthModule({ add: -1 })];
+    return [new TurnLengthModule({ add: -1 }), new InstantProductionModule()];
   }
 }
