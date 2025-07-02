@@ -1,6 +1,6 @@
 import { GameKey } from "../../api/game_key";
 import {
-  KAOSKODY,
+  GRIMIKU,
   MapSettings,
   ReleaseStage,
 } from "../../engine/game/map_settings";
@@ -22,7 +22,7 @@ export class ScotlandMapSettings implements MapSettings {
   readonly key = GameKey.SCOTLAND;
   readonly name = "Scotland";
   readonly designer = "Kevin Duffy";
-  readonly implementerId = KAOSKODY;
+  readonly implementerId = GRIMIKU;
   readonly minPlayers = 2;
   readonly maxPlayers = 2;
   readonly startingGrid = map;
