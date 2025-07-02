@@ -1,5 +1,9 @@
 import { GameKey } from "../../api/game_key";
-import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import {
+  KAOSKODY,
+  MapSettings,
+  ReleaseStage,
+} from "../../engine/game/map_settings";
 import { interCityConnections } from "../factory";
 import {
   DetroitAllowedActions,
@@ -26,6 +30,8 @@ export class DetroitBankruptcyMapSettings implements MapSettings {
   static readonly key = GameKey.DETROIT;
   readonly key = DetroitBankruptcyMapSettings.key;
   readonly name = "Detroit Bankruptcy";
+  readonly designer = "Chad Deshon";
+  readonly implementerId = KAOSKODY;
   readonly minPlayers = 1;
   readonly maxPlayers = 5;
   readonly startingGrid = map;

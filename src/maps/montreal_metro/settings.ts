@@ -1,5 +1,10 @@
 import { GameKey } from "../../api/game_key";
-import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import {
+  KAOSKODY,
+  MapSettings,
+  ReleaseStage,
+} from "../../engine/game/map_settings";
+import { MontrealActionNamingProvider } from "./actions";
 import {
   MontrealBidAction,
   MontrealSelectActionPhase,
@@ -24,11 +29,12 @@ import { MontrealMetroShareHelper } from "./max_shares";
 import { MontrealMetroRoundEngine } from "./rounds";
 import { MontrealAllowedActions } from "./select_action/allowed_actions";
 import { MontrealSelectAction } from "./select_action/montreal_select_action";
-import { MontrealActionNamingProvider } from "./actions";
 
 export class MontrealMetroMapSettings implements MapSettings {
   readonly key = GameKey.MONTREAL_METRO;
   readonly name = "Montréal Métro";
+  readonly designer = "Michael Webb";
+  readonly implementerId = KAOSKODY;
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
   readonly startingGrid = map;

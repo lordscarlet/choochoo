@@ -1,39 +1,42 @@
 import { GameKey } from "../../api/game_key";
 import {
+  JACK,
   MapSettings,
   ReleaseStage,
   Rotation,
 } from "../../engine/game/map_settings";
+import { Module } from "../../engine/module/module";
+import { Action } from "../../engine/state/action";
+import { Phase } from "../../engine/state/phase";
+import { AvailableActionsModule } from "../../modules/available_actions";
+import { InstantProductionModule } from "../../modules/instant_production/module";
+import { PhasesModule } from "../../modules/phases";
+import { remove } from "../../utils/functions";
 import { interCityConnections } from "../factory";
-import { map } from "./grid";
-import { DenmarkShareHelper, DenmarkTakeSharesAction } from "./shares";
-import { DenmarkIncomeReduction, DenmarkProfitHelper } from "./expenses";
-import { DenmarkMoneyManager } from "./money_manager";
+import { DenmarkActionNamingProvider } from "./actions";
 import { DenmarkSelectAction } from "./allowed_actions";
-import { DenmarkLocoAction } from "./loco";
-import { DenmarkBuildCostCalculator } from "./cost";
 import {
   DenmarkBuildAction,
   DenmarkBuildPhase,
   DenmarkBuildValidator,
   DenmarkConnectCitiesAction,
 } from "./build_validator";
-import { DenmarkMoveValidator } from "./move_validator";
-import { DenmarkStarter } from "./starter";
-import { InstantProductionModule } from "../../modules/instant_production/module";
-import { Module } from "../../engine/module/module";
+import { DenmarkBuildCostCalculator } from "./cost";
+import { DenmarkIncomeReduction, DenmarkProfitHelper } from "./expenses";
+import { map } from "./grid";
+import { DenmarkLocoAction } from "./loco";
 import { DenmarkMoveHelper } from "./locomotive_special_action";
-import { DenmarkActionNamingProvider } from "./actions";
-import { AvailableActionsModule } from "../../modules/available_actions";
-import { Action } from "../../engine/state/action";
-import { PhasesModule } from "../../modules/phases";
-import { remove } from "../../utils/functions";
-import { Phase } from "../../engine/state/phase";
+import { DenmarkMoneyManager } from "./money_manager";
+import { DenmarkMoveValidator } from "./move_validator";
+import { DenmarkShareHelper, DenmarkTakeSharesAction } from "./shares";
+import { DenmarkStarter } from "./starter";
 
 export class DenmarkMapSettings implements MapSettings {
   static readonly key = GameKey.DENMARK;
   readonly key = DenmarkMapSettings.key;
   readonly name = "Denmark";
+  readonly designer = "J. C. Lawrence";
+  readonly implementerId = JACK;
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
   readonly startingGrid = map;

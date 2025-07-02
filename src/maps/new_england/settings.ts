@@ -1,5 +1,6 @@
 import { GameKey } from "../../api/game_key";
 import {
+  KAOSKODY,
   MapSettings,
   ReleaseStage,
   Rotation,
@@ -19,6 +20,8 @@ import { NewEnglandRoundEngine, NewEnglandStarter } from "./turn_order";
 export class NewEnglandMapSettings implements MapSettings {
   readonly key = GameKey.NEW_ENGLAND;
   readonly name = "New England";
+  readonly designer = "John Bohrer";
+  readonly implementerId = KAOSKODY;
   readonly minPlayers = 2;
   readonly maxPlayers = 2;
   readonly startingGrid = map;

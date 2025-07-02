@@ -1,10 +1,15 @@
 import { GameKey } from "../../api/game_key";
 import { inject } from "../../engine/framework/execution_context";
-import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import {
+  JACK,
+  MapSettings,
+  ReleaseStage,
+} from "../../engine/game/map_settings";
 import { GoodsHelper } from "../../engine/goods_growth/helper";
 import { GoodsGrowthPhase } from "../../engine/goods_growth/phase";
 import { goodToString } from "../../engine/state/good";
 import { interCityConnections } from "../factory";
+import { GermanyActionNamingProvider } from "./actions";
 import {
   GermanyBuildAction,
   GermanyBuilderHelper,
@@ -14,12 +19,13 @@ import { GermanyCostCalculator } from "./cost";
 import { map } from "./grid";
 import { GermanyMoveHelper } from "./move";
 import { GermanyStarter } from "./starter";
-import { GermanyActionNamingProvider } from "./actions";
 
 export class GermanyMapSettings implements MapSettings {
   static readonly key = GameKey.GERMANY;
   readonly key = GermanyMapSettings.key;
   readonly name = "Germany";
+  readonly designer = "John Bohrer";
+  readonly implementerId = JACK;
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
   readonly startingGrid = map;

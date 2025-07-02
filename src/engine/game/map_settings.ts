@@ -38,9 +38,15 @@ export enum Rotation {
   COUNTER_CLOCKWISE = 2,
 }
 
+export const KAOSKODY = 1;
+export const JACK = 17;
+export const GRIMIKU = 99;
+
 export interface MapSettings {
   readonly key: GameKey;
   readonly name: string;
+  readonly designer: string;
+  readonly implementerId: number;
   readonly minPlayers: number;
   readonly maxPlayers: number;
   readonly bestAt?: string;

@@ -1,5 +1,9 @@
 import { GameKey } from "../../api/game_key";
-import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import {
+  KAOSKODY,
+  MapSettings,
+  ReleaseStage,
+} from "../../engine/game/map_settings";
 import { interCityConnections } from "../factory";
 import { KoreaWallaceCostCalculator } from "./cost";
 import { map } from "./grid";
@@ -10,7 +14,9 @@ import { KoreaWallaceUrbanizeAction } from "./urbanize";
 export class KoreaWallaceMapSettings implements MapSettings {
   static readonly key = GameKey.KOREA_WALLACE;
   readonly key = KoreaWallaceMapSettings.key;
-  readonly name = "Korea (Wallace)";
+  readonly name = "Korea";
+  readonly designer = "Martin Wallace";
+  readonly implementerId = KAOSKODY;
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
   readonly startingGrid = map;

@@ -1,6 +1,7 @@
 import { GameKey } from "../../api/game_key";
 import { VariantConfig } from "../../api/variant_config";
 import { ViewRegistry } from "../../maps/view_registry";
+import { Username } from "../components/username";
 
 export function MapInfo({
   gameKey,
@@ -26,6 +27,11 @@ export function MapInfo({
             ? ""
             : `-${selectedMap.maxPlayers}`}{" "}
           players
+        </li>
+        <li>Designer: {selectedMap.designer}</li>
+        <li>
+          Implementation by:{" "}
+          <Username useLink userId={selectedMap.implementerId} />
         </li>
       </ul>
       <h3>Rules</h3>

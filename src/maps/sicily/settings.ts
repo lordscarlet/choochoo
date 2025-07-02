@@ -1,5 +1,6 @@
 import { GameKey } from "../../api/game_key";
 import {
+  KAOSKODY,
   MapSettings,
   ReleaseStage,
   Rotation,
@@ -16,6 +17,8 @@ import { map } from "./grid";
 export class SicilyMapSettings implements MapSettings {
   readonly key = GameKey.SICILY;
   readonly name = "Sicily";
+  readonly designer = "John Bohrer";
+  readonly implementerId = KAOSKODY;
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
   readonly startingGrid = map;

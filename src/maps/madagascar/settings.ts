@@ -1,10 +1,12 @@
 import { GameKey } from "../../api/game_key";
 import { SimpleConstructor } from "../../engine/framework/dependency_stack";
 import {
+  KAOSKODY,
   MapSettings,
   ReleaseStage,
   Rotation,
 } from "../../engine/game/map_settings";
+import { MadagascarActionNamingProvider } from "./actions";
 import {
   MadagascarAllowedActions,
   MadagascarGameEnder,
@@ -23,12 +25,13 @@ import {
   MadagascarTurnOrderPass,
   MadagascarTurnOrderPhase,
 } from "./turn_order";
-import { MadagascarActionNamingProvider } from "./actions";
 
 export class MadagascarMapSettings implements MapSettings {
   static readonly key = GameKey.MADAGASCAR;
   readonly key = MadagascarMapSettings.key;
   readonly name = "Madagascar";
+  readonly designer = "Alban Viard";
+  readonly implementerId = KAOSKODY;
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
   readonly startingGrid = map;

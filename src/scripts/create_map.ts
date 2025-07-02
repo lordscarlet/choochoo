@@ -6,6 +6,8 @@ const { values: argsUnparsed } = parseArgs({
   args: process.argv.slice(2),
   options: {
     name: { type: "string", short: "n" },
+    designer: { type: "string", short: "d" },
+    implementer: { type: "string", short: "i" },
     min: { type: "string" },
     max: { type: "string" },
   },
@@ -14,13 +16,21 @@ const { values: argsUnparsed } = parseArgs({
 
 const CAMEL_CASE = /TTTCAMEL_CASE/g;
 const NAME = /TTTNAME/g;
+const DESIGNER = /TTTDESIGNER/g;
+const IMPLEMENTER = /KAOSKODY/g;
 const GAME_KEY_NAME = /GameKey.REVERSTEAM/g;
 const MIN_PLAYERS = /readonly minPlayers = \d;/g;
 const MAX_PLAYERS = /readonly maxPlayers = \d;/g;
 
 createMap(validateArgs(argsUnparsed));
 
-async function createMap({ name, maxPlayers, minPlayers }: ParsedArgs) {
+async function createMap({
+  name,
+  designer,
+  implementer,
+  maxPlayers,
+  minPlayers,
+}: ParsedArgs) {
   const snakeCase = name
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "_")
@@ -56,6 +66,8 @@ async function createMap({ name, maxPlayers, minPlayers }: ParsedArgs) {
     const newContents = contents
       .replace(CAMEL_CASE, upperCamelCase)
       .replace(NAME, name)
+      .replace(DESIGNER, designer)
+      .replace(IMPLEMENTER, implementer)
       .replace(GAME_KEY_NAME, `GameKey.${constantCase}`)
       .replace(MIN_PLAYERS, `readonly minPlayers = ${minPlayers};`)
       .replace(MAX_PLAYERS, `readonly maxPlayers = ${maxPlayers};`);
@@ -109,12 +121,16 @@ async function createMap({ name, maxPlayers, minPlayers }: ParsedArgs) {
 
 interface UnparsedArgs {
   name?: string;
+  designer?: string;
+  implementer?: string;
   min?: string;
   max?: string;
 }
 
 interface ParsedArgs {
   name: string;
+  designer: string;
+  implementer: string;
   minPlayers: number;
   maxPlayers: number;
 }
@@ -123,6 +139,26 @@ function validateArgs(args: UnparsedArgs): ParsedArgs {
   const name = args.name;
   if (name == null || name == "") {
     throw new Error("Empty name. Provide a name using --name or -n.");
+  }
+
+  const designer = args.designer;
+  if (designer == null || designer == "") {
+    throw new Error(
+      "Empty designer. Provide a designer using --designer or -d.",
+    );
+  }
+
+  const implementer = args.implementer?.toUpperCase();
+  const validImpementers = new Set(["KAOSKODY", "JACK", "GRIMIKU"]);
+  if (implementer == null || implementer == "") {
+    throw new Error(
+      "Empty implementer. Provide an implementer using --implementer or -i.",
+    );
+  }
+  if (!validImpementers.has(implementer)) {
+    throw new Error(
+      `Invalid implementer. Valid implementers are: ${Array.from(validImpementers).join(", ")}`,
+    );
   }
 
   const maxPlayers = parseInt(args.max ?? "");
@@ -139,6 +175,8 @@ function validateArgs(args: UnparsedArgs): ParsedArgs {
   }
   return {
     name,
+    designer,
+    implementer,
     minPlayers,
     maxPlayers,
   };

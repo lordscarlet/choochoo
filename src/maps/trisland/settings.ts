@@ -1,5 +1,9 @@
 import { GameKey } from "../../api/game_key";
-import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import {
+  KAOSKODY,
+  MapSettings,
+  ReleaseStage,
+} from "../../engine/game/map_settings";
 import { Module } from "../../engine/module/module";
 import { Action } from "../../engine/state/action";
 import { AvailableActionsModule } from "../../modules/available_actions";
@@ -16,6 +20,8 @@ import { TrislandStarter } from "./starter";
 export class TrislandMapSettings implements MapSettings {
   readonly key = GameKey.TRISLAND;
   readonly name = "Trisland";
+  readonly designer = "Ted Alspach";
+  readonly implementerId = KAOSKODY;
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
   readonly startingGrid = map;
