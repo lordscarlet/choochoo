@@ -8,6 +8,7 @@ import { inject } from "../framework/execution_context";
 import { Memory } from "./memory";
 
 export interface LimitedGame {
+  id: number;
   gameKey: GameKey;
   gameData?: string;
   variant: VariantConfig;
@@ -37,6 +38,7 @@ export function toLimitedGame(
   game: GameApi | InferAttributes<GameDao>,
 ): LimitedGame {
   return {
+    id: game.id,
     gameKey: game.gameKey,
     gameData: game.gameData ?? undefined,
     variant: game.variant,
