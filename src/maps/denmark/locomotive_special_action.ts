@@ -1,13 +1,10 @@
-import { MoveHelper } from "../../engine/move/helper";
 import { injectState } from "../../engine/framework/execution_context";
 import { PHASE } from "../../engine/game/phase";
-import { PlayerData } from "../../engine/state/player";
-import { Phase } from "../../engine/state/phase";
+import { injectInGamePlayers } from "../../engine/game/state";
+import { MoveHelper } from "../../engine/move/helper";
 import { Action } from "../../engine/state/action";
-import {
-  injectCurrentPlayer,
-  injectInGamePlayers,
-} from "../../engine/game/state";
+import { Phase } from "../../engine/state/phase";
+import { PlayerData } from "../../engine/state/player";
 import { getNextAvailableLinkValue } from "./loco";
 
 export class DenmarkMoveHelper extends MoveHelper {
