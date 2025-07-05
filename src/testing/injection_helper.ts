@@ -27,6 +27,7 @@ export class InjectionHelper {
       setInjectionContext(helper.injector());
 
       helper.spyOn(GameMemory, "getGame").and.returnValue({
+        id: 1,
         gameKey: GameKey.REVERSTEAM,
         variant: { gameKey: GameKey.REVERSTEAM, baseRules: true },
       });
