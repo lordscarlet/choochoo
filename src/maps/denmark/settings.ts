@@ -10,6 +10,7 @@ import { Action } from "../../engine/state/action";
 import { Phase } from "../../engine/state/phase";
 import { AvailableActionsModule } from "../../modules/available_actions";
 import { InstantProductionModule } from "../../modules/instant_production/module";
+import { OneClaimLimitModule } from "../../modules/one_claim_limit";
 import { PhasesModule } from "../../modules/phases";
 import { remove } from "../../utils/functions";
 import { interCityConnections } from "../factory";
@@ -103,6 +104,7 @@ export class DenmarkMapSettings implements MapSettings {
 
   getModules(): Array<Module> {
     return [
+      new OneClaimLimitModule(),
       new InstantProductionModule(),
       new AvailableActionsModule({ remove: [Action.PRODUCTION] }),
       new PhasesModule({

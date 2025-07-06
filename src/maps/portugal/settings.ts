@@ -4,7 +4,9 @@ import {
   MapSettings,
   ReleaseStage,
 } from "../../engine/game/map_settings";
+import { Module } from "../../engine/module/module";
 import { BOTTOM, TOP } from "../../engine/state/tile";
+import { OneClaimLimitModule } from "../../modules/one_claim_limit";
 import { interCityConnections } from "../factory";
 import { PortugalGoodsGrowthPhase } from "./goods";
 import { map } from "./grid";
@@ -63,5 +65,9 @@ export class PortugalMapSettings implements MapSettings {
       LisboaConnectAction,
       PortugalGoodsGrowthPhase,
     ];
+  }
+
+  getModules(): Array<Module> {
+    return [new OneClaimLimitModule()];
   }
 }

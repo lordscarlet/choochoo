@@ -50,23 +50,6 @@ export class DenmarkConnectCitiesAction extends ConnectCitiesAction {
       invalidInput: "Can only claim two ferry routes per turn",
     });
 
-    // Validate this player does not already have a ferry link between these two cities
-    const thisConnection = this.grid().getConnection(data.id);
-    assert(thisConnection !== undefined, {
-      invalidInput: "Invalid connection ID",
-    });
-    const existingConnection = this.grid()
-      .connections.filter((connection) => connection.id !== thisConnection.id)
-      .filter((connection) =>
-        arrayEqualsIgnoreOrder(connection.connects, thisConnection.connects),
-      )
-      .find(
-        (connection) => connection.owner?.color === this.currentPlayer().color,
-      );
-    assert(existingConnection === undefined, {
-      invalidInput: "Cannot claim the same ferry link twice",
-    });
-
     return super.validate(data);
   }
 
