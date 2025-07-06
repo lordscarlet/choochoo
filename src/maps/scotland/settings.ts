@@ -8,13 +8,8 @@ import { GoodsGrowthPhase } from "../../engine/goods_growth/phase";
 import { Module } from "../../engine/module/module";
 import { CityGroup } from "../../engine/state/city_group";
 import { ClaimRequiresUrbanizeModule } from "../../modules/claim_requires_urbanize";
-import { interCityConnections } from "../factory";
 import { ScotlandActionNamingProvider } from "./actions";
-import {
-  ScotlandBuildAction,
-  ScotlandConnectCitiesAction,
-  ScotlandMoveValidator,
-} from "./ferries_connections";
+import { ScotlandUrbanizeAction } from "./ayr_link";
 import { map } from "./grid";
 import { ScotlandPhaseEngine, ScotlandRoundEngine } from "./turn_order";
 
@@ -27,19 +22,14 @@ export class ScotlandMapSettings implements MapSettings {
   readonly maxPlayers = 2;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.ALPHA;
-  readonly interCityConnections = interCityConnections(map, [
-    { connects: ["Glasgow", "Ayr"] },
-  ]);
 
   getOverrides() {
     return [
       ScotlandRoundEngine,
       ScotlandGoodsGrowthPhase,
-      ScotlandConnectCitiesAction,
-      ScotlandBuildAction,
-      ScotlandMoveValidator,
       ScotlandPhaseEngine,
       ScotlandActionNamingProvider,
+      ScotlandUrbanizeAction,
     ];
   }
 

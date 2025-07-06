@@ -63,6 +63,14 @@ export class GridHelper {
     });
   }
 
+  addInterCityConnection(
+    connection: InterCityConnection,
+  ): void {
+    this.interCityConnections.update((connections) => {
+      connections.push(connection);
+    });
+  }
+
   lookup(coordinates: Coordinates): Space | undefined {
     return this.spaces().get(coordinates);
   }

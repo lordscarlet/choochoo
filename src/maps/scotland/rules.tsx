@@ -12,9 +12,10 @@ export function ScotlandRules() {
           towns on each side are urbanized.
         </li>
         <li>
-          <b>Ayr-Glasgow connection:</b> can be claimed at the cost of $2 and
-          functions as a link between the cities regardless if Ayr is urbanized
-          or not.
+          <b>Ayr-Glasgow connection:</b> will still exist even after Ayr is
+          urbanized (it&apos;ll turn into an inter-city connection). If no one
+          has build that link before urbanizing, then it will be available for
+          claiming for $2.
         </li>
         <li>
           <b>Bidding and Turn Order Pass:</b> During regular auction the first
