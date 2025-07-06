@@ -1,5 +1,6 @@
-import { SpaceData } from "../../engine/state/space";
 import { BLUE, RED, YELLOW } from "../../engine/state/good";
+import { SpaceType } from "../../engine/state/location_type";
+import { SpaceData } from "../../engine/state/space";
 import { Direction } from "../../engine/state/tile";
 import { duplicate } from "../../utils/functions";
 import {
@@ -7,12 +8,12 @@ import {
   city,
   grid,
   MOUNTAIN,
-  RIVER_MOUNTAIN,
   PLAIN,
-  WATER,
   RIVER,
+  RIVER_MOUNTAIN,
   town,
   UNPASSABLE,
+  WATER,
   white,
 } from "../factory";
 import { startFrom } from "../tile_factory";
@@ -74,7 +75,7 @@ export const map = grid<SpaceData>([
     WATER,
     PLAIN,
     RIVER,
-    town("Inverness"),
+    { ...town("Inverness"), type: SpaceType.RIVER },
     MOUNTAIN,
     RIVER,
     town("Kirkcaldy"),
