@@ -6,6 +6,7 @@ import {
 } from "../../engine/game/map_settings";
 import { BOTTOM, TOP } from "../../engine/state/tile";
 import { interCityConnections } from "../factory";
+import { PortugalGoodsGrowthPhase } from "./goods";
 import { map } from "./grid";
 import {
   LisboaBuildAction,
@@ -56,6 +57,11 @@ export class PortugalMapSettings implements MapSettings {
   ]);
 
   getOverrides() {
-    return [LisboaBuildAction, LisboaBuildPhase, LisboaConnectAction];
+    return [
+      LisboaBuildAction,
+      LisboaBuildPhase,
+      LisboaConnectAction,
+      PortugalGoodsGrowthPhase,
+    ];
   }
 }

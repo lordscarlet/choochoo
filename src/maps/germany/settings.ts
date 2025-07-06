@@ -53,12 +53,12 @@ class GermanyGoodsGrowth extends GoodsGrowthPhase {
 
   onStart(): void {
     super.onStart();
-    const berlin = [...this.grid.findAllCities()].find(
+    const berlin = [...this.gridHelper.findAllCities()].find(
       (city) => city.data.name === "Berlin",
     )!;
     const currentBerlinGoods = berlin.getGoods();
     const newGood = this.helper.drawGood();
-    this.grid.update(berlin.coordinates, (cityData) => {
+    this.gridHelper.update(berlin.coordinates, (cityData) => {
       cityData.goods = [...currentBerlinGoods, newGood];
     });
     this.log.log(`A ${goodToString(newGood)} good is added to Berlin (J9)`);

@@ -4,6 +4,7 @@ import { Coordinates, CoordinatesZod } from "../../utils/coordinates";
 import { deepEquals } from "../../utils/deep_equals";
 import { DoubleHeight } from "../../utils/double_height";
 import { isNotNull } from "../../utils/functions";
+import { assert } from "../../utils/validate";
 import { MapSettings } from "../game/map_settings";
 import { GridData } from "../state/grid";
 import { InterCityConnection } from "../state/inter_city_connection";
@@ -136,6 +137,12 @@ export class Grid {
       this.citiesCache = [...this.values()].filter(isCity);
     }
     return this.citiesCache;
+  }
+
+  getCityByName(name: string): City {
+    const city = this.cities().find((c) => c.name() === name);
+    assert(city != null, `City with name ${name} not found`);
+    return city;
   }
 
   entries(): Iterable<[Coordinates, Space]> {

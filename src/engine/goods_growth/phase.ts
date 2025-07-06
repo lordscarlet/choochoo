@@ -23,7 +23,7 @@ export class GoodsGrowthPhase extends PhaseModule {
   static readonly phase = Phase.GOODS_GROWTH;
 
   protected readonly log = inject(Log);
-  protected readonly grid = inject(GridHelper);
+  protected readonly gridHelper = inject(GridHelper);
   protected readonly playerCount = injectInitialPlayerCount();
   protected readonly productionPlayer = injectPlayerAction(Action.PRODUCTION);
   protected readonly bag = injectState(BAG);
@@ -82,7 +82,7 @@ export class GoodsGrowthPhase extends PhaseModule {
       this.log.log(
         `${cityGroupToString(cityGroup)} rolled ${rolls.join(", ")}`,
       );
-      const cities = this.grid.findAllCities();
+      const cities = this.gridHelper.findAllCities();
       for (const city of cities) {
         for (const [index, { group, onRoll }] of city.onRoll().entries()) {
           if (group !== cityGroup) continue;

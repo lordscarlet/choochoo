@@ -24,12 +24,12 @@ export class HeavyCardboardStarter extends GameStarter {
 export class HeavyCardboardGoodsGrowth extends GoodsGrowthPhase {
   onStart(): void {
     super.onStart();
-    const heavyCardboard = [...this.grid.findAllCities()].find((city) =>
+    const heavyCardboard = [...this.gridHelper.findAllCities()].find((city) =>
       isHeavyCardboardCity(city.data),
     )!;
     if (heavyCardboard.getGoods().length !== 0) return;
 
-    this.grid.update(heavyCardboard.coordinates, (cityData) => {
+    this.gridHelper.update(heavyCardboard.coordinates, (cityData) => {
       const goods = [...allGoods].filter((good) => this.bag().includes(good));
       cityData.goods = goods;
     });
