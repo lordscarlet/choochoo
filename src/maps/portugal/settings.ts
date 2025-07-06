@@ -10,7 +10,7 @@ import { map } from "./grid";
 import {
   LisboaBuildAction,
   LisboaBuildPhase,
-  LisboaClaimAction,
+  LisboaConnectAction,
 } from "./lisboa";
 
 export class PortugalMapSettings implements MapSettings {
@@ -56,6 +56,6 @@ export class PortugalMapSettings implements MapSettings {
   ]);
 
   getOverrides() {
-    return [LisboaBuildAction, LisboaBuildPhase, LisboaClaimAction];
+    return [LisboaBuildAction, LisboaBuildPhase, LisboaConnectAction];
   }
 }

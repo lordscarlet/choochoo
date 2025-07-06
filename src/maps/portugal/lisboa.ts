@@ -1,6 +1,9 @@
 import z from "zod";
 import { BuildAction, BuildData } from "../../engine/build/build";
-import { ClaimAction, ClaimData } from "../../engine/build/claim";
+import {
+  ConnectCitiesAction,
+  ConnectCitiesData,
+} from "../../engine/build/connect_cities";
 import { BuildPhase } from "../../engine/build/phase";
 import { injectState } from "../../engine/framework/execution_context";
 import { Key } from "../../engine/framework/key";
@@ -39,7 +42,7 @@ export class LisboaBuildAction extends BuildAction {
   }
 
   process(data: BuildData): boolean {
-    this.connected.set(this.isNewConnectionToLisboa(data));
+    this.connected.set(this.connected() || this.isNewConnectionToLisboa(data));
     return super.process(data);
   }
 
@@ -63,14 +66,14 @@ export class LisboaBuildAction extends BuildAction {
   private connectsToLisboa(coordinates: Coordinates, exit: Exit) {
     if (exit === TOWN) return false;
     const neighbor = this.grid().get(coordinates.neighbor(exit));
-    return neighbor instanceof City && neighbor.name() === "Lisboa";
+    return isLisboa(neighbor);
   }
 }
 
-export class LisboaClaimAction extends ClaimAction {
+export class LisboaConnectAction extends ConnectCitiesAction {
   private readonly connected = injectState(CONNECTED_TO_LISBOA);
 
-  validate(data: ClaimData): void {
+  validate(data: ConnectCitiesData): void {
     super.validate(data);
     // Only one connection out of Lisboa can be built per turn, per player.
     assert(!this.isConnectedToLisboa(data) || !this.connected(), {
@@ -78,20 +81,19 @@ export class LisboaClaimAction extends ClaimAction {
     });
   }
 
-  process(data: ClaimData): boolean {
-    this.connected.set(this.isConnectedToLisboa(data));
+  process(data: ConnectCitiesData): boolean {
+    this.connected.set(this.connected() || this.isConnectedToLisboa(data));
     return super.process(data);
   }
 
-  private isConnectedToLisboa(data: ClaimData): boolean {
-    const track = (this.grid().get(data.coordinates) as Land).getTrack()[0];
-    return track
-      .getExits()
-      .map((exit) => this.grid().getEnd(track, exit))
-      .map(
-        ([coordinates, exit]) =>
-          exit !== TOWN && this.grid().get(coordinates.neighbor(exit)),
-      )
-      .some((land) => !!land && land.name() === "Lisboa");
+  private isConnectedToLisboa(data: ConnectCitiesData): boolean {
+    const connection = this.getConnection(data);
+    return connection.connects
+      .map((coordinates) => this.grid().get(coordinates))
+      .some(isLisboa);
   }
+}
+
+function isLisboa(space: City | Land | undefined): boolean {
+  return space instanceof City && space.name() === "Lisboa";
 }

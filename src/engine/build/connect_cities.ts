@@ -69,7 +69,7 @@ export class ConnectCitiesAction implements ActionProcessor<ConnectCitiesData> {
     return this.helper.isAtEndOfTurn();
   }
 
-  private getConnection(data: ConnectCitiesData): InterCityConnection {
+  protected getConnection(data: ConnectCitiesData): InterCityConnection {
     const connection = this.grid().getConnection(data.id);
     assert(connection !== undefined, { invalidInput: 'Invalid connection' });
     return connection;
