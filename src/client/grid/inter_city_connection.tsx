@@ -33,15 +33,22 @@ export function InterCityConnectionRender({
   if (connection.connects.length !== 2) return <></>;
 
   const [first, second] = connection.connects;
-  let connectionCenter: Point;
-  if (connection.center !== undefined) {
-    connectionCenter = coordinatesToCenter(connection.center, size);
-  } else {
-    connectionCenter = useMemo(() => {
+  const connectionCenter: Point = useMemo(() => {
+    if (connection.center !== undefined) {
+      if (connection.offset !== undefined) {
+        const offsetDistance = (connection.offset.distance ?? 1) * size;
+        return movePointInDirection(
+          coordinatesToCenter(connection.center, size),
+          offsetDistance,
+          connection.offset.direction,
+        );
+      }
+      return coordinatesToCenter(connection.center, size);
+    } else {
       const center = coordinatesToCenter(first, size);
       return movePointInDirection(center, size, first.getDirection(second));
-    }, [first, second, size]);
-  }
+    }
+  }, [first, second, size, connection.center]);
 
   const clickable = clickTargets.has(ClickTarget.INTER_CITY_CONNECTION)
     ? gridStyles.clickable

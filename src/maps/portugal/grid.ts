@@ -1,15 +1,8 @@
 import { BLUE, PURPLE, RED, YELLOW } from "../../engine/state/good";
 import { SpaceData } from "../../engine/state/space";
-import {
-  BOTTOM_RIGHT,
-  Direction,
-  TOP,
-  TOP_RIGHT,
-} from "../../engine/state/tile";
 import { duplicate } from "../../utils/functions";
 import {
   black,
-  bridge,
   city,
   grid,
   MOUNTAIN,
@@ -20,7 +13,6 @@ import {
   WATER,
   white,
 } from "../factory";
-import { startFrom } from "../tile_factory";
 
 export const map = grid<SpaceData>([
   [
@@ -48,15 +40,10 @@ export const map = grid<SpaceData>([
     RIVER,
     RIVER,
     city("Porto", BLUE, black(2)),
-    bridge({ tile: startFrom(BOTTOM_RIGHT).curveRight() }),
+    WATER,
     ...duplicate(5, WATER),
   ],
-  [
-    UNPASSABLE,
-    ...duplicate(5, PLAIN),
-    bridge({ tile: startFrom(BOTTOM_RIGHT).straightAcross() }),
-    ...duplicate(4, WATER),
-  ],
+  [UNPASSABLE, ...duplicate(5, PLAIN), WATER, ...duplicate(4, WATER)],
   [
     town("Guarda"),
     MOUNTAIN,
@@ -64,7 +51,7 @@ export const map = grid<SpaceData>([
     RIVER,
     RIVER,
     WATER,
-    bridge({ tile: startFrom(BOTTOM_RIGHT).straightAcross() }),
+    WATER,
     ...duplicate(4, WATER),
   ],
   [
@@ -75,7 +62,7 @@ export const map = grid<SpaceData>([
     town("Coimbra"),
     RIVER,
     WATER,
-    bridge({ tile: startFrom(BOTTOM_RIGHT).straightAcross() }),
+    WATER,
     ...duplicate(3, WATER),
   ],
   [
@@ -86,9 +73,7 @@ export const map = grid<SpaceData>([
     MOUNTAIN,
     PLAIN,
     WATER,
-    bridge({
-      tile: { ...startFrom(BOTTOM_RIGHT).straightAcross(), claimableCost: [6] },
-    }),
+    WATER,
     ...duplicate(3, WATER),
   ],
   [
@@ -100,7 +85,7 @@ export const map = grid<SpaceData>([
     PLAIN,
     city("Leiria", YELLOW, white(4)),
     WATER,
-    bridge({ tile: startFrom(TOP_RIGHT).curveRight() }),
+    WATER,
     ...duplicate(2, WATER),
   ],
   [
@@ -111,7 +96,7 @@ export const map = grid<SpaceData>([
     RIVER,
     PLAIN,
     PLAIN,
-    bridge({ tile: startFrom(TOP_RIGHT).straightAcross() }),
+    WATER,
     ...duplicate(3, WATER),
   ],
   [
@@ -122,11 +107,9 @@ export const map = grid<SpaceData>([
     town("Almeirim"),
     RIVER,
     PLAIN,
-    bridge({ tile: startFrom(TOP_RIGHT).straightAcross() }),
-    bridge({
-      tile: { ...startFrom(TOP_RIGHT).curveLeft(), claimableCost: [6] },
-    }),
-    bridge({ tile: { ...startFrom(TOP).curveLeft(), claimableCost: [6] } }),
+    WATER,
+    WATER,
+    WATER,
     WATER,
   ],
   [
@@ -137,19 +120,9 @@ export const map = grid<SpaceData>([
     PLAIN,
     WATER,
     city("Lisboa", RED, white(3)),
-    bridge({
-      tile: {
-        ...startFrom(Direction.TOP).curveRight(),
-        claimableCost: [6],
-      },
-    }),
     WATER,
-    bridge({
-      tile: {
-        ...startFrom(Direction.BOTTOM).curveLeft(),
-        claimableCost: [6],
-      },
-    }),
+    WATER,
+    WATER,
     city("Açores", BLUE, [], 3),
   ],
   [
@@ -160,7 +133,7 @@ export const map = grid<SpaceData>([
     PLAIN,
     town("Setúbal"),
     RIVER,
-    bridge({ tile: startFrom(Direction.TOP_LEFT).curveLeft() }),
+    WATER,
     ...duplicate(3, WATER),
   ],
   [
@@ -170,12 +143,7 @@ export const map = grid<SpaceData>([
     PLAIN,
     RIVER,
     WATER,
-    bridge({
-      tile: {
-        ...startFrom(Direction.BOTTOM_LEFT).straightAcross(),
-        claimableCost: [6],
-      },
-    }),
+    WATER,
     ...duplicate(4, WATER),
   ],
   [
@@ -186,7 +154,7 @@ export const map = grid<SpaceData>([
     RIVER,
     town("Sines"),
 
-    bridge({ tile: startFrom(Direction.BOTTOM_LEFT).curveLeft() }),
+    WATER,
     ...duplicate(4, WATER),
   ],
   [UNPASSABLE, UNPASSABLE, RIVER, PLAIN, PLAIN, PLAIN, ...duplicate(5, WATER)],
@@ -206,30 +174,7 @@ export const map = grid<SpaceData>([
     city("Faro", YELLOW, white(1)),
     PLAIN,
     town("Sagres"),
-    bridge({
-      tile: {
-        ...startFrom(Direction.TOP).straightAcross(),
-        claimableCost: [6],
-      },
-    }),
-    bridge({
-      tile: {
-        ...startFrom(Direction.TOP).straightAcross(),
-        claimableCost: [6],
-      },
-    }),
-    bridge({
-      tile: {
-        ...startFrom(Direction.TOP).straightAcross(),
-        claimableCost: [6],
-      },
-    }),
-    bridge({
-      tile: {
-        ...startFrom(Direction.TOP).straightAcross(),
-        claimableCost: [6],
-      },
-    }),
+    ...duplicate(4, WATER),
     city("Madeira", PURPLE, [], 3),
   ],
 ]);

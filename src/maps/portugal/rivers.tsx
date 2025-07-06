@@ -35,6 +35,16 @@ export function PortugalRivers() {
         className={styles.riverPath}
         d="m 1746.5,1333.5 C 1630.447538,1354.9117 1528.651753,1376.3171 1422.977999,1367.6093"
       />
+      <path className={styles.seaRoute} d="m 1155,1938.5 l 0,380" />
+      <path className={styles.seaRoute} d="m 1785,1818.5 l 0,500" />
+      <path
+        className={styles.seaRoute}
+        d="m 1102.5,1913.5 C 751.447537,2114.9117 311.6517,1793.3171 312.977,1701.6093"
+      />
+      <path
+        className={styles.seaRoute}
+        d="m 1209.5,1908.5 C 1275.447538,1942.9117 1470.651753,1854.3171 1471.977999,1758.6093"
+      />
     </>
   );
 }

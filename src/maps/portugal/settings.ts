@@ -4,6 +4,8 @@ import {
   MapSettings,
   ReleaseStage,
 } from "../../engine/game/map_settings";
+import { BOTTOM, TOP } from "../../engine/state/tile";
+import { interCityConnections } from "../factory";
 import { map } from "./grid";
 import {
   LisboaBuildAction,
@@ -20,6 +22,38 @@ export class PortugalMapSettings implements MapSettings {
   readonly maxPlayers = 6;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly interCityConnections = interCityConnections(map, [
+    {
+      connects: ["Lisboa", "Açores"],
+      cost: 6,
+      center: [11, 11],
+      offset: { direction: BOTTOM, distance: 0.2 },
+    },
+    {
+      connects: ["Lisboa", "Açores"],
+      cost: 6,
+      center: [11, 12],
+      offset: { direction: TOP, distance: 0.6 },
+    },
+    {
+      connects: ["Lisboa", "Açores"],
+      cost: 6,
+      center: [11, 12],
+      offset: { direction: BOTTOM, distance: 0.6 },
+    },
+    {
+      connects: ["Lisboa", "Açores"],
+      cost: 6,
+      center: [11, 13],
+      offset: { direction: TOP, distance: 0.2 },
+    },
+    { connects: ["Sagres", "Madeira"], cost: 6, center: [17, 7] },
+    { connects: ["Sagres", "Madeira"], cost: 6, center: [17, 8] },
+    { connects: ["Sagres", "Madeira"], cost: 6, center: [17, 9] },
+    { connects: ["Sagres", "Madeira"], cost: 6, center: [17, 10] },
+    { connects: ["Lisboa", "Porto"], cost: 6, center: [6, 13] },
+    { connects: ["Lisboa", "Sines"], cost: 6, center: [13, 9] },
+  ]);
 
   getOverrides() {
     return [LisboaBuildAction, LisboaBuildPhase, LisboaClaimAction];

@@ -2,7 +2,10 @@ import { Map as ImmutableMap } from "immutable";
 import { BLACK, WHITE } from "../engine/state/city_group";
 import { Good } from "../engine/state/good";
 import { GridData } from "../engine/state/grid";
-import { InterCityConnection } from "../engine/state/inter_city_connection";
+import {
+  InterCityConnection,
+  Offset,
+} from "../engine/state/inter_city_connection";
 import { SpaceType } from "../engine/state/location_type";
 import { OnRoll, OnRollData } from "../engine/state/roll";
 import { CityData, LandData } from "../engine/state/space";
@@ -138,6 +141,7 @@ interface InterCityConnectionFactoryProps {
   connects: [string, string];
   cost?: number;
   center?: [number, number];
+  offset?: Offset;
 }
 
 export function interCityConnections(
@@ -155,6 +159,7 @@ export function interCityConnections(
       id: "" + (idx + 1),
       connects: [cities.get(spec.connects[0])!, cities.get(spec.connects[1])!],
       cost: spec.cost ?? 2,
+      offset: spec.offset,
       center: spec.center
         ? Coordinates.from({ q: spec.center[0], r: spec.center[1] })
         : undefined,
