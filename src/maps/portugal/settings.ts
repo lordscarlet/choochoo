@@ -24,7 +24,7 @@ export class PortugalMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly stage = ReleaseStage.ALPHA;
   readonly interCityConnections = interCityConnections(map, [
     {
       connects: ["Lisboa", "Açores"],
