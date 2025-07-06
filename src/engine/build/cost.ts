@@ -18,7 +18,7 @@ export class BuildCostCalculator {
     const isFirstTile = previousTileData == null;
     if (isFirstTile) {
       if (isTownTile(newTileType)) {
-        return this.getTownTileCost(newTileType);
+        return this.getTownTileCost(newTileType) + this.getCostOfLandTypeForTown(location.getLandType());
       }
       return this.getTerrainCost(location) + this.getTileCost(newTileType);
     } else if (location.hasTown()) {
@@ -97,7 +97,6 @@ export class BuildCostCalculator {
 
   protected getTownTileCost(tileType: TownTileType): number {
     return countExits(tileType) + 1;
-
   }
 
   protected getTileCost(tileType: SimpleTileType | ComplexTileType): number {
