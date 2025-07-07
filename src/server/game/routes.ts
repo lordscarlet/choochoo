@@ -467,6 +467,7 @@ const router = initServer().router(gameContract, {
     if (noneRemaining || onlyLeadPlayerRemaining) {
       game.status = GameStatus.enum.ENDED;
       game.activePlayerId = null;
+      game.undoPlayerId = null;
     }
     await game.save();
     return { status: 200, body: { game: game.toApi() } };

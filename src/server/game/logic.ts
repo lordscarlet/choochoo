@@ -198,6 +198,7 @@ export async function abandonGame(
   });
   game.status = GameStatus.enum.ABANDONED;
   game.activePlayerId = null;
+  game.undoPlayerId = null;
   const user = await UserDao.findByPk(userId);
   assert(user != null);
   user.abandons++;
