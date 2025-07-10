@@ -1,7 +1,11 @@
 import { inject, injectState } from "../../engine/framework/execution_context";
 import { SetKey } from "../../engine/framework/key";
 import { Log } from "../../engine/game/log";
-import { CURRENT_PLAYER, injectCurrentPlayer } from "../../engine/game/state";
+import {
+  CURRENT_PLAYER,
+  injectCurrentPlayer,
+  injectInGamePlayers,
+} from "../../engine/game/state";
 import { SelectActionPhase } from "../../engine/select_action/phase";
 import {
   PlayerColor,
@@ -39,6 +43,7 @@ export class MontrealBidAction extends BidAction {
 export class MontrealSelectActionPhase extends SelectActionPhase {
   private readonly hasBid = injectState(HAS_BID);
   protected readonly currentPlayer = injectCurrentPlayer();
+  private readonly inGamePlayers = injectInGamePlayers();
   private readonly log = inject(Log);
 
   configureActions(): void {
@@ -48,7 +53,9 @@ export class MontrealSelectActionPhase extends SelectActionPhase {
 
   private getSkippedPlayers(): PlayerData[] {
     const hasBid = this.hasBid();
-    const nonBidders = this.players().filter(
+    // Per https://boardgamegeek.com/thread/3538513/how-to-handle-player-elimination
+    // You only count in game players.
+    const nonBidders = this.inGamePlayers().filter(
       (player) => !hasBid.has(player.color),
     );
     if (nonBidders.length > 1) {

@@ -7,12 +7,17 @@ import { PHASE } from "../../engine/game/phase";
 import { PhaseDelegator } from "../../engine/game/phase_delegator";
 import { ActionBundle } from "../../engine/game/phase_module";
 import { ROUND } from "../../engine/game/round";
+import { injectInGamePlayers } from "../../engine/game/state";
 import { City } from "../../engine/map/city";
 import { calculateTrackInfo, Land } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
 import { TOWN, TrackInfo } from "../../engine/map/track";
 import { Phase } from "../../engine/state/phase";
-import { PlayerColor, PlayerColorZod } from "../../engine/state/player";
+import {
+  PlayerColor,
+  playerColorToString,
+  PlayerColorZod,
+} from "../../engine/state/player";
 import { allDirections, Direction } from "../../engine/state/tile";
 import { isNotNull } from "../../utils/functions";
 import { assert } from "../../utils/validate";
@@ -35,6 +40,7 @@ export class MontrealMetroPhaseDelegator extends PhaseDelegator {
 export class MontrealMetroGovernmentBuildPhase extends BaseBuildPhase {
   static readonly phase = Phase.GOVERNMENT_BUILD;
 
+  private readonly players = injectInGamePlayers();
   private readonly governmentTrack = injectState(GOVERNMENT_TRACK);
   private readonly round = injectState(ROUND);
 
@@ -45,7 +51,19 @@ export class MontrealMetroGovernmentBuildPhase extends BaseBuildPhase {
   protected abandonDangling() {}
 
   getPlayerOrder(): PlayerColor[] {
-    return [this.governmentTrack()[(this.round() - 1) % 3]];
+    const playerColor = this.governmentTrack()[(this.round() - 1) % 3];
+    const player = this.players().find(
+      (player) => player.color === playerColor,
+    );
+    // Per https://boardgamegeek.com/thread/3538513/how-to-handle-player-elimination
+    // Eliminated players do not build government track.
+    if (player == null) {
+      this.log.log(
+        `${playerColorToString(playerColor)} does not build government track because they have been eliminated`,
+      );
+      return [];
+    }
+    return [playerColor];
   }
 
   forcedAction(): ActionBundle<object> | undefined {
