@@ -18,6 +18,7 @@ export enum SpaceType {
   DARK_MOUNTAIN = 14,
   CRATER = 15,
   RIVER_MOUNTAIN = 16,
+  POLAND_DARK_MOUNTAIN = 17
 }
 
 export const SpaceTypeZod = z.nativeEnum(SpaceType);
