@@ -76,7 +76,6 @@ export class BuildCostCalculator {
   }
 
   protected getCostOfLandType(type: LandType): number {
-    console.log(type)
     switch (type) {
       case SpaceType.DARK_MOUNTAIN: return 5;
       case SpaceType.MOUNTAIN: return 4;
