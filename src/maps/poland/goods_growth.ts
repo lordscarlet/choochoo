@@ -32,7 +32,7 @@ export class PolandGoodsGrowthPhase extends GoodsGrowthPhase {
     });
 
     if (blackInBag !== -1) {
-      const cities = this.grid.findAllCities();
+      const cities = this.gridHelper.findAllCities();
 
       for (const city of cities) {
         if (city.name() === "Warsaw") {
