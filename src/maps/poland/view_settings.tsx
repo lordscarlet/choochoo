@@ -3,15 +3,14 @@ import { useAction } from "../../client/services/action";
 import { MapViewSettings } from "../view_settings";
 import { PolandMapSettings } from "./settings";
 import { ProductionAction } from "./goods_growth";
+import { PolandRules } from "./rules";
 
 export class PolandViewSettings
   extends PolandMapSettings
   implements MapViewSettings
 {
 
-  getMapRules() {
-    return <p>TO DO : Add Poland rules here</p>;
-  }
+  getMapRules = PolandRules
 
 
   useOnMapClick = usePolandProduction;
@@ -21,7 +20,7 @@ export class PolandViewSettings
 function usePolandProduction(on: OnClickRegister) {
   const { canEmit, emit, isPending } = useAction(ProductionAction);
   if (canEmit) {
-    on(ClickTarget.CITY, (city) => emit({ coordinates: city.coordinates }));
+    on(ClickTarget.TOWN, (town) => emit({ coordinates: town.coordinates }));
   }
   return isPending;
 }

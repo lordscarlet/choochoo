@@ -67,7 +67,7 @@ export class BuildCostCalculator {
       case SpaceType.HILL:
       case SpaceType.SKY:
       case SpaceType.FIRE:
-      case SpaceType.POLAND_DARK_MOUNTAIN: // TO DO : what should the logic be here
+      case SpaceType.POLAND_DARK_MOUNTAIN: 
         return 0;
       default:
         assert(!isUnpassable(type));

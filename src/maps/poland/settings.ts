@@ -2,10 +2,11 @@ import { GameKey } from "../../api/game_key";
 import {
   MapSettings,
   ReleaseStage,
-  JACK,
+  EMIL,
 } from "../../engine/game/map_settings";
 import { PolandBuildAction } from "./building";
 import { PolandGoodsGrowthPhase } from "./goods_growth";
+import { PolandActionNamingProvider } from "./actions";
 
 import { map } from "./grid";
 
@@ -17,9 +18,13 @@ export class PolandMapSettings implements MapSettings {
   readonly startingGrid = map;
   readonly stage = ReleaseStage.DEVELOPMENT;
   readonly designer = "John Bohrer";
-  readonly implementerId = JACK; // TO DO : change this
+  readonly implementerId = EMIL;
 
   getOverrides() {
-    return [PolandGoodsGrowthPhase, PolandBuildAction];
+    return [
+      PolandGoodsGrowthPhase,
+      PolandBuildAction,
+      PolandActionNamingProvider,
+    ];
   }
 }
