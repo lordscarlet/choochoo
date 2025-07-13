@@ -13,12 +13,20 @@ import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { assert } from "../../utils/validate";
 import { Land } from "../../engine/map/location";
 import { isTownTile } from "../../engine/map/tile";
+import { goodToString } from "../../engine/state/good";
 
 export class PolandGoodsGrowthPhase extends GoodsGrowthPhase {
   configureActions(): void {
     this.installAction(ProductionAction);
     this.installAction(ProductionPassAction);
   }
+
+  // onStartTurn(): void {
+  //     const goods = this.helper.drawGoods(1);
+  //     const asColors = goods.map(goodToString);
+  //     this.log.currentPlayer(`draws ${asColors.join(", ")}`);
+  //     this.goodsGrowthState.initState({ goods });
+  // }
 
   onEnd(): void {
     let blackInBag = -1;
@@ -61,11 +69,8 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
 
   validate(data: ProductionData) {
     const space = this.gridHelper.lookup(data.coordinates);
-    
-
+    // TO DO : Add Validation for only adding to towns    
     assert(space instanceof Land, { invalidInput: "must place goods in town" });
-    const tileType = space.getTileType();
-    assert(tileType !== undefined && isTownTile(tileType));
   }
 
   process(data: ProductionData): boolean {
