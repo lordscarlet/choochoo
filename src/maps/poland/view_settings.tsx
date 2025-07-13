@@ -9,12 +9,8 @@ export class PolandViewSettings
   extends PolandMapSettings
   implements MapViewSettings
 {
-
-  getMapRules = PolandRules
-
-
+  getMapRules = PolandRules;
   useOnMapClick = usePolandProduction;
-  
 }
 
 function usePolandProduction(on: OnClickRegister) {
