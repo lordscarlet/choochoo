@@ -7,6 +7,7 @@ import {
 import { PolandBuildAction } from "./building";
 import { PolandGoodsGrowthPhase } from "./goods_growth";
 import { PolandActionNamingProvider } from "./actions";
+import { PolandPhaseEngine, DiscoPhaseDelegator } from "./goods_growth";
 
 import { map } from "./grid";
 
@@ -22,6 +23,8 @@ export class PolandMapSettings implements MapSettings {
 
   getOverrides() {
     return [
+      PolandPhaseEngine,
+      DiscoPhaseDelegator,
       PolandGoodsGrowthPhase,
       PolandBuildAction,
       PolandActionNamingProvider,

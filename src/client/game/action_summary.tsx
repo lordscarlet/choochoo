@@ -25,6 +25,7 @@ import { PassAction } from "../../engine/turn_order/pass";
 import { TurnOrderPassAction } from "../../engine/turn_order/turn_order_pass";
 import { PlaceWhiteCubeAction } from "../../maps/dc_metro/production";
 import { ProductionPassAction } from "../../maps/disco/production";
+import { ProductionPassAction as PolandProductionPassAction } from "../../maps/poland/goods_growth";
 import { PassAction as DeurbanizationPassAction } from "../../maps/ireland/deurbanization";
 import { RepopulateAction } from "../../maps/montreal_metro/select_action/repopulate";
 import { REPOPULATION } from "../../maps/montreal_metro/select_action/state";
@@ -89,6 +90,8 @@ export function ActionSummary() {
       return <ManualGoodsGrowth />;
     case Phase.DISCO_INFERNO_PRODUCTION:
       return <DiscoProduction />;
+    case Phase.POLAND_GOODS_GROWTH:
+      return <PolandProduction />;
     case Phase.EARTH_TO_HEAVEN:
       return <EarthToHeaven />;
     case Phase.ST_LUCIA_TURN_ORDER:
@@ -248,6 +251,33 @@ function DiscoProduction() {
   return (
     <div>
       <p>You must select a city to place the drawn cubes.</p>
+      <Button negative disabled={isPending} onClick={emit}>
+        Pass
+      </Button>
+    </div>
+  );
+}
+
+function PolandProduction() {
+  const { canEmit, emit, isPending, canEmitUserId } =
+    useEmptyAction(PolandProductionPassAction);
+
+  if (canEmitUserId == null) {
+    return <></>;
+  }
+
+  if (!canEmit) {
+    return (
+      <GenericMessage>
+        <Username userId={canEmitUserId} /> must select a town to place the
+        drawn cubes.
+      </GenericMessage>
+    );
+  }
+
+  return (
+    <div>
+      <p>You must select a town to place the drawn cubes.</p>
       <Button negative disabled={isPending} onClick={emit}>
         Pass
       </Button>
