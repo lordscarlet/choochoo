@@ -104,6 +104,15 @@ export class PolandGoodsGrowthPhase extends PhaseModule {
       }
     });
 
+    if (blackInBag !== -1) {
+      const cities = this.gridHelper.findAllCities();
+      for (const city of cities) {
+        if (city.name() === "Warsaw") {
+          this.helper.addGoodToCity(city.coordinates, BLACK);
+        }
+      }
+    }
+
     for (const cityGroup of [CityGroup.WHITE, CityGroup.BLACK]) {
       const rolls = this.random.rollDice(this.getRollCount(cityGroup)).sort();
       if (rolls.length === 0) continue;
@@ -116,9 +125,6 @@ export class PolandGoodsGrowthPhase extends PhaseModule {
           if (group !== cityGroup) continue;
           const numRolled = rolls.filter((r) => r === onRoll).length;
           this.helper.moveGoodsToCity(city.coordinates, index, numRolled);
-          if (city.name() === "Warsaw" && blackInBag !== -1) {
-            this.helper.addGoodToCity(city.coordinates, BLACK);
-          }
         }
       }
     }
@@ -140,8 +146,8 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
 
   validate(data: ProductionData) {
     const space = this.gridHelper.lookup(data.coordinates);
-    // TO DO : Add Validation for only adding to towns
-    assert(space instanceof Land, { invalidInput: "must place goods in town" });
+    
+    assert(space instanceof Land && space.hasTown(), { invalidInput: "must place goods in town" });
   }
 
   process(data: ProductionData): boolean {
