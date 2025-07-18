@@ -19,7 +19,6 @@ import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
 import { GoodsHelper } from "../../engine/goods_growth/helper";
 import { assert } from "../../utils/validate";
 import { Land } from "../../engine/map/location";
-import { isTownTile } from "../../engine/map/tile";
 import { goodToString } from "../../engine/state/good";
 import { PhaseModule } from "../../engine/game/phase_module";
 import { PlayerColor } from "../../engine/state/player";
