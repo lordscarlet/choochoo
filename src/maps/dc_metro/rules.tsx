@@ -19,6 +19,9 @@ export function DCMetroRules() {
           choose which goods are dropped off along the way.
         </li>
         <li>
+          <b>Springfield: </b>receives all black cubes during Goods Growth.
+        </li>
+        <li>
           <b>Game Length:</b> 9 turns for 3 players, 8 turns for 2 players.
         </li>
         <li>

@@ -3,6 +3,7 @@ import { OnRoll } from "../../engine/state/roll";
 import { SpaceData } from "../../engine/state/space";
 import { duplicate, iterate } from "../../utils/functions";
 import {
+  black,
   city,
   MOUNTAIN,
   PLAIN,
@@ -22,7 +23,7 @@ export const map = startsLowerGrid<SpaceData>([
     city(
       "Springfield",
       RED,
-      iterate(6, (i) => white((i + 1) as OnRoll)).concat([white(1)]),
+      [white(1)].concat(iterate(6, (i) => black((i + 1) as OnRoll))),
     ),
   ],
   [
