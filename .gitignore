@@ -7,7 +7,3 @@ builds
 buildmeta.*
 *.swp
 *.tsbuildinfo
-<<<<<<< HEAD
-start-dev.sh
-=======
->>>>>>> 4ab0c8d (Safety commit)
