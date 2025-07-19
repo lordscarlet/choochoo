@@ -1,12 +1,12 @@
-import { TrislandMapSettings } from "./trisland/settings";
-import { PortugalMapSettings } from "./portugal/settings";
-import { AustraliaMapSettings } from "./australia/settings";
 import { GameKey } from "../api/game_key";
 import { MapSettings } from "../engine/game/map_settings";
 import { assert } from "../utils/validate";
 import { AlabamaRailwaysMapSettings } from "./alabama_railways/settings";
+import { AustraliaMapSettings } from "./australia/settings";
+import { ChesapeakeAndOhioMapSettings } from "./chesapeake-and-ohio/settings";
 import { CyprusMapSettings } from "./cyprus/settings";
-import { DCMetroMapSettings } from "./d_c_metro/settings";
+import { DCMetroMapSettings } from "./dc_metro/settings";
+import { DenmarkMapSettings } from "./denmark/settings";
 import { DetroitBankruptcyMapSettings } from "./detroit/settings";
 import { DiscoInfernoMapSettings } from "./disco/settings";
 import { GermanyMapSettings } from "./germany/settings";
@@ -21,6 +21,7 @@ import { MontrealMetroMapSettings } from "./montreal_metro/settings";
 import { MoonMapSettings } from "./moon/settings";
 import { NewEnglandMapSettings } from "./new_england/settings";
 import { PittsburghMapSettings } from "./pittsburgh/settings";
+import { PortugalMapSettings } from "./portugal/settings";
 import { ReversteamMapSettings } from "./reversteam/settings";
 import { RustBeltMapSettings } from "./rust_belt/settings";
 import { ScandinaviaMapSettings } from "./scandinavia/settings";
@@ -29,8 +30,7 @@ import { SicilyMapSettings } from "./sicily/settings";
 import { SoulTrainMapSettings } from "./soultrain/settings";
 import { StLuciaMapSettings } from "./st-lucia/settings";
 import { SwedenRecyclingMapSettings } from "./sweden/settings";
-import { DenmarkMapSettings } from "./denmark/settings";
-import { ChesapeakeAndOhioMapSettings } from "./chesapeake-and-ohio/settings";
+import { TrislandMapSettings } from "./trisland/settings";
 
 export class MapRegistry {
   static readonly singleton = new MapRegistry();

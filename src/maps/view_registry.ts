@@ -1,11 +1,11 @@
-import { TrislandViewSettings } from "./trisland/view_settings";
-import { PortugalViewSettings } from "./portugal/view_settings";
-import { AustraliaViewSettings } from "./australia/view_settings";
-import { DCMetroViewSettings } from "./d_c_metro/view_settings";
 import { GameKey } from "../api/game_key";
 import { assert } from "../utils/validate";
 import { AlabamaRailwaysViewSettings } from "./alabama_railways/view_settings";
+import { AustraliaViewSettings } from "./australia/view_settings";
+import { ChesapeakeAndOhioViewSettings } from "./chesapeake-and-ohio/view_settings";
 import { CyprusViewSettings } from "./cyprus/view_settings";
+import { DCMetroViewSettings } from "./dc_metro/view_settings";
+import { DenmarkViewSettings } from "./denmark/view_settings";
 import { DetroitBankruptcyViewSettings } from "./detroit/view_settings";
 import { DiscoInfernoViewSettings } from "./disco/view_settings";
 import { GermanyViewSettings } from "./germany/view_settings";
@@ -14,11 +14,13 @@ import { IndiaSteamBrothersViewSettings } from "./india-steam-brothers/view_sett
 import { IrelandViewSettings } from "./ireland/view_settings";
 import { JamaicaViewSettings } from "./jamaica/view_settings";
 import { KoreaWallaceViewSettings } from "./korea-wallace/view_settings";
+import { LondonViewSettings } from "./london/view_settings";
 import { MadagascarViewSettings } from "./madagascar/view_settings";
 import { MontrealMetroViewSettings } from "./montreal_metro/view_settings";
 import { MoonViewSettings } from "./moon/view_settings";
 import { NewEnglandViewSettings } from "./new_england/view_settings";
 import { PittsburghViewSettings } from "./pittsburgh/view_settings";
+import { PortugalViewSettings } from "./portugal/view_settings";
 import { ReversteamViewSettings } from "./reversteam/view_settings";
 import { RustBeltViewSettings } from "./rust_belt/view_settings";
 import { ScandinaviaViewSettings } from "./scandinavia/view_settings";
@@ -27,10 +29,8 @@ import { SicilyViewSettings } from "./sicily/view_settings";
 import { SoulTrainViewSettings } from "./soultrain/view_settings";
 import { StLuciaViewSettings } from "./st-lucia/view_settings";
 import { SwedenRecyclingViewSettings } from "./sweden/view_settings";
+import { TrislandViewSettings } from "./trisland/view_settings";
 import { MapViewSettings } from "./view_settings";
-import { LondonViewSettings } from "./london/view_settings";
-import { DenmarkViewSettings } from "./denmark/view_settings";
-import { ChesapeakeAndOhioViewSettings } from "./chesapeake-and-ohio/view_settings";
 
 export class ViewRegistry {
   static readonly singleton = new ViewRegistry();
