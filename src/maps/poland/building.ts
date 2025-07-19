@@ -20,18 +20,11 @@ export class PolandBuildAction extends BuildAction {
     const location = this.gridHelper.lookup(coordinates);
 
     assert(location instanceof Land);
-
-    if (
-      isTownTile(data.tileType) &&
-      (!location.data.tile ||
-        location.data.tile?.owners.every(
-          (owner) => owner === this.currentPlayer().color,
-        ))
-    ) {
+    if (isTownTile(data.tileType) && !location.data.tile) {
       this.playerHelper.updateCurrentPlayer((player) => player.income++);
 
       this.log.currentPlayer(
-        `builds first connect to town ${this.grid().displayName(data.coordinates)}, and recieves 1 income`,
+        `builds first connection to town ${this.grid().displayName(data.coordinates)}, and recieves 1 income`,
       );
     }
 

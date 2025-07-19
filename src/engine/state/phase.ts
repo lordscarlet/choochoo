@@ -30,9 +30,6 @@ export enum Phase {
 
   // Montreal Metro
   GOVERNMENT_BUILD = 16,
-
-  // Poland
-  POLAND_GOODS_GROWTH = 17,
 }
 
 export const PhaseZod = z.nativeEnum(Phase);
@@ -64,8 +61,6 @@ export function getPhaseString(phase: Phase): string {
     case Phase.DEURBANIZATION:
       return "Deurbanization";
     case Phase.DISCO_INFERNO_PRODUCTION:
-      return "Production";
-    case Phase.POLAND_GOODS_GROWTH:
       return "Production";
     case Phase.EARTH_TO_HEAVEN:
       return "Earth to Heaven";
