@@ -181,7 +181,7 @@ export class GameStarter {
     bag: Good[],
     cityColor: Good | Good[],
     urbanized: boolean,
-  ): Good[] {
+  ): Array<undefined | Good> {
     if (!this.isProductionEnabled()) return [];
     return draw(urbanized ? 2 : 3, bag);
   }

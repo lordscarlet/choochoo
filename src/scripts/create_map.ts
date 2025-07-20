@@ -149,7 +149,7 @@ function validateArgs(args: UnparsedArgs): ParsedArgs {
   }
 
   const implementer = args.implementer?.toUpperCase();
-  const validImpementers = new Set(["KAOSKODY", "JACK", "GRIMIKU"]);
+  const validImpementers = new Set(["KAOSKODY", "JACK", "GRIMIKU", "EMIL"]);
   if (implementer == null || implementer == "") {
     throw new Error(
       "Empty implementer. Provide an implementer using --implementer or -i.",

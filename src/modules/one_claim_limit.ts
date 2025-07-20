@@ -12,7 +12,7 @@ export class OneClaimLimitModule extends Module {
     this.installMixin(ConnectCitiesAction, oneClaimLimitActionMixin);
   }
 }
-export function oneClaimLimitActionMixin(
+function oneClaimLimitActionMixin(
   Ctor: SimpleConstructor<ConnectCitiesAction>,
 ): SimpleConstructor<ConnectCitiesAction> {
   return class extends Ctor {

@@ -58,9 +58,16 @@ export class PlayerHelper {
 
   beatSoloGoal(): boolean {
     assert(this.players().length === 1);
-    const [player] = this.players();
+    const player = this.getSoloPlayer();
+    if (player.outOfGame && this.outOfGameScoreIsLosing()) {
+      return false;
+    }
     const soloScore = this.getScore(player);
     return compareScore(soloScore, this.soloGoalScore()) <= 0;
+  }
+
+  protected outOfGameScoreIsLosing(): boolean {
+    fail("not implemented");
   }
 
   /** Returns the players ordered by their score. Tied players end up in the same placement in the array. */
@@ -144,6 +151,11 @@ export class PlayerHelper {
 
   getPlayer(playerColor: PlayerColor): PlayerData {
     return this.players().find(({ color }) => color === playerColor)!;
+  }
+
+  getSoloPlayer(): PlayerData {
+    assert(this.players().length === 1);
+    return this.players()[0];
   }
 }
 

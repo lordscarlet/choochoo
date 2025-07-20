@@ -13,22 +13,24 @@ export enum EndGameReason {
 
 /** This gets run at the end of the game. */
 export class Ender {
-  private readonly grid = injectGrid();
-  private readonly gridHelper = inject(GridHelper);
-  private readonly phase = injectState(PHASE);
-  private readonly log = inject(Log);
-  private readonly playerHelper = inject(PlayerHelper);
+  protected readonly grid = injectGrid();
+  protected readonly gridHelper = inject(GridHelper);
+  protected readonly phase = injectState(PHASE);
+  protected readonly log = inject(Log);
+  protected readonly playerHelper = inject(PlayerHelper);
 
   protected logEndGame(reason: EndGameReason) {
+    if (this.playerHelper.isSoloGame()) {
+      if (this.playerHelper.beatSoloGoal()) {
+        this.log.log("You win! Congrats!");
+      } else {
+        this.log.log("You lose! Better luck next time.");
+      }
+      return;
+    }
     switch (reason) {
       case EndGameReason.PLAYERS_ELIMINATED:
-        if (this.playerHelper.isSoloGame()) {
-          if (this.playerHelper.beatSoloGoal()) {
-            this.log.log("You win! Congrats!");
-          } else {
-            this.log.log("You lose! Better luck next time.");
-          }
-        } else if (this.playerHelper.getPlayersRemaining() === 0) {
+        if (this.playerHelper.getPlayersRemaining() === 0) {
           this.log.log("All players lose, no winner!");
         } else {
           this.log.log("Only one player remaining, game over.");

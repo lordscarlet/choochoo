@@ -23,6 +23,10 @@ export class DetroitPlayerHelper extends PlayerHelper {
     return [this.getRoundsLasted(player), player.income];
   }
 
+  protected outOfGameScoreIsLosing(): boolean {
+    return false;
+  }
+
   protected soloGoalScore(): Score {
     return [6, -1];
   }
