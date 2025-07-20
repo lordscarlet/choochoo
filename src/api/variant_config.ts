@@ -7,6 +7,8 @@ const EmptyVariantConfig = z.object({
     GameKey.PORTUGAL,
     GameKey.AUSTRALIA,
     GameKey.DC_METRO,
+    GameKey.BALKAN,
+    GameKey.POLAND,
     GameKey.SCANDINAVIA,
     GameKey.NEW_ENGLAND,
     GameKey.SCOTLAND,

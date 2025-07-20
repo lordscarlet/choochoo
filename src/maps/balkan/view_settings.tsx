@@ -1,12 +1,12 @@
 import { MapViewSettings } from "../view_settings";
-import { RustBeltRivers } from "./rivers";
+import { BalkanRivers } from "./rivers";
 import { BalkanMapSettings } from "./settings";
 
 export class BalkanViewSettings
   extends BalkanMapSettings
   implements MapViewSettings
 {
-  getTexturesLayer = RustBeltRivers;
+  getTexturesLayer = BalkanRivers;
 
   getMapRules() {
     return <p>No changes from base game.</p>;

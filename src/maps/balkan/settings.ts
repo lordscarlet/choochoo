@@ -1,5 +1,9 @@
 import { GameKey } from "../../api/game_key";
-import { MapSettings, ReleaseStage } from "../../engine/game/map_settings";
+import {
+  EMIL,
+  MapSettings,
+  ReleaseStage,
+} from "../../engine/game/map_settings";
 import { map } from "./grid";
 
 export class BalkanMapSettings implements MapSettings {
@@ -9,6 +13,8 @@ export class BalkanMapSettings implements MapSettings {
   readonly maxPlayers = 4;
   readonly startingGrid = map;
   readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly designer = "John Bohrer";
+  readonly implementerId = EMIL;
 
   getOverrides() {
     return [];

@@ -2,6 +2,7 @@ import { GameKey } from "../api/game_key";
 import { assert } from "../utils/validate";
 import { AlabamaRailwaysViewSettings } from "./alabama_railways/view_settings";
 import { AustraliaViewSettings } from "./australia/view_settings";
+import { BalkanViewSettings } from "./balkan/view_settings";
 import { ChesapeakeAndOhioViewSettings } from "./chesapeake-and-ohio/view_settings";
 import { CyprusViewSettings } from "./cyprus/view_settings";
 import { DCMetroViewSettings } from "./dc_metro/view_settings";
@@ -20,6 +21,7 @@ import { MontrealMetroViewSettings } from "./montreal_metro/view_settings";
 import { MoonViewSettings } from "./moon/view_settings";
 import { NewEnglandViewSettings } from "./new_england/view_settings";
 import { PittsburghViewSettings } from "./pittsburgh/view_settings";
+import { PolandViewSettings } from "./poland/view_settings";
 import { PortugalViewSettings } from "./portugal/view_settings";
 import { ReversteamViewSettings } from "./reversteam/view_settings";
 import { RustBeltViewSettings } from "./rust_belt/view_settings";
@@ -67,6 +69,8 @@ export class ViewRegistry {
     this.add(new MontrealMetroViewSettings());
     this.add(new DenmarkViewSettings());
     this.add(new ChesapeakeAndOhioViewSettings());
+    this.add(new BalkanViewSettings());
+    this.add(new PolandViewSettings());
   }
 
   values(): Iterable<MapViewSettings> {
