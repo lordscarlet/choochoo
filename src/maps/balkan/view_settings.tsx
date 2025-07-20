@@ -9,6 +9,7 @@ export class BalkanViewSettings
   getTexturesLayer = BalkanRivers;
 
   getMapRules() {
+    // TODO: add the Roma action.
     return <p>No changes from base game.</p>;
   }
 }
