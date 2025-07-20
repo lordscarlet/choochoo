@@ -25,7 +25,7 @@ export class BarbadosMapSettings implements MapSettings {
   readonly minPlayers = 1;
   readonly maxPlayers = 1;
   readonly startingGrid = map;
-  readonly stage = ReleaseStage.DEVELOPMENT;
+  readonly stage = ReleaseStage.ALPHA;
 
   getOverrides() {
     return [
