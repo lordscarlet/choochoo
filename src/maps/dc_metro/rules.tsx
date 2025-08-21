@@ -19,15 +19,12 @@ export function DCMetroRules() {
           choose which goods are dropped off along the way.
         </li>
         <li>
-          <b>Springfield: </b>receives all goods from the dark side of the goods
-          growth table, in addition to the white 1 (this is not rendered).
+          <b>National Airport: </b>receives all goods from the dark side of the
+          goods growth table, in addition to the white 1 (this is not
+          rendered).
         </li>
         <li>
           <b>Game Length:</b> 9 turns for 3 players, 8 turns for 2 players.
-        </li>
-        <li>
-          <b>City names:</b> are AI-generated because I cannot find the names of
-          the cities.
         </li>
       </ul>
     </div>
