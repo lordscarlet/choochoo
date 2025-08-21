@@ -59,7 +59,7 @@ export const map = grid([
   [
     UNPASSABLE,
     ...duplicate(5, PLAIN),
-    city("Lodz", Good.RED, black(5), 2),
+    city("Lodz", Good.RED, white(5), 2),
     ...duplicate(4, PLAIN),
   ],
   [
@@ -74,10 +74,10 @@ export const map = grid([
     SWAMP,
     PLAIN,
     PLAIN,
-    city("Warsaw", Good.BLUE, black(5), 3),
+    city("Warsaw", Good.BLUE, white(4), 3),
     PLAIN,
     PLAIN,
-    city("Kielce", Good.BLUE, black(6), 2),
+    city("Kielce", Good.BLUE, white(6), 2),
     PLAIN,
     PLAIN,
   ],
