@@ -51,7 +51,7 @@ jobs:
         run: npm ci
 
       - name: Running tests
-        run: npx ts-node node_modules/jasmine/bin/jasmine --config=spec/support/jasmine.mjs
+        run: npm test
 
       - name: Set up Java
         uses: actions/setup-java@v2
