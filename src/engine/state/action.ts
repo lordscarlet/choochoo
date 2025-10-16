@@ -133,7 +133,7 @@ export class ActionNamingProvider {
       case Action.ONE_MOVE:
         return "Skip one of your move goods actions.";
       case Action.COMMONWEALTH:
-        return "Reduces the cost of one $10 buid to $7.";
+        return "Reduces the cost of one $10 build to $7.";
       case Action.LOW_GRAVITATION:
         return "Allows you to use other's links as if they are your own for both moves.";
       case Action.HEAVY_LIFTING:

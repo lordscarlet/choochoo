@@ -34,6 +34,9 @@ import { StLuciaViewSettings } from "./st-lucia/view_settings";
 import { SwedenRecyclingViewSettings } from "./sweden/view_settings";
 import { TrislandViewSettings } from "./trisland/view_settings";
 import { MapViewSettings } from "./view_settings";
+import { CaliforniaGoldRushViewSettings } from "./ca-gold-rush/view_settings";
+import { UnionPacificExpressViewSettings } from "./union_pacific_express/view_settings";
+import { RustBeltExpressViewSettings } from "./rust_belt_express/view_settings";
 
 export class ViewRegistry {
   static readonly singleton = new ViewRegistry();
@@ -73,6 +76,9 @@ export class ViewRegistry {
     this.add(new ChesapeakeAndOhioViewSettings());
     this.add(new BalkanViewSettings());
     this.add(new PolandViewSettings());
+    this.add(new CaliforniaGoldRushViewSettings());
+    this.add(new UnionPacificExpressViewSettings());
+    this.add(new RustBeltExpressViewSettings());
   }
 
   values(): Iterable<MapViewSettings> {
