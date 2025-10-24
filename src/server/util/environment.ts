@@ -33,19 +33,6 @@ export function sessionSecret(): string {
   return sessionSecret ?? "foobar";
 }
 
-export function cert() {
-  if (stage() !== Stage.enum.production) {
-    return undefined;
-  }
-  assert(process.env.CERT != null, "must provide CERT in prod");
-  assert(process.env.CERT_KEY != null, "must provide CERT_KEY in prod");
-  const cert = {
-    cert: process.env.CERT,
-    certKey: process.env.CERT_KEY,
-  };
-  return cert;
-}
-
 export function mailjet() {
   const key = process.env.MAILJET_KEY;
   const secret = process.env.MAILJET_SECRET;
@@ -65,11 +52,7 @@ export function clientOrigin() {
 }
 
 export function port() {
-  const port = Number(process.env.PORT ?? 3000);
-  if (stage() === Stage.enum.production) {
-    assert(port === 443, "PORT must be 443 in prod mode");
-  }
-  return port;
+  return Number(process.env.PORT ?? 3000);
 }
 
 export function webhookUrls() {
