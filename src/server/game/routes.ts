@@ -42,46 +42,55 @@ const router = initServer().router(gameContract, {
     } = { ...defaultQuery, ...query };
 
     const pageCursor = parsePageCursor(pageCursorString);
-    let where: WhereOptions<GameDao> = rest;
+    const baseWhere: WhereOptions<GameDao> = rest;
+    const whereClauses: WhereOptions<GameDao>[] = [baseWhere];
 
     if (status != null) {
       if (status.length === 1) {
-        where.status = status[0];
+        baseWhere.status = status[0];
       } else if (status.length > 1) {
-        where.status = { [Op.in]: status };
+        baseWhere.status = { [Op.in]: status };
       }
     }
     if (userId != null) {
-      where.playerIds = { [Op.contains]: [userId] };
+      whereClauses.push({
+        [Op.or]: [
+          { playerIds: { [Op.contains]: [String(userId)] } },
+          { ownerId: userId },
+        ],
+      });
     }
     if (excludeUserId != null) {
-      where.playerIds = {
-        ...where.playerIds,
-        [Op.not]: {
-          [Op.contains]: [excludeUserId],
+      whereClauses.push({
+        playerIds: {
+          [Op.not]: {
+            [Op.contains]: [String(excludeUserId)],
+          },
         },
-      };
+      });
+      whereClauses.push({ ownerId: { [Op.ne]: excludeUserId } });
     }
     if (pageCursor != null) {
-      where.id = { [Op.notIn]: pageCursor };
+      baseWhere.id = { [Op.notIn]: pageCursor };
     }
 
     // Add a condition so that only games which are not marked as unlisted or which the user is a part of will be included
     if (req.session.userId) {
-      where = {
-        [Op.and]: [
-          {
-            [Op.or]: [
-              { playerIds: { [Op.contains]: [req.session.userId] } },
-              { unlisted: false },
-            ],
-          },
-          where,
+      whereClauses.push({
+        [Op.or]: [
+          { playerIds: { [Op.contains]: [String(req.session.userId)] } },
+          { ownerId: req.session.userId },
+          { unlisted: false },
         ],
-      };
+      });
     } else {
-      where.unlisted = false;
+      baseWhere.unlisted = false;
     }
+
+    const where: WhereOptions<GameDao> =
+      whereClauses.length === 1
+        ? whereClauses[0]
+        : ({ [Op.and]: whereClauses } as WhereOptions<GameDao>);
 
     const games = await GameDao.findAll({
       attributes: [
@@ -97,6 +106,8 @@ const router = initServer().router(gameContract, {
         "turnDuration",
         "unlisted",
         "autoStart",
+        "hotseat",
+        "ownerId",
       ],
       where,
       limit: pageSize! + 1,
@@ -143,15 +154,34 @@ const router = initServer().router(gameContract, {
     );
     assert(map.stage !== ReleaseStage.DEVELOPMENT || body.unlisted, { invalidInput: "Development map games must be unlisted." });
 
-    const playerIds = [userId];
-    if (body.artificialStart) {
-      assert(stage() === Stage.enum.development);
-      const users = await UserDao.findAll({
-        where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER },
-        limit: body.minPlayers - 1,
+    let playerIds: (number | string)[] = [userId];
+    let unlisted = body.unlisted;
+    let hotseat = false;
+
+    if (body.hotseat) {
+      // Hotseat games always use string player names and are always unlisted
+      assert(body.hotseatPlayers != null && body.hotseatPlayers.length > 0, {
+        invalidInput: "Hotseat games require player names",
       });
-      playerIds.push(...users.map(({ id }) => id));
+      playerIds = body.hotseatPlayers;
+      unlisted = true;
+      hotseat = true;
+      // Artificial start is not compatible with hotseat
+      assert(!body.artificialStart, {
+        invalidInput: "Artificial start is not supported for hotseat games",
+      });
+    } else {
+      // Traditional account-based game
+      if (body.artificialStart) {
+        assert(stage() === Stage.enum.development);
+        const users = await UserDao.findAll({
+          where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER },
+          limit: body.minPlayers - 1,
+        });
+        playerIds.push(...users.map(({ id }) => id));
+      }
     }
+
     const game = await GameDao.create({
       version: 1,
       gameKey: body.gameKey,
@@ -160,13 +190,15 @@ const router = initServer().router(gameContract, {
       turnDuration: body.turnDuration,
       concedingPlayers: [],
       playerIds,
+      ownerId: userId,
       variant: body.variant,
       config: {
         minPlayers: body.minPlayers,
         maxPlayers: body.maxPlayers,
       },
-      unlisted: body.unlisted,
+      unlisted,
       autoStart: body.autoStart,
+      hotseat,
     });
     return { status: 201, body: { game: game.toApi() } };
   },
@@ -179,13 +211,17 @@ const router = initServer().router(gameContract, {
 
     const isAdmin = user.role === UserRole.enum.ADMIN;
     if (!isAdmin) {
+      const fallbackOwnerId = Number.isFinite(Number(game.playerIds[0]))
+        ? Number(game.playerIds[0])
+        : null;
+      const ownerId = game.ownerId ?? fallbackOwnerId;
       assert(
         game.status === GameStatus.enum.LOBBY || game.playerIds.length === 1,
         {
           invalidInput: "cannot delete started game unless it's a solo",
         },
       );
-      assert(game.playerIds[0] === user.id, { permissionDenied: true });
+      assert(ownerId === user.id, { permissionDenied: true });
     }
 
     await sequelize.transaction(() =>
@@ -206,12 +242,12 @@ const router = initServer().router(gameContract, {
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, "cannot join started game");
-    assert(!game.playerIds.includes(userId), { invalidInput: true });
+    assert(!game.playerIds.includes(String(userId)), { invalidInput: true });
     assert(game.playerIds.length < game.toLiteApi().config.maxPlayers, {
       invalidInput: "game full",
     });
 
-    game.playerIds = [...game.playerIds, userId];
+    game.playerIds = [...game.playerIds, String(userId)];
     const newGame = await game.save();
     return { status: 200, body: { game: newGame.toApi() } };
   },
@@ -223,10 +259,12 @@ const router = initServer().router(gameContract, {
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null);
     assert(game.status === GameStatus.enum.LOBBY, "cannot leave started game");
-    const index = game.playerIds.indexOf(userId);
+    const index = game.playerIds.indexOf(String(userId));
     assert(index >= 0, { invalidInput: "cannot leave game you are not in" });
     // Figure out what to do if the owner wants to leave
-    assert(index > 0, { invalidInput: "the owner cannot leave the game" });
+    assert(game.ownerId !== userId, {
+      invalidInput: "the owner cannot leave the game",
+    });
 
     game.playerIds = game.playerIds
       .slice(0, index)
@@ -241,7 +279,7 @@ const router = initServer().router(gameContract, {
 
     const seed = stage() !== Stage.enum.production ? req.body.seed : undefined;
 
-    const game = await startGame(params.gameId, userId, seed);
+    const game = await startGame(params.gameId, Number(userId), seed);
     return { status: 200, body: { game } };
   },
 
@@ -255,11 +293,27 @@ const router = initServer().router(gameContract, {
   },
 
   async performAction({ req, params, body }) {
-    const userId = req.session.userId;
-    assert(userId != null, { permissionDenied: true });
+    // First fetch the game to check if it's hotseat
+    const gamePreFetch = await GameDao.findByPk(params.gameId);
+    assert(gamePreFetch != null, { notFound: true });
+
+    let playerId: number | string;
+    if (gamePreFetch.hotseat) {
+      // For hotseat games, use performingPlayerId from body
+      assert(body.performingPlayerId != null, {
+        invalidInput: "Hotseat games require performingPlayerId",
+      });
+      playerId = body.performingPlayerId;
+    } else {
+      // For regular games, require session userId
+      const userId = req.session.userId;
+      assert(userId != null, { permissionDenied: true });
+      playerId = String(userId);
+    }
+
     const game = await performAction(
       params.gameId,
-      userId,
+      playerId,
       body.actionName,
       body.actionData,
       body.confirmed,
@@ -267,7 +321,7 @@ const router = initServer().router(gameContract, {
 
     return {
       status: 200,
-      body: { game: game.toApi(), auto: game.getAutoActionForUser(userId) },
+      body: { game: game.toApi(), auto: game.getAutoActionForUser(playerId) },
     };
   },
 
@@ -299,9 +353,15 @@ const router = initServer().router(gameContract, {
         assert(gameHistory.reversible, {
           invalidInput: "cannot undo irreversible action",
         });
-        assert(gameHistory.userId === req.session.userId, {
-          permissionDenied: true,
-        });
+        if (game.hotseat) {
+          assert(game.ownerId === req.session.userId, {
+            permissionDenied: true,
+          });
+        } else {
+          assert(gameHistory.userId === String(req.session.userId), {
+            permissionDenied: true,
+          });
+        }
       }
 
       game.version = backToVersion;
@@ -329,27 +389,33 @@ const router = initServer().router(gameContract, {
 
   async retryLast({ req, body, params }) {
     await assertRole(req, UserRole.enum.ADMIN);
+    const game = await GameDao.findByPk(params.gameId);
+    assert(game != null, { notFound: true });
+    assert(!game.hotseat, {
+      invalidInput: "Cannot retry hotseat games",
+    });
+
     const limit = body.steps;
     const previousActions = await GameHistoryDao.findAll({
       where: { gameId: params.gameId },
       limit,
       order: [["id", "DESC"]],
     });
-    const game = await GameDao.findByPk(params.gameId);
-    assert(game != null, { notFound: true });
+    
     assert(previousActions.length == body.steps, {
       invalidInput: "There are not that many steps to retry",
     });
 
+    // Safe to cast to number[] since we checked !game.hotseat above
     const users = await Promise.all(
-      game.playerIds.map((id) => UserDao.getUser(id)),
+      game.playerIds.map((id) => UserDao.getUser(Number(id))),
     );
 
     let previousAction: GameHistoryDao | undefined;
     let currentGameData: string;
     let currentGameVersion: number;
-    let finalActivePlayerId: number | undefined;
-    let finalUndoPlayerId: number | undefined;
+    let finalActivePlayerId: number | string | undefined;
+    let finalUndoPlayerId: number | string | undefined;
     const allLogs: LogDao[] = [];
     const firstAction = peek(previousActions);
 
@@ -467,26 +533,26 @@ const router = initServer().router(gameContract, {
     assert(userId != null);
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
-    assert(game.playerIds.includes(userId), { permissionDenied: true });
+    assert(game.playerIds.includes(String(userId)), { permissionDenied: true });
     assert(game.status === GameStatus.enum.ACTIVE, {
       invalidInput: "Can only concede an active game",
     });
-    const hasConceded = game.concedingPlayers.includes(userId);
+    const hasConceded = game.concedingPlayers.includes(String(userId));
     if (body.concede) {
       if (!hasConceded) {
-        game.concedingPlayers = game.concedingPlayers.concat([userId]);
+        game.concedingPlayers = game.concedingPlayers.concat([String(userId)]);
       }
     } else {
       if (hasConceded) {
-        game.concedingPlayers = remove(game.concedingPlayers, userId);
+        game.concedingPlayers = remove(game.concedingPlayers, String(userId));
       }
     }
     assert(game.concedingPlayers.length <= game.playerIds.length);
     const remaining = remainingPlayers(game).filter(
-      (playerId) => !game.concedingPlayers.includes(playerId),
+      (playerId) => !game.concedingPlayers.includes(String(playerId)),
     );
     const noneRemaining = remaining.length === 0;
-    const leadPlayer = inTheLead(game);
+    const leadPlayer = inTheLead(game).map((playerId) => String(playerId));
     const onlyLeadPlayerRemaining =
       remaining.length === 1 &&
       leadPlayer.length === 1 &&
@@ -505,7 +571,7 @@ const router = initServer().router(gameContract, {
     assert(userId != null);
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
-    assert(game.playerIds.includes(userId), { permissionDenied: true });
+    assert(game.playerIds.includes(String(userId)), { permissionDenied: true });
     await abandonGame(game, userId, /* kicked= */ false);
     return { status: 200, body: { game: game.toApi() } };
   },
@@ -515,7 +581,7 @@ const router = initServer().router(gameContract, {
     assert(userId != null);
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
-    assert(game.playerIds.includes(userId), { permissionDenied: true });
+    assert(game.playerIds.includes(String(userId)), { permissionDenied: true });
     assert(game.status === GameStatus.enum.ACTIVE, {
       invalidInput: "Can only kick an active game",
     });

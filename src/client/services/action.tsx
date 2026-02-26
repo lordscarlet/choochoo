@@ -67,7 +67,7 @@ interface ActionHandler<T> {
   emit(data: T): void;
   canEmit: boolean;
   isPending: boolean;
-  canEmitUserId?: number;
+  canEmitUserId?: number | string;
   getErrorMessage(t: T): string | undefined;
 }
 
@@ -132,7 +132,13 @@ export function useAction<T extends object>(
       mutate(
         {
           params: { gameId: game.id },
-          body: { actionName, actionData, confirmed },
+          body: {
+            actionName,
+            actionData,
+            confirmed,
+            // For hotseat games, include the active player ID
+            performingPlayerId: game.hotseat ? game.activePlayerId : undefined,
+          },
         },
         {
           onError: (error) => {
@@ -162,7 +168,7 @@ export function useAction<T extends object>(
         },
       );
     },
-    [game.id, actionName],
+    [game.id, actionName, game.hotseat, game.activePlayerId],
   );
 
   const actionCanBeEmitted =
@@ -170,8 +176,12 @@ export function useAction<T extends object>(
     phaseDelegator.get().canEmit(action);
 
   const canEmitUserId = actionCanBeEmitted ? game.activePlayerId : undefined;
-  const canEmit =
-    me?.id === game.activePlayerId && actionCanBeEmitted && canEditGame(game);
+  
+  // For hotseat games, allow anyone to perform actions
+  // For regular games, only the active player can perform actions
+  const canEmit = game.hotseat
+    ? actionCanBeEmitted && canEditGame(game)
+    : me?.id === game.activePlayerId && actionCanBeEmitted && canEditGame(game);
   const getErrorMessage = useCallback(
     (data: T) => {
       try {

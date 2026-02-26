@@ -16,6 +16,7 @@ export function FinalOverview() {
 }
 
 function FinalOverviewInternal() {
+  const game = useGame();
   const playerHelper = useInjectedMemo(PlayerHelper);
 
   const playersOrdered = useMemo(() => {
@@ -28,7 +29,12 @@ function FinalOverviewInternal() {
 
   return (
     <div className={styles.finalOverview}>
-      <h2>Final Overview</h2>
+      <div className={styles.headerRow}>
+        <h2>Final Overview</h2>
+        {game.hotseat && (
+          <span className={styles.hotseatBadge}>Hotseat</span>
+        )}
+      </div>
       <div className={styles.tableContainer}>
         <table>
           <thead>

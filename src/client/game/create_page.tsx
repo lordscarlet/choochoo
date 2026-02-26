@@ -71,6 +71,8 @@ export function CreateGamePage() {
   const [artificialStart, setArtificialStart] = useSemanticUiCheckboxState();
   const [unlisted, setUnlisted] = useSemanticUiCheckboxState();
   const [autoStart, setAutoStart] = useSemanticUiCheckboxState(true);
+  const [hotseat, setHotseat] = useSemanticUiCheckboxState(false);
+  const [hotseatPlayers, setHotseatPlayers] = useState<string[]>(["Alice", "Bob"]);
   const [minPlayersS, setMinPlayers, setMinPlayersRaw] = useNumberInputState(
     selectedMap.minPlayers,
   );
@@ -125,6 +127,8 @@ export function CreateGamePage() {
         unlisted,
         autoStart,
         variant: variant as VariantConfig,
+        hotseat,
+        hotseatPlayers: hotseat ? hotseatPlayers : undefined,
       });
     },
     [
@@ -139,6 +143,8 @@ export function CreateGamePage() {
       maxPlayers,
       turnDuration,
       variant,
+      hotseat,
+      hotseatPlayers,
     ],
   );
 
@@ -153,6 +159,8 @@ export function CreateGamePage() {
       unlisted,
       autoStart,
       variant: variant as VariantConfig,
+      hotseat,
+      hotseatPlayers: hotseat ? hotseatPlayers : undefined,
     });
   }, [
     name,
@@ -164,6 +172,8 @@ export function CreateGamePage() {
     unlisted,
     autoStart,
     turnDuration,
+    hotseat,
+    hotseatPlayers,
   ]);
 
   const Editor = selectedMap.getVariantConfigEditor;
@@ -253,10 +263,62 @@ export function CreateGamePage() {
               toggle
               label="Artificial Start"
               checked={artificialStart}
-              disabled={isPending}
+              disabled={isPending || hotseat}
               onChange={setArtificialStart}
               error={validationError?.artificialStart}
             />
+          )}
+
+          <FormCheckbox
+            toggle
+            label="Hotseat Mode (Local multiplayer)"
+            checked={hotseat}
+            disabled={isPending}
+            onChange={setHotseat}
+            error={validationError?.hotseat}
+          />
+
+          {hotseat && (
+            <div style={{ marginBottom: "1em" }}>
+              <label style={{ fontWeight: "bold" }}>Player Names</label>
+              {hotseatPlayers.map((playerName, index) => (
+                <FormInput
+                  key={index}
+                  placeholder={`Player ${index + 1}`}
+                  value={playerName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const newPlayers = [...hotseatPlayers];
+                    newPlayers[index] = e.target.value;
+                    setHotseatPlayers(newPlayers);
+                  }}
+                  error={validationError?.hotseatPlayers}
+                />
+              ))}
+              <Button
+                type="button"
+                size="small"
+                onClick={() => {
+                  if (hotseatPlayers.length < (maxPlayers || 8)) {
+                    setHotseatPlayers([...hotseatPlayers, `Player ${hotseatPlayers.length + 1}`]);
+                  }
+                }}
+                disabled={hotseatPlayers.length >= (maxPlayers || 8)}
+              >
+                Add Player
+              </Button>
+              <Button
+                type="button"
+                size="small"
+                onClick={() => {
+                  if (hotseatPlayers.length > (minPlayers || 2)) {
+                    setHotseatPlayers(hotseatPlayers.slice(0, -1));
+                  }
+                }}
+                disabled={hotseatPlayers.length <= (minPlayers || 2)}
+              >
+                Remove Player
+              </Button>
+            </div>
           )}
 
           <FormCheckbox
@@ -272,8 +334,8 @@ export function CreateGamePage() {
           <FormCheckbox
             toggle
             label="Unlisted Game"
-            checked={unlisted}
-            disabled={isPending}
+            checked={unlisted || hotseat}
+            disabled={isPending || hotseat}
             onChange={setUnlisted}
             error={validationError?.unlisted}
           />

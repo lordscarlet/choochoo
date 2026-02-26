@@ -41,6 +41,7 @@ const ActionApi = z.object({
   actionName: z.string(),
   actionData: z.unknown(),
   confirmed: z.boolean(),
+  performingPlayerId: z.union([z.number(), z.string()]).optional(),
 });
 
 type ActionApi = z.infer<typeof ActionApi>;
@@ -71,6 +72,8 @@ export const CreateGameApi = z
     artificialStart: z.boolean(),
     unlisted: z.boolean(),
     autoStart: z.boolean(),
+    hotseat: z.boolean().default(false),
+    hotseatPlayers: z.array(z.string().min(1).max(32)).optional(),
   })
   .and(MapConfig)
   .refine((data) => data.gameKey === data.variant.gameKey, {
@@ -95,6 +98,16 @@ export const CreateGameApi = z
       message: numPlayersMessage(data.gameKey),
       path: ["maxPlayers"],
     }),
+  )
+  .refine(
+    (data) => {
+      if (!data.hotseat) return true;
+      return data.hotseatPlayers !== undefined && data.hotseatPlayers.length >= data.minPlayers;
+    },
+    {
+      message: "Hotseat games require player names for all minimum players",
+      path: ["hotseatPlayers"],
+    },
   );
 
 export type CreateGameApi = z.infer<typeof CreateGameApi>;
@@ -144,23 +157,25 @@ export const GameLiteApi = z.object({
   id: z.number(),
   gameKey: GameKeyZod,
   name: z.string(),
-  playerIds: z.array(z.number()),
+  playerIds: z.array(z.union([z.number(), z.string()])),
   status: GameStatus,
-  activePlayerId: z.number().optional(),
+  activePlayerId: z.union([z.number(), z.string()]).optional(),
   config: MapConfig,
   variant: VariantConfig,
   turnDuration: TurnDurationZod.or(z.number()),
   summary: z.string().optional(),
   unlisted: z.boolean(),
+  hotseat: z.boolean().default(false),
+  ownerId: z.number().optional(),
 });
 export type GameLiteApi = z.infer<typeof GameLiteApi>;
 
 export const GameApi = GameLiteApi.extend({
   version: z.number(),
   turnStartTime: z.string().optional(),
-  concedingPlayers: z.number().array(),
+  concedingPlayers: z.array(z.union([z.number(), z.string()])),
   gameData: z.string().optional(),
-  undoPlayerId: z.number().optional(),
+  undoPlayerId: z.union([z.number(), z.string()]).optional(),
 });
 export type GameApi = z.infer<typeof GameApi>;
 

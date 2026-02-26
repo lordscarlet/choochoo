@@ -48,7 +48,9 @@ export function creatingGame(driver: Driver) {
   }
 
   async function startGame(game: GameDao, seedValue: string): Promise<void> {
-    await driver.goToGame(game.id, game.playerIds[0]);
+    const firstPlayerId = game.playerIds[0];
+    assert(typeof firstPlayerId === "number", "First player should be a user ID");
+    await driver.goToGame(game.id, firstPlayerId);
     const seedEl = await driver.waitForElement(By.xpath('//*[@name="seed"]'));
     await driver.driver.executeScript(
       `arguments[0].value = arguments[1];`,

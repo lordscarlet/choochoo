@@ -6,6 +6,7 @@ import {
   AutoAction,
   NoAutoActionError,
 } from "../../engine/state/auto_action";
+import { PlayerColor } from "../../engine/state/player";
 import { ErrorCode } from "../../utils/error_code";
 import { log, logError } from "../../utils/functions";
 import { afterTransaction } from "../../utils/transaction";
@@ -29,24 +30,40 @@ export async function startGame(
   assert(game.status === GameStatus.enum.LOBBY, {
     invalidInput: "cannot start a game that has already been started",
   });
-  assert(enforceOwner == null || game.playerIds[0] === enforceOwner, {
-    invalidInput: "only the owner can start the game",
-  });
+  const ownerId = game.ownerId;
+  assert(
+    enforceOwner == null || ownerId == null || ownerId === enforceOwner,
+    {
+      invalidInput: "only the owner can start the game",
+    },
+  );
   assert(
     game.playerIds.length >= game.toLiteApi().config.minPlayers,
     "not enough players to start the game",
   );
 
-  const users = await Promise.all(
-    game.playerIds.map((id) => UserDao.getUser(id)),
-  );
+  let players: Array<{ playerId: number | string; preferredColors?: PlayerColor[] }>;
+
+  if (game.hotseat) {
+    // For hotseat games, use string player IDs directly without fetching users
+    players = game.playerIds.map((playerId) => ({
+      playerId,
+      preferredColors: undefined,
+    }));
+  } else {
+    // For regular games, fetch user data
+    const users = await Promise.all(
+      game.playerIds.map((id) => UserDao.getUser(Number(id))),
+    );
+    players = users.map((user) => ({
+      playerId: user!.id,
+      preferredColors: user!.preferredColors,
+    }));
+  }
 
   const { gameData, logs, activePlayerId, seed } =
     EngineDelegator.singleton.start({
-      players: users.map((user) => ({
-        playerId: user!.id,
-        preferredColors: user!.preferredColors,
-      })),
+      players,
       seed: inputSeed,
       game: game.toLimitedGame(),
     });
@@ -82,7 +99,7 @@ export async function startGame(
 
 export async function performAction(
   gameId: number,
-  playerId: number,
+  playerId: number | string,
   actionName: string,
   actionData: unknown,
   confirmed: boolean,
@@ -189,35 +206,55 @@ async function notifyTurnUnlessAutoAction(game: GameDao): Promise<void> {
 
 export async function abandonGame(
   game: GameDao,
-  userId: number,
+  userId: number | string,
   kicked: boolean,
 ): Promise<void> {
-  assert(game.playerIds.includes(userId), { permissionDenied: true });
+  assert(game.playerIds.includes(String(userId)), { permissionDenied: true });
   assert(game.status === GameStatus.enum.ACTIVE, {
     invalidInput: "Can only abandon an active game",
   });
   game.status = GameStatus.enum.ABANDONED;
   game.activePlayerId = null;
   game.undoPlayerId = null;
-  const user = await UserDao.findByPk(userId);
-  assert(user != null);
-  user.abandons++;
-  await sequelize.transaction(async (transaction) => {
-    await Promise.all([
-      game.save({ transaction }),
-      user.save({ transaction }),
-      LogDao.createForGame(
-        game.id,
-        game.version,
-        [
-          kicked
-            ? `<@user-${userId}> ran out of time and was kicked from the game.`
-            : `<@user-${userId}> abandoned the game.`,
-        ],
-        transaction,
-      ),
-    ]);
-  });
+  // Only update user stats for actual user accounts (numeric IDs)
+  if (typeof userId === "number") {
+    const user = await UserDao.findByPk(userId);
+    assert(user != null);
+    user.abandons++;
+    await sequelize.transaction(async (transaction) => {
+      await Promise.all([
+        game.save({ transaction }),
+        user.save({ transaction }),
+        LogDao.createForGame(
+          game.id,
+          game.version,
+          [
+            kicked
+              ? `<@user-${userId}> ran out of time and was kicked from the game.`
+              : `<@user-${userId}> abandoned the game.`,
+          ],
+          transaction,
+        ),
+      ]);
+    });
+  } else {
+    // For hotseat players (string IDs), just save game state and log
+    await sequelize.transaction(async (transaction) => {
+      await Promise.all([
+        game.save({ transaction }),
+        LogDao.createForGame(
+          game.id,
+          game.version,
+          [
+            kicked
+              ? `${userId} ran out of time and was kicked from the game.`
+              : `${userId} abandoned the game.`,
+          ],
+          transaction,
+        ),
+      ]);
+    });
+  }
 }
 
 async function checkForAutoAction(
@@ -251,11 +288,11 @@ async function checkForAutoAction(
   }
 }
 
-export function inTheLead(game: GameDao): number[] {
+export function inTheLead(game: GameDao): (string | number)[] {
   return EngineDelegator.singleton.inTheLead(game.toLimitedGame());
 }
 
-export function remainingPlayers(game: GameDao): number[] {
+export function remainingPlayers(game: GameDao): (string | number)[] {
   return EngineDelegator.singleton.remainingPlayers(game.toLimitedGame());
 }
 

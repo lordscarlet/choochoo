@@ -6,7 +6,7 @@ import { injectCurrentPlayer } from "./state";
 type AutoActionMutation = (autoAction: AutoAction) => void;
 
 export interface AutoActionMutationConfig {
-  playerId: number;
+  playerId: number | string;
   mutation: AutoActionMutation;
 }
 
@@ -24,7 +24,7 @@ export class AutoActionManager {
     return [...this.newAutoAction];
   }
 
-  mutate(playerId: number, mutation: AutoActionMutation) {
+  mutate(playerId: number | string, mutation: AutoActionMutation) {
     this.newAutoAction.push({ playerId, mutation });
   }
 }

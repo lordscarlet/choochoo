@@ -136,9 +136,11 @@ export function PlayerStats() {
                       );
                     })}
                     <td>
-                      <LoginButton playerId={player.playerId}>
-                        Switch
-                      </LoginButton>
+                      {typeof player.playerId === "number" && (
+                        <LoginButton playerId={player.playerId}>
+                          Switch
+                        </LoginButton>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -117,10 +117,13 @@ function TurnOrder() {
 function GameHeader() {
   const game = useGame();
   return (
-    <h1 className={styles.header}>
-      [{game.name}] {ViewRegistry.singleton.get(game.gameKey).name} -{" "}
-      {game.summary}
-    </h1>
+    <div className={styles.headerRow}>
+      <h1 className={styles.header}>
+        [{game.name}] {ViewRegistry.singleton.get(game.gameKey).name} -{" "}
+        {game.summary}
+      </h1>
+      {game.hotseat && <span className={styles.hotseatBadge}>Hotseat</span>}
+    </div>
   );
 }
 

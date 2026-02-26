@@ -22,7 +22,7 @@ export function stringToPlayerColor(str: string): PlayerColor {
 }
 
 export const MutablePlayerData = z.object({
-  playerId: z.number(),
+  playerId: z.union([z.number(), z.string()]),
   color: z.nativeEnum(PlayerColor),
   income: z.number(),
   shares: z.number(),

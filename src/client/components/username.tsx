@@ -4,13 +4,19 @@ import { useUsers, useUserUnsuspended } from "../services/user";
 import * as styles from "./username.module.css";
 
 interface UsernameProps {
-  userId: number;
+  userId: number | string;
   useAt?: boolean;
   useLink?: boolean;
   suspense?: boolean;
 }
 
 export function Username({ userId, useAt, useLink }: UsernameProps) {
+  // For string player IDs (hotseat players), render directly without API call
+  if (typeof userId === "string") {
+    return <>{(useAt ? "@" : "") + userId}</>;
+  }
+
+  // For numeric user IDs, fetch from API
   const { data, isPending } = useUserUnsuspended(userId);
 
   return (
@@ -51,19 +57,37 @@ function MaybeLink({ username, userId, useAt, useLink }: MaybeLinkProps) {
 }
 
 interface UsernameListProps {
-  userIds: number[];
+  userIds: (number | string)[];
   useLink?: boolean;
 }
 
 export function UsernameList({ userIds, useLink }: UsernameListProps) {
-  const users = useUsers(userIds);
+  // Separate numeric and string IDs
+  const numericIds = userIds.filter((id): id is number => typeof id === "number");
+  const stringIds = userIds.filter((id): id is string => typeof id === "string");
+
+  const users = useUsers(numericIds);
+
+  // Combine users and string IDs in original order
+  const allNames = userIds.map((id) => {
+    if (typeof id === "string") {
+      return { id, username: id, isString: true };
+    } else {
+      const user = users.find((u) => u?.id === id);
+      return user ? { ...user, isString: false } : null;
+    }
+  }).filter(isNotNull);
 
   return (
     <>
-      {users.filter(isNotNull).map(({ id, username }, index) => (
-        <span key={username}>
+      {allNames.map(({ id, username, isString }, index) => (
+        <span key={`${id}-${username}`}>
           {index !== 0 && ", "}
-          <MaybeLink username={username} userId={id} useLink={useLink} />
+          {isString ? (
+            <>{username}</>
+          ) : (
+            <MaybeLink username={username} userId={id as number} useLink={useLink} />
+          )}
         </span>
       ))}
     </>

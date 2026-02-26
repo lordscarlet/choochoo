@@ -1,9 +1,25 @@
 .gameCard {
+  position: relative;
 }
 
 .gameCardHeader {
   padding: 1em;
   border-radius: inherit;
+}
+
+.hotseatBadge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75em;
+  font-weight: 600;
+  font-family: sans-serif;
+  letter-spacing: 0.02em;
+  background: #e6f3ff;
+  color: #1f6fb2;
+  white-space: nowrap;
 }
 
 :global(.ui.card) :global(.meta).gameCardMeta {

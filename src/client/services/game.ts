@@ -498,8 +498,9 @@ export function useUndoAction(): UndoAction {
   const { mutate, error, isPending } = tsr.games.undoAction.useMutation();
   handleError(isPending, error);
 
-  const canUndoBecausePlayer =
-    game.undoPlayerId != null && game.undoPlayerId === me?.id;
+  const canUndoBecausePlayer = game.hotseat
+    ? game.ownerId != null && game.ownerId === me?.id && game.undoPlayerId != null
+    : game.undoPlayerId != null && game.undoPlayerId === me?.id;
   const canUndoBecauseAdmin = isAdmin;
   const canUndo =
     canEditGame(game) && (canUndoBecausePlayer || canUndoBecauseAdmin);

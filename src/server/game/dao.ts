@@ -54,11 +54,14 @@ export class GameDao extends Model<
   declare status: GameStatus;
 
   @Attribute(DataTypes.JSONB)
-  declare autoAction: { users: { [userId: number]: AutoAction } } | null;
+  declare autoAction: { users: { [playerId: number | string]: AutoAction } } | null;
 
-  @Attribute(DataTypes.ARRAY(DataTypes.INTEGER))
+  @Attribute(DataTypes.ARRAY(DataTypes.TEXT))
   @NotNull
-  declare playerIds: number[];
+  declare playerIds: (number | string)[];
+
+  @Attribute({ type: DataTypes.INTEGER, allowNull: true })
+  declare ownerId: number | null;
 
   @Attribute(DataTypes.BOOLEAN)
   @NotNull
@@ -75,9 +78,9 @@ export class GameDao extends Model<
   @Attribute({ type: DataTypes.DATE, allowNull: true })
   declare turnStartTime?: CreationOptional<Date | null>;
 
-  @Attribute(DataTypes.ARRAY(DataTypes.INTEGER))
+  @Attribute(DataTypes.ARRAY(DataTypes.TEXT))
   @NotNull
-  declare concedingPlayers: number[];
+  declare concedingPlayers: (number | string)[];
 
   @Attribute(DataTypes.JSONB)
   declare config: MapConfig;
@@ -89,11 +92,15 @@ export class GameDao extends Model<
   @Attribute(DataTypes.ARRAY(DataTypes.TEXT))
   declare notes: Array<string | null> | null;
 
-  @Attribute({ type: DataTypes.INTEGER, allowNull: true })
-  declare activePlayerId: number | null;
+  @Attribute({ type: DataTypes.TEXT, allowNull: true })
+  declare activePlayerId: number | string | null;
 
-  @Attribute({ type: DataTypes.INTEGER, allowNull: true })
-  declare undoPlayerId: number | null;
+  @Attribute({ type: DataTypes.TEXT, allowNull: true })
+  declare undoPlayerId: number | string | null;
+
+  @Attribute(DataTypes.BOOLEAN)
+  @NotNull
+  declare hotseat: boolean;
 
   @Version
   @NotNull
@@ -126,27 +133,27 @@ export class GameDao extends Model<
     return toSummary(this);
   }
 
-  getAutoActionForUser(userId: number): AutoAction {
-    return this.autoAction?.users?.[userId] ?? {};
+  getAutoActionForUser(playerId: number | string): AutoAction {
+    return this.autoAction?.users?.[playerId] ?? {};
   }
 
-  setAutoActionForUser(userId: number, autoAction: AutoAction): void {
+  setAutoActionForUser(playerId: number | string, autoAction: AutoAction): void {
     this.autoAction = this.autoAction ?? { users: {} };
-    this.autoAction.users[userId] = autoAction;
+    this.autoAction.users[playerId] = autoAction;
     this.changed("autoAction", true);
   }
 
-  getNotesForUser(userId: number): string {
-    const index = this.playerIds.indexOf(userId);
+  getNotesForUser(playerId: number | string): string {
+    const index = this.playerIds.indexOf(playerId);
     if (index === -1) {
       return "";
     }
     return this.notes?.[index] ?? "";
   }
 
-  setNotesForUser(userId: number, notes: string) {
-    const index = this.playerIds.indexOf(userId);
-    assert(index >= 0, { unauthorized: "only players can set notes" });
+  setNotesForUser(playerId: number | string, notes: string) {
+    const index = this.playerIds.indexOf(playerId);
+    assert(index >= 0, { unauthorized: "only players can set notes for themselves" });
     this.notes ??= [];
     this.notes[index] = notes;
     this.changed("notes", true);
@@ -161,6 +168,7 @@ export function toApi(game: InferAttributes<GameDao> | GameApi): GameApi {
     turnStartTime: game.turnStartTime?.toString() ?? undefined,
     gameData: game.gameData ?? undefined,
     undoPlayerId: game.undoPlayerId ?? undefined,
+    hotseat: game.hotseat ?? false,
   };
 }
 
@@ -177,6 +185,8 @@ function toLiteApi(game: GameApi | InferAttributes<GameDao>): GameLiteApi {
     config: game.config,
     summary: toSummary(game),
     unlisted: game.unlisted,
+    hotseat: ("hotseat" in game ? game.hotseat : false) ?? false,
+    ownerId: ("ownerId" in game ? game.ownerId : undefined) ?? undefined,
   };
 }
 

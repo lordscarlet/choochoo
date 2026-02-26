@@ -23,7 +23,7 @@ import {
 } from "./state";
 
 export interface PlayerUser {
-  playerId: number;
+  playerId: number | string;
   preferredColors?: PlayerColor[];
 }
 
@@ -190,7 +190,7 @@ export class GameStarter {
     return true;
   }
 
-  protected buildPlayer(playerId: number, color: PlayerColor): PlayerData {
+  protected buildPlayer(playerId: number | string, color: PlayerColor): PlayerData {
     return {
       playerId,
       color,

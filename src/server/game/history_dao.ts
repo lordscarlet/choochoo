@@ -69,8 +69,8 @@ export class GameHistoryDao extends Model<
   @BelongsTo(() => GameDao, "gameId")
   declare game: NonAttribute<GameDao>;
 
-  @Attribute(DataTypes.INTEGER)
-  declare userId: number | null;
+  @Attribute(DataTypes.TEXT)
+  declare userId: number | string | null;
 
   @BelongsTo(() => UserDao, "userId")
   declare user: NonAttribute<UserDao>;
@@ -118,6 +118,7 @@ export class GameHistoryDao extends Model<
       variant: game.variant,
       unlisted: game.unlisted,
       undoPlayerId: undefined,
+      hotseat: game.hotseat ?? false,
     };
     historyApi.summary = toSummary(historyApi);
     return historyApi;

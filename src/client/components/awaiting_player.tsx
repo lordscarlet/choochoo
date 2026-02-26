@@ -13,11 +13,17 @@ const AwaitingPlayerContext = createContext<(() => void) | undefined>(
 );
 const IsAwaitingPlayerContext = createContext(false);
 
-export function useAwaitingPlayer(awaitingPlayer?: number): void {
+export function useAwaitingPlayer(awaitingPlayer?: number | string): void {
   const me = useMe();
   const ctx = useContext(AwaitingPlayerContext);
   useEffect(() => {
-    if (ctx != null && awaitingPlayer != null && awaitingPlayer === me?.id) {
+    // Only check for numeric user IDs (not hotseat string names)
+    if (
+      ctx != null &&
+      awaitingPlayer != null &&
+      typeof awaitingPlayer === "number" &&
+      awaitingPlayer === me?.id
+    ) {
       return ctx();
     }
   }, [me?.id, awaitingPlayer, ctx]);

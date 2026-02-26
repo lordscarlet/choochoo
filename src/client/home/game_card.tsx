@@ -62,11 +62,11 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
             {game.activePlayerId && (
               <p>
                 Active Player:{" "}
-                <Username userId={game.activePlayerId} useLink={true} />
+                <Username userId={game.activePlayerId} useLink={!game.hotseat} />
               </p>
             )}
             <p>
-              Players: <UsernameList userIds={game.playerIds} useLink={true} />
+              Players: <UsernameList userIds={game.playerIds} useLink={!game.hotseat} />
             </p>
             {game.status === GameStatus.enum.LOBBY && (
               <p>Seats: {seats(game)}</p>
@@ -81,11 +81,12 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
       </CardContent>
       <CardContent extra>
         <ViewButton game={game} />
-        <LeaveButton game={game} />
-        <JoinButton game={game} />
+        {!game.hotseat && <LeaveButton game={game} />}
+        {!game.hotseat && <JoinButton game={game} />}
         <StartButton game={game} />
         <DeleteButton game={game} />
       </CardContent>
+      {game.hotseat && <span className={styles.hotseatBadge}>Hotseat</span>}
     </Card>
   );
 }

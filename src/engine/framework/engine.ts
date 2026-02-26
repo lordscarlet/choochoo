@@ -22,7 +22,7 @@ import { InjectionContext } from "./inject";
 import { StateStore } from "./state";
 
 interface GameState {
-  activePlayerId?: number;
+  activePlayerId?: string | number;
   hasEnded: boolean;
   gameData: string;
   reversible: boolean;
@@ -63,11 +63,11 @@ export class EngineDelegator {
     return this.getEngine(game.gameKey).readSummary(game);
   }
 
-  inTheLead(game: LimitedGame): number[] {
+  inTheLead(game: LimitedGame): (string | number)[] {
     return this.getEngine(game.gameKey).inTheLead(game);
   }
 
-  remainingPlayers(game: LimitedGame): number[] {
+  remainingPlayers(game: LimitedGame): (string | number)[] {
     return this.getEngine(game.gameKey).remainingPlayers(game);
   }
 }
@@ -143,7 +143,7 @@ export class EngineProcessor {
     });
   }
 
-  inTheLead(game: LimitedGame): number[] {
+  inTheLead(game: LimitedGame): (number | string)[] {
     return this.process(game, () => {
       return this.playerHelper
         .getPlayersOrderedByScore()[0]
@@ -151,7 +151,7 @@ export class EngineProcessor {
     });
   }
 
-  remainingPlayers(game: LimitedGame): number[] {
+  remainingPlayers(game: LimitedGame): (number | string)[] {
     return this.process(game, () => {
       return this.playerHelper
         .getRemainingPlayers()
