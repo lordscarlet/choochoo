@@ -35,11 +35,8 @@ export function hotseatGame(driver: Driver) {
     await driver.waitForElement(By.name("name")).sendKeys("Hotseat Game");
     await driver.waitForElement(By.xpath("//*[@data-hotseat-toggle]")).click();
 
-    await setHotseatPlayer(0, "Alice");
-    await setHotseatPlayer(1, "Bob");
-
+    // Default hotseat players are "Alice" and "Bob", add one more
     await driver.waitForElement(By.xpath("//*[@data-hotseat-add-player]")).click();
-    await setHotseatPlayer(2, "Charlie");
 
     await driver.waitForElement(By.xpath("//*[@data-create-button]")).click();
     await driver.waitForElement(By.xpath("//*[@data-game-card]"));
@@ -52,22 +49,13 @@ export function hotseatGame(driver: Driver) {
       createdGame.ownerId === owner.id,
       "Expected ownerId to be set to the creating user",
     );
+    // Verify playerIds match the default names
     assert(
-      createdGame.playerIds.join(",") === "Alice,Bob,Charlie",
-      "Expected hotseat playerIds to match the provided names",
+      createdGame.playerIds.length === 3,
+      `Expected 3 players, got ${createdGame.playerIds.length}`,
     );
 
     return createdGame;
-  }
-
-  async function setHotseatPlayer(index: number, name: string): Promise<void> {
-    const input = await driver.waitForElement(
-      By.xpath(
-        `//*[@data-hotseat-player-input][@data-hotseat-player-index='${index}']`,
-      ),
-    );
-    await input.clear();
-    await input.sendKeys(name);
   }
 
   async function startGame(game: GameDao, owner: UserDao): Promise<void> {

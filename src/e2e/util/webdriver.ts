@@ -101,6 +101,9 @@ export class Driver {
     tileType: TileType,
     orientation: Direction,
   ) {
+    await this.waitForElement(
+      By.xpath("//*[name()='svg'][@data-hex-grid='main-map']"),
+    );
     const mapHex = await this.findElementByDataAttributes({
       parent: By.xpath("//*[name()='svg'][@data-hex-grid='main-map']"),
       name: "polygon",
@@ -112,12 +115,21 @@ export class Driver {
       "arguments[0].scrollIntoView({ block: 'center', inline: 'center' });",
       mapHex,
     );
+    // Dispatch click event to bypass SVG overlay
     await this.driver.executeScript(
-      "arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));",
+      `
+        const element = arguments[0];
+        element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+        element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true }));
+      `,
       mapHex,
     );
+    
+    // Give React time to process the events and render the building options
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    await this.waitForElement(By.xpath("//*[@data-building-options]"));
+    await this.waitForElement(By.xpath("//*[@data-building-options]"), { timeout: 3000 });
 
     const tileOption = await this.findElementByDataAttributes({
       parent: By.xpath("//*[@data-building-options]"),
@@ -129,7 +141,12 @@ export class Driver {
     });
     const tilePolygon = await tileOption.findElement(By.css("polygon"));
     await this.driver.executeScript(
-      "arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));",
+      `
+        const element = arguments[0];
+        element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+        element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true }));
+      `,
       tilePolygon,
     );
 
