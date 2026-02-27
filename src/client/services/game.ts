@@ -453,7 +453,9 @@ export function useStartGame(game: GameLiteApi) {
   const canPerform =
     me != null &&
     game.status == GameStatus.enum.LOBBY &&
-    Number(game.playerIds[0]) === me.id &&
+    (game.hotseat
+      ? game.ownerId != null && game.ownerId === me.id
+      : Number(game.playerIds[0]) === me.id) &&
     game.playerIds.length >= game.config.minPlayers;
 
   return { canPerform, perform, isPending };
