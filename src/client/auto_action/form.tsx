@@ -43,7 +43,7 @@ export function AutoActionForm() {
     !canEdit ||
     me == null ||
     game.status !== GameStatus.enum.ACTIVE ||
-    !game.playerIds.includes(me.id)
+    !game.playerIds.some((id) => Number(id) === me.id)
   )
     return <></>;
 

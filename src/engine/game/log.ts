@@ -12,8 +12,12 @@ export class Log {
   }
 
   player(player: PlayerData, entry: string): void {
+    const playerLabel =
+      typeof player.playerId === "string"
+        ? player.playerId
+        : `<@user-${player.playerId}>`;
     this.log(
-      `<@user-${player.playerId}> (${playerColorToString(player.color)}) ${entry}`,
+      `${playerLabel} (${playerColorToString(player.color)}) ${entry}`,
     );
   }
 

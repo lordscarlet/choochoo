@@ -73,7 +73,22 @@ export const CreateGameApi = z
     unlisted: z.boolean(),
     autoStart: z.boolean(),
     hotseat: z.boolean().default(false),
-    hotseatPlayers: z.array(z.string().min(1).max(32)).optional(),
+    hotseatPlayers: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(32)
+          .regex(
+            /^[a-zA-Z0-9_\- ]+$/,
+            "Player names can only contain letters, numbers, spaces, underscores, and hyphens",
+          ),
+      )
+      .optional()
+      .refine(
+        (players) => !players || new Set(players).size === players.length,
+        { message: "Player names must be unique" },
+      ),
   })
   .and(MapConfig)
   .refine((data) => data.gameKey === data.variant.gameKey, {
@@ -106,6 +121,17 @@ export const CreateGameApi = z
     },
     {
       message: "Hotseat games require player names for all minimum players",
+      path: ["hotseatPlayers"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (!data.hotseat) return true;
+      // If hotseat is true, hotseatPlayers should be defined and not empty
+      return data.hotseatPlayers !== undefined && data.hotseatPlayers.length > 0;
+    },
+    {
+      message: "Hotseat games must have at least one player name",
       path: ["hotseatPlayers"],
     },
   );

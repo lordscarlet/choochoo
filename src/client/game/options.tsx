@@ -25,7 +25,7 @@ export function GameOptions() {
   if (
     game.status !== GameStatus.enum.ACTIVE ||
     me == null ||
-    !game.playerIds.includes(me.id)
+    !game.playerIds.some((id) => Number(id) === me.id)
   ) {
     return <></>;
   }

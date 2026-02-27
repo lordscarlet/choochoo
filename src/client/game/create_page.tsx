@@ -276,6 +276,7 @@ export function CreateGamePage() {
             disabled={isPending}
             onChange={setHotseat}
             error={validationError?.hotseat}
+            data-hotseat-toggle
           />
 
           {hotseat && (
@@ -286,6 +287,8 @@ export function CreateGamePage() {
                   key={index}
                   placeholder={`Player ${index + 1}`}
                   value={playerName}
+                  data-hotseat-player-input
+                  data-hotseat-player-index={index}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const newPlayers = [...hotseatPlayers];
                     newPlayers[index] = e.target.value;
@@ -297,6 +300,7 @@ export function CreateGamePage() {
               <Button
                 type="button"
                 size="small"
+                data-hotseat-add-player
                 onClick={() => {
                   if (hotseatPlayers.length < (maxPlayers || 8)) {
                     setHotseatPlayers([...hotseatPlayers, `Player ${hotseatPlayers.length + 1}`]);
@@ -309,6 +313,7 @@ export function CreateGamePage() {
               <Button
                 type="button"
                 size="small"
+                data-hotseat-remove-player
                 onClick={() => {
                   if (hotseatPlayers.length > (minPlayers || 2)) {
                     setHotseatPlayers(hotseatPlayers.slice(0, -1));

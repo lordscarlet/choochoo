@@ -101,24 +101,37 @@ export class Driver {
     tileType: TileType,
     orientation: Direction,
   ) {
-    await this.findElementByDataAttributes({
+    const mapHex = await this.findElementByDataAttributes({
       parent: By.xpath("//*[name()='svg'][@data-hex-grid='main-map']"),
       name: "polygon",
       dataAttributes: {
         coordinates: coordinates.serialize(),
       },
-    }).click();
+    });
+    await this.driver.executeScript(
+      "arguments[0].scrollIntoView({ block: 'center', inline: 'center' });",
+      mapHex,
+    );
+    await this.driver.executeScript(
+      "arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));",
+      mapHex,
+    );
 
-    await this.findElementByDataAttributes({
+    await this.waitForElement(By.xpath("//*[@data-building-options]"));
+
+    const tileOption = await this.findElementByDataAttributes({
       parent: By.xpath("//*[@data-building-options]"),
       name: "div",
       dataAttributes: {
         "tile-type": tileType,
         orientation: orientation,
       },
-    })
-      .findElement(By.css("polygon"))
-      .click();
+    });
+    const tilePolygon = await tileOption.findElement(By.css("polygon"));
+    await this.driver.executeScript(
+      "arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));",
+      tilePolygon,
+    );
 
     await this.waitForSuccess();
   }

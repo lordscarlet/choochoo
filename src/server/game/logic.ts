@@ -51,12 +51,12 @@ export async function startGame(
       preferredColors: undefined,
     }));
   } else {
-    // For regular games, fetch user data
+    // For regular games, fetch user data but convert playerIds to strings
     const users = await Promise.all(
       game.playerIds.map((id) => UserDao.getUser(Number(id))),
     );
     players = users.map((user) => ({
-      playerId: user!.id,
+      playerId: String(user!.id),
       preferredColors: user!.preferredColors,
     }));
   }
@@ -71,7 +71,7 @@ export async function startGame(
   game.turnStartTime = new Date();
   game.gameData = gameData;
   game.status = GameStatus.enum.ACTIVE;
-  game.activePlayerId = activePlayerId ?? null;
+  game.activePlayerId = activePlayerId != null ? String(activePlayerId) : null;
 
   const gameHistory = GameHistoryDao.build({
     previousGameVersion: game.version - 1,
@@ -156,9 +156,9 @@ export async function performAction(
       }
       game.version = game.version + 1;
       game.gameData = gameData;
-      game.activePlayerId = activePlayerId ?? null;
+      game.activePlayerId = activePlayerId != null ? String(activePlayerId) : null;
       game.status = hasEnded ? GameStatus.enum.ENDED : GameStatus.enum.ACTIVE;
-      game.undoPlayerId = reversible ? playerId : null;
+      game.undoPlayerId = reversible ? String(playerId) : null;
 
       for (const mutation of autoActionMutations) {
         const autoAction = game.getAutoActionForUser(mutation.playerId);
@@ -198,6 +198,9 @@ export async function performAction(
 }
 
 async function notifyTurnUnlessAutoAction(game: GameDao): Promise<void> {
+  // Skip notifications for hotseat games (single device play, no remote notifications needed)
+  if (game.hotseat) return;
+
   const hasAutoAction = await checkForAutoAction(game.id, /* dryRun= */ true);
   if (!hasAutoAction) {
     return notifyTurn(game);

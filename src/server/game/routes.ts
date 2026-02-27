@@ -154,7 +154,7 @@ const router = initServer().router(gameContract, {
     );
     assert(map.stage !== ReleaseStage.DEVELOPMENT || body.unlisted, { invalidInput: "Development map games must be unlisted." });
 
-    let playerIds: (number | string)[] = [userId];
+    let playerIds: (number | string)[] = [String(userId)];
     let unlisted = body.unlisted;
     let hotseat = false;
 
@@ -178,7 +178,7 @@ const router = initServer().router(gameContract, {
           where: { id: { [Op.ne]: userId }, role: UserRole.enum.USER },
           limit: body.minPlayers - 1,
         });
-        playerIds.push(...users.map(({ id }) => id));
+        playerIds.push(...users.map(({ id }) => String(id)));
       }
     }
 
@@ -303,6 +303,10 @@ const router = initServer().router(gameContract, {
       assert(body.performingPlayerId != null, {
         invalidInput: "Hotseat games require performingPlayerId",
       });
+      // SECURITY: Only the game owner can perform actions in hotseat mode
+      assert(gamePreFetch.ownerId === req.session.userId, {
+        permissionDenied: "Only the game owner can perform actions in hotseat mode",
+      });
       playerId = body.performingPlayerId;
     } else {
       // For regular games, require session userId
@@ -391,6 +395,8 @@ const router = initServer().router(gameContract, {
     await assertRole(req, UserRole.enum.ADMIN);
     const game = await GameDao.findByPk(params.gameId);
     assert(game != null, { notFound: true });
+    // Hotseat games use string player IDs without user accounts, so retrying would require
+    // fetching user data which is not applicable. Retries are only supported for account-based games.
     assert(!game.hotseat, {
       invalidInput: "Cannot retry hotseat games",
     });

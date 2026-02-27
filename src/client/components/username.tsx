@@ -62,9 +62,8 @@ interface UsernameListProps {
 }
 
 export function UsernameList({ userIds, useLink }: UsernameListProps) {
-  // Separate numeric and string IDs
+  // Separate numeric and string IDs for useUsers query
   const numericIds = userIds.filter((id): id is number => typeof id === "number");
-  const stringIds = userIds.filter((id): id is string => typeof id === "string");
 
   const users = useUsers(numericIds);
 

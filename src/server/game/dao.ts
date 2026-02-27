@@ -185,8 +185,9 @@ function toLiteApi(game: GameApi | InferAttributes<GameDao>): GameLiteApi {
     config: game.config,
     summary: toSummary(game),
     unlisted: game.unlisted,
-    hotseat: ("hotseat" in game ? game.hotseat : false) ?? false,
-    ownerId: ("ownerId" in game ? game.ownerId : undefined) ?? undefined,
+    hotseat: ("hotseat" in game && game.hotseat) || false,
+    ownerId:
+      "ownerId" in game ? (game.ownerId ?? undefined) : undefined,
   };
 }
 

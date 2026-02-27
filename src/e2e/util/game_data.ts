@@ -33,7 +33,7 @@ export function setUpGameEnvironment(
     ] as PlayerColor;
     for (const player of playerData) {
       const user = users.pop()!;
-      player.playerId = user.id;
+      player.playerId = String(user.id);
       players.set(player.color, user);
       if (player.color === currentPlayerColor) {
         gameEnvironment.activePlayer = user;
@@ -117,8 +117,8 @@ async function initializeGame(
     status: GameStatus.enum.ACTIVE,
     turnDuration: 1000,
     concedingPlayers: [],
-    activePlayerId: currentPlayer.id,
-    playerIds: players.map((u) => u.id),
+    activePlayerId: String(currentPlayer.id),
+    playerIds: players.map((u) => String(u.id)),
     variant: variantConfig,
     config: {
       minPlayers: players.length,

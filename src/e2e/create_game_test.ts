@@ -31,6 +31,7 @@ export function creatingGame(driver: Driver) {
     await joinGame(users[2], game);
 
     await startGame(game, "fooval");
+    await waitForGameActive(game);
 
     await compareGameData(game, "create_game_after");
   });
@@ -38,6 +39,7 @@ export function creatingGame(driver: Driver) {
   async function createGame(creationUser: UserDao): Promise<GameDao> {
     await driver.goTo("/app/games/create", creationUser.id);
     await driver.waitForElement(By.name("name")).sendKeys("My Game");
+    // Disable auto-start so we can start the game explicitly in the test.
     await driver.waitForElement(By.xpath("//*[@data-auto-start]")).click();
     await driver.waitForElement(By.xpath("//*[@data-create-button]")).click();
     await driver.waitForElement(By.xpath("//*[@data-game-card]"));
@@ -49,20 +51,43 @@ export function creatingGame(driver: Driver) {
 
   async function startGame(game: GameDao, seedValue: string): Promise<void> {
     const firstPlayerId = game.playerIds[0];
-    assert(typeof firstPlayerId === "number", "First player should be a user ID");
-    await driver.goToGame(game.id, firstPlayerId);
-    const seedEl = await driver.waitForElement(By.xpath('//*[@name="seed"]'));
-    await driver.driver.executeScript(
-      `arguments[0].value = arguments[1];`,
-      seedEl,
-      seedValue,
+    const numericPlayerId = Number(firstPlayerId);
+    assert(
+      Number.isFinite(numericPlayerId),
+      "First player should be a numeric user ID",
     );
-    await driver.waitForElement(By.xpath("//*[@data-start-button]")).click();
+    await driver.goToGame(game.id, numericPlayerId);
+    
+    // Check game status in database
+    await game.reload();
+    const status = game.status;
+    assert(status === "LOBBY", `Expected game to be in LOBBY but is in ${status}`);
+    
+    const seedEls = await driver.driver.findElements(By.name("seed"));
+    if (seedEls.length > 0) {
+      await driver.driver.executeScript(
+        `arguments[0].value = arguments[1];`,
+        seedEls[0],
+        seedValue,
+      );
+    }
+    const startButton = await driver.waitForElement(
+      By.xpath("//*[@data-start-button]"),
+    );
+    await startButton.click();
     await driver.waitForSuccess();
   }
 
   async function joinGame(user: UserDao, game: GameDao) {
     await driver.goToGame(game.id, user.id);
     await driver.waitForElement(By.xpath("//*[@data-join-button]")).click();
+  }
+
+  async function waitForGameActive(game: GameDao): Promise<void> {
+    for (let i = 0; i < 20; i++) {
+      await game.reload();
+      if (game.status === "ACTIVE") return;
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
   }
 }

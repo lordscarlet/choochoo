@@ -37,9 +37,9 @@ function checkMatch(game: GameLiteApi, entry: Entry<ListGamesApi>): boolean {
   if (value == null) return true;
   switch (key) {
     case "userId":
-      return game.playerIds.includes(value);
+      return game.playerIds.includes(String(value));
     case "excludeUserId":
-      return !game.playerIds.includes(value);
+      return !game.playerIds.includes(String(value));
     case "status":
       return value.includes(game.status);
     case "gameKey":
@@ -150,7 +150,7 @@ export function useGameList(baseQuery: ListGamesApi) {
         );
         // Do not add unlisted games to the UI
         // FIXME: Ideally this should be excluded server-side, but since updates are broadcast to all sockets it's a bit tricky to control there
-        if (!present && game.unlisted && (me === undefined || game.playerIds.indexOf(me.id) === -1)) {
+        if (!present && game.unlisted && (me === undefined || game.playerIds.indexOf(String(me.id)) === -1)) {
           return pages;
         }
 
@@ -361,7 +361,7 @@ export function useDeleteGame(game: GameLiteApi) {
   const canBeDeleted =
     game.status === GameStatus.enum.LOBBY || game.playerIds.length === 1;
 
-  const canPerform = isAdmin || (canBeDeleted && game.playerIds[0] === me?.id);
+  const canPerform = isAdmin || (canBeDeleted && Number(game.playerIds[0]) === me?.id);
 
   return { canPerform, perform, isPending };
 }
@@ -386,7 +386,7 @@ export function useJoinGame(game: GameLiteApi): GameAction {
   const canPerform =
     me != null &&
     game.status == GameStatus.enum.LOBBY &&
-    !game.playerIds.includes(me.id) &&
+    !game.playerIds.some((id) => Number(id) === me.id) &&
     game.playerIds.length < game.config.maxPlayers;
 
   return { canPerform, perform, isPending };
@@ -406,8 +406,8 @@ export function useLeaveGame(game: GameLiteApi): GameAction {
   const canPerform =
     me != null &&
     game.status == GameStatus.enum.LOBBY &&
-    game.playerIds.includes(me.id) &&
-    game.playerIds[0] !== me.id;
+    game.playerIds.some((id) => Number(id) === me.id) &&
+    Number(game.playerIds[0]) !== me.id;
 
   return { canPerform, perform, isPending };
 }
@@ -453,7 +453,7 @@ export function useStartGame(game: GameLiteApi) {
   const canPerform =
     me != null &&
     game.status == GameStatus.enum.LOBBY &&
-    game.playerIds[0] === me.id &&
+    Number(game.playerIds[0]) === me.id &&
     game.playerIds.length >= game.config.minPlayers;
 
   return { canPerform, perform, isPending };
