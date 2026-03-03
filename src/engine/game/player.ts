@@ -112,6 +112,14 @@ export class PlayerHelper {
     );
   }
 
+  getIncomeMultiplier(): number {
+    return 3;
+  }
+
+  getSharesMultiplier(): number {
+    return -3;
+  }
+
   getScoreFromIncome(player: PlayerData): number {
     if (player.outOfGame) return 0;
     return 3 * player.income;

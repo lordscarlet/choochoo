@@ -132,6 +132,18 @@
   color: #d1d5db;
 }
 
+.panelSubsectionTitle {
+  font-weight: 600;
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 8px;
+  margin-bottom: 6px;
+}
+
+:global(.dark-mode) .panelSubsectionTitle {
+  color: #9ca3af;
+}
+
 .panelCard {
   background: white;
   padding: 12px 16px;

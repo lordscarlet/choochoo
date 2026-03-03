@@ -1,6 +1,7 @@
 import { ClickTarget, OnClickRegister } from "../../client/grid/click_target";
 import { useAction } from "../../client/services/action";
 import { MapViewSettings } from "../view_settings";
+import { PlayerData } from "../../engine/state/player";
 import { SelectCityAction } from "./production";
 import { IndiaSteamBrothersRivers } from "./rivers";
 import { IndiaSteamBrothersRules } from "./rules";
@@ -14,6 +15,7 @@ export class IndiaSteamBrothersViewSettings
   getTexturesLayer = IndiaSteamBrothersRivers;
 
   useOnMapClick = useSelectCityOnClick;
+  useMonsoonScenarios = useMonsoonScenarios;
 }
 
 function useSelectCityOnClick(on: OnClickRegister) {
@@ -22,4 +24,16 @@ function useSelectCityOnClick(on: OnClickRegister) {
     on(ClickTarget.CITY, ({ coordinates }) => emit({ coordinates }));
   }
   return isPending;
+}
+
+function useMonsoonScenarios(player: PlayerData) {
+  // Monsoon costs based on die roll:
+  // 1 = $0
+  // 2-5 = $1
+  // 6 = $2
+  return [
+    { description: "No monsoon", cost: 0, probability: "1/6" },
+    { description: "Light monsoon", cost: 1, probability: "4/6" },
+    { description: "Heavy monsoon", cost: 2, probability: "1/6" },
+  ];
 }
