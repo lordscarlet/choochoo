@@ -9,65 +9,65 @@ export const up: Migration = async ({ context: queryInterface }) => {
     defaultValue: false,
   });
 
-  // Convert integer arrays to text arrays by casting the data
+  // Convert array columns via temp columns to avoid ALTER TYPE casting issues
+  await queryInterface.addColumn("Games", "playerIdsTmp", {
+    type: DataTypes.ARRAY(DataTypes.TEXT),
+    allowNull: true,
+  });
+
   await queryInterface.sequelize.query(`
-    UPDATE "Games" 
-    SET "playerIds" = ARRAY(SELECT CAST(unnest("playerIds") AS TEXT))
+    UPDATE "Games"
+    SET "playerIdsTmp" = ARRAY(SELECT CAST(unnest("playerIds") AS TEXT))
     WHERE "playerIds" IS NOT NULL
   `);
 
-  await queryInterface.sequelize.query(`
-    UPDATE "Games" 
-    SET "concedingPlayers" = ARRAY(SELECT CAST(unnest("concedingPlayers") AS TEXT))
-    WHERE "concedingPlayers" IS NOT NULL
-  `);
-
-  // Convert activePlayerId to text
-  await queryInterface.sequelize.query(`
-    UPDATE "Games" 
-    SET "activePlayerId" = CAST("activePlayerId" AS TEXT)
-    WHERE "activePlayerId" IS NOT NULL
-  `);
-
-  // Convert undoPlayerId to text
-  await queryInterface.sequelize.query(`
-    UPDATE "Games" 
-    SET "undoPlayerId" = CAST("undoPlayerId" AS TEXT)
-    WHERE "undoPlayerId" IS NOT NULL
-  `);
-
-  // Convert userId in GameHistories to text
-  await queryInterface.sequelize.query(`
-    UPDATE "GameHistories" 
-    SET "userId" = CAST("userId" AS TEXT)
-    WHERE "userId" IS NOT NULL
-  `);
-
-  // Now change the column types
+  await queryInterface.removeColumn("Games", "playerIds");
+  await queryInterface.renameColumn("Games", "playerIdsTmp", "playerIds");
   await queryInterface.changeColumn("Games", "playerIds", {
     type: DataTypes.ARRAY(DataTypes.TEXT),
     allowNull: false,
   });
 
-  await queryInterface.changeColumn("Games", "activePlayerId", {
-    type: DataTypes.TEXT,
+  await queryInterface.addColumn("Games", "concedingPlayersTmp", {
+    type: DataTypes.ARRAY(DataTypes.TEXT),
     allowNull: true,
   });
 
-  await queryInterface.changeColumn("Games", "undoPlayerId", {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  });
+  await queryInterface.sequelize.query(`
+    UPDATE "Games"
+    SET "concedingPlayersTmp" = ARRAY(SELECT CAST(unnest("concedingPlayers") AS TEXT))
+    WHERE "concedingPlayers" IS NOT NULL
+  `);
 
+  await queryInterface.removeColumn("Games", "concedingPlayers");
+  await queryInterface.renameColumn(
+    "Games",
+    "concedingPlayersTmp",
+    "concedingPlayers",
+  );
   await queryInterface.changeColumn("Games", "concedingPlayers", {
     type: DataTypes.ARRAY(DataTypes.TEXT),
     allowNull: false,
   });
 
-  await queryInterface.changeColumn("GameHistories", "userId", {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  });
+  // Convert single value columns
+  await queryInterface.sequelize.query(`
+    ALTER TABLE "Games"
+    ALTER COLUMN "activePlayerId" TYPE TEXT
+    USING "activePlayerId"::TEXT
+  `);
+
+  await queryInterface.sequelize.query(`
+    ALTER TABLE "Games"
+    ALTER COLUMN "undoPlayerId" TYPE TEXT
+    USING "undoPlayerId"::TEXT
+  `);
+
+  await queryInterface.sequelize.query(`
+    ALTER TABLE "GameHistories"
+    ALTER COLUMN "userId" TYPE TEXT
+    USING "userId"::TEXT
+  `);
 };
 
 export const down: Migration = async ({ context: queryInterface }) => {
