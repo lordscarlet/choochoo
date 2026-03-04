@@ -6,4 +6,4 @@ builds
 .DS_STORE
 buildmeta.*
 *.swp
-*.tsbuildinfo
+*.tsbuildinfosrc/e2e/artifacts/screenshots/

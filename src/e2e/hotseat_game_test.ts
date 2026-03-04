@@ -9,9 +9,16 @@ import { Driver } from "./util/webdriver";
 export function hotseatGame(driver: Driver) {
   let users: UserDao[];
   let game: GameDao | undefined | null;
+  const shouldCaptureScreenshots =
+    process.env.E2E_HOTSEAT_SCREENSHOTS === "true";
+  const screenshotWidth = 1898;
+  const screenshotHeight = 1350;
 
   beforeEach(async function setUpUsers() {
     users = await initializeUsers();
+    if (shouldCaptureScreenshots) {
+      await driver.setViewportSize(screenshotWidth, screenshotHeight);
+    }
   });
 
   afterEach(async function cleanUpGameData() {
@@ -38,8 +45,20 @@ export function hotseatGame(driver: Driver) {
     // Default hotseat players are "Alice" and "Bob", add one more
     await driver.waitForElement(By.xpath("//*[@data-hotseat-add-player]")).click();
 
+    if (shouldCaptureScreenshots) {
+      await driver.saveScreenshot(
+        "src/e2e/artifacts/screenshots/hotseat-create-page.png",
+      );
+    }
+
     await driver.waitForElement(By.xpath("//*[@data-create-button]")).click();
     await driver.waitForElement(By.xpath("//*[@data-game-card]"));
+
+    if (shouldCaptureScreenshots) {
+      await driver.saveScreenshot(
+        "src/e2e/artifacts/screenshots/hotseat-lobby-card.png",
+      );
+    }
 
     const createdGame = await GameDao.findByPk(await driver.getGameId());
     assert(createdGame != null);
@@ -71,7 +90,15 @@ export function hotseatGame(driver: Driver) {
   async function waitForGameActive(game: GameDao): Promise<void> {
     for (let i = 0; i < 20; i++) {
       await game.reload();
-      if (game.status === "ACTIVE") return;
+      if (game.status === "ACTIVE") {
+        if (shouldCaptureScreenshots) {
+          await driver.goToGame(game.id, users[0].id);
+          await driver.saveScreenshot(
+            "src/e2e/artifacts/screenshots/hotseat-active-game.png",
+          );
+        }
+        return;
+      }
       await new Promise((resolve) => setTimeout(resolve, 200));
     }
   }

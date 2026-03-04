@@ -1,3 +1,5 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import {
   Browser,
   Builder,
@@ -156,6 +158,21 @@ export class Driver {
   async waitForSuccess(): Promise<void> {
     const element = await this.waitForElement(By.className("success-toast"));
     await element.findElement(By.css("button")).click();
+  }
+
+  async setViewportSize(width: number, height: number): Promise<void> {
+    // Browser chrome overhead in headless Chrome: ~22px width, ~150px height
+    const windowWidth = width + 22;
+    const windowHeight = height + 150;
+    await this.driver.manage().window().setRect({ width: windowWidth, height: windowHeight });
+  }
+
+  async saveScreenshot(relativePath: string): Promise<string> {
+    const imageBase64 = await this.driver.takeScreenshot();
+    const absolutePath = path.resolve(process.cwd(), relativePath);
+    await mkdir(path.dirname(absolutePath), { recursive: true });
+    await writeFile(absolutePath, imageBase64, { encoding: "base64" });
+    return absolutePath;
   }
 
   async getGameId(): Promise<number> {
