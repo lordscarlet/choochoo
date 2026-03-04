@@ -181,7 +181,7 @@ export function useAction<T extends object>(
   // For regular games, only the active player can perform actions
   const canEmit = game.hotseat
     ? actionCanBeEmitted && canEditGame(game)
-    : me?.id === game.activePlayerId && actionCanBeEmitted && canEditGame(game);
+    : String(me?.id) === String(game.activePlayerId) && actionCanBeEmitted && canEditGame(game);
   const getErrorMessage = useCallback(
     (data: T) => {
       try {

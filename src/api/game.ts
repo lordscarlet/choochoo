@@ -117,21 +117,11 @@ export const CreateGameApi = z
   .refine(
     (data) => {
       if (!data.hotseat) return true;
+      // Hotseat games must have player names for at least the minimum number of players
       return data.hotseatPlayers !== undefined && data.hotseatPlayers.length >= data.minPlayers;
     },
     {
       message: "Hotseat games require player names for all minimum players",
-      path: ["hotseatPlayers"],
-    },
-  )
-  .refine(
-    (data) => {
-      if (!data.hotseat) return true;
-      // If hotseat is true, hotseatPlayers should be defined and not empty
-      return data.hotseatPlayers !== undefined && data.hotseatPlayers.length > 0;
-    },
-    {
-      message: "Hotseat games must have at least one player name",
       path: ["hotseatPlayers"],
     },
   );

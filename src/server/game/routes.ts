@@ -160,10 +160,8 @@ const router = initServer().router(gameContract, {
 
     if (body.hotseat) {
       // Hotseat games always use string player names and are always unlisted
-      assert(body.hotseatPlayers != null && body.hotseatPlayers.length > 0, {
-        invalidInput: "Hotseat games require player names",
-      });
-      playerIds = body.hotseatPlayers;
+      // Validation already handled by CreateGameApi schema
+      playerIds = body.hotseatPlayers!;
       unlisted = true;
       hotseat = true;
       // Artificial start is not compatible with hotseat
@@ -211,17 +209,17 @@ const router = initServer().router(gameContract, {
 
     const isAdmin = user.role === UserRole.enum.ADMIN;
     if (!isAdmin) {
-      const fallbackOwnerId = Number.isFinite(Number(game.playerIds[0]))
-        ? Number(game.playerIds[0])
-        : null;
-      const ownerId = game.ownerId ?? fallbackOwnerId;
       assert(
         game.status === GameStatus.enum.LOBBY || game.playerIds.length === 1,
         {
           invalidInput: "cannot delete started game unless it's a solo",
         },
       );
-      assert(ownerId === user.id, { permissionDenied: true });
+      // For hotseat games, ownerId must be set; for regular games, fall back to first player
+      const ownerId = game.hotseat
+        ? game.ownerId
+        : game.ownerId ?? (Number.isFinite(Number(game.playerIds[0])) ? Number(game.playerIds[0]) : null);
+      assert(ownerId != null && ownerId === user.id, { permissionDenied: true });
     }
 
     await sequelize.transaction(() =>
@@ -591,7 +589,9 @@ const router = initServer().router(gameContract, {
     assert(game.status === GameStatus.enum.ACTIVE, {
       invalidInput: "Can only kick an active game",
     });
-    assert(game.activePlayerId != null);
+    assert(game.activePlayerId != null, {
+      invalidInput: "No active player to kick",
+    });
     assert(
       game.turnStartTime != null &&
         game.turnStartTime.getTime() + game.turnDuration < Date.now(),

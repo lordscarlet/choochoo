@@ -46,7 +46,7 @@ export function GameCard({ game, hideStatus }: GameCardProps) {
     <Card className={styles.gameCard} data-game-card>
       <CardContent style={{ padding: "0" }}>
         <CardHeader
-          className={`${styles.gameCardHeader} ${gameStatusToStyle(game.status)} ${game.activePlayerId === me?.id ? styles.activePlayer : ""}`}
+          className={`${styles.gameCardHeader} ${gameStatusToStyle(game.status)} ${String(game.activePlayerId) === String(me?.id) ? styles.activePlayer : ""}`}
         >
           {game.name}
           <CardMeta
