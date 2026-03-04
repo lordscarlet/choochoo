@@ -1,5 +1,5 @@
 import { PlayerColor, PlayerData } from "../../engine/state/player";
-import { useMonsoonScenarios } from "./view_settings";
+import { useMonsoonScenarios } from "./monsoon_scenarios";
 
 describe("useMonsoonScenarios (India)", () => {
   const COLOR = PlayerColor.BLUE;
