@@ -12,15 +12,15 @@ describe("useMonsoonScenarios (India)", () => {
     
     // Mock the useMonsoonScenarios function
     const scenarios = [
-      { description: "No monsoon", cost: 0, probability: "1/6" },
-      { description: "Light monsoon", cost: 1, probability: "4/6" },
-      { description: "Heavy monsoon", cost: 2, probability: "1/6" },
+      { description: "No monsoon", cost: 0, probability: "17% (1 in 6)" },
+      { description: "Light monsoon", cost: 1, probability: "67% (2 in 3)" },
+      { description: "Heavy monsoon", cost: 2, probability: "17% (1 in 6)" },
     ];
 
     expect(scenarios).toEqual([
-      { description: "No monsoon", cost: 0, probability: "1/6" },
-      { description: "Light monsoon", cost: 1, probability: "4/6" },
-      { description: "Heavy monsoon", cost: 2, probability: "1/6" },
+      { description: "No monsoon", cost: 0, probability: "17% (1 in 6)" },
+      { description: "Light monsoon", cost: 1, probability: "67% (2 in 3)" },
+      { description: "Heavy monsoon", cost: 2, probability: "17% (1 in 6)" },
     ]);
   });
 

@@ -8,6 +8,7 @@ import { Driver } from "./util/webdriver";
 export function playerOverviewBreakdowns(driver: Driver) {
   let users: UserDao[];
   let game: GameDao | undefined | null;
+  const shouldCapture = process.env.E2E_SCREENSHOTS === "true";
 
   beforeEach(async function setUpUsers() {
     users = await initializeUsers();
@@ -34,6 +35,10 @@ export function playerOverviewBreakdowns(driver: Driver) {
     await driver.waitForElement(
       By.xpath("//*[contains(., 'Share penalty') and contains(., '× -2')]"),
     );
+    await maybeElementScreenshot(
+      "london-multiplier-breakdown",
+      By.xpath("//*[contains(., 'Score Breakdown')]/following-sibling::*[1]"),
+    );
   });
 
   it("hides score breakdown on Detroit", async () => {
@@ -50,6 +55,10 @@ export function playerOverviewBreakdowns(driver: Driver) {
       By.xpath("//*[contains(text(), 'Score Breakdown')]"),
     );
     expect(scoreBreakdownHeaders.length).toBe(0);
+    await maybeElementScreenshot(
+      "detroit-score-hidden",
+      By.xpath("//*[contains(., 'Financial Details')]/following-sibling::*[1]"),
+    );
   });
 
   it("hides score breakdown on Barbados", async () => {
@@ -66,6 +75,10 @@ export function playerOverviewBreakdowns(driver: Driver) {
       By.xpath("//*[contains(., 'Score Breakdown')]"),
     );
     expect(scoreBreakdownHeaders.length).toBe(0);
+    await maybeElementScreenshot(
+      "barbados-score-hidden",
+      By.xpath("//*[contains(., 'Financial Details')]/following-sibling::*[1]"),
+    );
   });
 
   it("shows monsoon scenarios with probabilities on India", async () => {
@@ -81,10 +94,14 @@ export function playerOverviewBreakdowns(driver: Driver) {
       By.xpath("//*[contains(., 'Monsoon Scenarios (next income phase):')]"),
     );
     await driver.waitForElement(By.xpath("//*[contains(., 'No monsoon')]") );
-    await driver.waitForElement(By.xpath("//*[contains(., '1/6')]") );
+    await driver.waitForElement(By.xpath("//*[contains(., '17%')]") );
     await driver.waitForElement(By.xpath("//*[contains(., 'Light monsoon')]") );
-    await driver.waitForElement(By.xpath("//*[contains(., '4/6')]") );
+    await driver.waitForElement(By.xpath("//*[contains(., '67%')]") );
     await driver.waitForElement(By.xpath("//*[contains(., 'Heavy monsoon')]") );
+    await maybeElementScreenshot(
+      "india-monsoon-scenarios",
+      By.xpath("//*[contains(., 'Monsoon Scenarios (next income phase):')]/ancestor::*[contains(@class, 'panelCard')][1]"),
+    );
   });
 
   async function createGameForMap(
@@ -165,8 +182,39 @@ export function playerOverviewBreakdowns(driver: Driver) {
 
 
   async function expandFirstPlayer(): Promise<void> {
-    await driver
-      .waitForElement(By.css("button[aria-label='Expand player details']"))
-      .click();
+    const button = await driver.waitForElement(
+      By.css("button[aria-label='Expand player details']"),
+    );
+    await button.click();
+    // Wait for expansion animation to complete
+    await new Promise((r) => setTimeout(r, 500));
+  }
+
+  async function maybeScreenshot(name: string): Promise<void> {
+    if (!shouldCapture) {
+      return;
+    }
+    await driver.saveScreenshot(name);
+  }
+
+  async function maybeElementScreenshot(name: string, by: By): Promise<void> {
+    if (!shouldCapture) {
+      return;
+    }
+    
+    // Set a taller window size to capture expanded content without scrolling
+    await driver.driver.manage().window().setRect({ width: 1920, height: 1500 });
+    
+    // Wait for the target element to ensure it exists
+    await driver.waitForElement(by);
+    
+    // Small delay for any animations to complete
+    await new Promise((r) => setTimeout(r, 500));
+    
+    // Take full page screenshot
+    await driver.saveScreenshot(name);
+    
+    // Reset to normal size
+    await driver.driver.manage().window().setRect({ width: 1920, height: 1080 });
   }
 }

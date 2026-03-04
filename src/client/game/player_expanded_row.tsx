@@ -248,14 +248,36 @@ function FinancialDetailsPanel({ player }: { player: PlayerData }) {
             <div className={styles.panelSubsectionTitle}>
               Monsoon Scenarios (next income phase):
             </div>
-            {monsoonScenarios.map((scenario, index) => (
-              <div key={index} className={styles.panelSubrow}>
-                <span>{scenario.description}:</span>
-                <span className={styles.valueNegative}>
-                  {formatMoney(scenario.cost)} ({scenario.probability})
-                </span>
-              </div>
-            ))}
+            <div className={styles.monsoonScenariosGrid}>
+              {monsoonScenarios.map((scenario, index) => {
+                const resultingMoney = endOfTurnMoney + scenario.cost;
+                return (
+                  <div key={index} className={styles.monsoonScenario}>
+                    <div className={styles.monsoonLabel}>
+                      {scenario.description}
+                    </div>
+                    <div
+                      className={`${styles.monsoonValue} ${resultingMoney >= 0 ? styles.valuePositive : styles.valueNegative}`}
+                    >
+                      {formatMoney(resultingMoney)}
+                    </div>
+                    <div className={styles.monsoonCost}>
+                      {scenario.cost === 0
+                        ? "No cost"
+                        : `Cost: ${formatMoney(scenario.cost)}`}
+                    </div>
+                    <div className={styles.monsoonProbability}>
+                      {scenario.probability}
+                    </div>
+                    {resultingMoney < 0 && (
+                      <div className={styles.monsoonNeeds}>
+                        Needs {formatMoney(Math.abs(resultingMoney))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </>
         )}
       </div>
