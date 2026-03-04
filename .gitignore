@@ -6,4 +6,5 @@ builds
 .DS_STORE
 buildmeta.*
 *.swp
-*.tsbuildinfosrc/e2e/artifacts/
+*.tsbuildinfo
+src/e2e/artifacts/
