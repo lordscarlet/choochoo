@@ -93,6 +93,9 @@ export function hotseatGame(driver: Driver) {
       if (game.status === "ACTIVE") {
         if (shouldCaptureScreenshots) {
           await driver.goToGame(game.id, users[0].id);
+          // Wait for the game board to load by checking for game container or waiting for network to settle
+          await driver.waitForElement(By.xpath("//*[contains(@class, 'game')]"), { timeout: 5000 });
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // Extra wait for rendering
           await driver.saveScreenshot(
             "src/e2e/artifacts/screenshots/hotseat-active-game.png",
           );
