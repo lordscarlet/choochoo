@@ -119,7 +119,7 @@ export class Driver {
       "arguments[0].scrollIntoView({ block: 'center', inline: 'center' });",
       element,
     );
-    const image = await element.takeScreenshot(true);
+    const image = await element.takeScreenshot();
 
     const artifactsDir = resolve(__dirname, "../artifacts/screenshots");
     await mkdir(artifactsDir, { recursive: true });

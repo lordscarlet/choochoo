@@ -250,7 +250,7 @@ function FinancialDetailsPanel({ player }: { player: PlayerData }) {
             </div>
             <div className={styles.monsoonScenariosGrid}>
               {monsoonScenarios.map((scenario, index) => {
-                const resultingMoney = endOfTurnMoney + scenario.cost;
+                const resultingMoney = endOfTurnMoney - scenario.cost;
                 return (
                   <div key={index} className={styles.monsoonScenario}>
                     <div className={styles.monsoonLabel}>
@@ -566,6 +566,10 @@ export function ScoreTooltipContent({ player }: ScoreTooltipContentProps) {
   // Get multipliers from helper (handles maps with custom multipliers)
   const incomeMultiplier = playerHelper.getIncomeMultiplier();
   const sharesMultiplier = playerHelper.getSharesMultiplier();
+
+  if (viewSettings.hideScoreBreakdown) {
+    return null;
+  }
 
   const customScoreItems = viewSettings.useScoreBreakdownItems?.(player) ?? [];
 

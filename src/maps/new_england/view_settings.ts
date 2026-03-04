@@ -11,7 +11,7 @@ export class NewEnglandViewSettings
   useScoreBreakdownItems = useNewEnglandScoreBreakdown;
 }
 
-function useNewEnglandScoreBreakdown(
+export function useNewEnglandScoreBreakdown(
   player: PlayerData,
 ): Array<{ label: string; value: number }> {
   const bonus = Math.floor(player.money / 20);

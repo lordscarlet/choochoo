@@ -26,7 +26,7 @@ function useSelectCityOnClick(on: OnClickRegister) {
   return isPending;
 }
 
-function useMonsoonScenarios(player: PlayerData) {
+export function useMonsoonScenarios(_player: PlayerData) {
   // Monsoon costs based on die roll:
   // 1 = $0 (1 in 6 = 17%)
   // 2-5 = $1 (4 in 6 = 67%)

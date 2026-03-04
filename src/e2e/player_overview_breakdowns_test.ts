@@ -190,13 +190,6 @@ export function playerOverviewBreakdowns(driver: Driver) {
     await new Promise((r) => setTimeout(r, 500));
   }
 
-  async function maybeScreenshot(name: string): Promise<void> {
-    if (!shouldCapture) {
-      return;
-    }
-    await driver.saveScreenshot(name);
-  }
-
   async function maybeElementScreenshot(name: string, by: By): Promise<void> {
     if (!shouldCapture) {
       return;
@@ -205,8 +198,12 @@ export function playerOverviewBreakdowns(driver: Driver) {
     // Set a taller window size to capture expanded content without scrolling
     await driver.driver.manage().window().setRect({ width: 1920, height: 1500 });
     
-    // Wait for the target element to ensure it exists
-    await driver.waitForElement(by);
+    // Wait for the target element to ensure it exists and center it in viewport
+    const targetElement = await driver.waitForElement(by);
+    await driver.driver.executeScript(
+      "arguments[0].scrollIntoView({ block: 'center', inline: 'nearest' });",
+      targetElement,
+    );
     
     // Small delay for any animations to complete
     await new Promise((r) => setTimeout(r, 500));
