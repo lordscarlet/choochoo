@@ -32,28 +32,15 @@
 
 /* layout for the two groups: White and Black */
 .groupsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  align-items: start;
-  justify-items: center;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
 }
 
 .group {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.groupHeader {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  text-align: center;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
 }
 
 .goodPlace {
@@ -80,19 +67,6 @@
   margin-right: 8px;
 }
 
-.blackColumn {
-  background-color: #333;
-  padding: 12px 6px 12px 6px; 
-  border-radius: 4px;
-}
-
-.blackHeader {
-  background-color: #333;
-  color: white;
-  padding: 6px 8px;
-  border-radius: 6px;
-}
-
 .headerCell {
   display: flex;
   justify-content: center;
@@ -105,18 +79,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 10px;
   padding: 2px 0;
   height: 26px; 
-}
-
-/* keep header cell positioned naturally inside the black column so it has breathing room */
-.blackColumn > .headerCell {
-  margin-top: 0;
-}
-
-/* Ensure letter placeholders in black columns align with others */
-.blackColumn > .letterCell {
-  margin-top: 0;
 }
 
 /* layout wrappers for grouped columns (white / black) */
@@ -125,29 +90,24 @@
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  flex: none; /* don't stretch to fill the row */
+  flex: none;
   flex-wrap: nowrap;
-  padding-top: 10px; /* breathing room above the first row of header hexes */
+  padding: 12px 10px;
+  border-radius: 6px;
 }
 
 .rightColumns {
-  margin-left: 8px;
+  background-color: #5d4037;
 }
 
 /* make each column a fixed-size stack so groups line up */
 .column {
-  width: 52px; 
+  width: 36px; 
   flex: none;
   display: flex;
   flex-direction: column;
   gap: 6px;
   align-items: center;
-}
-
-/* apply the same internal padding to white columns so header hexes have breathing room inside the white stacks */
-.leftColumns > .column {
-  padding: 12px 6px 12px 6px;
-  box-sizing: border-box;
 }
 
 /* placeholder used to reserve header space when there's no visible letter header */
@@ -157,4 +117,34 @@
 }
 .headerPlaceholderHidden {
   visibility: hidden;
+}
+
+/* Plain text header styling for number headers (1-6) */
+.plainNumberHeader {
+  font-family: Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  height: 29px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tab-shaped badge for letter headers (A-H), matching physical board */
+.letterHeader {
+  font-family: Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  width: 28px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px 6px 0 0;
+  box-sizing: border-box;
+  margin-bottom: -4px;
 }

@@ -18,7 +18,6 @@ import { assert } from "../../utils/validate";
 import { Username } from "../components/username";
 import { goodStyle } from "../grid/good";
 import { readGoodColor } from "../grid/read_good_color";
-import { polygon } from "../../utils/point";
 import { useAction, useEmptyAction } from "../services/action";
 import { useGame, useGameVersionState } from "../services/game";
 import {
@@ -68,10 +67,30 @@ function parseHexOrRgb(color: string): [number, number, number] {
  * Calculate relative luminance using standard formula
  */
 function luminance([r, g, b]: [number, number, number]): number {
-  const rs = r / 255;
-  const gs = g / 255;
-  const bs = b / 255;
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+  const srgb = [r / 255, g / 255, b / 255].map((val) => {
+    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+}
+
+/**
+ * Calculate WCAG 2.1 contrast ratio between two colors
+ */
+function contrastRatio(color1: [number, number, number], color2: [number, number, number]): number {
+  const lum1 = luminance(color1);
+  const lum2 = luminance(color2);
+  const lighter = Math.max(lum1, lum2);
+  const darker = Math.min(lum1, lum2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/**
+ * Choose text color (white or black) that provides better WCAG contrast
+ */
+function chooseBestTextColor(bgColor: [number, number, number]): string {
+  const whiteContrast = contrastRatio(bgColor, [255, 255, 255]);
+  const blackContrast = contrastRatio(bgColor, [34, 34, 34]); // #222222
+  return whiteContrast > blackContrast ? "#ffffff" : "#222222";
 }
 
 export function GoodsTable() {
@@ -185,15 +204,16 @@ export function GoodsTable() {
       letterGood = primaryGood;
     }
 
+    // Whether this column has a valid urbanized city letter (A-H)
+    const hasLetter = letter !== "";
+
     return (
       <div
-        className={`${styles.column} ${
-          cityGroup === CityGroup.BLACK ? styles.blackColumn : ""
-        } ${i === 5 ? styles.gapRight : ""}`}
+        className={`${styles.column} ${i === 5 ? styles.gapRight : ""}`}
         key={i}
       >
         <div className={styles.headerCell}>
-          <HeaderHex onRoll={onRoll} primaryGood={primaryGood} letter={letter} />
+          <HeaderHex onRoll={onRoll} primaryGood={primaryGood} cityGroup={cityGroup} />
         </div>
         {iterate(maxRegularGoods, (goodIndex) => (
           <GoodBlock
@@ -210,16 +230,16 @@ export function GoodsTable() {
             }
           />
         ))}
-        {hasUrbanizedCities && (
+        {hasUrbanizedCities && hasLetter && (
           <div className={styles.letterCell}>
-            {letter === "" ? (
-              <div className={`${styles.headerPlaceholder} ${styles.headerPlaceholderHidden}`} />
+            {urbanizedCity ? (
+              <HeaderHex primaryGood={letterGood} letter={letter} cityGroup={cityGroup} />
             ) : (
-              urbanizedCity && <HeaderHex primaryGood={letterGood} letter={letter} />
+              <div className={`${styles.headerPlaceholder} ${styles.headerPlaceholderHidden}`} />
             )}
           </div>
         )}
-        {hasUrbanizedCities &&
+        {hasUrbanizedCities && hasLetter &&
           iterate(maxUrbanizedGoods, (goodIndex) => (
             <GoodBlock
               key={goodIndex}
@@ -249,14 +269,12 @@ export function GoodsTable() {
       <PlaceGood good={good} toggleSelectedGood={toggleSelectedGood} />
       <div className={styles.goodsContainer}>
         <div className={styles.groupsGrid}>
-          <section className={styles.group} aria-labelledby="goods-white">
-            <h3 id="goods-white" className={styles.groupHeader}>White</h3>
+          <section className={styles.group}>
             <div className={styles.leftColumns} role="list">
               {columns.slice(0, 6)}
             </div>
           </section>
-          <section className={styles.group} aria-labelledby="goods-black">
-            <h3 id="goods-black" className={styles.groupHeader + ' ' + styles.blackHeader}>Black</h3>
+          <section className={styles.group}>
             <div className={styles.rightColumns} role="list">
               {columns.slice(6)}
             </div>
@@ -267,49 +285,52 @@ export function GoodsTable() {
   );
 }
 
-function HeaderHex({ onRoll, primaryGood, letter }: { onRoll?: OnRoll; primaryGood?: Good; letter?: string }) {
-  // Use the goods CSS class and read the --good-color CSS variable at runtime so
-  // CSS remains the single source of truth. Fall back to a neutral color if
-  // DOM or the variable isn't available.
-  const defaultColor = "#e69074";
-
-  const fillColor = primaryGood != null ? readGoodColor(primaryGood) : defaultColor;
-
+function HeaderHex({ 
+  onRoll, 
+  primaryGood, 
+  letter,
+  cityGroup 
+}: { 
+  onRoll?: OnRoll; 
+  primaryGood?: Good; 
+  letter?: string;
+  cityGroup?: CityGroup;
+}) {
   const label = onRoll != null ? String(onRoll) : letter ?? "";
-
+  
+  // Determine if this is a number header (has onRoll but no letter content)
+  const isNumberHeader = onRoll != null && (letter == null || letter === "");
+  
+  if (isNumberHeader) {
+    // Render plain text for number headers with WCAG-compliant colors
+    const textColor = cityGroup === CityGroup.BLACK ? "#ffffff" : "#222222";
+    return (
+      <div 
+        className={styles.plainNumberHeader}
+        style={{ color: textColor }}
+        aria-label={`Roll number ${onRoll}`}
+      >
+        {label}
+      </div>
+    );
+  }
+  
+  // Render rounded rectangle for letter headers
+  const defaultColor = "#e69074";
+  const fillColor = primaryGood != null ? readGoodColor(primaryGood) : defaultColor;
+  
+  // Use WCAG-compliant text color selection for letter headers
   const rgb = parseHexOrRgb(fillColor);
-  const lum = luminance(rgb);
-  const textFill = lum > 0.6 ? "#222222" : "#ffffff";
-
-  const labelStyle = { fill: textFill, fontSize: 14, fontWeight: 700 } as const;
-
-  // Render an SVG hex so stroke and orientation match map hexes.
-  // We'll compute a 6-point polygon centered in an SVG viewbox of width W and height H
-  const W = 32;
-  const H = Math.round(W * 0.9);
-  const cx = W / 2;
-  const cy = H / 2;
-  // size is distance from center to corner. Choose size so polygon fits inside viewbox with stroke.
-  const size = Math.min(W, H) / 2 - 3; // leave room for stroke
-  // compute corners using floats (no rounding) so the SVG polygon is symmetric
-  const angles = [0, Math.PI / 3, (2 * Math.PI) / 3, Math.PI, (4 * Math.PI) / 3, (5 * Math.PI) / 3];
-  const corners = angles.map((rad) => ({ x: cx + Math.cos(rad) * size, y: cy + Math.sin(rad) * size }));
-  const points = polygon(corners);
+  const textColor = chooseBestTextColor(rgb);
 
   return (
-    <svg
-      width={W}
-      height={H}
-      viewBox={`0 0 ${W} ${H}`}
-      aria-hidden
-      role="img"
-      xmlns="http://www.w3.org/2000/svg"
+    <div
+      className={styles.letterHeader}
+      style={{ backgroundColor: fillColor, color: textColor }}
+      aria-label={`City ${label}`}
     >
-      <polygon points={points} fill={fillColor} stroke="#222" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" style={labelStyle}>
-        {label}
-      </text>
-    </svg>
+      {label}
+    </div>
   );
 }
 
