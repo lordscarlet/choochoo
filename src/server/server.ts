@@ -2,13 +2,9 @@ import { DatabaseError } from "@sequelize/core";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
-import { readFile } from "fs/promises";
-import { createServer, Server } from "http";
-import { createServer as createSecureServer } from "https";
-import { resolve } from "path";
+import { createServer } from "http";
 import { UserError } from "../utils/error";
 import { log, logError } from "../utils/functions";
-import { assert } from "../utils/validate";
 import { devApp } from "./dev/routes";
 import { feedbackApp } from "./feedback/routes";
 import { autoActionApp } from "./game/auto_action_routes";
@@ -23,7 +19,7 @@ import { testApp } from "./test/routes";
 import { notificationApp } from "./user/notification_routes";
 import { userApp } from "./user/routes";
 import { enforceRoleMiddleware } from "./util/enforce_role";
-import { cert, clientOrigin, port, stage, Stage } from "./util/environment";
+import { clientOrigin, port, stage, Stage } from "./util/environment";
 import { Lifecycle } from "./util/lifecycle";
 import { xsrfApp } from "./xsrf";
 
@@ -86,18 +82,7 @@ export async function runApp(): Promise<() => Promise<void>> {
     }
   });
 
-  let server: Server;
-  const serverCert = cert();
-  if (serverCert != null) {
-    assert(serverCert.certKey != null, "cannot provide cert without certkey");
-    const [key, cert] = await Promise.all([
-      readFile(resolve(serverCert.certKey), { encoding: "utf-8" }),
-      readFile(resolve(serverCert.cert), { encoding: "utf-8" }),
-    ]);
-    server = createSecureServer({ key, cert }, app);
-  } else {
-    server = createServer(app);
-  }
+  const server = createServer(app);
 
   const io = startIo();
 

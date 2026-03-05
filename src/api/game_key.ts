@@ -1,6 +1,9 @@
 import z from "zod";
 
 export enum GameKey {
+  PUERTO_RICO = "puerto-rico",
+  SOUTHERN_US = "southern-us",
+  FOUR_CORNERS = "four-corners",
   BARBADOS = "barbados",
   BALKAN = "balkan",
   POLAND = "poland",
@@ -34,6 +37,14 @@ export enum GameKey {
   JAMAICA = "jamaica",
   HEAVY_CARDBOARD = "heavy-cardboard",
   CHESAPEAKE_AND_OHIO = "chesapeake-and-ohio",
+  CALIFORNIA_GOLD_RUSH = "california-gold-rush",
+  UNION_PACIFIC_EXPRESS = "union-pacific-express",
+  RUST_BELT_EXPRESS = "rust-belt-express",
+  CHICAGO_SPEAKEASY = "chicago-speakeasy",
+  BELGIUM = "belgium",
+  EASTERN_US_AND_CANADA = "eastern-us-and-canada",
+  DOUBLE_BASE_USA = "double-base-usa",
+  CHICAGO_L = "chicago-l",
 }
 
 export const GameKeyZod = z.nativeEnum(GameKey);

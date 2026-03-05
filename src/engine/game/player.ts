@@ -67,7 +67,7 @@ export class PlayerHelper {
   }
 
   protected outOfGameScoreIsLosing(): boolean {
-    fail("not implemented");
+    return true;
   }
 
   /** Returns the players ordered by their score. Tied players end up in the same placement in the array. */
