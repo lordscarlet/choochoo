@@ -10,15 +10,15 @@ import { CityGroup } from "../../engine/state/city_group";
 import { Good, goodToString } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
 import { OnRoll } from "../../engine/state/roll";
+import { MutableAvailableCity } from "../../engine/state/available_city";
 import { SwedenRecyclingMapSettings } from "../../maps/sweden/settings";
 import { iterate } from "../../utils/functions";
 import { ImmutableMap } from "../../utils/immutable";
 import { assert } from "../../utils/validate";
 import { Username } from "../components/username";
 import { goodStyle } from "../grid/good";
-import { readGoodColor } from "../grid/readGoodColor";
-import * as hexStyles from "../grid/hex.module.css";
-import { getCorners, polygon } from "../../utils/point";
+import { readGoodColor } from "../grid/read_good_color";
+import { polygon } from "../../utils/point";
 import { useAction, useEmptyAction } from "../services/action";
 import { useGame, useGameVersionState } from "../services/game";
 import {
@@ -37,6 +37,41 @@ function getMaxGoods(
   ].flatMap((i) => i);
 
   return Math.max(...goodArrays.map((goods) => goods.length));
+}
+
+/**
+ * Parse a color string (hex or rgb) into RGB tuple
+ */
+function parseHexOrRgb(color: string): [number, number, number] {
+  if (color.startsWith("#")) {
+    const hex = color.substring(1);
+    if (hex.length === 3) {
+      const r = parseInt(hex[0] + hex[0], 16);
+      const g = parseInt(hex[1] + hex[1], 16);
+      const b = parseInt(hex[2] + hex[2], 16);
+      return [r, g, b];
+    }
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return [r, g, b];
+  }
+  if (color.startsWith("rgb")) {
+    const parts = color.replace(/rgba?\(|\)/g, "").split(",").map((s) => parseInt(s.trim(), 10));
+    return [parts[0] || 0, parts[1] || 0, parts[2] || 0];
+  }
+  // default
+  return [230, 144, 116];
+}
+
+/**
+ * Calculate relative luminance using standard formula
+ */
+function luminance([r, g, b]: [number, number, number]): number {
+  const rs = r / 255;
+  const gs = g / 255;
+  const bs = b / 255;
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
 
 export function GoodsTable() {
@@ -130,46 +165,24 @@ export function GoodsTable() {
     const urbanizedCity =
       cities.urbanizedCities.get(cityGroup)?.[onRoll];
     const letter = i < 2 || i >= 10 ? "" : numberToLetter(i - 2);
-    // determine a primary good color for this onRoll column
+    // determine a primary good color for this onRoll column from the map city
     let primaryGood: Good | undefined = undefined;
-    // first try to find the actual City on the map with this onRoll/group so color matches the map hex
     const mapCity = grid.cities().find((c) =>
       c.onRoll().some((r) => r.group === cityGroup && r.onRoll === onRoll),
     );
     if (mapCity != null) primaryGood = mapCity.goodColors()[0];
-    // next try availableCities (new urbanized city options)
-    if (primaryGood == null && Array.isArray(availableCities)) {
-      const avail = (availableCities as any[]).find((a) =>
-        a.onRoll.some((r: any) => r.group === cityGroup && r.onRoll === onRoll),
-      );
-      if (avail) {
-        primaryGood = Array.isArray(avail.color) ? avail.color[0] : avail.color;
-      }
-    }
-    // final fallback: use the goods currently in the city/urbanized city if present
-    if (primaryGood == null && city != null) {
-      for (const g of city) {
-        if (g != null) {
-          primaryGood = g as Good;
-          break;
-        }
-      }
-    }
-    if (primaryGood == null && urbanizedCity != null) {
-      for (const g of urbanizedCity) {
-        if (g != null) {
-          primaryGood = g as Good;
-          break;
-        }
-      }
-    }
-    // For the letter headers (A..H) use the availableCities list order so they match the Available Cities
+
+    // For the letter headers (A..H) use the availableCities' color so they match the Available Cities display
     const letterIndex = i - 2;
-    let letterGood: Good | undefined = primaryGood;
+    let letterGood: Good | undefined = undefined;
     if (letter !== "" && Array.isArray(availableCities) && availableCities[letterIndex]) {
-      const avail = (availableCities as any[])[letterIndex];
+      const avail = availableCities[letterIndex] as MutableAvailableCity;
       const colorVal = avail.color;
       letterGood = Array.isArray(colorVal) ? colorVal[0] : colorVal;
+    }
+    // if no specific letter good from availableCities, fall back to using the primary good from the map
+    if (letterGood == null) {
+      letterGood = primaryGood;
     }
 
     return (
@@ -261,37 +274,6 @@ function HeaderHex({ onRoll, primaryGood, letter }: { onRoll?: OnRoll; primaryGo
   const defaultColor = "#e69074";
 
   const fillColor = primaryGood != null ? readGoodColor(primaryGood) : defaultColor;
-  const goodClass = primaryGood != null ? goodStyle(primaryGood) : "";
-
-  function parseHexOrRgb(color: string): [number, number, number] {
-    if (color.startsWith("#")) {
-      const hex = color.substring(1);
-      if (hex.length === 3) {
-        const r = parseInt(hex[0] + hex[0], 16);
-        const g = parseInt(hex[1] + hex[1], 16);
-        const b = parseInt(hex[2] + hex[2], 16);
-        return [r, g, b];
-      }
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      return [r, g, b];
-    }
-    if (color.startsWith("rgb")) {
-      const parts = color.replace(/rgba?\(|\)/g, "").split(",").map((s) => parseInt(s.trim(), 10));
-      return [parts[0] || 0, parts[1] || 0, parts[2] || 0];
-    }
-    // default
-    return [230, 144, 116];
-  }
-
-  function luminance([r, g, b]: [number, number, number]) {
-    // standard relative luminance
-    const rs = r / 255;
-    const gs = g / 255;
-    const bs = b / 255;
-    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
-  }
 
   const label = onRoll != null ? String(onRoll) : letter ?? "";
 
@@ -316,7 +298,6 @@ function HeaderHex({ onRoll, primaryGood, letter }: { onRoll?: OnRoll; primaryGo
 
   return (
     <svg
-      className={goodClass}
       width={W}
       height={H}
       viewBox={`0 0 ${W} ${H}`}
