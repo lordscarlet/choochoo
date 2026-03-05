@@ -73,7 +73,7 @@ export class MoveSearcher {
     );
 
     const partialErrorMessage = this.getErrorMessage(() =>
-      this.validator.validatePartial(player, partialPath),
+      this.validator.validatePartialForSearch(player, partialPath),
     );
 
     if (endErrorMessage == null && partialErrorMessage == null) {
