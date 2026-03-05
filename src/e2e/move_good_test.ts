@@ -31,7 +31,7 @@ export function movingGoods(driver: Driver) {
 		);
 
 		const elapsedMs = Date.now() - start;
-		const maxAllowedMs = process.env.MOVE_CALCULATOR_E2E_MAX_MS;
+		const maxAllowedMs = process.env.MOVE_CALCULATOR_E2E_TIMEOUT_MS;
 		if (maxAllowedMs != null && maxAllowedMs.trim() !== "") {
 			expect(elapsedMs).toBeLessThan(Number(maxAllowedMs));
 		}

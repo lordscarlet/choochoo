@@ -15,7 +15,7 @@ export class MoveSearcher {
     const allRoutes: MoveData[] = [];
     const cache = new Map<Coordinates, RouteInfo[]>();
     const startTime = Date.now();
-    const verbose = process.env.MOVE_SEARCH_VERBOSE === "true";
+    const verbose = process.env.MOVE_SEARCH_DEBUG === "true";
     let goodsProcessed = 0;
     const totalGoods = Array.from(this.grid().values()).reduce(
       (sum, space) => sum + space.getGoods().length,

@@ -110,4 +110,4 @@ Optional environment variables:
 - `MOVE_SEARCH_PERF_ALLOWED_REGRESSION`: soft budget ratio (default `0.3` = 30%)
 - `MOVE_SEARCH_PERF_MAX_MS`: optional absolute median cap
 
-For e2e smoke coverage, `src/e2e/move_good_test.ts` opens Move Calculator and times completion. You can set an optional soft cap with `MOVE_CALCULATOR_E2E_MAX_MS`.
+For e2e smoke coverage, `src/e2e/move_good_test.ts` opens Move Calculator and times completion. You can set an optional soft timeout with `MOVE_CALCULATOR_E2E_TIMEOUT_MS`.

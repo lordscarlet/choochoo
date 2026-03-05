@@ -70,7 +70,7 @@
     }
   },
   "command_reference": {
-    "generate_baselines": "MOVE_SEARCH_VERBOSE=true npx ts-node src/scripts/measure_move_search.ts src/e2e/goldens/move_perf_2096.json",
+    "generate_baselines": "MOVE_SEARCH_DEBUG=true npx ts-node src/scripts/measure_move_search.ts src/e2e/goldens/move_perf_2096.json",
     "compare_routes": "git diff src/e2e/goldens/move_perf_2096.routes.json",
     "check_all_fixtures": [
       "npx ts-node src/scripts/measure_move_search.ts src/e2e/goldens/move_perf_2096.json",

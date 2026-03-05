@@ -46,6 +46,8 @@ interface RouteBaselineFile {
 async function main() {
   const fixturePath = process.argv[2];
   const updateBaseline = process.argv.includes("--update-routes-baseline");
+  const runsEnv = process.env.MOVE_SEARCH_PERF_RUNS;
+  const runs = runsEnv ? Math.max(1, parseInt(runsEnv, 10)) : 3;
 
   if (!fixturePath) {
     console.error(
@@ -60,41 +62,106 @@ async function main() {
   console.log(`Game: ${fixture.game.gameKey}`);
   console.log(`Setting up game context...`);
 
-  const context = new InjectionContext(fixture.game.gameKey);
-  setInjectionContext(context);
+  const currentPlayer = (() => {
+    const context = new InjectionContext(fixture.game.gameKey);
+    setInjectionContext(context);
 
-  inject(GameMemory).setGame(fixture.game);
-  inject(StateStore).merge(JSON.stringify(fixture.gameData));
+    inject(GameMemory).setGame(fixture.game);
+    inject(StateStore).merge(JSON.stringify(fixture.gameData));
 
-  const currentPlayer = injectCurrentPlayer()();
+    return injectCurrentPlayer()();
+  })();
+  
   console.log(`Current player: ${playerColorToString(currentPlayer.color)}`);
 
-  const searcher = inject(MoveSearcher);
-  const moveAction = inject(MoveAction);
-  const grid = injectGrid();
+  const durations: number[] = [];
+  let routeCount: number | undefined;
+  let lastRoutes: MoveData[] | undefined;
 
-  console.log(`Starting route search...`);
-  const startTime = Date.now();
+  console.log(`\nStarting ${runs} measurement run(s)...`);
+  
+  for (let runIndex = 0; runIndex < runs; runIndex++) {
+    // Reset injection context for each run
+    const context = new InjectionContext(fixture.game.gameKey);
+    setInjectionContext(context);
 
-  const routes = searcher.findAllRoutes(currentPlayer);
+    inject(GameMemory).setGame(fixture.game);
+    inject(StateStore).merge(JSON.stringify(fixture.gameData));
 
-  const duration = Date.now() - startTime;
+    const searcher = inject(MoveSearcher);
+    const currentPlayer = injectCurrentPlayer()();
 
-  console.log(`\n[OK] Route search complete!`);
-  console.log(`  Routes found: ${routes.length}`);
-  console.log(`  Duration: ${(duration / 1000).toFixed(2)}s (${duration}ms)`);
+    const startTime = Date.now();
+    const routes = searcher.findAllRoutes(currentPlayer);
+    const duration = Date.now() - startTime;
+    
+    durations.push(duration);
+    
+    if (routeCount === undefined) {
+      routeCount = routes.length;
+      lastRoutes = routes;
+    } else if (routes.length !== routeCount) {
+      throw new Error(
+        `Route count mismatch: run ${runIndex + 1} found ${routes.length} routes, expected ${routeCount}`
+      );
+    }
+
+    console.log(`  Run ${runIndex + 1}/${runs}: ${duration}ms (${routes.length} routes)`);
+  }
+
+  const stats = calculateStats(durations);
+  
+  console.log(`\n[OK] Performance measurement complete!`);
+  console.log(`  Routes found: ${routeCount}`);
+  console.log(`  Runs: ${runs}`);
+  console.log(`  Min:    ${stats.min}ms`);
+  console.log(`  Median: ${stats.median}ms`);
+  console.log(`  Mean:   ${stats.mean.toFixed(2)}ms`);
+  console.log(`  Max:    ${stats.max}ms`);
+  console.log(`  StdDev: ${stats.stdDev.toFixed(2)}ms`);
 
   // Verify regression baseline
-  verifyRegressionBaseline(fixturePath, routes.length);
+  verifyRegressionBaseline(fixturePath, routeCount!);
 
   // Verify full route content against baseline (not just count)
   await verifyRouteContentBaseline(
     fixturePath,
-    routes,
-    moveAction,
-    grid,
+    lastRoutes!,
+    inject(MoveAction),
+    injectGrid(),
     updateBaseline,
   );
+}
+
+function calculateStats(durations: number[]): {
+  min: number;
+  max: number;
+  median: number;
+  mean: number;
+  stdDev: number;
+} {
+  if (durations.length === 0) {
+    throw new Error("No durations provided");
+  }
+
+  const sorted = [...durations].sort((a, b) => a - b);
+  const min = sorted[0];
+  const max = sorted[sorted.length - 1];
+  
+  let median: number;
+  if (sorted.length % 2 === 0) {
+    median = (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
+  } else {
+    median = sorted[Math.floor(sorted.length / 2)];
+  }
+
+  const sum = durations.reduce((a, b) => a + b, 0);
+  const mean = sum / durations.length;
+
+  const variance = durations.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / durations.length;
+  const stdDev = Math.sqrt(variance);
+
+  return { min, max, median, mean, stdDev };
 }
 
 async function loadFixture(pathFromWorkspaceRoot: string) {
