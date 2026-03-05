@@ -80,7 +80,7 @@ async function main() {
 
   const duration = Date.now() - startTime;
 
-  console.log(`\n✓ Route search complete!`);
+  console.log(`\n[OK] Route search complete!`);
   console.log(`  Routes found: ${routes.length}`);
   console.log(`  Duration: ${(duration / 1000).toFixed(2)}s (${duration}ms)`);
 
@@ -173,7 +173,7 @@ function verifyRegressionBaseline(fixturePath: string, routesFound: number) {
       `Difference: ${routesFound > expected ? `+${routesFound - expected}` : routesFound - expected}`
     );
   }
-  console.log(`✓ Regression check passed: ${routesFound} routes matches expected ${expected}`);
+  console.log(`[OK] Regression check passed: ${routesFound} routes matches expected ${expected}`);
 }
 
 async function verifyRouteContentBaseline(
@@ -197,13 +197,13 @@ async function verifyRouteContentBaseline(
   };
 
   await writeFile(latestFile, JSON.stringify(latest, null, 2));
-  console.log(`✓ Latest route snapshot written: ${latestFile}`);
+  console.log(`[OK] Latest route snapshot written: ${latestFile}`);
 
   const hasBaseline = await fileExists(baselineFile);
   if (!hasBaseline || updateBaseline) {
     await writeFile(baselineFile, JSON.stringify(latest, null, 2));
     const reason = hasBaseline ? "updated" : "created";
-    console.log(`✓ Route baseline ${reason}: ${baselineFile}`);
+    console.log(`[OK] Route baseline ${reason}: ${baselineFile}`);
     return;
   }
 
@@ -238,7 +238,7 @@ async function verifyRouteContentBaseline(
     }
   }
 
-  console.log(`✓ Route content regression check passed (${snapshots.length} exact route signatures)`);
+  console.log(`[OK] Route content regression check passed (${snapshots.length} exact route signatures)`);
 }
 
 function buildRouteSnapshots(

@@ -47,7 +47,7 @@ export class MoveSearcher {
         if (verbose) {
           const elapsed = Date.now() - startTime;
           console.log(
-            `  ✓ Finished good ${goodsProcessed}: found ${routesForGood.length} routes (total: ${allRoutes.length}, elapsed: ${elapsed}ms)`
+            `  [OK] Finished good ${goodsProcessed}: found ${routesForGood.length} routes (total: ${allRoutes.length}, elapsed: ${elapsed}ms)`
           );
         }
       }
