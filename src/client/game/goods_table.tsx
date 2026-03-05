@@ -6,6 +6,7 @@ import { AVAILABLE_CITIES } from "../../engine/game/state";
 import { PassAction } from "../../engine/goods_growth/pass";
 import { ProductionAction } from "../../engine/goods_growth/production";
 import { GOODS_GROWTH_STATE } from "../../engine/goods_growth/state";
+import { City } from "../../engine/map/city";
 import { CityGroup } from "../../engine/state/city_group";
 import { Good, goodToString } from "../../engine/state/good";
 import { Phase } from "../../engine/state/phase";
@@ -37,6 +38,13 @@ function getMaxGoods(
 
   return Math.max(...goodArrays.map((goods) => goods.length));
 }
+
+// Constants for goods table layout
+const TOTAL_COLUMNS = 12;
+const WHITE_COLUMNS = 6;
+const LETTER_START_INDEX = 2; // First letter column (A)
+const LETTER_END_INDEX = 10;  // Last letter column before end
+const GAP_AFTER_COLUMN = WHITE_COLUMNS - 1; // Add gap after last white column
 
 /**
  * Parse a color string (hex or rgb) into RGB tuple
@@ -93,6 +101,117 @@ function chooseBestTextColor(bgColor: [number, number, number]): string {
   return whiteContrast > blackContrast ? "#ffffff" : "#222222";
 }
 
+/**
+ * Generate a single column for the goods table
+ */
+function createGoodsColumn({
+  columnIndex,
+  cities,
+  availableCities,
+  maxRegularGoods,
+  maxUrbanizedGoods,
+  hasUrbanizedCities,
+  canEmit,
+  onClick,
+}: {
+  columnIndex: number;
+  cities: {
+    regularCities: ImmutableMap<CityGroup, (Good | undefined | null)[][]>;
+    urbanizedCities: ImmutableMap<CityGroup, (Good | undefined | null)[][]>;
+    cityObjects: Map<string, City>;
+  };
+  availableCities: readonly MutableAvailableCity[];
+  maxRegularGoods: number;
+  maxUrbanizedGoods: number;
+  hasUrbanizedCities: boolean;
+  canEmit: boolean;
+  onClick: (urbanized: boolean, cityGroup: CityGroup, onRoll: OnRoll, row: number) => void;
+}) {
+  const i = columnIndex;
+  const cityGroup = i < WHITE_COLUMNS ? CityGroup.WHITE : CityGroup.BLACK;
+  const onRoll = OnRoll.parse((i % WHITE_COLUMNS) + 1);
+  const city = cities.regularCities.get(cityGroup)?.[onRoll];
+  const urbanizedCity = cities.urbanizedCities.get(cityGroup)?.[onRoll];
+  const letter = i < LETTER_START_INDEX || i >= LETTER_END_INDEX ? "" : numberToLetter(i - LETTER_START_INDEX);
+  
+  // Get the primary good color from the cached city object
+  let primaryGood: Good | undefined = undefined;
+  const cityKey = `${cityGroup}-${onRoll}`;
+  const mapCity = cities.cityObjects.get(cityKey);
+  if (mapCity != null) primaryGood = mapCity.goodColors()[0];
+
+  // For the letter headers (A..H) use the availableCities' color so they match the Available Cities display
+  const letterIndex = i - LETTER_START_INDEX;
+  let letterGood: Good | undefined = undefined;
+  if (letter !== "" && Array.isArray(availableCities) && letterIndex >= 0 && letterIndex < availableCities.length) {
+    const avail = availableCities[letterIndex] as MutableAvailableCity;
+    const colorVal = avail.color;
+    letterGood = Array.isArray(colorVal) ? colorVal[0] : colorVal;
+  }
+  // if no specific letter good from availableCities, fall back to using the primary good from the map
+  if (letterGood == null) {
+    letterGood = primaryGood;
+  }
+
+  // Whether this column has a valid urbanized city letter (A-H)
+  const hasLetter = letter !== "";
+
+  return (
+    <div
+      className={`${styles.column} ${i === GAP_AFTER_COLUMN ? styles.gapRight : ""}`}
+      key={i}
+    >
+      <div className={styles.headerCell}>
+        <HeaderHex onRoll={onRoll} primaryGood={primaryGood} cityGroup={cityGroup} />
+      </div>
+      {iterate(maxRegularGoods, (goodIndex) => (
+        <GoodBlock
+          key={goodIndex}
+          good={city?.[maxRegularGoods - 1 - goodIndex] ?? undefined}
+          canSelect={canEmit}
+          onClick={() =>
+            onClick(
+              false,
+              cityGroup,
+              onRoll,
+              maxRegularGoods - 1 - goodIndex,
+            )
+          }
+        />
+      ))}
+      {hasUrbanizedCities && hasLetter && (
+        <div className={styles.letterCell}>
+          {urbanizedCity ? (
+            <HeaderHex primaryGood={letterGood} letter={letter} cityGroup={cityGroup} />
+          ) : (
+            <div className={`${styles.headerPlaceholder} ${styles.headerPlaceholderHidden}`} />
+          )}
+        </div>
+      )}
+      {hasUrbanizedCities && hasLetter &&
+        iterate(maxUrbanizedGoods, (goodIndex) => (
+          <GoodBlock
+            key={goodIndex}
+            good={
+              urbanizedCity?.[maxUrbanizedGoods - 1 - goodIndex] ??
+              undefined
+            }
+            canSelect={canEmit}
+            emptySpace={urbanizedCity == null}
+            onClick={() =>
+              onClick(
+                true,
+                cityGroup,
+                onRoll,
+                maxUrbanizedGoods - 1 - goodIndex,
+              )
+            }
+          />
+        ))}
+    </div>
+  );
+}
+
 export function GoodsTable() {
   const gameKey = useGame().gameKey;
   const [manuallySelectedGood, setSelectedGood] = useGameVersionState<
@@ -112,10 +231,14 @@ export function GoodsTable() {
       [CityGroup.WHITE, []],
       [CityGroup.BLACK, []],
     ]);
+    const cityObjects = new Map<string, City>();
     for (const city of cities) {
       const map = city.isUrbanized() ? urbanizedCities : regularCities;
       for (const onRoll of city.onRoll().values()) {
         map.get(onRoll.group)![onRoll.onRoll] = onRoll.goods;
+        // Store city object by key for color lookups
+        const key = `${onRoll.group}-${onRoll.onRoll}`;
+        cityObjects.set(key, city);
       }
     }
     for (const availableCity of availableCities) {
@@ -126,6 +249,7 @@ export function GoodsTable() {
     return {
       regularCities: ImmutableMap(regularCities),
       urbanizedCities: ImmutableMap(urbanizedCities),
+      cityObjects,
     };
   }, [grid, availableCities]);
 
@@ -176,92 +300,24 @@ export function GoodsTable() {
   } else if (!starter.isGoodsGrowthEnabled()) {
     return <></>;
   }
+  
   // build the 12 column elements, then render them grouped (white on left, black on right)
-  const columns = iterate(12, (i) => {
-    const cityGroup = i < 6 ? CityGroup.WHITE : CityGroup.BLACK;
-    const onRoll = OnRoll.parse((i % 6) + 1);
-    const city = cities.regularCities.get(cityGroup)?.[onRoll];
-    const urbanizedCity =
-      cities.urbanizedCities.get(cityGroup)?.[onRoll];
-    const letter = i < 2 || i >= 10 ? "" : numberToLetter(i - 2);
-    // determine a primary good color for this onRoll column from the map city
-    let primaryGood: Good | undefined = undefined;
-    const mapCity = grid.cities().find((c) =>
-      c.onRoll().some((r) => r.group === cityGroup && r.onRoll === onRoll),
-    );
-    if (mapCity != null) primaryGood = mapCity.goodColors()[0];
-
-    // For the letter headers (A..H) use the availableCities' color so they match the Available Cities display
-    const letterIndex = i - 2;
-    let letterGood: Good | undefined = undefined;
-    if (letter !== "" && Array.isArray(availableCities) && availableCities[letterIndex]) {
-      const avail = availableCities[letterIndex] as MutableAvailableCity;
-      const colorVal = avail.color;
-      letterGood = Array.isArray(colorVal) ? colorVal[0] : colorVal;
-    }
-    // if no specific letter good from availableCities, fall back to using the primary good from the map
-    if (letterGood == null) {
-      letterGood = primaryGood;
-    }
-
-    // Whether this column has a valid urbanized city letter (A-H)
-    const hasLetter = letter !== "";
-
-    return (
-      <div
-        className={`${styles.column} ${i === 5 ? styles.gapRight : ""}`}
-        key={i}
-      >
-        <div className={styles.headerCell}>
-          <HeaderHex onRoll={onRoll} primaryGood={primaryGood} cityGroup={cityGroup} />
-        </div>
-        {iterate(maxRegularGoods, (goodIndex) => (
-          <GoodBlock
-            key={goodIndex}
-            good={city?.[maxRegularGoods - 1 - goodIndex] ?? undefined}
-            canSelect={canEmit}
-            onClick={() =>
-              onClick(
-                false,
-                cityGroup,
-                onRoll,
-                maxRegularGoods - 1 - goodIndex,
-              )
-            }
-          />
-        ))}
-        {hasUrbanizedCities && hasLetter && (
-          <div className={styles.letterCell}>
-            {urbanizedCity ? (
-              <HeaderHex primaryGood={letterGood} letter={letter} cityGroup={cityGroup} />
-            ) : (
-              <div className={`${styles.headerPlaceholder} ${styles.headerPlaceholderHidden}`} />
-            )}
-          </div>
-        )}
-        {hasUrbanizedCities && hasLetter &&
-          iterate(maxUrbanizedGoods, (goodIndex) => (
-            <GoodBlock
-              key={goodIndex}
-              good={
-                urbanizedCity?.[maxUrbanizedGoods - 1 - goodIndex] ??
-                undefined
-              }
-              canSelect={canEmit}
-              emptySpace={urbanizedCity == null}
-              onClick={() =>
-                onClick(
-                  true,
-                  cityGroup,
-                  onRoll,
-                  maxUrbanizedGoods - 1 - goodIndex,
-                )
-              }
-            />
-          ))}
-      </div>
-    );
-  });
+  const columns = useMemo(
+    () =>
+      iterate(TOTAL_COLUMNS, (i) =>
+        createGoodsColumn({
+          columnIndex: i,
+          cities,
+          availableCities,
+          maxRegularGoods,
+          maxUrbanizedGoods,
+          hasUrbanizedCities,
+          canEmit,
+          onClick,
+        })
+      ),
+    [cities, availableCities, maxRegularGoods, maxUrbanizedGoods, hasUrbanizedCities, canEmit, onClick]
+  );
 
   return (
     <div>
@@ -271,12 +327,12 @@ export function GoodsTable() {
         <div className={styles.groupsGrid}>
           <section className={styles.group}>
             <div className={styles.leftColumns} role="list">
-              {columns.slice(0, 6)}
+              {columns.slice(0, WHITE_COLUMNS)}
             </div>
           </section>
           <section className={styles.group}>
             <div className={styles.rightColumns} role="list">
-              {columns.slice(6)}
+              {columns.slice(WHITE_COLUMNS)}
             </div>
           </section>
         </div>

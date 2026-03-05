@@ -33,6 +33,10 @@ export function readGoodColor(g: Good): string {
     cache.set(g, res);
     return res;
   } catch (e) {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn(`Failed to read color for good ${g}:`, e);
+    }
     return fallback;
   }
 }
