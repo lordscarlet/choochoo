@@ -46,6 +46,9 @@ const LETTER_START_INDEX = 2; // First letter column (A)
 const LETTER_END_INDEX = 10;  // Last letter column before end
 const GAP_AFTER_COLUMN = WHITE_COLUMNS - 1; // Add gap after last white column
 
+// Default color for colorless cities - should match --colorless-default CSS variable
+const COLORLESS_DEFAULT = "#e69074";
+
 /**
  * Parse a color string (hex or rgb) into RGB tuple
  */
@@ -372,8 +375,7 @@ function HeaderHex({
   }
   
   // Render rounded rectangle for letter headers
-  const defaultColor = "#e69074";
-  const fillColor = primaryGood != null ? readGoodColor(primaryGood) : defaultColor;
+  const fillColor = primaryGood != null ? readGoodColor(primaryGood) : COLORLESS_DEFAULT;
   
   // Use WCAG-compliant text color selection for letter headers
   const rgb = parseHexOrRgb(fillColor);

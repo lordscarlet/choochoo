@@ -3,6 +3,8 @@
   display: flex;
   flex-direction: column;
   padding-bottom: 16px;
+  --black-group-bg: #5d4037;
+  --colorless-default: rgb(230, 144, 116);
 }
 
 .row {
@@ -97,7 +99,7 @@
 }
 
 .rightColumns {
-  background-color: #5d4037;
+  background-color: var(--black-group-bg);
 }
 
 /* make each column a fixed-size stack so groups line up */

@@ -21,6 +21,18 @@ function getPersistentEl(): HTMLDivElement {
   return persistentEl;
 }
 
+/**
+ * Cleanup function to remove the persistent DOM element and clear cache.
+ * Useful for testing or when completely unmounting the application.
+ */
+export function cleanupGoodColorReader(): void {
+  if (persistentEl && persistentEl.parentNode) {
+    persistentEl.parentNode.removeChild(persistentEl);
+    persistentEl = null;
+  }
+  cache.clear();
+}
+
 export function readGoodColor(g: Good): string {
   if (cache.has(g)) return cache.get(g)!;
   if (typeof document === "undefined") return fallback;
