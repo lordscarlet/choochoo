@@ -20,8 +20,8 @@ export class DCMetroMapSettings implements MapSettings {
   readonly minPlayers = 3;
   readonly maxPlayers = 3;
   readonly playerCountRatings = {
-    1: PlayerCountRating.RECOMMENDED,
-    2: PlayerCountRating.RECOMMENDED,
+    1: PlayerCountRating.NOT_SUPPORTED,
+    2: PlayerCountRating.NOT_SUPPORTED,
     3: PlayerCountRating.RECOMMENDED,
     4: PlayerCountRating.NOT_SUPPORTED,
     5: PlayerCountRating.NOT_SUPPORTED,

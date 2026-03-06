@@ -133,7 +133,7 @@ export function MapSelectorDialog({
     return {};
   };
 
-  const playerCounts = [2, 3, 4, 5, 6, 7, 8];
+  const playerCounts = [1, 2, 3, 4, 5, 6, 7, 8];
 
   const handleCellMouseEnter = (rowKey: GameKey, column: number) => {
     setHoveredRowKey(rowKey);
@@ -184,7 +184,7 @@ export function MapSelectorDialog({
             <Input
               id="map-selector-player-count-filter"
               type="number"
-              min={2}
+              min={1}
               max={8}
               step={1}
               inputMode="numeric"
@@ -208,7 +208,15 @@ export function MapSelectorDialog({
         <p id={ratingsGuideId}>
           Ratings guide: ? = no data, -- = not supported, - = not recommended,
           + = recommended, ++ = highly recommended, +- = mixed. These are map
-          selection aids and not cross-map quality rankings.
+          selection aids and not cross-map quality rankings. Source: {" "}
+          <a
+            href="https://boardgamegeek.com/thread/2930352/article/41563109#41563109"
+            target="_blank"
+            rel="noreferrer"
+          >
+            BoardGameGeek community list
+          </a>
+          .
         </p>
         <p id={resultsStatusId} aria-live="polite">
           Showing {filteredMaps.length} map{filteredMaps.length === 1 ? "" : "s"}.
@@ -217,7 +225,7 @@ export function MapSelectorDialog({
         <div className={tableContainer}>
           <Table celled compact sortable className={mapTable}>
             <caption className={visuallyHidden}>
-              Map list with ratings for 2 through 8 players and an action to select a map.
+              Map list with ratings for 1 through 8 players and an action to select a map.
             </caption>
             <TableHeader>
               <TableRow>
