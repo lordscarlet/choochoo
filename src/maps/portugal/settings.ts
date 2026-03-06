@@ -30,8 +30,8 @@ export class PortugalMapSettings implements MapSettings {
     2: PlayerCountRating.NOT_SUPPORTED,
     3: PlayerCountRating.RECOMMENDED,
     4: PlayerCountRating.HIGHLY_RECOMMENDED,
-    5: PlayerCountRating.NOT_SUPPORTED,
-    6: PlayerCountRating.NOT_SUPPORTED,
+    5: PlayerCountRating.NOT_RECOMMENDED,
+    6: PlayerCountRating.NOT_RECOMMENDED,
     7: PlayerCountRating.NOT_SUPPORTED,
     8: PlayerCountRating.NOT_SUPPORTED,
   };

@@ -240,15 +240,15 @@ export function MapSelectorDialog({
                     key={count}
                     textAlign="center"
                     scope="col"
-                    active={hoveredColumn === count}
+                    active={hoveredColumn === count + 2}
                   >
                     {count}p
                   </TableHeaderCell>
                 ))}
-                <TableHeaderCell scope="col" active={hoveredColumn === 9}>
+                <TableHeaderCell scope="col" active={hoveredColumn === 11}>
                   Range
                 </TableHeaderCell>
-                <TableHeaderCell scope="col" active={hoveredColumn === 10}>
+                <TableHeaderCell scope="col" active={hoveredColumn === 12}>
                   Action
                 </TableHeaderCell>
               </TableRow>
@@ -261,12 +261,18 @@ export function MapSelectorDialog({
                   data-map-row={map.key}
                   onClick={() => handleSelectMap(map.key)}
                   onKeyDown={(event: React.KeyboardEvent<HTMLTableRowElement>) => {
+                    if (event.currentTarget !== event.target) {
+                      return;
+                    }
+
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
                       handleSelectMap(map.key);
                     }
                   }}
                   tabIndex={0}
+                  role="button"
+                  aria-selected={map.key === initialSelection}
                 >
                   <TableCell
                     as="th"
@@ -288,7 +294,7 @@ export function MapSelectorDialog({
                     {map.designer}
                   </TableCell>
                   {playerCounts.map((count) => {
-                    const column = count;
+                    const column = count + 2;
                     const rating = getRatingForCount(map, count);
                     const ratingCellState = getRatingCellState(rating);
                     return (
@@ -306,7 +312,7 @@ export function MapSelectorDialog({
                   })}
                   <TableCell
                     active={hoveredRowKey === map.key}
-                    onMouseEnter={() => handleCellMouseEnter(map.key, 9)}
+                    onMouseEnter={() => handleCellMouseEnter(map.key, 11)}
                     onMouseLeave={clearHoveredCell}
                   >
                     {map.minPlayers === map.maxPlayers
@@ -315,12 +321,15 @@ export function MapSelectorDialog({
                   </TableCell>
                   <TableCell
                     active={hoveredRowKey === map.key}
-                    onMouseEnter={() => handleCellMouseEnter(map.key, 10)}
+                    onMouseEnter={() => handleCellMouseEnter(map.key, 12)}
                     onMouseLeave={clearHoveredCell}
                   >
                     <Button
                       primary
                       size="mini"
+                      onKeyDown={(event) => {
+                        event.stopPropagation();
+                      }}
                       onClick={(event) => {
                         event.stopPropagation();
                         handleSelectMap(map.key);
