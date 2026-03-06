@@ -45,9 +45,9 @@ export class ChicagoLMapSettings implements MapSettings {
     1: PlayerCountRating.NOT_SUPPORTED,
     2: PlayerCountRating.NOT_SUPPORTED,
     3: PlayerCountRating.RECOMMENDED,
-    4: PlayerCountRating.RECOMMENDED,
-    5: PlayerCountRating.RECOMMENDED,
-    6: PlayerCountRating.NOT_RECOMMENDED,
+    4: PlayerCountRating.NOT_SUPPORTED,
+    5: PlayerCountRating.NOT_SUPPORTED,
+    6: PlayerCountRating.NOT_SUPPORTED,
     7: PlayerCountRating.NOT_SUPPORTED,
     8: PlayerCountRating.NOT_SUPPORTED,
   };
