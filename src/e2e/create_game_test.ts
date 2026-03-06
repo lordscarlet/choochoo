@@ -38,7 +38,7 @@ export function creatingGame(driver: Driver) {
   async function createGame(creationUser: UserDao): Promise<GameDao> {
     await driver.goTo("/app/games/create", creationUser.id);
     await driver.waitForElement(By.name("name")).sendKeys("My Game");
-    await driver.waitForElement(By.xpath("//button[contains(., 'Change Map')]"))
+    await driver.waitForElement(By.xpath("//*[@data-change-map-button]"))
       .click();
     await driver.waitForElement(By.xpath("//*[@data-map-selector-dialog]"));
     await driver.waitForElement(

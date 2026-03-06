@@ -202,6 +202,7 @@ export function CreateGamePage() {
                 size="small"
                 disabled={isPending}
                 onClick={() => setMapDialogOpen(true)}
+                data-change-map-button
               >
                 Change Map
               </Button>

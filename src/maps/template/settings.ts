@@ -2,7 +2,6 @@ import { GameKey } from "../../api/game_key";
 import {
   KAOSKODY,
   MapSettings,
-  PlayerCountRating,
   ReleaseStage,
 } from "../../engine/game/map_settings";
 import { map } from "./grid";

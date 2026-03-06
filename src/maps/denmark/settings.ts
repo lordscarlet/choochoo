@@ -48,7 +48,7 @@ export class DenmarkMapSettings implements MapSettings {
     3: PlayerCountRating.HIGHLY_RECOMMENDED,
     4: PlayerCountRating.NOT_RECOMMENDED,
     5: PlayerCountRating.NOT_RECOMMENDED,
-    6: PlayerCountRating.NOT_SUPPORTED,
+    6: PlayerCountRating.NOT_RECOMMENDED,
     7: PlayerCountRating.NOT_SUPPORTED,
     8: PlayerCountRating.NOT_SUPPORTED,
   };
