@@ -47,7 +47,24 @@ async function main() {
   const fixturePath = process.argv[2];
   const updateBaseline = process.argv.includes("--update-routes-baseline");
   const runsEnv = process.env.MOVE_SEARCH_PERF_RUNS;
-  const runs = runsEnv ? Math.max(1, parseInt(runsEnv, 10)) : 3;
+
+  let runs: number;
+  if (runsEnv === undefined || runsEnv === "") {
+    runs = 3;
+  } else {
+    const parsedRuns = Number(runsEnv);
+    if (
+      !Number.isFinite(parsedRuns) ||
+      !Number.isInteger(parsedRuns) ||
+      parsedRuns <= 0
+    ) {
+      console.error(
+        `Invalid MOVE_SEARCH_PERF_RUNS value "${runsEnv}". Expected a positive integer.`,
+      );
+      process.exit(1);
+    }
+    runs = parsedRuns;
+  }
 
   if (!fixturePath) {
     console.error(
@@ -217,7 +234,9 @@ function defaultVariantConfig(gameKey: GameKey): VariantConfig {
     case GameKey.CYPRUS:
       return { gameKey };
     case GameKey.PUERTO_RICO:
-      throw new Error("MOVE_SEARCH_PERF_VARIANT is required for Puerto Rico fixtures");
+      throw new Error(
+        "Puerto Rico fixtures must specify a 'variant' in the fixture JSON; no default variant is available",
+      );
     default:
       return VariantConfig.parse({ gameKey });
   }

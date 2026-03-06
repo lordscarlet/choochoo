@@ -14,22 +14,26 @@ export class MoveSearcher {
   findAllRoutes(player: PlayerData): MoveData[] {
     const allRoutes: MoveData[] = [];
     const cache = new Map<Coordinates, RouteInfo[]>();
-    const startTime = Date.now();
     const verbose = process.env.MOVE_SEARCH_DEBUG === "true";
-    let goodsProcessed = 0;
-    const totalGoods = Array.from(this.grid().values()).reduce(
-      (sum, space) => sum + space.getGoods().length,
-      0,
-    );
+
+    let startTime: number = 0;
+    let goodsProcessed: number = 0;
+    let totalGoods: number = 0;
 
     if (verbose) {
+      startTime = Date.now();
+      goodsProcessed = 0;
+      totalGoods = Array.from(this.grid().values()).reduce(
+        (sum, space) => sum + space.getGoods().length,
+        0,
+      );
       console.log(`[MoveSearch] Starting route search for ${totalGoods} goods...`);
     }
 
     for (const [coordinates, space] of this.grid().entries()) {
       for (const good of space.getGoods()) {
-        goodsProcessed++;
         if (verbose) {
+          goodsProcessed++;
           const elapsed = Date.now() - startTime;
           console.log(
             `[MoveSearch] Processing good ${goodsProcessed}/${totalGoods} at ${coordinates} (elapsed: ${elapsed}ms, routes so far: ${allRoutes.length})`

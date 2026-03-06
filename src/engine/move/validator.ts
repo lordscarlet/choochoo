@@ -55,6 +55,20 @@ export class MoveValidator {
       invalidInput: "cannot stop at the same city twice",
     });
 
+    // Check for duplicate cities by logical identity (sameCity key)
+    // Prevents visiting the same logical city via different coordinate hexes
+    const seenCityKeys = new Set<string | number>();
+    for (const coordinate of allCoordinates) {
+      const location = grid.get(coordinate);
+      if (location instanceof City) {
+        const cityKey = location.data.sameCity ?? coordinate.serialize();
+        assert(!seenCityKeys.has(cityKey), {
+          invalidInput: "Cannot visit the same city twice",
+        });
+        seenCityKeys.add(cityKey);
+      }
+    }
+
     // Validate that the route passes through cities and towns
     for (const step of action.path.slice(0, action.path.length - 1)) {
       const location = grid.get(step.endingStop);
