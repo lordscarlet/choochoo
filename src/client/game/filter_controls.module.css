@@ -1,7 +1,7 @@
 .filterControls {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -10,16 +10,33 @@
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+}
+
+/* Inactive state - more subdued */
+.filterButton:not(.active) {
+  opacity: 0.6;
+  background: #e0e0e0 !important;
+  color: #666 !important;
+}
+
+.filterButton:not(.active):hover {
+  opacity: 0.8;
+  background: #d0d0d0 !important;
 }
 
 .buttonIcon {
-  font-size: 1.1em;
+  font-size: 1em;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
 }
 
 .buttonLabel {
-  font-size: 0.9em;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
 }
 
 /* Mobile responsiveness */
@@ -43,7 +60,12 @@
 }
 
 /* Dark mode adjustments */
-:global(.dark-mode) .filterControls {
-  /* Semantic UI buttons already handle dark mode,
-     but we can add any additional dark mode styling here if needed */
+:global(.dark-mode) .filterButton:not(.active) {
+  background: #424242 !important;
+  color: #aaa !important;
+}
+
+:global(.dark-mode) .filterButton:not(.active):hover {
+  background: #4a4a4a !important;
+  color: #ccc !important;
 }

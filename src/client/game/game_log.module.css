@@ -24,11 +24,12 @@
 }
 
 .logLine {
-  margin: 4px 0;
-  padding: 0.5rem;
-  border-radius: 4px;
+  margin: 6px 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 6px;
   border-left: 3px solid transparent;
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
+  line-height: 1.5;
 }
 
 .scrollToBottomContainer {
@@ -49,11 +50,17 @@
 }
 
 .time {
-  opacity: 0.7;
+  opacity: 0.6;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+:global(.dark-mode) .time {
+  color: #aaa;
 }
 
 .username {
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .submitInput {
@@ -62,60 +69,59 @@
 
 /* Message type styling - WCAG AA compliant colors */
 
-/* Chat messages - light blue */
+/* Chat messages - subtle cyan */
 .CHAT {
-  background-color: #e3f2fd;
-  border-left-color: #1976d2;
+  background-color: #e0f7fa;
+  border-left-color: #00acc1;
 }
 
-/* Player action messages - light green */
+/* Player action messages - subtle pink/rose */
 .PLAYER_ACTION {
-  background-color: #e8f5e9;
-  border-left-color: #388e3c;
+  background-color: #fce4ec;
+  border-left-color: #ec407a;
 }
 
-/* Turn event messages - light yellow */
+/* Turn event messages - subtle blue */
 .TURN_EVENT {
-  background-color: #fff9c4;
-  border-left-color: #f9a825;
+  background-color: #e3f2fd;
+  border-left-color: #42a5f5;
 }
 
-/* System event messages - light gray */
+/* System event messages - subtle gray */
 .SYSTEM_EVENT {
   background-color: #f5f5f5;
-  border-left-color: #757575;
+  border-left-color: #9e9e9e;
 }
 
-/* Mention highlighting - amber/orange */
+/* Mention highlighting - warm peach */
 .mentionHighlight {
   background-color: #fff3e0 !important;
-  border: 2px solid #ff6f00 !important;
-  border-left: 3px solid #ff6f00 !important;
-  font-weight: 500;
-  box-shadow: 0 0 0 2px rgba(255, 111, 0, 0.1);
+  border: 1px solid #ffb74d !important;
+  border-left: 3px solid #ff9800 !important;
+  box-shadow: 0 1px 3px rgba(255, 152, 0, 0.12);
 }
 
 /* Dark mode message type styling */
 :global(.dark-mode) .CHAT {
-  background-color: #0d47a1;
-  color: #e3f2fd;
-  border-left-color: #42a5f5;
+  background-color: #004d56;
+  color: #e0f7fa;
+  border-left-color: #26c6da;
 }
 
 :global(.dark-mode) .PLAYER_ACTION {
-  background-color: #1b5e20;
-  color: #e8f5e9;
-  border-left-color: #66bb6a;
+  background-color: #4a1a36;
+  color: #fce4ec;
+  border-left-color: #f06292;
 }
 
 :global(.dark-mode) .TURN_EVENT {
-  background-color: #f57f17;
-  color: #000;
-  border-left-color: #ffb300;
+  background-color: #0d3c61;
+  color: #e3f2fd;
+  border-left-color: #64b5f6;
 }
 
 :global(.dark-mode) .SYSTEM_EVENT {
-  background-color: #424242;
+  background-color: #3a3a3a;
   color: #e0e0e0;
   border-left-color: #9e9e9e;
 }
@@ -123,9 +129,9 @@
 :global(.dark-mode) .mentionHighlight {
   background-color: #e65100 !important;
   color: #fff !important;
-  border: 2px solid #ff9800 !important;
-  border-left: 3px solid #ff9800 !important;
-  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
+  border: 1px solid #ff9800 !important;
+  border-left: 3px solid #ffb74d !important;
+  box-shadow: 0 1px 3px rgba(255, 152, 0, 0.3);
 }
 
 /* Empty state message */
