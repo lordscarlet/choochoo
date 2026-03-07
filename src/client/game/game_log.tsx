@@ -167,6 +167,8 @@ interface PlayerColorContainer {
   playerColor: PlayerColor;
 }
 
+type ParsedMessagePart = string | Container | PlayerColorContainer;
+
 function parseColorsInText(text: string): Array<string | PlayerColorContainer> {
   const parts: Array<string | PlayerColorContainer> = [];
   let lastIndex = 0;
@@ -191,9 +193,45 @@ function parseColorsInText(text: string): Array<string | PlayerColorContainer> {
   return parts;
 }
 
+function moveColorChipBeforeUser(parts: ParsedMessagePart[]): ParsedMessagePart[] {
+  const reordered: ParsedMessagePart[] = [];
+
+  for (let index = 0; index < parts.length; index++) {
+    const current = parts[index];
+    if (typeof current === "string" || current.type !== "user") {
+      reordered.push(current);
+      continue;
+    }
+
+    const next = parts[index + 1];
+    const nextNext = parts[index + 2];
+
+    if (
+      typeof next === "string" &&
+      /^\s+$/.test(next) &&
+      typeof nextNext !== "string" &&
+      nextNext.type === "playerColor"
+    ) {
+      reordered.push(nextNext, next, current);
+      index += 2;
+      continue;
+    }
+
+    if (typeof next !== "string" && next?.type === "playerColor") {
+      reordered.push(next, " ", current);
+      index += 1;
+      continue;
+    }
+
+    reordered.push(current);
+  }
+
+  return reordered;
+}
+
 function LogMessage({ message, currentUserId }: { message: string; currentUserId?: number }) {
   const messageParsed = useMemo(() => {
-    const parts: Array<string | Container | PlayerColorContainer> = [];
+    const parts: ParsedMessagePart[] = [];
     let lastIndex = 0;
     for (const match of message.matchAll(USER_MESSAGE_PARSER)) {
       parts.push(...parseColorsInText(message.substring(lastIndex, match.index)));
@@ -201,7 +239,7 @@ function LogMessage({ message, currentUserId }: { message: string; currentUserId
       lastIndex = match.index + match[0].length;
     }
     parts.push(...parseColorsInText(message.substring(lastIndex)));
-    return parts;
+    return moveColorChipBeforeUser(parts);
   }, [message]);
 
   return (
