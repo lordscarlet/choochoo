@@ -14,6 +14,7 @@ import {
   detectMessageType,
   getAllMessageTypes,
 } from "../../utils/message_types";
+import { PlayerColor } from "../../engine/state/player";
 import { useMessages, useSendChat } from "../services/message";
 import { useMe } from "../services/me";
 import { useLocalStorage } from "../services/local_storage";
@@ -26,6 +27,7 @@ import useStayScrolled from "react-stay-scrolled";
 import { Button, Form, Icon, Input, Popup } from "semantic-ui-react";
 import { GameHistoryApi } from "../../api/history";
 import { MessageApi } from "../../api/message";
+import { getPlayerColorCss } from "../components/player_color";
 import { Username } from "../components/username";
 import { isGameHistory, useGame } from "../services/game";
 
@@ -140,22 +142,65 @@ export function ChatLog({ gameId }: ChatLogProps) {
 }
 
 const USER_MESSAGE_PARSER = /<@(user|game)-(\d+)>/g;
+const PLAYER_COLOR_PARSER = /\((red|yellow|green|purple|black|blue|brown|white|pink)\)/gi;
+
+const PLAYER_COLOR_LOOKUP: Record<string, PlayerColor> = {
+  red: PlayerColor.RED,
+  yellow: PlayerColor.YELLOW,
+  green: PlayerColor.GREEN,
+  purple: PlayerColor.PURPLE,
+  black: PlayerColor.BLACK,
+  blue: PlayerColor.BLUE,
+  brown: PlayerColor.BROWN,
+  white: PlayerColor.WHITE,
+  pink: PlayerColor.PINK,
+};
 
 interface Container {
   type: string;
   id: number;
 }
 
+interface PlayerColorContainer {
+  type: "playerColor";
+  colorName: string;
+  playerColor: PlayerColor;
+}
+
+function parseColorsInText(text: string): Array<string | PlayerColorContainer> {
+  const parts: Array<string | PlayerColorContainer> = [];
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(PLAYER_COLOR_PARSER)) {
+    const colorName = match[1].toLowerCase();
+    const playerColor = PLAYER_COLOR_LOOKUP[colorName];
+    if (playerColor == null) {
+      continue;
+    }
+
+    parts.push(text.substring(lastIndex, match.index));
+    parts.push({
+      type: "playerColor",
+      colorName,
+      playerColor,
+    });
+    lastIndex = match.index + match[0].length;
+  }
+
+  parts.push(text.substring(lastIndex));
+  return parts;
+}
+
 function LogMessage({ message, currentUserId }: { message: string; currentUserId?: number }) {
   const messageParsed = useMemo(() => {
-    const parts: Array<string | Container> = [];
+    const parts: Array<string | Container | PlayerColorContainer> = [];
     let lastIndex = 0;
     for (const match of message.matchAll(USER_MESSAGE_PARSER)) {
-      parts.push(message.substring(lastIndex, match.index));
+      parts.push(...parseColorsInText(message.substring(lastIndex, match.index)));
       parts.push({ type: match[1], id: Number(match[2]) });
       lastIndex = match.index + match[0].length;
     }
-    parts.push(message.substring(lastIndex));
+    parts.push(...parseColorsInText(message.substring(lastIndex)));
     return parts;
   }, [message]);
 
@@ -167,6 +212,19 @@ function LogMessage({ message, currentUserId }: { message: string; currentUserId
           <span key={index} className={isMentionedUser ? styles.mentionedUser : undefined}>
             {typeof part === "string" ? (
               part
+            ) : part.type === "playerColor" ? (
+              <span
+                className={styles.playerColorToken}
+                role="img"
+                aria-label={`player color ${part.colorName}`}
+                title={`Player color: ${part.colorName}`}
+              >
+                <Icon
+                  name="circle"
+                  className={`${styles.playerColorCircle} ${getPlayerColorCss(part.playerColor)}`}
+                  aria-hidden="true"
+                />
+              </span>
             ) : part.type === "game" ? (
               <a href={`/app/games/${part.id}`}>Game #{part.id}</a>
             ) : (
