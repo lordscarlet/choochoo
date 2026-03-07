@@ -83,7 +83,7 @@ export function ChatLog({ gameId, userColorLookup = {}, showFilters = true }: Ch
 
   // Filter state with localStorage persistence
   const [storedFilters, setStoredFilters] = useLocalStorage<MessageType[]>(
-    "chat-filters",
+    `chat-filters-${gameId ?? 'home'}`,
   );
   const [activeFilters, setActiveFilters] = useState<Set<MessageType>>(() => {
     if (storedFilters && storedFilters.length > 0) {
@@ -456,9 +456,23 @@ function LogMessages({
   const hasMessages = messages.length > 0;
   const hasFilteredOutMessages = allMessages && allMessages.length > messages.length;
 
-  // Track actor for alternating background grouping
-  let previousActor: number | null = null;
-  let currentActorGroup = 0;
+  // Track actor for alternating background grouping - memoized to ensure consistent grouping
+  const messageGrouping = useMemo(() => {
+    const grouping: number[] = [];
+    let previousActor: number | null = null;
+    let currentActorGroup = 0;
+    
+    messages.forEach((log) => {
+      const currentActor = getMessageActor(log);
+      if (currentActor !== null && currentActor !== previousActor) {
+        currentActorGroup = 1 - currentActorGroup;
+        previousActor = currentActor;
+      }
+      grouping.push(currentActorGroup);
+    });
+    
+    return grouping;
+  }, [messages]);
 
   return (
     <div className={styles.logContainer}>
@@ -508,10 +522,7 @@ function LogMessages({
               nextLog.date.toLocaleDateString() === dateString;
 
             const currentActor = getMessageActor(log);
-            if (currentActor !== null && currentActor !== previousActor) {
-              currentActorGroup = 1 - currentActorGroup;
-              previousActor = currentActor;
-            }
+            const currentActorGroup = messageGrouping[index];
             const actorGroupClass =
               currentActor !== null ? `actorGroup${currentActorGroup}` : null;
 

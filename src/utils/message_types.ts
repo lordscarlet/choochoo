@@ -22,16 +22,6 @@ export const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
 };
 
 /**
- * Icons for each message type (emoji for simplicity)
- */
-export const MESSAGE_TYPE_ICONS: Record<MessageType, string> = {
-  [MessageType.CHAT]: "💬",
-  [MessageType.PLAYER_ACTION]: "🎯",
-  [MessageType.TURN_EVENT]: "🔄",
-  [MessageType.SYSTEM_EVENT]: "⚙️",
-};
-
-/**
  * Patterns for detecting player actions in message text.
  * Format: <@user-123> (color) action
  */
