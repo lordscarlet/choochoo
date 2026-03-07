@@ -280,9 +280,21 @@ function LogMessage({
         const isMentionedUser = typeof part !== "string" && part.type === "user" && part.id === currentUserId;
         const previousPart = messageParsed[index - 1];
         const nextPart = messageParsed[index + 1];
+        const previousPreviousPart = messageParsed[index - 2];
+        const nextNextPart = messageParsed[index + 2];
+        const previousIsWhitespace =
+          typeof previousPart === "string" && /^\s+$/.test(previousPart);
+        const nextIsWhitespace =
+          typeof nextPart === "string" && /^\s+$/.test(nextPart);
         const hasAdjacentColorToken =
           (typeof previousPart !== "string" && previousPart?.type === "playerColor") ||
-          (typeof nextPart !== "string" && nextPart?.type === "playerColor");
+          (typeof nextPart !== "string" && nextPart?.type === "playerColor") ||
+          (previousIsWhitespace &&
+            typeof previousPreviousPart !== "string" &&
+            previousPreviousPart?.type === "playerColor") ||
+          (nextIsWhitespace &&
+            typeof nextNextPart !== "string" &&
+            nextNextPart?.type === "playerColor");
         return (
           <span key={index} className={isMentionedUser ? styles.mentionedUser : undefined}>
             {typeof part === "string" ? (
