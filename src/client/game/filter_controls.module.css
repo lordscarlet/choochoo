@@ -33,8 +33,14 @@
   border: 1px solid #1a9234 !important;
 }
 
+.active {
+  background-color: #21ba45 !important;
+  color: #ffffff !important;
+  border: 1px solid #1a9234 !important;
+}
+
 /* Inactive state - WCAG compliant without opacity */
-.filterButton:not(.active) {
+.filterButton:not(:global(.active)) {
   background: #d8d8d8 !important;
   color: #4a4a4a !important;
   border: 1px solid #b0b0b0 !important;
@@ -73,7 +79,13 @@
   border: 1px solid #484848 !important;
 }
 
-:global(.dark-mode) .filterButton:not(.active) {
+:global(.dark-mode) .active {
+  background-color: #21ba45 !important;
+  color: #ffffff !important;
+  border: 1px solid #484848 !important;
+}
+
+:global(.dark-mode) .filterButton:not(:global(.active)) {
   background: #3a3a3a !important;
   color: #b0b0b0 !important;
   border: 1px solid #505050 !important;
