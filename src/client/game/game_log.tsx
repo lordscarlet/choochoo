@@ -14,11 +14,13 @@ import {
   detectMessageType,
   getAllMessageTypes,
 } from "../../utils/message_types";
-import { PlayerColor } from "../../engine/state/player";
+import { injectAllPlayersUnsafe } from "../../engine/game/state";
+import { PlayerColor, playerColorToString } from "../../engine/state/player";
 import { useMessages, useSendChat } from "../services/message";
 import { useMe } from "../services/me";
 import { useLocalStorage } from "../services/local_storage";
 import { useTextInputState } from "../utils/form_state";
+import { useInject } from "../utils/injection_context";
 import { FilterControls } from "./filter_controls";
 import * as styles from "./game_log.module.css";
 
@@ -33,22 +35,43 @@ import { isGameHistory, useGame } from "../services/game";
 
 export function GameLog() {
   const game = useGame();
+  const userColorLookup = useInject(() => {
+    const lookup: Record<number, PlayerColor> = {};
+    injectAllPlayersUnsafe()().forEach((player) => {
+      lookup[player.playerId] = player.color;
+    });
+    return lookup;
+  }, [game.id]);
+
   if (isGameHistory(game)) {
-    return <GameHistoryLog history={game} />;
+    return <GameHistoryLog history={game} userColorLookup={userColorLookup} />;
   }
-  return <ChatLog gameId={game.id} />;
+  return <ChatLog gameId={game.id} userColorLookup={userColorLookup} />;
 }
 
-function GameHistoryLog({ history }: { history: GameHistoryApi }) {
+function GameHistoryLog({
+  history,
+  userColorLookup,
+}: {
+  history: GameHistoryApi;
+  userColorLookup: Record<number, PlayerColor>;
+}) {
   const me = useMe();
-  return <LogMessages messages={history.logs} currentUserId={me?.id} />;
+  return (
+    <LogMessages
+      messages={history.logs}
+      currentUserId={me?.id}
+      userColorLookup={userColorLookup}
+    />
+  );
 }
 
 interface ChatLogProps {
   gameId?: number;
+  userColorLookup: Record<number, PlayerColor>;
 }
 
-export function ChatLog({ gameId }: ChatLogProps) {
+export function ChatLog({ gameId, userColorLookup }: ChatLogProps) {
   const { messages, isLoading, fetchNextPage, hasNextPage } =
     useMessages(gameId);
   const [newMessage, setNewMessage, setNewMessageRaw] = useTextInputState("");
@@ -115,6 +138,7 @@ export function ChatLog({ gameId }: ChatLogProps) {
         fetchNextPage={hasNextPage ? fetchNextPage : undefined}
         disableNextPage={isLoading}
         currentUserId={me?.id}
+        userColorLookup={userColorLookup}
       />
       <Form onSubmit={onSubmit} className={styles.submitForm}>
         <Input
@@ -229,7 +253,15 @@ function moveColorChipBeforeUser(parts: ParsedMessagePart[]): ParsedMessagePart[
   return reordered;
 }
 
-function LogMessage({ message, currentUserId }: { message: string; currentUserId?: number }) {
+function LogMessage({
+  message,
+  currentUserId,
+  userColorLookup,
+}: {
+  message: string;
+  currentUserId?: number;
+  userColorLookup: Record<number, PlayerColor>;
+}) {
   const messageParsed = useMemo(() => {
     const parts: ParsedMessagePart[] = [];
     let lastIndex = 0;
@@ -246,6 +278,11 @@ function LogMessage({ message, currentUserId }: { message: string; currentUserId
     <>
       {messageParsed.map((part, index) => {
         const isMentionedUser = typeof part !== "string" && part.type === "user" && part.id === currentUserId;
+        const previousPart = messageParsed[index - 1];
+        const nextPart = messageParsed[index + 1];
+        const hasAdjacentColorToken =
+          (typeof previousPart !== "string" && previousPart?.type === "playerColor") ||
+          (typeof nextPart !== "string" && nextPart?.type === "playerColor");
         return (
           <span key={index} className={isMentionedUser ? styles.mentionedUser : undefined}>
             {typeof part === "string" ? (
@@ -266,11 +303,45 @@ function LogMessage({ message, currentUserId }: { message: string; currentUserId
             ) : part.type === "game" ? (
               <a href={`/app/games/${part.id}`}>Game #{part.id}</a>
             ) : (
-              <Username userId={part.id} useAt={true} useLink={true} />
+              <ReferencedUser
+                userId={part.id}
+                showColorChip={!hasAdjacentColorToken}
+                playerColor={userColorLookup[part.id]}
+              />
             )}
           </span>
         );
       })}
+    </>
+  );
+}
+
+function ReferencedUser({
+  userId,
+  showColorChip,
+  playerColor,
+}: {
+  userId: number;
+  showColorChip: boolean;
+  playerColor?: PlayerColor;
+}) {
+  return (
+    <>
+      {showColorChip && playerColor != null && (
+        <span
+          className={styles.playerColorToken}
+          role="img"
+          aria-label={`player color ${playerColorToString(playerColor)}`}
+          title={`Player color: ${playerColorToString(playerColor)}`}
+        >
+          <Icon
+            name="circle"
+            className={`${styles.playerColorCircle} ${getPlayerColorCss(playerColor)}`}
+            aria-hidden="true"
+          />
+        </span>
+      )}
+      <Username userId={userId} useAt={true} useLink={true} />
     </>
   );
 }
@@ -281,6 +352,7 @@ interface LogMessagesProps {
   fetchNextPage?: () => void;
   disableNextPage?: boolean;
   currentUserId?: number;
+  userColorLookup: Record<number, PlayerColor>;
 }
 
 // Simple classnames helper
@@ -294,6 +366,7 @@ function LogMessages({
   fetchNextPage,
   disableNextPage,
   currentUserId,
+  userColorLookup,
 }: LogMessagesProps) {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -357,7 +430,11 @@ function LogMessages({
                     </>
                   )}{" "}
                   <span>
-                    <LogMessage message={log.message} currentUserId={currentUserId} />
+                    <LogMessage
+                      message={log.message}
+                      currentUserId={currentUserId}
+                      userColorLookup={userColorLookup}
+                    />
                   </span>
                 </p>
               </Fragment>
