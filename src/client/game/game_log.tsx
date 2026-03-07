@@ -13,7 +13,6 @@ import {
   MessageType,
   containsMentionOfUser,
   detectMessageType,
-  getAllMessageTypes,
   getMessageActor,
 } from "../../utils/message_types";
 import { injectAllPlayersUnsafe } from "../../engine/game/state";
@@ -93,6 +92,11 @@ export function ChatLog({ gameId, userColorLookup = {}, showFilters = true }: Ch
     return new Set();
   });
 
+  // Reset filters when gameId changes to prevent stale state
+  useLayoutEffect(() => {
+    setActiveFilters(new Set());
+  }, [gameId]);
+
   // Toggle filter handler
   const handleToggleFilter = useCallback(
     (type: MessageType) => {
@@ -113,9 +117,10 @@ export function ChatLog({ gameId, userColorLookup = {}, showFilters = true }: Ch
 
   // Filter messages by active types
   // If no filters are active, show all messages
+  // If showFilters is false, always show all messages (bypass filtering)
   const filteredMessages = useMemo(
     () => {
-      if (activeFilters.size === 0) {
+      if (!showFilters || activeFilters.size === 0) {
         return messages;
       }
       return messages.filter((message) => {
@@ -123,7 +128,7 @@ export function ChatLog({ gameId, userColorLookup = {}, showFilters = true }: Ch
         return activeFilters.has(type);
       });
     },
-    [messages, activeFilters],
+    [messages, activeFilters, showFilters],
   );
 
   const onSubmit = useCallback(
@@ -449,6 +454,13 @@ function LogMessages({
 
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
+
+      // Cleanup listeners on unmount or if component changes
+      return () => {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+        resizeStateRef.current = null;
+      };
     },
     [logHeight],
   );
@@ -612,6 +624,23 @@ function LogMessages({
         role="separator"
         aria-label="Resize chat log"
         aria-orientation="horizontal"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+            event.preventDefault();
+            const handle = event.currentTarget as HTMLDivElement;
+            const logList = handle.previousElementSibling as HTMLElement | null;
+            if (!logList) {
+              return;
+            }
+            const step = 10;
+            const minHeight = 50;
+            const currentHeight = logList.offsetHeight;
+            const delta = event.key === "ArrowUp" ? step : -step;
+            const newHeight = Math.max(minHeight, currentHeight + delta);
+            logList.style.height = `${newHeight}px`;
+          }
+        }}
       />
       {canScrollToBottom && (
         <div className={styles.scrollToBottomContainer}>

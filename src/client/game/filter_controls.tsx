@@ -40,7 +40,7 @@ export function FilterControls({
             onClick={() => onToggle(type)}
             aria-label={`Toggle ${label} messages`}
             aria-pressed={isActive}
-            className={`${styles.filterButton} ${styles[`filterButton${MessageType[type]}`]} ${isActive ? "active" : ""}`}
+            className={`${styles.filterButton} ${styles[`filterButton${MessageType[type]}`]} ${isActive ? styles.active : ""}`}
           >
             {label}
           </Button>
