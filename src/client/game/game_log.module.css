@@ -55,6 +55,7 @@
   font-size: 0.875rem;
   color: #666;
   font-family: 'Courier New', Courier, monospace;
+  margin-right: 0.75rem;
 }
 
 :global(.dark-mode) .time {
