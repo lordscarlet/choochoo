@@ -1,7 +1,6 @@
 import { Button } from "semantic-ui-react";
 import {
   getAllMessageTypes,
-  MESSAGE_TYPE_ICONS,
   MESSAGE_TYPE_LABELS,
   MessageType,
 } from "../../utils/message_types";
@@ -31,7 +30,6 @@ export function FilterControls({
       {messageTypes.map((type) => {
         const isActive = activeFilters.has(type);
         const label = MESSAGE_TYPE_LABELS[type];
-        const icon = MESSAGE_TYPE_ICONS[type];
 
         return (
           <Button
@@ -42,12 +40,9 @@ export function FilterControls({
             onClick={() => onToggle(type)}
             aria-label={`Toggle ${label} messages`}
             aria-pressed={isActive}
-            className={`${styles.filterButton} ${isActive ? "active" : ""}`}
+            className={`${styles.filterButton} ${styles[`filterButton${MessageType[type]}`]} ${isActive ? "active" : ""}`}
           >
-            <span className={styles.buttonIcon} aria-hidden="true">
-              {icon}
-            </span>
-            <span className={styles.buttonLabel}>{label}</span>
+            {label}
           </Button>
         );
       })}

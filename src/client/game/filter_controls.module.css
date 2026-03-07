@@ -8,35 +8,43 @@
 
 .filterButton {
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
   font-weight: 500 !important;
-  border-radius: 6px !important;
+  border-radius: 4px !important;
+  font-size: 0.875rem !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* Color buttons to match their log types */
+.filterButtonCHAT.active {
+  background-color: #00acc1 !important;
+  color: white !important;
+}
+
+.filterButtonPLAYER_ACTION.active {
+  background-color: #ec407a !important;
+  color: white !important;
+}
+
+.filterButtonTURN_EVENT.active {
+  background-color: #42a5f5 !important;
+  color: white !important;
+}
+
+.filterButtonSYSTEM_EVENT.active {
+  background-color: #9e9e9e !important;
+  color: white !important;
 }
 
 /* Inactive state - more subdued */
 .filterButton:not(.active) {
-  opacity: 0.6;
+  opacity: 0.5;
   background: #e0e0e0 !important;
   color: #666 !important;
 }
 
 .filterButton:not(.active):hover {
-  opacity: 0.8;
+  opacity: 0.7;
   background: #d0d0d0 !important;
-}
-
-.buttonIcon {
-  font-size: 1em;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-}
-
-.buttonLabel {
-  font-size: 0.875rem;
-  letter-spacing: 0.01em;
 }
 
 /* Mobile responsiveness */
@@ -60,6 +68,18 @@
 }
 
 /* Dark mode adjustments */
+:global(.dark-mode) .filterButtonCHAT.active {
+  background-color: #26c6da !important;
+}
+
+:global(.dark-mode) .filterButtonPLAYER_ACTION.active {
+  background-color: #f06292 !important;
+}
+
+:global(.dark-mode) .filterButtonTURN_EVENT.active {
+  background-color: #64b5f6 !important;
+}
+
 :global(.dark-mode) .filterButton:not(.active) {
   background: #424242 !important;
   color: #aaa !important;

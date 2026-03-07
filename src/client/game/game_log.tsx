@@ -146,7 +146,7 @@ interface Container {
   id: number;
 }
 
-function LogMessage({ message }: { message: string }) {
+function LogMessage({ message, currentUserId }: { message: string; currentUserId?: number }) {
   const messageParsed = useMemo(() => {
     const parts: Array<string | Container> = [];
     let lastIndex = 0;
@@ -161,17 +161,20 @@ function LogMessage({ message }: { message: string }) {
 
   return (
     <>
-      {messageParsed.map((part, index) => (
-        <span key={index}>
-          {typeof part === "string" ? (
-            part
-          ) : part.type === "game" ? (
-            <a href={`/app/games/${part.id}`}>Game #{part.id}</a>
-          ) : (
-            <Username userId={part.id} useAt={true} useLink={true} />
-          )}
-        </span>
-      ))}
+      {messageParsed.map((part, index) => {
+        const isMentionedUser = typeof part !== "string" && part.type === "user" && part.id === currentUserId;
+        return (
+          <span key={index} className={isMentionedUser ? styles.mentionedUser : undefined}>
+            {typeof part === "string" ? (
+              part
+            ) : part.type === "game" ? (
+              <a href={`/app/games/${part.id}`}>Game #{part.id}</a>
+            ) : (
+              <Username userId={part.id} useAt={true} useLink={true} />
+            )}
+          </span>
+        );
+      })}
     </>
   );
 }
@@ -240,7 +243,7 @@ function LogMessages({
             
             return (
               <Fragment key={log.id}>
-                {isNewDay && <p>-- {dateString} --</p>}
+                {isNewDay && <p className={styles.dateChange}>-- {dateString} --</p>}
                 <p
                   className={cx(
                     styles.logLine,
@@ -258,7 +261,7 @@ function LogMessages({
                     </>
                   )}{" "}
                   <span>
-                    <LogMessage message={log.message} />
+                    <LogMessage message={log.message} currentUserId={currentUserId} />
                   </span>
                 </p>
               </Fragment>
