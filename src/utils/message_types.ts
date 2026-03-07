@@ -121,3 +121,31 @@ export function getAllMessageTypes(): MessageType[] {
     MessageType.SYSTEM_EVENT,
   ];
 }
+
+/**
+ * Extracts the "actor" (user ID) responsible for a message.
+ * Used for visual grouping of consecutive messages by the same actor.
+ * 
+ * Extraction logic:
+ * 1. Chat messages → userId
+ * 2. Player actions → parse userId from <@user-123> at start
+ * 3. Turn/system events → null (no specific actor)
+ * 
+ * @param message The message to analyze
+ * @returns The user ID of the actor, or null if no specific actor
+ */
+export function getMessageActor(message: MessageApi): number | null {
+  // Chat messages have explicit userId
+  if (message.userId != null) {
+    return message.userId;
+  }
+
+  // Try to extract actor from player action format: <@user-123> ...
+  const actorMatch = message.message.match(/^<@user-(\d+)>/);
+  if (actorMatch) {
+    return Number(actorMatch[1]);
+  }
+
+  // No specific actor for turn/system events
+  return null;
+}

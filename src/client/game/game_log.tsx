@@ -1,6 +1,7 @@
 import {
   FormEvent,
   Fragment,
+  MouseEvent,
   useCallback,
   useLayoutEffect,
   useMemo,
@@ -13,6 +14,7 @@ import {
   containsMentionOfUser,
   detectMessageType,
   getAllMessageTypes,
+  getMessageActor,
 } from "../../utils/message_types";
 import { injectAllPlayersUnsafe } from "../../engine/game/state";
 import { PlayerColor, playerColorToString } from "../../engine/state/player";
@@ -68,10 +70,11 @@ function GameHistoryLog({
 
 interface ChatLogProps {
   gameId?: number;
-  userColorLookup: Record<number, PlayerColor>;
+  userColorLookup?: Record<number, PlayerColor>;
+  showFilters?: boolean;
 }
 
-export function ChatLog({ gameId, userColorLookup }: ChatLogProps) {
+export function ChatLog({ gameId, userColorLookup = {}, showFilters = true }: ChatLogProps) {
   const { messages, isLoading, fetchNextPage, hasNextPage } =
     useMessages(gameId);
   const [newMessage, setNewMessage, setNewMessageRaw] = useTextInputState("");
@@ -86,8 +89,8 @@ export function ChatLog({ gameId, userColorLookup }: ChatLogProps) {
     if (storedFilters && storedFilters.length > 0) {
       return new Set(storedFilters);
     }
-    // Default: all filters enabled
-    return new Set(getAllMessageTypes());
+    // Default: no filters active (show all)
+    return new Set();
   });
 
   // Toggle filter handler
@@ -109,12 +112,17 @@ export function ChatLog({ gameId, userColorLookup }: ChatLogProps) {
   );
 
   // Filter messages by active types
+  // If no filters are active, show all messages
   const filteredMessages = useMemo(
-    () =>
-      messages.filter((message) => {
+    () => {
+      if (activeFilters.size === 0) {
+        return messages;
+      }
+      return messages.filter((message) => {
         const type = detectMessageType(message);
         return activeFilters.has(type);
-      }),
+      });
+    },
     [messages, activeFilters],
   );
 
@@ -128,10 +136,12 @@ export function ChatLog({ gameId, userColorLookup }: ChatLogProps) {
 
   return (
     <div className={styles.chat}>
-      <FilterControls
-        activeFilters={activeFilters}
-        onToggle={handleToggleFilter}
-      />
+      {showFilters && (
+        <FilterControls
+          activeFilters={activeFilters}
+          onToggle={handleToggleFilter}
+        />
+      )}
       <LogMessages
         messages={filteredMessages}
         allMessages={messages}
@@ -181,7 +191,7 @@ const PLAYER_COLOR_LOOKUP: Record<string, PlayerColor> = {
 };
 
 interface Container {
-  type: string;
+  type: "user" | "game";
   id: number;
 }
 
@@ -257,17 +267,20 @@ function LogMessage({
   message,
   currentUserId,
   userColorLookup,
+  messageType,
 }: {
   message: string;
   currentUserId?: number;
   userColorLookup: Record<number, PlayerColor>;
+  messageType: MessageType;
 }) {
   const messageParsed = useMemo(() => {
     const parts: ParsedMessagePart[] = [];
     let lastIndex = 0;
     for (const match of message.matchAll(USER_MESSAGE_PARSER)) {
       parts.push(...parseColorsInText(message.substring(lastIndex, match.index)));
-      parts.push({ type: match[1], id: Number(match[2]) });
+      const referenceType: "user" | "game" = match[1] === "user" ? "user" : "game";
+      parts.push({ type: referenceType, id: Number(match[2]) });
       lastIndex = match.index + match[0].length;
     }
     parts.push(...parseColorsInText(message.substring(lastIndex)));
@@ -277,7 +290,8 @@ function LogMessage({
   return (
     <>
       {messageParsed.map((part, index) => {
-        const isMentionedUser = typeof part !== "string" && part.type === "user" && part.id === currentUserId;
+        const isUserMention = typeof part !== "string" && part.type === "user";
+        const isMentionedUser = isUserMention && part.id === currentUserId;
         const previousPart = messageParsed[index - 1];
         const nextPart = messageParsed[index + 1];
         const previousPreviousPart = messageParsed[index - 2];
@@ -295,8 +309,14 @@ function LogMessage({
           (nextIsWhitespace &&
             typeof nextNextPart !== "string" &&
             nextNextPart?.type === "playerColor");
+        
+        const mentionClasses = cx(
+          isUserMention && messageType === MessageType.CHAT && styles.userMention,
+          isMentionedUser && styles.mentionedUser
+        );
+        
         return (
-          <span key={index} className={isMentionedUser ? styles.mentionedUser : undefined}>
+          <span key={index} className={mentionClasses || undefined}>
             {typeof part === "string" ? (
               part
             ) : part.type === "playerColor" ? (
@@ -381,8 +401,12 @@ function LogMessages({
   userColorLookup,
 }: LogMessagesProps) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const resizeStateRef = useRef<{ startY: number; startHeight: number } | null>(
+    null,
+  );
 
   const [canScrollToBottom, setCanScrollToBottom] = useState(false);
+  const [logHeight, setLogHeight] = useState(250);
   const { stayScrolled, isScrolled, scrollBottom } = useStayScrolled(ref);
 
   const onScroll = useCallback(() => {
@@ -395,12 +419,55 @@ function LogMessages({
     setCanScrollToBottom(!isScrolled());
   }, [isScrolled, setCanScrollToBottom, messages.length]);
 
+  const onResizeMouseDown = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      resizeStateRef.current = {
+        startY: event.clientY,
+        startHeight: logHeight,
+      };
+
+      const onMouseMove = (moveEvent: globalThis.MouseEvent) => {
+        if (resizeStateRef.current == null) {
+          return;
+        }
+
+        const deltaY = moveEvent.clientY - resizeStateRef.current.startY;
+        const maxHeight = Math.round(window.innerHeight * 0.75);
+        const nextHeight = Math.max(
+          180,
+          Math.min(maxHeight, resizeStateRef.current.startHeight + deltaY),
+        );
+        setLogHeight(nextHeight);
+      };
+
+      const onMouseUp = () => {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+        resizeStateRef.current = null;
+      };
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+    },
+    [logHeight],
+  );
+
   const hasMessages = messages.length > 0;
   const hasFilteredOutMessages = allMessages && allMessages.length > messages.length;
 
+  // Track actor for alternating background grouping
+  let previousActor: number | null = null;
+  let currentActorGroup = 0;
+
   return (
     <div className={styles.logContainer}>
-      <div className={styles.logList} ref={ref} onScroll={onScroll}>
+      <div
+        className={styles.logList}
+        style={{ height: `${logHeight}px` }}
+        ref={ref}
+        onScroll={onScroll}
+      >
         {fetchNextPage != null && (
           <button
             onClick={fetchNextPage}
@@ -416,29 +483,98 @@ function LogMessages({
             const isNewDay =
               index == 0 ||
               dateString !== messages[index - 1].date.toLocaleDateString();
-            
-            // Detect message type and mention
+
             const messageType = detectMessageType(log);
-            const isMentioned = messageType === MessageType.CHAT && containsMentionOfUser(log.message, currentUserId);
+            const isMentioned =
+              messageType === MessageType.CHAT &&
+              containsMentionOfUser(log.message, currentUserId);
             const typeClassName = MessageType[messageType];
-            
+            const previousLog = index > 0 ? messages[index - 1] : undefined;
+            const nextLog = index < messages.length - 1 ? messages[index + 1] : undefined;
+            const shouldCollapseAuthor =
+              !isNewDay &&
+              messageType === MessageType.CHAT &&
+              log.userId != null &&
+              previousLog != null &&
+              previousLog.userId === log.userId &&
+              detectMessageType(previousLog) === MessageType.CHAT;
+
+            const nextIsContinuation =
+              nextLog != null &&
+              messageType === MessageType.CHAT &&
+              log.userId != null &&
+              nextLog.userId === log.userId &&
+              detectMessageType(nextLog) === MessageType.CHAT &&
+              nextLog.date.toLocaleDateString() === dateString;
+
+            const currentActor = getMessageActor(log);
+            if (currentActor !== null && currentActor !== previousActor) {
+              currentActorGroup = 1 - currentActorGroup;
+              previousActor = currentActor;
+            }
+            const actorGroupClass =
+              currentActor !== null ? `actorGroup${currentActorGroup}` : null;
+
             return (
               <Fragment key={log.id}>
-                {isNewDay && <p className={styles.dateChange}>-- {dateString} --</p>}
+                {isNewDay && (
+                  <p
+                    className={cx(
+                      styles.dateChange,
+                      index !== 0 && styles.dateChangeWithGap,
+                    )}
+                  >
+                    -- {dateString} --
+                  </p>
+                )}
                 <p
                   className={cx(
                     styles.logLine,
+                    shouldCollapseAuthor && styles.logLineContinuation,
+                    nextIsContinuation && styles.logLineBeforeContinuation,
                     styles[typeClassName],
+                    actorGroupClass && styles[actorGroupClass],
                     isMentioned && styles.mentionHighlight,
                   )}
                 >
                   <span className={styles.time}>{timeFormat(log.date)}</span>{" "}
                   {log.userId != null && (
                     <>
-                      <span className={styles.username}>
+                      <span
+                        className={cx(
+                          styles.username,
+                          shouldCollapseAuthor && styles.usernamePlaceholder,
+                        )}
+                        aria-hidden={shouldCollapseAuthor}
+                      >
+                        {userColorLookup[log.userId] != null && (
+                          <span
+                            className={styles.playerColorToken}
+                            role="img"
+                            aria-label={`player color ${playerColorToString(
+                              userColorLookup[log.userId],
+                            )}`}
+                            title={`Player color: ${playerColorToString(
+                              userColorLookup[log.userId],
+                            )}`}
+                          >
+                            <Icon
+                              name="circle"
+                              className={`${styles.playerColorCircle} ${getPlayerColorCss(
+                                userColorLookup[log.userId],
+                              )}`}
+                              aria-hidden="true"
+                            />
+                          </span>
+                        )}
                         <Username userId={log.userId} useLink={true} />
                       </span>
-                      :
+                      <span
+                        className={shouldCollapseAuthor ? styles.usernamePlaceholder : undefined}
+                        aria-hidden={shouldCollapseAuthor}
+                      >
+                        :
+                      </span>
                     </>
                   )}{" "}
                   <span>
@@ -446,6 +582,7 @@ function LogMessages({
                       message={log.message}
                       currentUserId={currentUserId}
                       userColorLookup={userColorLookup}
+                      messageType={messageType}
                     />
                   </span>
                 </p>
@@ -458,6 +595,13 @@ function LogMessages({
           </div>
         ) : null}
       </div>
+      <div
+        className={styles.resizeHandle}
+        onMouseDown={onResizeMouseDown}
+        role="separator"
+        aria-label="Resize chat log"
+        aria-orientation="horizontal"
+      />
       {canScrollToBottom && (
         <div className={styles.scrollToBottomContainer}>
           <Popup

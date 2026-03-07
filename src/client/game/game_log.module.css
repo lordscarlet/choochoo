@@ -18,32 +18,50 @@
 }
 
 .logList {
-  height: 200px;
+  height: 250px;
   position: relative;
   overflow-y: auto;
 }
 
+.resizeHandle {
+  height: 10px;
+  cursor: ns-resize;
+  position: relative;
+  user-select: none;
+}
+
+.resizeHandle::before {
+  content: "";
+  position: absolute;
+  left: 35%;
+  right: 35%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 2px solid #c1c1c1;
+}
+
+.resizeHandle:hover::before {
+  border-top-color: #8f8f8f;
+}
+
 .logLine {
   margin: 3px 0;
-  padding: 0.45rem 0.75rem 0.45rem 1rem;
+  padding: 0.45rem 0.75rem 0.45rem 0.75rem;
   border-radius: 0;
   position: relative;
   background-color: #f7f7f7;
-  --log-accent: transparent;
+  border-left: 3px solid #e0e0e0;
   transition: all 0.15s ease;
   line-height: 1.5;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.logLine::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 5px;
-  height: 70%;
-  background-color: var(--log-accent);
+.logLineContinuation {
+  margin: 0;
+}
+
+.logLineBeforeContinuation {
+  margin-bottom: 0;
 }
 
 .scrollToBottomContainer {
@@ -75,15 +93,41 @@
   color: #c7c7c7;
 }
 
+:global(.dark-mode) .resizeHandle::before {
+  border-top-color: #6d6d6d;
+}
+
+:global(.dark-mode) .resizeHandle:hover::before {
+  border-top-color: #9a9a9a;
+}
+
 .username {
   font-weight: 600;
+}
+
+.usernamePlaceholder {
+  visibility: hidden;
 }
 
 .dateChange {
   text-align: center;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0.2rem 0 1rem;
 }
 
+.dateChangeWithGap {
+  margin-top: 0.9rem;
+}
+
+/* All user mentions get a subtle background */
+.userMention {
+  background-color: rgba(88, 101, 242, 0.15);
+  padding: 0 0.25rem;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* Current user mentions are bold */
 .mentionedUser {
   font-weight: 700;
 }
@@ -104,56 +148,64 @@
   flex: 1;
 }
 
-/* Message type styling - WCAG AA compliant colors */
+/* Message type styling - subtle grayscale backgrounds */
 
-/* Chat messages */
+/* Actor-based alternating groups for visual blocks */
+.actorGroup0 {
+  background-color: #f5f5f5;
+  border-left-color: #c8c8c8;
+}
+
+.actorGroup1 {
+  background-color: #ffffff;
+  border-left-color: #d8d8d8;
+}
+
+/* Type-specific subtle adjustments (optional, minimal) */
 .CHAT {
-  --log-accent: #00acc1;
 }
 
-/* Player action messages */
 .PLAYER_ACTION {
-  --log-accent: #ec407a;
 }
 
-/* Turn event messages */
 .TURN_EVENT {
-  --log-accent: #42a5f5;
 }
 
-/* System event messages */
 .SYSTEM_EVENT {
-  --log-accent: #9e9e9e;
 }
 
 /* Mention highlighting */
 .mentionHighlight {
-  box-shadow: inset 0 0 0 1px #ffb74d;
+  border-left-width: 4px;
+  border-left-color: #999 !important;
+}
+
+.mentionHighlight .time {
+  font-weight: 700;
 }
 
 /* Dark mode message type styling */
 :global(.dark-mode) .logLine {
-  background-color: #2f2f2f;
+  background-color: #2a2a2a;
+  border-left-color: #404040;
 }
 
-:global(.dark-mode) .CHAT {
-  --log-accent: #26c6da;
+:global(.dark-mode) .actorGroup0 {
+  background-color: #2e2e2e;
+  border-left-color: #484848;
 }
 
-:global(.dark-mode) .TURN_EVENT {
-  --log-accent: #64b5f6;
-}
-
-:global(.dark-mode) .SYSTEM_EVENT {
-  --log-accent: #9e9e9e;
-}
-
-:global(.dark-mode) .PLAYER_ACTION {
-  --log-accent: #f06292;
+:global(.dark-mode) .actorGroup1 {
+  background-color: #242424;
+  border-left-color: #3c3c3c;
 }
 
 :global(.dark-mode) .mentionHighlight {
-  box-shadow: inset 0 0 0 1px #ff9800;
+  border-left-color: #777 !important;
+}
+
+:global(.dark-mode) .userMention {
+  background-color: rgba(88, 101, 242, 0.25);
 }
 
 /* Empty state message */

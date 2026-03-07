@@ -34,7 +34,7 @@ export function FilterControls({
         return (
           <Button
             key={type}
-            size="small"
+            size="tiny"
             toggle
             active={isActive}
             onClick={() => onToggle(type)}
