@@ -1,0 +1,49 @@
+.filterControls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filterButton {
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.buttonIcon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.buttonLabel {
+  font-size: 0.9em;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .filterControls {
+    gap: 0.35rem;
+  }
+
+  .filterButton {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.85em;
+  }
+
+  .buttonLabel {
+    display: none;
+  }
+
+  .buttonIcon {
+    font-size: 1.2em;
+  }
+}
+
+/* Dark mode adjustments */
+:global(.dark-mode) .filterControls {
+  /* Semantic UI buttons already handle dark mode,
+     but we can add any additional dark mode styling here if needed */
+}
