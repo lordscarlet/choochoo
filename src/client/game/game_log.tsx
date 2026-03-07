@@ -8,8 +8,17 @@ import {
   useState,
 } from "react";
 import { timeFormat } from "../../utils/functions";
+import {
+  MessageType,
+  containsMentionOfUser,
+  detectMessageType,
+  getAllMessageTypes,
+} from "../../utils/message_types";
 import { useMessages, useSendChat } from "../services/message";
+import { useMe } from "../services/me";
+import { useLocalStorage } from "../services/local_storage";
 import { useTextInputState } from "../utils/form_state";
+import { FilterControls } from "./filter_controls";
 import * as styles from "./game_log.module.css";
 
 // @ts-expect-error This doesn't inject properly.
@@ -29,7 +38,8 @@ export function GameLog() {
 }
 
 function GameHistoryLog({ history }: { history: GameHistoryApi }) {
-  return <LogMessages messages={history.logs} />;
+  const me = useMe();
+  return <LogMessages messages={history.logs} currentUserId={me?.id} />;
 }
 
 interface ChatLogProps {
@@ -41,21 +51,68 @@ export function ChatLog({ gameId }: ChatLogProps) {
     useMessages(gameId);
   const [newMessage, setNewMessage, setNewMessageRaw] = useTextInputState("");
   const { sendChat, isPending } = useSendChat(gameId);
+  const me = useMe();
+
+  // Filter state with localStorage persistence
+  const [storedFilters, setStoredFilters] = useLocalStorage<MessageType[]>(
+    "chat-filters",
+  );
+  const [activeFilters, setActiveFilters] = useState<Set<MessageType>>(() => {
+    if (storedFilters && storedFilters.length > 0) {
+      return new Set(storedFilters);
+    }
+    // Default: all filters enabled
+    return new Set(getAllMessageTypes());
+  });
+
+  // Toggle filter handler
+  const handleToggleFilter = useCallback(
+    (type: MessageType) => {
+      setActiveFilters((prev) => {
+        const next = new Set(prev);
+        if (next.has(type)) {
+          next.delete(type);
+        } else {
+          next.add(type);
+        }
+        // Persist to localStorage
+        setStoredFilters(Array.from(next));
+        return next;
+      });
+    },
+    [setStoredFilters],
+  );
+
+  // Filter messages by active types
+  const filteredMessages = useMemo(
+    () =>
+      messages.filter((message) => {
+        const type = detectMessageType(message);
+        return activeFilters.has(type);
+      }),
+    [messages, activeFilters],
+  );
 
   const onSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       sendChat(newMessage, () => setNewMessageRaw(""));
     },
-    [newMessage],
+    [newMessage, sendChat, setNewMessageRaw],
   );
 
   return (
     <div className={styles.chat}>
+      <FilterControls
+        activeFilters={activeFilters}
+        onToggle={handleToggleFilter}
+      />
       <LogMessages
-        messages={messages}
+        messages={filteredMessages}
+        allMessages={messages}
         fetchNextPage={hasNextPage ? fetchNextPage : undefined}
         disableNextPage={isLoading}
+        currentUserId={me?.id}
       />
       <Form onSubmit={onSubmit} className={styles.submitForm}>
         <Input
@@ -121,14 +178,23 @@ function LogMessage({ message }: { message: string }) {
 
 interface LogMessagesProps {
   messages: MessageApi[];
+  allMessages?: MessageApi[];
   fetchNextPage?: () => void;
   disableNextPage?: boolean;
+  currentUserId?: number;
+}
+
+// Simple classnames helper
+function cx(...classes: (string | false | undefined)[]): string {
+  return classes.filter(Boolean).join(" ");
 }
 
 function LogMessages({
   messages,
+  allMessages,
   fetchNextPage,
   disableNextPage,
+  currentUserId,
 }: LogMessagesProps) {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -145,6 +211,9 @@ function LogMessages({
     setCanScrollToBottom(!isScrolled());
   }, [isScrolled, setCanScrollToBottom, messages.length]);
 
+  const hasMessages = messages.length > 0;
+  const hasFilteredOutMessages = allMessages && allMessages.length > messages.length;
+
   return (
     <div className={styles.logContainer}>
       <div className={styles.logList} ref={ref} onScroll={onScroll}>
@@ -157,31 +226,49 @@ function LogMessages({
             Load More
           </button>
         )}
-        {messages.map((log, index) => {
-          const dateString = log.date.toLocaleDateString();
-          const isNewDay =
-            index == 0 ||
-            dateString !== messages[index - 1].date.toLocaleDateString();
-          return (
-            <Fragment key={log.id}>
-              {isNewDay && <p>-- {dateString} --</p>}
-              <p className={styles.logLine}>
-                <span className={styles.time}>{timeFormat(log.date)}</span>{" "}
-                {log.userId != null && (
-                  <>
-                    <span className={styles.username}>
-                      <Username userId={log.userId} useLink={true} />
-                    </span>
-                    :
-                  </>
-                )}{" "}
-                <span>
-                  <LogMessage message={log.message} />
-                </span>
-              </p>
-            </Fragment>
-          );
-        })}
+        {hasMessages ? (
+          messages.map((log, index) => {
+            const dateString = log.date.toLocaleDateString();
+            const isNewDay =
+              index == 0 ||
+              dateString !== messages[index - 1].date.toLocaleDateString();
+            
+            // Detect message type and mention
+            const messageType = detectMessageType(log);
+            const isMentioned = containsMentionOfUser(log.message, currentUserId);
+            const typeClassName = MessageType[messageType];
+            
+            return (
+              <Fragment key={log.id}>
+                {isNewDay && <p>-- {dateString} --</p>}
+                <p
+                  className={cx(
+                    styles.logLine,
+                    styles[typeClassName],
+                    isMentioned && styles.mentionHighlight,
+                  )}
+                >
+                  <span className={styles.time}>{timeFormat(log.date)}</span>{" "}
+                  {log.userId != null && (
+                    <>
+                      <span className={styles.username}>
+                        <Username userId={log.userId} useLink={true} />
+                      </span>
+                      :
+                    </>
+                  )}{" "}
+                  <span>
+                    <LogMessage message={log.message} />
+                  </span>
+                </p>
+              </Fragment>
+            );
+          })
+        ) : hasFilteredOutMessages ? (
+          <div className={styles.emptyState}>
+            No messages match current filters. Enable more filters to see messages.
+          </div>
+        ) : null}
       </div>
       {canScrollToBottom && (
         <div className={styles.scrollToBottomContainer}>
