@@ -121,7 +121,7 @@
 
 /* All user mentions get a subtle background */
 .userMention {
-  background-color: rgba(88, 101, 242, 0.15);
+  background-color: rgba(218, 173, 12, 0.15);
   padding: 0 0.25rem;
   border-radius: 3px;
   display: inline-block;
@@ -205,7 +205,7 @@
 }
 
 :global(.dark-mode) .userMention {
-  background-color: rgba(88, 101, 242, 0.25);
+  background-color: rgba(218, 173, 12, 0.20);
 }
 
 /* Empty state message */
