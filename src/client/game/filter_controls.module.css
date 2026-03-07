@@ -17,21 +17,21 @@
 /* Color buttons to match their log types */
 .filterButtonCHAT.active {
   background-color: #00acc1 !important;
-  color: white !important;
+  color: #003d47 !important;
 }
 
 .filterButtonPLAYER_ACTION.active {
   background-color: #ec407a !important;
-  color: white !important;
+  color: #4a0012 !important;
 }
 
 .filterButtonTURN_EVENT.active {
   background-color: #42a5f5 !important;
-  color: white !important;
+  color: #002f5a !important;
 }
 
 .filterButtonSYSTEM_EVENT.active {
-  background-color: #9e9e9e !important;
+  background-color: #757575 !important;
   color: white !important;
 }
 
@@ -69,15 +69,23 @@
 
 /* Dark mode adjustments */
 :global(.dark-mode) .filterButtonCHAT.active {
-  background-color: #26c6da !important;
+  background-color: #004d56 !important;
+  color: #e0f7fa !important;
 }
 
 :global(.dark-mode) .filterButtonPLAYER_ACTION.active {
-  background-color: #f06292 !important;
+  background-color: #4a1a36 !important;
+  color: #fce4ec !important;
 }
 
 :global(.dark-mode) .filterButtonTURN_EVENT.active {
-  background-color: #64b5f6 !important;
+  background-color: #0d3c61 !important;
+  color: #e3f2fd !important;
+}
+
+:global(.dark-mode) .filterButtonSYSTEM_EVENT.active {
+  background-color: #3a3a3a !important;
+  color: #e0e0e0 !important;
 }
 
 :global(.dark-mode) .filterButton:not(.active) {

@@ -238,7 +238,7 @@ function LogMessages({
             
             // Detect message type and mention
             const messageType = detectMessageType(log);
-            const isMentioned = containsMentionOfUser(log.message, currentUserId);
+            const isMentioned = messageType === MessageType.CHAT && containsMentionOfUser(log.message, currentUserId);
             const typeClassName = MessageType[messageType];
             
             return (
