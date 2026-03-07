@@ -19,14 +19,6 @@
   text-align: center !important;
 }
 
-.filterButtonCHAT {}
-
-.filterButtonPLAYER_ACTION {}
-
-.filterButtonTURN_EVENT {}
-
-.filterButtonSYSTEM_EVENT {}
-
 /* Active colors - green to indicate active/included filters */
 :global(.ui.toggle.button).filterButtonCHAT.active,
 :global(.ui.button).filterButtonCHAT.active,
@@ -90,6 +82,4 @@
 :global(.dark-mode) .filterButton:not(.active):hover {
   background: #454545 !important;
   color: #d0d0d0 !important;
-}
-  color: #ccc !important;
 }

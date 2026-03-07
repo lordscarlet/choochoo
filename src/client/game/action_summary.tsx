@@ -350,28 +350,26 @@ function Bid() {
     <div>
       <p>You must bid.</p>
       <Form>
-        <FormGroup inline>
-          <FormField>
-            <FormSelect
-              disabled={isPending}
-              value={selectedBid}
-              placeholder=""
-              onChange={(
-                event: React.SyntheticEvent<HTMLElement>,
-                data: DropdownProps,
-              ) => {
-                setSelectedBid(data.value as number);
-              }}
-              options={iterate(maxBid - minBid + 1, (i) => {
-                const bid = i + minBid;
-                return {
-                  key: bid,
-                  value: bid,
-                  text: dollarFormat(bid),
-                };
-              })}
-            />
-          </FormField>
+        <FormGroup widths={8}>
+          <FormSelect
+            disabled={isPending}
+            value={selectedBid}
+            placeholder=""
+            onChange={(
+              event: React.SyntheticEvent<HTMLElement>,
+              data: DropdownProps,
+            ) => {
+              setSelectedBid(data.value as number);
+            }}
+            options={iterate(maxBid - minBid + 1, (i) => {
+              const bid = i + minBid;
+              return {
+                key: bid,
+                value: bid,
+                text: dollarFormat(bid),
+              };
+            })}
+          />
           <FormField>
             <Button
               primary
