@@ -182,6 +182,7 @@ export function ChatLog({ gameId, userColorLookup = {}, showFilters = true }: Ch
 
 const USER_MESSAGE_PARSER = /<@(user|game)-(\d+)>/g;
 const PLAYER_COLOR_PARSER = /\((red|yellow|green|purple|black|blue|brown|white|pink)\)/gi;
+const ACTOR_PREFIX_PARSER = /^\s*<@user-(\d+)>\s*(?:\([^)]+\))?/;
 
 const PLAYER_COLOR_LOOKUP: Record<string, PlayerColor> = {
   red: PlayerColor.RED,
@@ -268,16 +269,51 @@ function moveColorChipBeforeUser(parts: ParsedMessagePart[]): ParsedMessagePart[
   return reordered;
 }
 
+function isActorPrefixedLogMessage(message: string): boolean {
+  return ACTOR_PREFIX_PARSER.test(message);
+}
+
+function isWhitespaceOnlyPart(part: ParsedMessagePart | undefined): part is string {
+  return typeof part === "string" && /^\s*$/.test(part);
+}
+
+function stripLeadingActorColorToken(parts: ParsedMessagePart[]): ParsedMessagePart[] {
+  let startIndex = 0;
+
+  while (startIndex < parts.length && isWhitespaceOnlyPart(parts[startIndex])) {
+    startIndex += 1;
+  }
+
+  const firstContentPart = parts[startIndex];
+  if (
+    typeof firstContentPart !== "string" &&
+    firstContentPart?.type === "playerColor"
+  ) {
+    startIndex += 1;
+    if (isWhitespaceOnlyPart(parts[startIndex])) {
+      startIndex += 1;
+    }
+  }
+
+  const remaining = parts.slice(startIndex);
+  if (typeof remaining[0] === "string") {
+    return [remaining[0].replace(/^\s+/, ""), ...remaining.slice(1)];
+  }
+  return remaining;
+}
+
 function LogMessage({
   message,
   currentUserId,
   userColorLookup,
   messageType,
+  collapseLeadingActorMention = false,
 }: {
   message: string;
   currentUserId?: number;
   userColorLookup: Record<number, PlayerColor>;
   messageType: MessageType;
+  collapseLeadingActorMention?: boolean;
 }) {
   const messageParsed = useMemo(() => {
     const parts: ParsedMessagePart[] = [];
@@ -289,8 +325,12 @@ function LogMessage({
       lastIndex = match.index + match[0].length;
     }
     parts.push(...parseColorsInText(message.substring(lastIndex)));
-    return moveColorChipBeforeUser(parts);
-  }, [message]);
+    const normalizedParts = moveColorChipBeforeUser(parts);
+    if (collapseLeadingActorMention) {
+      return stripLeadingActorColorToken(normalizedParts);
+    }
+    return normalizedParts;
+  }, [collapseLeadingActorMention, message]);
 
   return (
     <>
@@ -517,23 +557,56 @@ function LogMessages({
             const typeClassName = MessageType[messageType];
             const previousLog = index > 0 ? messages[index - 1] : undefined;
             const nextLog = index < messages.length - 1 ? messages[index + 1] : undefined;
-            const shouldCollapseAuthor =
-              !isNewDay &&
-              messageType === MessageType.CHAT &&
-              log.userId != null &&
+            const currentActor = getMessageActor(log);
+            const previousActor = previousLog != null ? getMessageActor(previousLog) : null;
+            const nextActor = nextLog != null ? getMessageActor(nextLog) : null;
+            const isChatMessage = messageType === MessageType.CHAT;
+            const isPlayerActionStyleMessage =
+              !isChatMessage && isActorPrefixedLogMessage(log.message);
+
+            const previousIsSameCollapsibleKind =
               previousLog != null &&
-              previousLog.userId === log.userId &&
-              detectMessageType(previousLog) === MessageType.CHAT;
+              (
+                (isChatMessage && detectMessageType(previousLog) === MessageType.CHAT) ||
+                (
+                  isPlayerActionStyleMessage &&
+                  detectMessageType(previousLog) !== MessageType.CHAT &&
+                  isActorPrefixedLogMessage(previousLog.message)
+                )
+              );
+
+            const nextIsSameCollapsibleKind =
+              nextLog != null &&
+              (
+                (isChatMessage && detectMessageType(nextLog) === MessageType.CHAT) ||
+                (
+                  isPlayerActionStyleMessage &&
+                  detectMessageType(nextLog) !== MessageType.CHAT &&
+                  isActorPrefixedLogMessage(nextLog.message)
+                )
+              );
+
+            const shouldCollapseActor =
+              !isNewDay &&
+              (isChatMessage || isPlayerActionStyleMessage) &&
+              currentActor != null &&
+              previousLog != null &&
+              previousIsSameCollapsibleKind &&
+              previousActor === currentActor;
+
+            const shouldCollapseAuthor =
+              shouldCollapseActor &&
+              isChatMessage &&
+              log.userId != null;
 
             const nextIsContinuation =
               nextLog != null &&
-              messageType === MessageType.CHAT &&
-              log.userId != null &&
-              nextLog.userId === log.userId &&
-              detectMessageType(nextLog) === MessageType.CHAT &&
+              (isChatMessage || isPlayerActionStyleMessage) &&
+              currentActor != null &&
+              nextIsSameCollapsibleKind &&
+              nextActor === currentActor &&
               nextLog.date.toLocaleDateString() === dateString;
 
-            const currentActor = getMessageActor(log);
             const currentActorGroup = messageGrouping[index];
             const actorGroupClass =
               currentActor !== null ? `actorGroup${currentActorGroup}` : null;
@@ -553,7 +626,7 @@ function LogMessages({
                 <p
                   className={cx(
                     styles.logLine,
-                    shouldCollapseAuthor && styles.logLineContinuation,
+                    shouldCollapseActor && styles.logLineContinuation,
                     nextIsContinuation && styles.logLineBeforeContinuation,
                     styles[typeClassName],
                     actorGroupClass && styles[actorGroupClass],
@@ -606,6 +679,10 @@ function LogMessages({
                       currentUserId={currentUserId}
                       userColorLookup={userColorLookup}
                       messageType={messageType}
+                      collapseLeadingActorMention={
+                        shouldCollapseActor &&
+                        isPlayerActionStyleMessage
+                      }
                     />
                   </span>
                 </p>
