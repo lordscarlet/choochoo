@@ -1,4 +1,5 @@
 
+
 html {
   height: 100%;
   /* Theme variables */
@@ -10,6 +11,12 @@ html {
   --color-bg-chat-actor1: #fff;
   --color-border: #e0e0e0;
   --color-border-alt: #c8c8c8;
+  --color-border-actor1: #d8d8d8;
+  --color-border-mention: #999;
+  --color-border-mention-dark: #777;
+  --color-bg-logline-dark: #2a2a2a;
+  --color-border-logline-dark: #404040;
+  --color-border-actor1-dark: #3c3c3c;
   --color-text: #222;
   --color-text-secondary: #555;
   --color-text-muted: #666;
@@ -17,6 +24,7 @@ html {
   --color-mention-bg: rgba(218, 173, 12, 0.15);
   --color-empty-state: #666;
 }
+
 
 body.dark-mode {
   --color-bg: #121212;
@@ -27,6 +35,12 @@ body.dark-mode {
   --color-bg-chat-actor1: #242424;
   --color-border: #404040;
   --color-border-alt: #484848;
+  --color-border-actor1: var(--color-border-actor1-dark, #3c3c3c);
+  --color-border-mention: var(--color-border-mention-dark, #777);
+  --color-bg-logline-dark: #2a2a2a;
+  --color-border-logline-dark: #404040;
+  --color-border-actor1-dark: #3c3c3c;
+  --color-border-mention-dark: #777;
   --color-text: #fff;
   --color-text-secondary: #c7c7c7;
   --color-text-muted: #aaa;
