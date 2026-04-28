@@ -44,7 +44,11 @@ import { ChicagoSpeakeasyMapSettings } from "./chicago_speakeasy/settings";
 import { BelgiumMapSettings } from "./belgium/settings";
 import { EasternUsAndCanadaMapSettings } from "./eastern_us_and_canada/settings";
 import { DoubleBaseUsaMapSettings } from "./double_base_usa/settings";
-import {ChicagoLMapSettings} from "./chicago-l/settings";
+import { ChicagoLMapSettings } from "./chicago-l/settings";
+import { MinasGeraesMapSettings } from "./minas-geraes/settings";
+import { JapanMapSettings } from "./japan/settings";
+import { FourLocoMapSettings } from "./four_loco/settings";
+import { NorthernCaliforniaMapSettings } from "./northern_california/settings";
 
 export class MapRegistry {
   static readonly singleton = new MapRegistry();
@@ -95,6 +99,10 @@ export class MapRegistry {
     this.add(new EasternUsAndCanadaMapSettings());
     this.add(new DoubleBaseUsaMapSettings());
     this.add(new ChicagoLMapSettings());
+    this.add(new MinasGeraesMapSettings());
+    this.add(new JapanMapSettings());
+    this.add(new FourLocoMapSettings());
+    this.add(new NorthernCaliforniaMapSettings());
   }
 
   values(): Iterable<MapSettings> {
