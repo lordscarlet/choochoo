@@ -33,6 +33,11 @@ import { MessageApi } from "../../api/message";
 import { getPlayerColorCss } from "../components/player_color";
 import { Username } from "../components/username";
 import { isGameHistory, useGame } from "../services/game";
+import {
+  moveColorChipBeforeUser,
+  ParsedMessagePart,
+  PlayerColorContainer,
+} from "./message_parts";
 
 export function GameLog() {
   const game = useGame();
@@ -196,19 +201,6 @@ const PLAYER_COLOR_LOOKUP: Record<string, PlayerColor> = {
   pink: PlayerColor.PINK,
 };
 
-interface Container {
-  type: "user" | "game";
-  id: number;
-}
-
-interface PlayerColorContainer {
-  type: "playerColor";
-  colorName: string;
-  playerColor: PlayerColor;
-}
-
-type ParsedMessagePart = string | Container | PlayerColorContainer;
-
 function parseColorsInText(text: string): Array<string | PlayerColorContainer> {
   const parts: Array<string | PlayerColorContainer> = [];
   let lastIndex = 0;
@@ -232,43 +224,6 @@ function parseColorsInText(text: string): Array<string | PlayerColorContainer> {
   parts.push(text.substring(lastIndex));
   return parts;
 }
-
-function moveColorChipBeforeUser(parts: ParsedMessagePart[]): ParsedMessagePart[] {
-  const reordered: ParsedMessagePart[] = [];
-
-  for (let index = 0; index < parts.length; index++) {
-    const current = parts[index];
-    if (typeof current === "string" || current.type !== "user") {
-      reordered.push(current);
-      continue;
-    }
-
-    const next = parts[index + 1];
-    const nextNext = parts[index + 2];
-
-    if (
-      typeof next === "string" &&
-      /^\s+$/.test(next) &&
-      typeof nextNext !== "string" &&
-      nextNext.type === "playerColor"
-    ) {
-      reordered.push(nextNext, next, current);
-      index += 2;
-      continue;
-    }
-
-    if (typeof next !== "string" && next?.type === "playerColor") {
-      reordered.push(next, " ", current);
-      index += 1;
-      continue;
-    }
-
-    reordered.push(current);
-  }
-
-  return reordered;
-}
-
 function isActorPrefixedLogMessage(message: string): boolean {
   return ACTOR_PREFIX_PARSER.test(message);
 }
