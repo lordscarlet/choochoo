@@ -88,6 +88,7 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
   static readonly action = "disco-production";
   readonly assertInput = ProductionData.parse;
 
+  protected readonly log = inject(Log);
   protected readonly goodsGrowthState = injectState(GOODS_GROWTH_STATE);
   private readonly gridHelper = inject(GridHelper);
 
@@ -100,6 +101,9 @@ export class ProductionAction implements ActionProcessor<ProductionData> {
   }
 
   process(data: ProductionData): boolean {
+    const goods = this.goodsGrowthState().goods.map(goodToString).join(', ');
+    const locationName = this.gridHelper.displayName(data.coordinates);
+    this.log.currentPlayer(`places ${goods} in ${locationName}`);
     this.gridHelper.update(data.coordinates, (city) => {
       city.goods = city.goods!.concat(this.goodsGrowthState().goods);
     });
