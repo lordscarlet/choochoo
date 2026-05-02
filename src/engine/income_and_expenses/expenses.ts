@@ -10,10 +10,10 @@ import { ProfitHelper } from "./helper";
 export class ExpensesPhase extends PhaseModule {
   static readonly phase = Phase.EXPENSES;
 
-  private readonly profitHelper = inject(ProfitHelper);
-  private readonly log = inject(Log);
-  private readonly moneyManager = inject(MoneyManager);
-  private readonly players = injectPlayersByTurnOrder();
+  protected readonly profitHelper = inject(ProfitHelper);
+  protected readonly log = inject(Log);
+  protected readonly moneyManager = inject(MoneyManager);
+  protected readonly players = injectPlayersByTurnOrder();
 
   onStart(): void {
     for (const player of this.players()) {
@@ -25,7 +25,7 @@ export class ExpensesPhase extends PhaseModule {
         if (profit > 0) {
           this.log.player(player, `earns $${profit}`);
         } else {
-          this.log.player(player, `loses $${-profit}`);
+          this.log.player(player, `pays $${-profit} for expenses`);
         }
       } else {
         this.log.player(

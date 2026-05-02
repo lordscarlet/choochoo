@@ -1,5 +1,5 @@
 import { injectState } from "../../engine/framework/execution_context";
-import { draw, GameStarter } from "../../engine/game/starter";
+import { GameStarter } from "../../engine/game/starter";
 import { Action } from "../../engine/state/action";
 import { CityGroup } from "../../engine/state/city_group";
 import { Good } from "../../engine/state/good";
@@ -41,13 +41,5 @@ export class TrislandStarter extends GameStarter {
       [Good.BLUE, CityGroup.WHITE, 4],
       [Good.BLACK, CityGroup.WHITE, 5],
     ];
-  }
-
-  protected getGoodsGrowthGoodsFor(
-    bag: Good[],
-    _: Good | Good[],
-    __: boolean,
-  ): Good[] {
-    return draw(1, bag);
   }
 }
