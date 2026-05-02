@@ -361,12 +361,13 @@ function HeaderHex({
   const isNumberHeader = onRoll != null && (letter == null || letter === "");
   
   if (isNumberHeader) {
-    // Render plain text for number headers with WCAG-compliant colors
-    const textColor = cityGroup === CityGroup.BLACK ? "#ffffff" : "#222222";
+    const numberHeaderTone =
+      cityGroup === CityGroup.BLACK
+        ? styles.plainNumberHeaderBlack
+        : styles.plainNumberHeaderWhite;
     return (
       <div 
-        className={styles.plainNumberHeader}
-        style={{ color: textColor }}
+        className={`${styles.plainNumberHeader} ${numberHeaderTone}`}
         aria-label={`Roll number ${onRoll}`}
       >
         {label}

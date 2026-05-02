@@ -98,8 +98,20 @@
   border-radius: 6px;
 }
 
+.leftColumns {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
 .rightColumns {
   background-color: var(--black-group-bg);
+}
+
+:global(.dark-mode) .leftColumns {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+:global(.dark-mode) .rightColumns {
+  background-color: rgba(93, 64, 55, 0.72);
 }
 
 /* make each column a fixed-size stack so groups line up */
@@ -132,6 +144,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.plainNumberHeaderWhite {
+  color: #222222;
+}
+
+.plainNumberHeaderBlack {
+  color: #ffffff;
+}
+
+:global(.dark-mode) .plainNumberHeaderWhite {
+  color: #f0f0f0;
 }
 
 /* Tab-shaped badge for letter headers (A-H), matching physical board */
