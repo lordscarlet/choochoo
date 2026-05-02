@@ -10,6 +10,7 @@ import {
   TileType,
 } from "../../engine/state/tile";
 import { Coordinates } from "../../utils/coordinates";
+import { assert } from "../../utils/validate";
 
 export class PittsburghBuilderHelper extends BuilderHelper {
   protected minimumBuildCost(): number {
@@ -33,7 +34,19 @@ export class PittsburghFunkyBuilding extends BuildCostCalculator {
     return super.costOf(coordinates, newTileType, orientation);
   }
 
-  protected getRedirectCost(): number {
+  protected getRedirectCost(
+    previousTileType: TileType,
+    newTileType: TileType,
+  ): number {
+    assert(!isTownTile(previousTileType));
+    assert(!isTownTile(newTileType));
+    // https://boardgamegeek.com/thread/250037/article/1900582#1900582
+    if (
+      this.getTileCost(previousTileType) !== 10 &&
+      this.getTileCost(newTileType) === 10
+    ) {
+      return 10;
+    }
     return 4;
   }
 
