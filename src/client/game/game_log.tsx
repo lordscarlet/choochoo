@@ -37,7 +37,7 @@ import { isGameHistory, useGame } from "../services/game";
 export function GameLog() {
   const game = useGame();
   const userColorLookup = useInject(() => {
-    const lookup: Record<number, PlayerColor> = {};
+    const lookup: Record<number | string, PlayerColor> = {};
     injectAllPlayersUnsafe()().forEach((player) => {
       lookup[player.playerId] = player.color;
     });
