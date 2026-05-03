@@ -43,7 +43,7 @@ function getMaxGoods(
 const TOTAL_COLUMNS = 12;
 const WHITE_COLUMNS = 6;
 const LETTER_START_INDEX = 2; // First letter column (A)
-const LETTER_END_INDEX = 10;  // Last letter column before end
+const LETTER_END_INDEX = 10; // Last letter column before end
 const GAP_AFTER_COLUMN = WHITE_COLUMNS - 1; // Add gap after last white column
 
 // Default color for colorless cities - should match --colorless-default CSS variable
@@ -67,7 +67,10 @@ function parseHexOrRgb(color: string): [number, number, number] {
     return [r, g, b];
   }
   if (color.startsWith("rgb")) {
-    const parts = color.replace(/rgba?\(|\)/g, "").split(",").map((s) => parseInt(s.trim(), 10));
+    const parts = color
+      .replace(/rgba?\(|\)/g, "")
+      .split(",")
+      .map((s) => parseInt(s.trim(), 10));
     return [parts[0] || 0, parts[1] || 0, parts[2] || 0];
   }
   // default
@@ -87,7 +90,10 @@ function luminance([r, g, b]: [number, number, number]): number {
 /**
  * Calculate WCAG 2.1 contrast ratio between two colors
  */
-function contrastRatio(color1: [number, number, number], color2: [number, number, number]): number {
+function contrastRatio(
+  color1: [number, number, number],
+  color2: [number, number, number],
+): number {
   const lum1 = luminance(color1);
   const lum2 = luminance(color2);
   const lighter = Math.max(lum1, lum2);
@@ -128,15 +134,23 @@ function createGoodsColumn({
   maxUrbanizedGoods: number;
   hasUrbanizedCities: boolean;
   canEmit: boolean;
-  onClick: (urbanized: boolean, cityGroup: CityGroup, onRoll: OnRoll, row: number) => void;
+  onClick: (
+    urbanized: boolean,
+    cityGroup: CityGroup,
+    onRoll: OnRoll,
+    row: number,
+  ) => void;
 }) {
   const i = columnIndex;
   const cityGroup = i < WHITE_COLUMNS ? CityGroup.WHITE : CityGroup.BLACK;
   const onRoll = OnRoll.parse((i % WHITE_COLUMNS) + 1);
   const city = cities.regularCities.get(cityGroup)?.[onRoll];
   const urbanizedCity = cities.urbanizedCities.get(cityGroup)?.[onRoll];
-  const letter = i < LETTER_START_INDEX || i >= LETTER_END_INDEX ? "" : numberToLetter(i - LETTER_START_INDEX);
-  
+  const letter =
+    i < LETTER_START_INDEX || i >= LETTER_END_INDEX
+      ? ""
+      : numberToLetter(i - LETTER_START_INDEX);
+
   // Get the primary good color from the cached city object
   let primaryGood: Good | undefined = undefined;
   const cityKey = `${cityGroup}-${onRoll}`;
@@ -146,7 +160,12 @@ function createGoodsColumn({
   // For the letter headers (A..H) use the availableCities' color so they match the Available Cities display
   const letterIndex = i - LETTER_START_INDEX;
   let letterGood: Good | undefined = undefined;
-  if (letter !== "" && Array.isArray(availableCities) && letterIndex >= 0 && letterIndex < availableCities.length) {
+  if (
+    letter !== "" &&
+    Array.isArray(availableCities) &&
+    letterIndex >= 0 &&
+    letterIndex < availableCities.length
+  ) {
     const avail = availableCities[letterIndex] as MutableAvailableCity;
     const colorVal = avail.color;
     letterGood = Array.isArray(colorVal) ? colorVal[0] : colorVal;
@@ -165,7 +184,11 @@ function createGoodsColumn({
       key={i}
     >
       <div className={styles.headerCell}>
-        <HeaderHex onRoll={onRoll} primaryGood={primaryGood} cityGroup={cityGroup} />
+        <HeaderHex
+          onRoll={onRoll}
+          primaryGood={primaryGood}
+          cityGroup={cityGroup}
+        />
       </div>
       {iterate(maxRegularGoods, (goodIndex) => (
         <GoodBlock
@@ -173,31 +196,32 @@ function createGoodsColumn({
           good={city?.[maxRegularGoods - 1 - goodIndex] ?? undefined}
           canSelect={canEmit}
           onClick={() =>
-            onClick(
-              false,
-              cityGroup,
-              onRoll,
-              maxRegularGoods - 1 - goodIndex,
-            )
+            onClick(false, cityGroup, onRoll, maxRegularGoods - 1 - goodIndex)
           }
         />
       ))}
       {hasUrbanizedCities && hasLetter && (
         <div className={styles.letterCell}>
           {urbanizedCity ? (
-            <HeaderHex primaryGood={letterGood} letter={letter} cityGroup={cityGroup} />
+            <HeaderHex
+              primaryGood={letterGood}
+              letter={letter}
+              cityGroup={cityGroup}
+            />
           ) : (
-            <div className={`${styles.headerPlaceholder} ${styles.headerPlaceholderHidden}`} />
+            <div
+              className={`${styles.headerPlaceholder} ${styles.headerPlaceholderHidden}`}
+            />
           )}
         </div>
       )}
-      {hasUrbanizedCities && hasLetter &&
+      {hasUrbanizedCities &&
+        hasLetter &&
         iterate(maxUrbanizedGoods, (goodIndex) => (
           <GoodBlock
             key={goodIndex}
             good={
-              urbanizedCity?.[maxUrbanizedGoods - 1 - goodIndex] ??
-              undefined
+              urbanizedCity?.[maxUrbanizedGoods - 1 - goodIndex] ?? undefined
             }
             canSelect={canEmit}
             emptySpace={urbanizedCity == null}
@@ -303,7 +327,7 @@ export function GoodsTable() {
   } else if (!starter.isGoodsGrowthEnabled()) {
     return <></>;
   }
-  
+
   // build the 12 column elements, then render them grouped (white on left, black on right)
   const columns = useMemo(
     () =>
@@ -317,9 +341,17 @@ export function GoodsTable() {
           hasUrbanizedCities,
           canEmit,
           onClick,
-        })
+        }),
       ),
-    [cities, availableCities, maxRegularGoods, maxUrbanizedGoods, hasUrbanizedCities, canEmit, onClick]
+    [
+      cities,
+      availableCities,
+      maxRegularGoods,
+      maxUrbanizedGoods,
+      hasUrbanizedCities,
+      canEmit,
+      onClick,
+    ],
   );
 
   return (
@@ -344,29 +376,29 @@ export function GoodsTable() {
   );
 }
 
-function HeaderHex({ 
-  onRoll, 
-  primaryGood, 
+function HeaderHex({
+  onRoll,
+  primaryGood,
   letter,
-  cityGroup 
-}: { 
-  onRoll?: OnRoll; 
-  primaryGood?: Good; 
+  cityGroup,
+}: {
+  onRoll?: OnRoll;
+  primaryGood?: Good;
   letter?: string;
   cityGroup?: CityGroup;
 }) {
-  const label = onRoll != null ? String(onRoll) : letter ?? "";
-  
+  const label = onRoll != null ? String(onRoll) : (letter ?? "");
+
   // Determine if this is a number header (has onRoll but no letter content)
   const isNumberHeader = onRoll != null && (letter == null || letter === "");
-  
+
   if (isNumberHeader) {
     const numberHeaderTone =
       cityGroup === CityGroup.BLACK
         ? styles.plainNumberHeaderBlack
         : styles.plainNumberHeaderWhite;
     return (
-      <div 
+      <div
         className={`${styles.plainNumberHeader} ${numberHeaderTone}`}
         aria-label={`Roll number ${onRoll}`}
       >
@@ -374,10 +406,11 @@ function HeaderHex({
       </div>
     );
   }
-  
+
   // Render rounded rectangle for letter headers
-  const fillColor = primaryGood != null ? readGoodColor(primaryGood) : COLORLESS_DEFAULT;
-  
+  const fillColor =
+    primaryGood != null ? readGoodColor(primaryGood) : COLORLESS_DEFAULT;
+
   // Use WCAG-compliant text color selection for letter headers
   const rgb = parseHexOrRgb(fillColor);
   const textColor = chooseBestTextColor(rgb);

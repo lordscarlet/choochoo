@@ -83,7 +83,7 @@
   align-items: center;
   margin-top: 10px;
   padding: 2px 0;
-  height: 26px; 
+  height: 26px;
 }
 
 /* layout wrappers for grouped columns (white / black) */
@@ -116,7 +116,7 @@
 
 /* make each column a fixed-size stack so groups line up */
 .column {
-  width: 36px; 
+  width: 36px;
   flex: none;
   display: flex;
   flex-direction: column;

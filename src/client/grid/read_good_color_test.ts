@@ -23,14 +23,14 @@ describe("readGoodColor", () => {
   it("should cache color values on subsequent calls", () => {
     const firstCall = readGoodColor(Good.BLUE);
     const secondCall = readGoodColor(Good.BLUE);
-    
+
     expect(firstCall).toBe(secondCall);
   });
 
   it("should return different colors for different goods", () => {
     const blackColor = readGoodColor(Good.BLACK);
     const blueColor = readGoodColor(Good.BLUE);
-    
+
     // Colors should be different (assuming CSS is properly set up)
     // In a test environment, they might both return fallback
     expect(blackColor).toBeDefined();
@@ -38,9 +38,16 @@ describe("readGoodColor", () => {
   });
 
   it("should handle multiple goods without errors", () => {
-    const goods = [Good.BLACK, Good.BLUE, Good.PURPLE, Good.RED, Good.YELLOW, Good.WHITE];
-    
-    goods.forEach(good => {
+    const goods = [
+      Good.BLACK,
+      Good.BLUE,
+      Good.PURPLE,
+      Good.RED,
+      Good.YELLOW,
+      Good.WHITE,
+    ];
+
+    goods.forEach((good) => {
       const color = readGoodColor(good);
       expect(color).toBeDefined();
       expect(typeof color).toBe("string");
@@ -54,10 +61,10 @@ describe("cleanupGoodColorReader", () => {
     // Warm up the cache
     readGoodColor(Good.BLACK);
     readGoodColor(Good.BLUE);
-    
+
     // Cleanup
     cleanupGoodColorReader();
-    
+
     // After cleanup, the persistent element should be recreated on next call
     const color = readGoodColor(Good.RED);
     expect(color).toBeDefined();
@@ -67,7 +74,7 @@ describe("cleanupGoodColorReader", () => {
     cleanupGoodColorReader();
     cleanupGoodColorReader();
     cleanupGoodColorReader();
-    
+
     // Should not throw
     expect(true).toBe(true);
   });
