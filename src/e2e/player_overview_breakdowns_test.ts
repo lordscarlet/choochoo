@@ -43,14 +43,20 @@ export function playerOverviewBreakdowns(driver: Driver) {
 
   it("hides score breakdown on Detroit", async () => {
     const creator = users[0];
-    game = await createGameForMap(creator, "detroit-bankruptcy", "Detroit score hidden smoke");
+    game = await createGameForMap(
+      creator,
+      "detroit-bankruptcy",
+      "Detroit score hidden smoke",
+    );
 
     await fillAndStartGame(game, "detroit-seed");
 
     await driver.goToGame(game.id, creator.id);
     await expandFirstPlayer();
 
-    await driver.waitForElement(By.xpath("//*[contains(text(), 'Financial Details')]"));
+    await driver.waitForElement(
+      By.xpath("//*[contains(text(), 'Financial Details')]"),
+    );
     const scoreBreakdownHeaders = await driver.driver.findElements(
       By.xpath("//*[contains(text(), 'Score Breakdown')]"),
     );
@@ -63,14 +69,20 @@ export function playerOverviewBreakdowns(driver: Driver) {
 
   it("hides score breakdown on Barbados", async () => {
     const creator = users[0];
-    game = await createGameForMap(creator, "barbados", "Barbados score hidden smoke");
+    game = await createGameForMap(
+      creator,
+      "barbados",
+      "Barbados score hidden smoke",
+    );
 
     await fillAndStartGame(game, "barbados-seed");
 
     await driver.goToGame(game.id, creator.id);
     await expandFirstPlayer();
 
-    await driver.waitForElement(By.xpath("//*[contains(., 'Financial Details')]"));
+    await driver.waitForElement(
+      By.xpath("//*[contains(., 'Financial Details')]"),
+    );
     const scoreBreakdownHeaders = await driver.driver.findElements(
       By.xpath("//*[contains(., 'Score Breakdown')]"),
     );
@@ -93,14 +105,16 @@ export function playerOverviewBreakdowns(driver: Driver) {
     await driver.waitForElement(
       By.xpath("//*[contains(., 'Monsoon Scenarios (next income phase):')]"),
     );
-    await driver.waitForElement(By.xpath("//*[contains(., 'No monsoon')]") );
-    await driver.waitForElement(By.xpath("//*[contains(., '17%')]") );
-    await driver.waitForElement(By.xpath("//*[contains(., 'Light monsoon')]") );
-    await driver.waitForElement(By.xpath("//*[contains(., '67%')]") );
-    await driver.waitForElement(By.xpath("//*[contains(., 'Heavy monsoon')]") );
+    await driver.waitForElement(By.xpath("//*[contains(., 'No monsoon')]"));
+    await driver.waitForElement(By.xpath("//*[contains(., '17%')]"));
+    await driver.waitForElement(By.xpath("//*[contains(., 'Light monsoon')]"));
+    await driver.waitForElement(By.xpath("//*[contains(., '67%')]"));
+    await driver.waitForElement(By.xpath("//*[contains(., 'Heavy monsoon')]"));
     await maybeElementScreenshot(
       "india-monsoon-scenarios",
-      By.xpath("//*[contains(., 'Monsoon Scenarios (next income phase):')]/ancestor::*[contains(@class, 'panelCard')][1]"),
+      By.xpath(
+        "//*[contains(., 'Monsoon Scenarios (next income phase):')]/ancestor::*[contains(@class, 'panelCard')][1]",
+      ),
     );
   });
 
@@ -140,7 +154,10 @@ export function playerOverviewBreakdowns(driver: Driver) {
     return false;
   }
 
-  async function startGame(createdGame: GameDao, seedValue: string): Promise<void> {
+  async function startGame(
+    createdGame: GameDao,
+    seedValue: string,
+  ): Promise<void> {
     await driver.goToGame(createdGame.id, createdGame.playerIds[0]);
     let startButtonFound = false;
     for (let i = 0; i < 40; i++) {
@@ -180,7 +197,6 @@ export function playerOverviewBreakdowns(driver: Driver) {
     await startGame(createdGame, seedValue);
   }
 
-
   async function expandFirstPlayer(): Promise<void> {
     const button = await driver.waitForElement(
       By.css("button[aria-label='Expand player details']"),
@@ -194,24 +210,30 @@ export function playerOverviewBreakdowns(driver: Driver) {
     if (!shouldCapture) {
       return;
     }
-    
+
     // Set a taller window size to capture expanded content without scrolling
-    await driver.driver.manage().window().setRect({ width: 1920, height: 1500 });
-    
+    await driver.driver
+      .manage()
+      .window()
+      .setRect({ width: 1920, height: 1500 });
+
     // Wait for the target element to ensure it exists and center it in viewport
     const targetElement = await driver.waitForElement(by);
     await driver.driver.executeScript(
       "arguments[0].scrollIntoView({ block: 'center', inline: 'nearest' });",
       targetElement,
     );
-    
+
     // Small delay for any animations to complete
     await new Promise((r) => setTimeout(r, 500));
-    
+
     // Take full page screenshot
     await driver.saveScreenshot(name);
-    
+
     // Reset to normal size
-    await driver.driver.manage().window().setRect({ width: 1920, height: 1080 });
+    await driver.driver
+      .manage()
+      .window()
+      .setRect({ width: 1920, height: 1080 });
   }
 }

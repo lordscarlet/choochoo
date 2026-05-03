@@ -9,7 +9,10 @@ import { CaliforniaGoldRushMineAction } from "./mine_action";
 import { Good } from "../../engine/state/good";
 import { Space } from "../../engine/map/grid";
 import { Land } from "../../engine/map/location";
-import { useCurrentPlayer, useInjectedState } from "../../client/utils/injection_context";
+import {
+  useCurrentPlayer,
+  useInjectedState,
+} from "../../client/utils/injection_context";
 import { PlayerData } from "../../engine/state/player";
 import {
   getRowList,

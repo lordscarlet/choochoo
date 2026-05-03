@@ -25,5 +25,3 @@ function useSelectCityOnClick(on: OnClickRegister) {
   }
   return isPending;
 }
-
-export { useMonsoonScenarios };

@@ -172,8 +172,10 @@ function FinancialDetailsPanel({ player }: { player: PlayerData }) {
   const profit = profitHelper.getProfit(player);
   const endOfTurnMoney = player.money + profit;
   const warning = getPlayerWarning(player);
-  const netIncomeHighlight = warning.hasIncomeLoss || warning.hasEliminationRisk;
-  const customExpenseItems = viewSettings.useExpenseBreakdownItems?.(player) ?? [];
+  const netIncomeHighlight =
+    warning.hasIncomeLoss || warning.hasEliminationRisk;
+  const customExpenseItems =
+    viewSettings.useExpenseBreakdownItems?.(player) ?? [];
   const monsoonScenarios = viewSettings.useMonsoonScenarios?.(player) ?? [];
 
   return (
@@ -421,7 +423,8 @@ function ScoreBreakdownPanel({ player }: { player: PlayerData }) {
                 item.value >= 0 ? styles.valuePositive : styles.valueNegative
               }`}
             >
-              {item.value >= 0 ? "+" : ""}{item.value}
+              {item.value >= 0 ? "+" : ""}
+              {item.value}
             </span>
           </div>
         ))}
@@ -599,7 +602,8 @@ export function ScoreTooltipContent({ player }: ScoreTooltipContentProps) {
                   item.value >= 0 ? styles.valuePositive : styles.valueNegative
                 }`}
               >
-                {item.value >= 0 ? "+" : ""}{item.value}
+                {item.value >= 0 ? "+" : ""}
+                {item.value}
               </td>
             </tr>
           ))}

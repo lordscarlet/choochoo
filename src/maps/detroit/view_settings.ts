@@ -7,7 +7,10 @@ import {
   TotalVps,
   TrackVps,
 } from "../../client/game/final_overview_row";
-import { useInject, useInjectedState } from "../../client/utils/injection_context";
+import {
+  useInject,
+  useInjectedState,
+} from "../../client/utils/injection_context";
 import { injectInitialPlayerCount } from "../../engine/game/state";
 import { ROUND } from "../../engine/game/round";
 import { Action } from "../../engine/state/action";
