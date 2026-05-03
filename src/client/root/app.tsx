@@ -30,15 +30,15 @@ export function App() {
         <SocketContextProvider>
           <ThemeProvider>
             <DialogsProvider>
-              <AwaitingContextProvider>
-                <QueryClientProvider client={queryClient}>
-                  <tsr.ReactQueryProvider>
-                    <AdminModeProvider>
+              <QueryClientProvider client={queryClient}>
+                <tsr.ReactQueryProvider>
+                  <AdminModeProvider>
+                    <AwaitingContextProvider>
                       <Router />
-                    </AdminModeProvider>
-                  </tsr.ReactQueryProvider>
-                </QueryClientProvider>
-              </AwaitingContextProvider>
+                    </AwaitingContextProvider>
+                  </AdminModeProvider>
+                </tsr.ReactQueryProvider>
+              </QueryClientProvider>
             </DialogsProvider>
           </ThemeProvider>
         </SocketContextProvider>

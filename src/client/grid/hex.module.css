@@ -128,6 +128,10 @@
   fill: #009bb2;
 }
 
+.waterPath {
+  fill: #579ba8;
+}
+
 .seaRoute {
   stroke: #ffffff;
   stroke-width: 9;
@@ -135,5 +139,5 @@
 }
 
 .location.canyon {
-  fill: #2b2b2b;  
+  fill: #2b2b2b;
 }

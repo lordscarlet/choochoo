@@ -38,6 +38,15 @@ export function creatingGame(driver: Driver) {
   async function createGame(creationUser: UserDao): Promise<GameDao> {
     await driver.goTo("/app/games/create", creationUser.id);
     await driver.waitForElement(By.name("name")).sendKeys("My Game");
+    await driver
+      .waitForElement(By.xpath("//*[@data-change-map-button]"))
+      .click();
+    await driver.waitForElement(By.xpath("//*[@data-map-selector-dialog]"));
+    await driver
+      .waitForElement(
+        By.xpath("//*[@data-map-row='germany']//*[@data-map-select-button]"),
+      )
+      .click();
     await driver.waitForElement(By.xpath("//*[@data-auto-start]")).click();
     await driver.waitForElement(By.xpath("//*[@data-create-button]")).click();
     await driver.waitForElement(By.xpath("//*[@data-game-card]"));
@@ -48,7 +57,7 @@ export function creatingGame(driver: Driver) {
   }
 
   async function startGame(game: GameDao, seedValue: string): Promise<void> {
-    await driver.goToGame(game.id, game.playerIds[0]);
+    await driver.goToGame(game.id, game.ownerId);
     const seedEl = await driver.waitForElement(By.xpath('//*[@name="seed"]'));
     await driver.driver.executeScript(
       `arguments[0].value = arguments[1];`,

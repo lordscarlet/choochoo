@@ -52,27 +52,45 @@ const router = initServer().router(gameContract, {
       }
     }
     if (userId != null) {
-      where.playerIds = { [Op.contains]: [userId] };
+      where = {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { playerIds: { [Op.contains]: [userId] } },
+              { ownerId: userId },
+            ],
+          },
+          where,
+        ],
+      };
     }
     if (excludeUserId != null) {
-      where.playerIds = {
-        ...where.playerIds,
-        [Op.not]: {
-          [Op.contains]: [excludeUserId],
-        },
+      where = {
+        [Op.and]: [
+          {
+            [Op.not]: {
+              [Op.or]: [
+                { playerIds: { [Op.contains]: [excludeUserId] } },
+                { ownerId: excludeUserId },
+              ],
+            },
+          },
+          where,
+        ],
       };
     }
     if (pageCursor != null) {
-      where.id = { [Op.notIn]: pageCursor };
+      where = { [Op.and]: [{ id: { [Op.notIn]: pageCursor } }, where] };
     }
 
-    // Add a condition so that only games which are not marked as unlisted or which the user is a part of will be included
+    // Add a condition so that only games which are not marked as unlisted or which the user is a part of (as player or owner) will be included
     if (req.session.userId) {
       where = {
         [Op.and]: [
           {
             [Op.or]: [
               { playerIds: { [Op.contains]: [req.session.userId] } },
+              { ownerId: req.session.userId },
               { unlisted: false },
             ],
           },
@@ -80,7 +98,7 @@ const router = initServer().router(gameContract, {
         ],
       };
     } else {
-      where.unlisted = false;
+      where = { [Op.and]: [{ unlisted: false }, where] };
     }
 
     const games = await GameDao.findAll({
@@ -94,6 +112,7 @@ const router = initServer().router(gameContract, {
         "status",
         "activePlayerId",
         "playerIds",
+        "ownerId",
         "turnDuration",
         "unlisted",
         "autoStart",
@@ -141,7 +160,9 @@ const router = initServer().router(gameContract, {
           map.developmentAllowlist.indexOf(userId) !== -1),
       { permissionDenied: true },
     );
-    assert(map.stage !== ReleaseStage.DEVELOPMENT || body.unlisted, { invalidInput: "Development map games must be unlisted." });
+    assert(map.stage !== ReleaseStage.DEVELOPMENT || body.unlisted, {
+      invalidInput: "Development map games must be unlisted.",
+    });
 
     const playerIds = [userId];
     if (body.artificialStart) {
@@ -160,6 +181,7 @@ const router = initServer().router(gameContract, {
       turnDuration: body.turnDuration,
       concedingPlayers: [],
       playerIds,
+      ownerId: userId,
       variant: body.variant,
       config: {
         minPlayers: body.minPlayers,
@@ -185,7 +207,7 @@ const router = initServer().router(gameContract, {
           invalidInput: "cannot delete started game unless it's a solo",
         },
       );
-      assert(game.playerIds[0] === user.id, { permissionDenied: true });
+      assert(game.ownerId === user.id, { permissionDenied: true });
     }
 
     await sequelize.transaction(() =>
@@ -225,8 +247,6 @@ const router = initServer().router(gameContract, {
     assert(game.status === GameStatus.enum.LOBBY, "cannot leave started game");
     const index = game.playerIds.indexOf(userId);
     assert(index >= 0, { invalidInput: "cannot leave game you are not in" });
-    // Figure out what to do if the owner wants to leave
-    assert(index > 0, { invalidInput: "the owner cannot leave the game" });
 
     game.playerIds = game.playerIds
       .slice(0, index)

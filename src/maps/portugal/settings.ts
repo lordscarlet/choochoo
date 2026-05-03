@@ -2,6 +2,7 @@ import { GameKey } from "../../api/game_key";
 import {
   KAOSKODY,
   MapSettings,
+  PlayerCountRating,
   ReleaseStage,
 } from "../../engine/game/map_settings";
 import { Module } from "../../engine/module/module";
@@ -24,6 +25,16 @@ export class PortugalMapSettings implements MapSettings {
   readonly implementerId = KAOSKODY;
   readonly minPlayers = 3;
   readonly maxPlayers = 6;
+  readonly playerCountRatings = {
+    1: PlayerCountRating.NOT_SUPPORTED,
+    2: PlayerCountRating.NOT_SUPPORTED,
+    3: PlayerCountRating.RECOMMENDED,
+    4: PlayerCountRating.HIGHLY_RECOMMENDED,
+    5: PlayerCountRating.NOT_RECOMMENDED,
+    6: PlayerCountRating.NOT_RECOMMENDED,
+    7: PlayerCountRating.NOT_SUPPORTED,
+    8: PlayerCountRating.NOT_SUPPORTED,
+  };
   readonly startingGrid = map;
   readonly stage = ReleaseStage.ALPHA;
   readonly interCityConnections = interCityConnections(map, [
@@ -51,12 +62,37 @@ export class PortugalMapSettings implements MapSettings {
       center: [11, 13],
       offset: { direction: TOP, distance: 0.2 },
     },
-    { connects: ["Sagres", "Madeira"], cost: 6, center: [17, 7], connectedTownExits: [BOTTOM] },
-    { connects: ["Sagres", "Madeira"], cost: 6, center: [17, 8], connectedTownExits: [BOTTOM] },
-    { connects: ["Sagres", "Madeira"], cost: 6, center: [17, 9], connectedTownExits: [BOTTOM] },
-    { connects: ["Sagres", "Madeira"], cost: 6, center: [17, 10], connectedTownExits: [BOTTOM] },
+    {
+      connects: ["Sagres", "Madeira"],
+      cost: 6,
+      center: [17, 7],
+      connectedTownExits: [BOTTOM],
+    },
+    {
+      connects: ["Sagres", "Madeira"],
+      cost: 6,
+      center: [17, 8],
+      connectedTownExits: [BOTTOM],
+    },
+    {
+      connects: ["Sagres", "Madeira"],
+      cost: 6,
+      center: [17, 9],
+      connectedTownExits: [BOTTOM],
+    },
+    {
+      connects: ["Sagres", "Madeira"],
+      cost: 6,
+      center: [17, 10],
+      connectedTownExits: [BOTTOM],
+    },
     { connects: ["Lisboa", "Porto"], cost: 6, center: [6, 13] },
-    { connects: ["Lisboa", "Sines"], cost: 6, center: [13, 9], connectedTownExits: [BOTTOM] },
+    {
+      connects: ["Lisboa", "Sines"],
+      cost: 6,
+      center: [13, 9],
+      connectedTownExits: [BOTTOM],
+    },
   ]);
 
   getOverrides() {
@@ -69,9 +105,6 @@ export class PortugalMapSettings implements MapSettings {
   }
 
   getModules(): Array<Module> {
-    return [
-      new OneClaimLimitModule(),
-      new TownsAndSeaLinksModule(),
-    ];
+    return [new OneClaimLimitModule(), new TownsAndSeaLinksModule()];
   }
 }

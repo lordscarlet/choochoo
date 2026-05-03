@@ -1,9 +1,9 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useParams } from "react-router-dom";
 import { cssTransition, ToastContainer } from "react-toastify";
 import { Button, Dropdown, Icon, Menu, MenuMenu } from "semantic-ui-react";
-import { useIsAwaitingPlayer } from "../components/awaiting_player";
+import { useAwaitingGameIds } from "../components/awaiting_player";
 import { Loading } from "../components/loading";
 import { environment } from "../services/environment";
 import { FeedbackForm } from "../services/feedback/form";
@@ -15,6 +15,7 @@ import {
   useMe,
 } from "../services/me";
 import { isNetworkError } from "../services/network";
+import { useTabIndicator } from "../services/tab_indicator";
 import { Banner } from "./banner";
 import * as styles from "./layout.module.css";
 import { useTheme } from "./theme";
@@ -30,7 +31,15 @@ export function Layout() {
 
   const [enableAdminMode, setEnableAdminMode] = useEnableAdminMode();
   const isAdmin = useIsAdmin(true);
-  const isAwaiting = useIsAwaitingPlayer();
+  const { gameId } = useParams();
+  const awaitingGameIds = useAwaitingGameIds();
+  const isAwaiting =
+    gameId != null
+      ? awaitingGameIds.has(Number(gameId))
+      : awaitingGameIds.size > 0;
+
+  // Update browser tab indicator with count of games awaiting user's turn
+  useTabIndicator();
 
   useEffect(() => {
     document.body.classList.toggle("dark-mode", isDarkMode);
