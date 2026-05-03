@@ -101,11 +101,15 @@ export function BuildingDialog({
     [space, emitUrbanize],
   );
 
+  const eligibleCities: number[] = [];
+  availableCities.forEach((_, idx) => {
+    if (canUrbanizeSpace(urbanizeAction, coordinates, idx)) {
+      eligibleCities.push(idx);
+    }
+  });
+
   const canUrbanize =
-    canEmitUrbanize &&
-    space != null &&
-    availableCities.length > 0 &&
-    canUrbanizeSpace(urbanizeAction, coordinates);
+    canEmitUrbanize && space != null && eligibleCities.length > 0;
   const hasBuildingOptions = canUrbanize || eligible.length > 0;
 
   const isOpen = coordinates != null && (hasBuildingOptions || isAdmin);
@@ -136,16 +140,13 @@ export function BuildingDialog({
           )}
           <div className={buildingDialogContainer} data-building-options>
             {canUrbanize &&
-              availableCities.map((city, index) => (
-                <div
-                  key={index}
-                  className={buildingOption}
-                >
+              eligibleCities.map((cityIdx) => (
+                <div key={cityIdx} className={buildingOption}>
                   <ModifiedSpace
                     space={space!}
                     settings={settings}
-                    asCity={city}
-                    onClick={() => selectAvailableCity(index)}
+                    asCity={availableCities[cityIdx]}
+                    onClick={() => selectAvailableCity(cityIdx)}
                   />
                 </div>
               ))}
@@ -360,12 +361,16 @@ function* getAllEligibleBuilds(
   }
 }
 
-function canUrbanizeSpace(action: Memoized<UrbanizeAction>, coordinates: Coordinates|undefined): boolean {
+function canUrbanizeSpace(
+  action: Memoized<UrbanizeAction>,
+  coordinates: Coordinates | undefined,
+  cityIndex: number,
+): boolean {
   if (!coordinates) {
     return false;
   }
   try {
-    action.value.validate({coordinates: coordinates, cityIndex: 0});
+    action.value.validate({ coordinates: coordinates, cityIndex: cityIndex });
     return true;
   } catch (_: unknown) {
     return false;
